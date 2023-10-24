@@ -13,7 +13,6 @@ namespace Cr7Sund.Framework.Impl
         public EventBinding(Impl.Binder.BindingResolver resolver) : base(resolver)
         {
             ValueConstraint = BindingConstraintType.MANY;
-            KeyConstraint = BindingConstraintType.ONE;
 
             callbackTypes = new Dictionary<Delegate, EventCallbackType>();
         }

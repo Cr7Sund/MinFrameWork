@@ -13,7 +13,6 @@ namespace Cr7Sund.Framework.Impl
         public InjectionBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             KeyConstraint = BindingConstraintType.MANY;
-            ValueConstraint = BindingConstraintType.ONE;
         }
 
 
