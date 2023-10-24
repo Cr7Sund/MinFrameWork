@@ -10,10 +10,10 @@ namespace Cr7Sund.Framework.Api
 {
     public interface IInjectorFactory
     {
-        /// Request instantiation based on the provided binding
+        /// <summary>  Request instantiation based on the provided binding </summary> 
         object Get( IInjectionBinding binding);
 
-        /// Request instantiation based on the provided binding and an array of Constructor arguments
+        /// <summary>  Request instantiation based on the provided binding and an array of Constructor arguments </summary> 
         object Get( IInjectionBinding binding, object[] args);
     }
 }

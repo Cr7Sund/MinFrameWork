@@ -11,7 +11,9 @@ namespace Cr7Sund.Framework.Api
 {
     public interface ICrossContextInjectionBinder : IInjectionBinder
     {
-        //Cross-context Injection Binder is shared across all child contexts
+        /// <summary>
+        /// Cross-context Injection Binder is shared across all child contexts
+        /// </summary>
         IInjectionBinder CrossContextBinder { get; set; }
     }
 }

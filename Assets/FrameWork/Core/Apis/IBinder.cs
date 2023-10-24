@@ -71,11 +71,13 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         void Unbind(object key, object name);
 
-        /// Remove a select value from the given binding
+        ///  <summary> Remove a select value from the given binding </summary> 
         void RemoveValue(IBinding binding, object value);
 
+        /// <summary>
         /// The Binder is being removed
-        /// Override this method to clean up remaining bindings
+        /// Override this method to clean up remaining bindings <summary>
+        /// </summary>        
         void OnRemove();
 
         /// <summary>

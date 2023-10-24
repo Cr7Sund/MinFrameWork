@@ -26,10 +26,10 @@ namespace Cr7Sund.Framework.Api
 {
     public interface ISemiBinding : IManagedList
     {
-        /// Set or get the constraint. 
+        /// <summary>  Set or get the constraint.  </summary>
         BindingConstraintType Constraint { get; set; }
 
-        /// A secondary constraint that ensures that this SemiBinding will never contain multiple values equivalent to each other. 
+        /// <summary>  A secondary constraint that ensures that this SemiBinding will never contain multiple values equivalent to each other. </summary> 
         bool UniqueValue { get; set; }
 
     }

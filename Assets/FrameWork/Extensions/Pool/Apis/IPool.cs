@@ -39,13 +39,17 @@ namespace Cr7Sund.Framework.Api
 
     public interface IPool : IManagedList
     {
+        /// <summary>  
         /// A class that provides instances to the pool when it needs them.
         /// This can be the InjectionBinder, or any class you write that satisfies the IInstanceProvider
-        /// interface.
+        /// interface. <summary>
+        /// </summary>        
         IInstanceProvider InstanceProvider { get; set; }
 
+        /// <summary>
         /// The object Type of the first object added to the pool.
         /// Pool objects must be of the same concrete type. This property enforces that requirement. 
+        /// </summary>    
         Type poolType { get; set; }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace Cr7Sund.Framework.Impl
         {
             bindings = new Dictionary<object, Dictionary<object, IBinding>>();
         }
-        
+
         #region IBinder implementation
 
         public IBinding Bind<T>()
@@ -19,7 +19,7 @@ namespace Cr7Sund.Framework.Impl
             return Bind(typeof(T));
         }
 
-        public virtual IBinding Bind(object key)
+        public IBinding Bind(object key)
         {
             if (BindingConst.FORBIDBOXING)
             {

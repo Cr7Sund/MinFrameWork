@@ -16,16 +16,16 @@ namespace Cr7Sund.Framework.Api
 {
 	public interface IReflectedClass
 	{
-		/// Get/set the preferred constructor
+		/// <summary>  Get/set the preferred constructor </summary> 
 		ConstructorInfo Constructor { get; set; }
 
-		/// Get/set the preferred constructor's parameters length
+		/// <summary>  Get/set the preferred constructor's parameters length </summary> 
 		int ConstructorParameterCount { get; set; }
 
-		/// Get/set any PostConstructors. This includes inherited PostConstructors.
+		/// <summary>  Get/set any PostConstructors. This includes inherited PostConstructors. </summary> 
 		MethodInfo PostConstructor { get; set; }
 
-		/// Get/set the list of field injections. This includes inherited fields.
+		/// <summary>  Get/set the list of field injections. This includes inherited fields. </summary> 
 		Tuple<Type,object, FieldInfo>[] Fields { get; set; }
 
 	}

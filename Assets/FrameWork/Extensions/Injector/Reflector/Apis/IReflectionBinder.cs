@@ -16,10 +16,10 @@ namespace Cr7Sund.Framework.Api
 {
 	public interface IReflectionBinder
 	{
-		/// Get a binding based on the provided Type
+		/// <summary>  Get a binding based on the provided Type </summary> 
 		IReflectedClass Get(Type type);
 
-		/// Get a binding based on the provided Type generic.
+		/// <summary>  Get a binding based on the provided Type generic. </summary> 
 		IReflectedClass Get<T>();
 	}
 }

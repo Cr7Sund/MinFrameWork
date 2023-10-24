@@ -61,10 +61,10 @@ namespace Cr7Sund.Framework.Api
 
         BindingConstraintType KeyConstraint { get; }
 
-        //Mark a binding as weak, so that any new binding will override it
+        /// <summary> Mark a binding as weak, so that any new binding will override it </summary>
         IBinding Weak();
 
-        //Get whether or not the binding is weak, default false
+        /// <summary> Get whether or not the binding is weak, default false </summary>
         bool IsWeak { get; }
     }
 
