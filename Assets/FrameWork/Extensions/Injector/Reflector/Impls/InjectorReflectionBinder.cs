@@ -1,0 +1,141 @@
+/**
+ * @class strange.extensions.reflector.impl.ReflectionBinder
+ * 
+ * Uses System.Reflection to create `ReflectedClass` instances.
+ * 
+ * Reflection is a slow process. This binder isolates the calls to System.Reflector 
+ * and caches the result, meaning that Reflection is performed only once per class.
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Cr7Sund.Framework.Api;
+
+namespace Cr7Sund.Framework.Impl
+{
+    public class InjectorReflectionBinder : Binder, IReflectionBinder
+    {
+        public IReflectedClass Get<T>()
+        {
+            return Get(typeof(T));
+        }
+
+        public IReflectedClass Get(Type type)
+        {
+            var binding = GetBinding(type);
+            IReflectedClass retVal = null;
+
+            if (binding == null)
+            {
+                binding = GetRawBinding();
+                var reflected = new ReflectedClass();
+                MapPreferredConstructor(reflected, binding, type);
+                MapPostConstructors(reflected, binding, type);
+                MapFields(reflected, binding, type);
+                binding.Bind(type).ToValue(reflected);
+
+                reflected.PreGenerated = false;
+                retVal = reflected; ;
+            }
+            else
+            {
+                retVal = binding.Value as IReflectedClass;
+                ((ReflectedClass)retVal).PreGenerated = true;
+            }
+
+            return retVal;
+        }
+
+        private void MapPreferredConstructor(IReflectedClass reflected, IBinding binding, Type type)
+        {
+            var constructor = FindPreferredConstructor(type);
+            if (constructor == null)
+            {
+                throw new ReflectionException("The reflector requires concrete classes.\nType " + type.Name + " has no constructor. Is it an interface?", ReflectionExceptionType.CANNOT_REFLECT_INTERFACE);
+            }
+
+            reflected.Constructor = constructor;
+            reflected.ConstructorParameterCount = constructor.GetParameters().Length;
+        }
+
+        private void MapPostConstructors(IReflectedClass reflected, IBinding binding, Type type)
+        {
+            var methods = type.GetMethods(BindingFlags.FlattenHierarchy |
+                                                         BindingFlags.Public |
+                                                         BindingFlags.NonPublic |
+                                                         BindingFlags.Instance |
+                                                         BindingFlags.InvokeMethod);
+            foreach (MethodInfo method in methods)
+            {
+                var tagged = method.GetCustomAttributes(typeof(PostConstruct), true);
+                if (tagged.Length > 0)
+                {
+                    if (reflected.PostConstructor == null)
+                    {
+                        reflected.PostConstructor = method;
+                    }
+                    else
+                    {
+                        throw new ReflectionException("The reflector class.\nType " + type + " has more than one post constructors", ReflectionExceptionType.CANNOT_POST_CONSTRUCTS);
+                    }
+                }
+            }
+        }
+
+        private void MapFields(IReflectedClass reflected, IBinding binding, Type type)
+        {
+            var pairs = new List<Tuple<Type, object, FieldInfo>>();
+
+            var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var field in fields)
+            {
+                var injections = field.GetCustomAttributes(typeof(Inject), true);
+
+                if (injections.Length > 0)
+                {
+                    Inject attr = injections[0] as Inject;
+                    Type pointType = field.FieldType;
+                    object bindingName = attr.Name;
+
+                    var pair = new Tuple<Type, object, FieldInfo>(pointType, bindingName, field);
+                    pairs.Add(pair);
+
+                }
+            }
+            reflected.Fields = pairs.ToArray();
+        }
+
+
+        //Look for a constructor in the order:
+        //1. Only one (just return it, since it's our only option)
+        //3. The constructor with the fewest parameters 
+        private ConstructorInfo FindPreferredConstructor(Type type)
+        {
+            var constructors = type.GetConstructors(BindingFlags.FlattenHierarchy |
+                                                                          BindingFlags.Public |
+                                                                          BindingFlags.Instance |
+                                                                          BindingFlags.InvokeMethod);
+
+            if (constructors.Length == 1)
+            {
+                return constructors[0];
+            }
+
+            int shortestLen = int.MaxValue;
+            ConstructorInfo shortestConstructor = null;
+            for (int i = 0; i < constructors.Length; i++)
+            {
+                var constructor = constructors[i];
+                int len = constructor.GetParameters().Length;
+                if (len < shortestLen)
+                {
+                    shortestLen = len;
+                    shortestConstructor = constructor;
+                }
+            }
+
+            return shortestConstructor;
+        }
+    }
+}

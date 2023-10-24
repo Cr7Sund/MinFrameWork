@@ -1,0 +1,124 @@
+using System;
+using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Impl;
+using NUnit.Framework;
+
+namespace Cr7Sund.Framework.Tests
+{
+	class TestInjector
+	{
+		private IInjectionBinder binder;
+
+		[SetUp]
+		public void SetUp()
+		{
+			binder = new InjectionBinder();
+		}
+
+		[Test]
+		public void TestNoParamsConstructor()
+		{
+			binder.Bind<ClassWithConstructorParameters>().To<ClassWithConstructorParameters>();
+			ClassWithConstructorParameters instance =
+				binder.GetInstance<ClassWithConstructorParameters>() as ClassWithConstructorParameters;
+			Assert.IsNotNull(instance);
+			Assert.AreEqual(42, instance.intValue);
+			Assert.AreEqual("Liberator", instance.stringValue);
+		}
+
+		[Test]
+		public void TestPostConstruct()
+		{
+			binder.Bind<PostConstructClass>().To<PostConstructClass>();
+			binder.Bind<float>().ToValue((float)Math.PI);
+			PostConstructClass instance = binder.GetInstance<PostConstructClass>() as PostConstructClass;
+			Assert.IsNotNull(instance);
+			Assert.AreEqual((float)Math.PI * 2f, instance.floatVal);
+		}
+
+		// A value-mapped object must never attempt to re-instantiate
+		[Test]
+		public void TestValueMappingWithNoReInstantiate()
+		{
+			string stringVal = "Ender Wiggin";
+			var instance = new ClassWithConstructorParametersOnlyOneConstructor(stringVal);
+
+			binder.Bind<ClassWithConstructorParametersOnlyOneConstructor>().ToValue(instance);
+			//If this class attempts to construct, with no string mapped, there'll be an error
+			var instance2 = binder.GetInstance<ClassWithConstructorParametersOnlyOneConstructor>() as ClassWithConstructorParametersOnlyOneConstructor;
+			Assert.AreSame(instance, instance2);
+			Assert.AreEqual(stringVal, instance2.stringVal);
+		}
+
+		[Test]
+		public void TestNameInstances()
+		{
+			var testValue = new InjectableSuperClass();
+			float defaultFloatValue = testValue.floatValue;
+			testValue.floatValue = (float)Math.PI;
+
+			binder.Bind<int>().ToValue(20);
+			var binding = binder.Bind<InjectableSuperClass>()
+				.To<InjectableSuperClass>()
+				.ToName(SomeEnum.ONE)
+				.AsSingleton();
+			binder.Bind<InjectableSuperClass>().ToValue(testValue).ToName(SomeEnum.TWO);
+			binder.Bind<HasNamedInjections>().To<HasNamedInjections>();
+
+			var instance = binder.GetInstance<HasNamedInjections>();
+			Assert.IsNotNull(instance);
+			Assert.IsNotNull(instance.injectionOne);
+			Assert.IsNotNull(instance.injectionTwo);
+			Assert.AreEqual(20, instance.injectionOne.intValue);
+			Assert.AreEqual(20, instance.injectionTwo.intValue);
+			Assert.AreEqual(defaultFloatValue, instance.injectionOne.floatValue);
+			Assert.AreEqual((float)Math.PI, instance.injectionTwo.floatValue);
+		}
+
+		[Test]
+		public void TestNamedFactories()
+		{
+			binder.Bind<int>().ToValue(20);
+			binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
+			binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementerTwo>().ToName(SomeEnum.TWO);
+
+			ISimpleInterface valueOneOne = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE) as ISimpleInterface;
+			ISimpleInterface valueOneTwo = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE) as ISimpleInterface;
+
+			ISimpleInterface valueTwoOne = binder.GetInstance<ISimpleInterface>(SomeEnum.TWO) as ISimpleInterface;
+			ISimpleInterface valueTwoTwo = binder.GetInstance<ISimpleInterface>(SomeEnum.TWO) as ISimpleInterface;
+
+			//Of course nothing should return null
+			Assert.NotNull(valueOneOne);
+			Assert.NotNull(valueOneTwo);
+			Assert.NotNull(valueTwoOne);
+			Assert.NotNull(valueTwoTwo);
+
+			//All four instances should be unique.
+			Assert.AreNotSame(valueOneOne, valueOneTwo);
+			Assert.AreNotSame(valueOneTwo, valueTwoOne);
+			Assert.AreNotSame(valueTwoOne, valueTwoTwo);
+			Assert.AreNotSame(valueOneOne, valueTwoTwo);
+			//First pair should be of type SimpleInterfaceImplementer.
+			Assert.IsInstanceOf<SimpleInterfaceImplementer>(valueOneOne);
+			Assert.IsInstanceOf<SimpleInterfaceImplementer>(valueOneTwo);
+			//Second pair should be of type SimpleInterfaceImplementerTwo.
+			Assert.IsInstanceOf<SimpleInterfaceImplementerTwo>(valueTwoOne);
+			Assert.IsInstanceOf<SimpleInterfaceImplementerTwo>(valueTwoTwo);
+		}
+
+		[Test]
+		public void TestOnlyParamConstructorException()
+		{
+			binder.Bind<IMapConfig>().ToValue(new MapConfig());
+			binder.Bind<IMap>().To<Map>().AsSingleton();
+
+			TestDelegate testDelegate = () =>
+			{
+				binder.GetInstance<IMap>();
+			};
+			var ex = Assert.Throws<InjectionException>(testDelegate);
+			Assert.AreEqual(InjectionExceptionType.NOEMPTY_CONSTRUCTOR, ex.type);
+		}
+	}
+}
