@@ -103,6 +103,15 @@ namespace Cr7Sund.Framework.Impl
             Unbind(typeof(T), name);
         }
 
+        public void Unbind(IBinding binding)
+        {
+            if (binding == null)
+            {
+                return;
+            }
+            Unbind(binding.Key, binding.Name);
+        }
+
         public void Unbind(object key, object name)
         {
             if (bindings.TryGetValue(key, out var dict))

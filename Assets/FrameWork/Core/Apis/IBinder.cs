@@ -66,6 +66,9 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         void Unbind(object key);
 
+        /// <summary> Remove the provided binding from the Binder </summary>
+        void Unbind(IBinding binding);
+
         /// <summary>
         /// Remove a binding based on the provided Key (generic)
         /// </summary>
