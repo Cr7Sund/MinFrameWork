@@ -41,7 +41,7 @@ namespace Cr7Sund.Framework.Api
         /// <summary>
         /// Set the Binding's value to a value, such as a string or class instance
         /// </summary>
-        IBinding ToValue(object o);
+        IBinding To(object value);
         /// <summary>
         /// Set the Binding's value to a Type
         /// </summary>

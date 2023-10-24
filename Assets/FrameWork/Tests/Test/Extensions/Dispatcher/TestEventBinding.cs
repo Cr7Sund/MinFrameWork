@@ -17,7 +17,7 @@ namespace Cr7Sund.Framework.Tests
 		{
 			confirmationValue = INIT_VALUE;
 			IEventBinding binding = new EventBinding ();
-			binding.Bind (SomeEnum.ONE).ToValue (noArgumentCallback);
+			binding.Bind(SomeEnum.ONE).To(noArgumentCallback);
 			EventCallbackType type = binding.TypeForCallback (noArgumentCallback);
 			object[] value = binding.Value as object[];
 			Delegate extracted =  value[0] as Delegate;
@@ -39,7 +39,7 @@ namespace Cr7Sund.Framework.Tests
 		{
 			confirmationValue = INIT_VALUE;
 			IEventBinding binding = new EventBinding ();
-			binding.Bind (SomeEnum.ONE).ToValue (oneArgumentCallback);
+			binding.Bind(SomeEnum.ONE).To(oneArgumentCallback);
 			EventCallbackType type = binding.TypeForCallback (oneArgumentCallback);
 			object[] value = binding.Value as object[];
 			Delegate extracted =  value[0] as Delegate;

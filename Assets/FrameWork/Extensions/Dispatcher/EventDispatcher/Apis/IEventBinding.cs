@@ -25,8 +25,8 @@ namespace Cr7Sund.Framework.Api
         EventCallbackType TypeForCallback(EmptyCallback callback);
 
         new IEventBinding Bind(object key);
-        IEventBinding ToValue(EventCallback callback);
-        IEventBinding ToValue(EmptyCallback callback);
+        IEventBinding To(EventCallback callback);
+        IEventBinding To(EmptyCallback callback);
     }
 
     /// Delegate for adding a listener with a single argument

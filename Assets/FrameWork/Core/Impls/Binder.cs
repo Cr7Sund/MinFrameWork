@@ -11,6 +11,7 @@ namespace Cr7Sund.Framework.Impl
         {
             bindings = new Dictionary<object, Dictionary<object, IBinding>>();
         }
+        
         #region IBinder implementation
 
         public IBinding Bind<T>()
@@ -34,10 +35,11 @@ namespace Cr7Sund.Framework.Impl
 
         protected virtual IBinding GetRawBinding()
         {
-            return new Binding(resolver);
+            return new Binding(Resolver);
         }
 
-        protected void resolver(IBinding binding, object oldName = null)
+
+        protected void Resolver(IBinding binding, object oldName = null)
         {
             object key = binding.Key;
             if (binding.KeyConstraint.Equals(BindingConstraintType.ONE))

@@ -19,13 +19,16 @@ namespace Cr7Sund.Framework.Impl
 
             ValueConstraint = BindingConstraintType.ONE;
             KeyConstraint = BindingConstraintType.ONE;
-            
+
             Unique = true;
         }
 
+        // only for unit-test binding
         public Binding() : this(null)
         {
+
         }
+
 
         #region IBinding implementation
 
@@ -82,18 +85,18 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding To<T>()
         {
-            return ToValue(typeof(T));
+            return To(typeof(T));
         }
 
-        public IBinding ToValue(object o)
+        public IBinding To(object value)
         {
             if (BindingConst.FORBIDBOXING)
             {
-                if (o.GetType().IsValueType)
-                    throw new BinderException($"{o} is not referenceType", BinderExceptionType.EXIST_BOXING);
+                if (value.GetType().IsValueType)
+                    throw new BinderException($"{value} is not referenceType", BinderExceptionType.EXIST_BOXING);
             }
 
-            _value.Add(o);
+            _value.Add(value);
             if (resolver != null)
                 resolver(this);
             return this;

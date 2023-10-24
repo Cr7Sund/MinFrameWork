@@ -89,7 +89,7 @@ namespace Cr7Sund.Framework.Impl
             return base.Bind(type) as IInjectionBinding;
         }
 
-        public new IInjectionBinding ToValue(object o)
+        public IInjectionBinding ToValue(object o)
         {
             this.Type = InjectionBindingType.VALUE;
             this.SetValue(o);
@@ -101,7 +101,7 @@ namespace Cr7Sund.Framework.Impl
             var objType = o.GetType();
             ValidBindingType(objType);
 
-            base.ToValue(o);
+            base.To(o);
             return this;
         }
 
@@ -109,6 +109,12 @@ namespace Cr7Sund.Framework.Impl
         {
             ValidBindingType(typeof(T));
             return base.To<T>() as IInjectionBinding;
+        }
+
+        public IInjectionBinding To(Type type)
+        {
+            ValidBindingType(type);
+            return base.To(type) as IInjectionBinding;
         }
 
         public new IInjectionBinding ToName(object name)

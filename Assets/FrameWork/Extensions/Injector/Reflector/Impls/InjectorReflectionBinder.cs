@@ -33,7 +33,7 @@ namespace Cr7Sund.Framework.Impl
                 MapPreferredConstructor(reflected, binding, type);
                 MapPostConstructors(reflected, binding, type);
                 MapFields(reflected, binding, type);
-                binding.Bind(type).ToValue(reflected);
+                binding.Bind(type).To(reflected);
 
                 reflected.PreGenerated = false;
                 retVal = reflected; ;

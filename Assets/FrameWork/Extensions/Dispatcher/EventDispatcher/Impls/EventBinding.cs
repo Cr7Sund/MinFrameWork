@@ -9,9 +9,6 @@ namespace Cr7Sund.Framework.Impl
     {
         private Dictionary<Delegate, EventCallbackType> callbackTypes;
 
-        public EventBinding() : this(null)
-        {
-        }
 
         public EventBinding(Impl.Binder.BindingResolver resolver) : base(resolver)
         {
@@ -21,25 +18,31 @@ namespace Cr7Sund.Framework.Impl
             callbackTypes = new Dictionary<Delegate, EventCallbackType>();
         }
 
+        // only for unit-test binding
+        public EventBinding() : this(null)
+        {
+
+        }
+
         #region  IBinding Implementation
         IEventBinding IEventBinding.Bind(object key)
         {
             return base.Bind(key) as IEventBinding;
         }
 
-        public IEventBinding ToValue(EventCallback value)
+        public IEventBinding To(EventCallback value)
         {
             return ToDelegateValue(value);
         }
 
-        public IEventBinding ToValue(EmptyCallback value)
+        public IEventBinding To(EmptyCallback value)
         {
             return ToDelegateValue(value);
         }
 
         private IEventBinding ToDelegateValue(Delegate value)
         {
-            base.ToValue(value);
+            base.To(value);
             StoreMethodType(value as Delegate);
             return this;
         }
@@ -71,7 +74,7 @@ namespace Cr7Sund.Framework.Impl
                     throw new DispatcherException("Event callbacks must have either one or no arguments", DispatcherExceptionType.ILLEGAL_CALLBACK_HANDLER);
             }
         }
-       
+
         #endregion
 
         #region  IEventBinding Implementation

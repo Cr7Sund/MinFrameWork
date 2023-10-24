@@ -61,7 +61,7 @@ namespace Cr7Sund.Framework.Impl
 
         protected override IBinding GetRawBinding()
         {
-            return new InjectionBinding(resolver);
+            return new InjectionBinding(Resolver);
         }
 
         public new virtual IInjectionBinding Bind<T>()

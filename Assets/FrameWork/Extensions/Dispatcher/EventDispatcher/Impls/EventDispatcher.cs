@@ -46,10 +46,10 @@ namespace Cr7Sund.Framework.Impl
         }
 
         #region IBinder Implementation 
-        
+
         protected override IBinding GetRawBinding()
         {
-            return new EventBinding(resolver);
+            return new EventBinding(Resolver);
         }
 
         public new IEventBinding Bind(object key)
@@ -189,8 +189,8 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Trigger(object key, object data)
         {
-            bool allow = ((data is IEvent && System.Object.ReferenceEquals((data as IEvent).Target, this) == false) ||
-                (key is IEvent && System.Object.ReferenceEquals((data as IEvent).Target, this) == false));
+            bool allow = (data is IEvent && System.Object.ReferenceEquals((data as IEvent).Target, this) == false) ||
+                (key is IEvent && System.Object.ReferenceEquals((data as IEvent).Target, this) == false);
 
             if (allow)
             {
@@ -208,11 +208,11 @@ namespace Cr7Sund.Framework.Impl
             IBinding binding = GetBinding(evt);
             if (binding == null)
             {
-                Bind(evt).ToValue(callback);
+                Bind(evt).To(callback);
             }
             else
             {
-                binding.ToValue(callback);
+                binding.To(callback);
             }
         }
 
@@ -221,11 +221,11 @@ namespace Cr7Sund.Framework.Impl
             IBinding binding = GetBinding(evt);
             if (binding == null)
             {
-                Bind(evt).ToValue(callback);
+                Bind(evt).To(callback);
             }
             else
             {
-                binding.ToValue(callback);
+                binding.To(callback);
             }
         }
 
@@ -277,6 +277,9 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
+        #endregion
+
+
         private void FlushRemoval()
         {
             if (triggerClientRemovals == null)
@@ -292,6 +295,7 @@ namespace Cr7Sund.Framework.Impl
             }
             triggerClientRemovals.Clear();
         }
+
 
         private void InvokeEventCallback(IEvent evt, EventCallback callback)
         {
@@ -361,8 +365,6 @@ namespace Cr7Sund.Framework.Impl
             evt.Data = null;
             evt.Type = null;
         }
-
-        #endregion
 
     }
 }

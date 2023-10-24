@@ -6,8 +6,6 @@ namespace Cr7Sund.Framework.Tests
 {
     public class TestCrossContextSubclass : CrossContext
     {
-        public TestCrossContextSubclass() : base()
-        { }
 
         public TestCrossContextSubclass(object view, bool autoStartup) : base(view, autoStartup)
         { }

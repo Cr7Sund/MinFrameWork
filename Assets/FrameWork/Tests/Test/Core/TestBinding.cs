@@ -47,9 +47,9 @@ namespace Cr7Sund.Framework.Tests
             // binding.Unique = false;
 
             binding.Bind<ISimpleInterface>()
-                    .ToValue(test1).ToName("abc")
-                    .ToValue(test2).ToName("def")
-                    .ToValue(test3).ToName("ghi");
+                    .To(test1).ToName("abc")
+                    .To(test2).ToName("def")
+                    .To(test3).ToName("ghi");
             Assert.That(binding.Key as Type == typeof(ISimpleInterface));
 
             object[] values = ((Binding)binding).Value as object[];
