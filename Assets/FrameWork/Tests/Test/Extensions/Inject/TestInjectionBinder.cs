@@ -2,18 +2,24 @@ using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 
 namespace Cr7Sund.Framework.Tests
 {
-    public class TestinjectionBinder
+    [TestFixture]
+    public class TestinjectionBinder : IPrebuildSetup, IPostBuildCleanup
     {
         IInjectionBinder binder;
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
             binder = new InjectionBinder();
+        }
 
+        public void Cleanup()
+        {
+            GuaranteedUniqueInstances.Reset();
         }
 
         [Test]
@@ -152,6 +158,79 @@ namespace Cr7Sund.Framework.Tests
 
             InjectionException ex = Assert.Throws<InjectionException>(testDelegate);
             Assert.That(ex.type == InjectionExceptionType.NULL_BINDING);
+        }
+
+        [Test]
+        public void TestDefaultInjection()
+        {
+            GuaranteedUniqueInstances.Reset();
+
+            binder.Bind<GuaranteedUniqueInstances>().To<GuaranteedUniqueInstances>().ToName(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            Assert.AreNotEqual(instance1.uid, instance2.uid);
+            Assert.AreNotSame(instance1, instance2);
+            Assert.AreEqual(1, instance1.uid);
+            Assert.AreEqual(2, instance2.uid);
+            Assert.AreEqual(3, instance3.uid);
+            Assert.AreEqual(4, instance4.uid);
+        }
+
+
+        [Test]
+        public void TestInjectionToPool()
+        {
+            GuaranteedUniqueInstances.Reset();
+
+            binder.Bind<GuaranteedUniqueInstances>().To<GuaranteedUniqueInstances>().ToName(SomeEnum.ONE).AsPool();
+            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            Assert.AreNotEqual(instance1.uid, instance2.uid);
+            Assert.AreNotSame(instance1, instance2);
+            Assert.AreEqual(1, instance1.uid);
+            Assert.AreEqual(2, instance2.uid);
+
+            binder.ReleaseInstance(instance1, SomeEnum.ONE);
+            binder.ReleaseInstance(instance2, SomeEnum.ONE);
+            GuaranteedUniqueInstances instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            Assert.LessOrEqual(instance3.uid, 2);
+            Assert.LessOrEqual(instance4.uid, 2);
+        }
+
+        [Test]
+        public void TestReleaseNullToPool()
+        {
+            GuaranteedUniqueInstances.Reset();
+
+            binder.Bind<GuaranteedUniqueInstances>().To<GuaranteedUniqueInstances>().ToName(SomeEnum.ONE).AsPool();
+            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            Assert.AreNotEqual(instance1.uid, instance2.uid);
+            Assert.AreNotSame(instance1, instance2);
+            Assert.AreEqual(1, instance1.uid);
+            Assert.AreEqual(2, instance2.uid);
+
+            AssignNull(ref instance1);
+            Assert.IsNull(instance1);
+
+            TestDelegate testDelegate = delegate
+            {
+                binder.ReleaseInstance(instance1, SomeEnum.ONE);
+                binder.ReleaseInstance(instance2, SomeEnum.ONE);
+            };
+            Assert.Throws<InjectionException>(testDelegate);
+            GuaranteedUniqueInstances instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            GuaranteedUniqueInstances instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            Assert.LessOrEqual(instance3.uid, 4); // since we dont actually return , we will expand the pool to adjust
+            Assert.LessOrEqual(instance4.uid, 4);
+        }
+
+        private void AssignNull(ref GuaranteedUniqueInstances instances)
+        {
+            instances = null;
         }
 
         [Test]
@@ -366,6 +445,8 @@ namespace Cr7Sund.Framework.Tests
             Assert.IsNotNull(instance.Instance1);
             Assert.IsNotNull(instance.Instance2);
         }
+
+
     }
 
     interface ITestPooled : IPoolable

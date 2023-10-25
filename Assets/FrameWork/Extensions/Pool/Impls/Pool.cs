@@ -47,8 +47,6 @@ namespace Cr7Sund.Framework.Impl
         public Type poolType { get; set; }
 
         public int Available => instancesAvailable.Count;
-
-
         public int instanceCount => _instanceCount;
 
         public PoolOverflowBehavior OverflowBehavior { get; set; }

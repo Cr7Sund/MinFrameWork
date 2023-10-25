@@ -35,13 +35,19 @@ namespace Cr7Sund.Framework.Impl
 
         // The eventPool is shared across all EventDispatchers for efficiency
         public static IPool<TmEvent> eventPool;
+        private static IInstanceProvider _instanceProvider;
 
         public EventDispatcher()
         {
+            if (_instanceProvider == null)
+            {
+                _instanceProvider = new EventInstanceProvider();
+            }
+
             if (eventPool == null)
             {
                 eventPool = new Pool<TmEvent>();
-                eventPool.InstanceProvider = new EventInstanceProvider();
+                eventPool.InstanceProvider = _instanceProvider;
             }
         }
 

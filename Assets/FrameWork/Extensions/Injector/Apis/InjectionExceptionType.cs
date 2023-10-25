@@ -28,5 +28,9 @@ namespace Cr7Sund.Framework.Api
         NULL_INSTANTIATE,
         /// The value of a binding does not extend or implement the binding type.
         ILLEGAL_BINDING_VALUE,
+        /// During an attempt to construct, no pool can be instantiate
+        NULL_POOL,
+        // try to release a null instance, pay attention to that. maybe you have destroy the instance at first
+        NULL_RELEASE,
     }
 }

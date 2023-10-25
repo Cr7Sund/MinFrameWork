@@ -59,6 +59,11 @@ namespace Cr7Sund.Framework.Api
         /// </summary> 
         object GetInstance(Type key, object name);
 
+        /// <summary>
+        /// Release an Instance based on a instance/name combo.
+        /// </summary> 
+        void ReleaseInstance(object instance, object name = null);
+
         ///<summary>
         /// Reflect all the types in the list
         /// Return the number of types in the list, which should be equal to the list length
@@ -74,9 +79,8 @@ namespace Cr7Sund.Framework.Api
 
 
         new IInjectionBinding Bind<T>();
-        new IInjectionBinding GetBinding<T>();
+        new IInjectionBinding GetBinding<T>(object name = null);
         IInjectionBinding GetBinding(Type key);
-        new IInjectionBinding GetBinding<T>(object name);
         IInjectionBinding GetBinding(Type key, object name);
     }
 }

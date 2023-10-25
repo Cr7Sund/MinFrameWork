@@ -24,13 +24,14 @@ namespace Cr7Sund.Framework.Impl
 
         public InjectionBindingType Type { get => _type; set => _type = value; }
 
-        public IInjectionBinding AsNew()
+        public IInjectionBinding AsDefault()
         {
             //If already a value, this mapping is redundant
             if (Type == InjectionBindingType.VALUE)
             {
                 return this;
             }
+
             _type = InjectionBindingType.DEFAULT;
             if (resolver != null)
             {
@@ -39,6 +40,21 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
+        public IInjectionBinding AsPool()
+        {
+            //If already a value, this mapping is redundant
+            if (Type == InjectionBindingType.VALUE)
+            {
+                return this;
+            }
+
+            _type = InjectionBindingType.POOL;
+            if (resolver != null)
+            {
+                resolver(this);
+            }
+            return this;
+        }
 
         public IInjectionBinding AsSingleton()
         {

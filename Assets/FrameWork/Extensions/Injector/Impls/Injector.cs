@@ -9,10 +9,30 @@ namespace Cr7Sund.Framework.Impl
         public IInjectorFactory Factory { get; set; }
         public IInjectionBinder Binder { get; set; }
         public IReflectionBinder Reflector { get; set; }
+        public IPoolBinder PoolBinder { get; set; }
+
+        private static IInjectorFactory _factory;
+        private IReflectionBinder _reflectionBinder;
+        private IPoolBinder _poolBinder;
 
         public Injector()
         {
-            Factory = new InjectorFactory();
+            if (_factory == null)
+            {
+                _factory = new InjectorFactory();
+            }
+            if (_reflectionBinder == null)
+            {
+                _reflectionBinder = new InjectorReflectionBinder();
+            }
+            if (_poolBinder == null)
+            {
+                _poolBinder = new PoolBinder();
+            }
+
+            Factory = _factory;
+            Reflector = _reflectionBinder;
+            PoolBinder = _poolBinder;
         }
 
         public object Instantiate(IInjectionBinding binding)
@@ -35,10 +55,19 @@ namespace Cr7Sund.Framework.Impl
 
             if (retVal == null) // If we don't have an existing value , go ahead and create one
             {
-                IReflectedClass reflection = Reflector.Get(reflectionType);
+                var reflection = Reflector.Get(reflectionType);
                 failIf(reflection.ConstructorParameterCount > 0, "Attempt to inject a class with an only parameters constructor", InjectionExceptionType.NOEMPTY_CONSTRUCTOR);
 
-                retVal = Factory.Get(binding, null);
+                if (binding.Type == InjectionBindingType.POOL)
+                {
+                    var pool = PoolBinder.Get(reflectionType);
+                    failIf(pool == null, "Attempt to instantiate a class with a null pool", InjectionExceptionType.NOEMPTY_CONSTRUCTOR);
+                    retVal = pool.GetInstance();
+                }
+                else // handle other case
+                {
+                    retVal = Factory.Get(binding, null);
+                }
 
                 //If the InjectorFactory returns null, just return it. Otherwise inject the retVal if it needs it
                 //This could happen if Activator.CreateInstance returns null
@@ -83,6 +112,18 @@ namespace Cr7Sund.Framework.Impl
             PerformFieldInjection(target, reflection);
             PostInject(target, reflection);
             return target;
+        }
+
+        public void Destroy(object instance)
+        {
+            if (instance != null)
+            {
+                var pool = PoolBinder.Get(instance.GetType());
+                if (pool != null)
+                {
+                    pool.ReturnInstance(instance);
+                }
+            }
         }
 
         public void Uninject(object target)

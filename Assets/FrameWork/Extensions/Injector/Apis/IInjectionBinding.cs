@@ -8,7 +8,9 @@ namespace Cr7Sund.Framework.Api
         IInjectionBinding AsSingleton();
 
         /// <summary>  Map the Binding to a stated instance so that every `GetInstance()` on the Binder Key returns the provided instance. Sets type to Default </summary> 
-        IInjectionBinding AsNew();
+        IInjectionBinding AsDefault();
+        /// <summary>  Map the Binding to a stated instance so that every `GetInstance()` on the Binder Key returns the provided instance. Sets type to Pool </summary> 
+        IInjectionBinding AsPool();
 
         /// <summary>  Map the binding and give access to all contexts in hierarchy </summary> 
         IInjectionBinding CrossContext();
@@ -50,6 +52,8 @@ namespace Cr7Sund.Framework.Api
 
         /// <summary>  The binding always provides the same instance based on a provided value </summary> 
         VALUE,
+        /// <summary>  The binding provides a new instance every time from pool </summary> 
+        POOL,
     }
 }
 

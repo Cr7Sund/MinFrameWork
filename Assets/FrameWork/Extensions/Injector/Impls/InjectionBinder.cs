@@ -10,10 +10,11 @@ namespace Cr7Sund.Framework.Impl
 
         public InjectionBinder()
         {
+
+
             Injector = new Injector
             {
                 Binder = this,
-                Reflector = new InjectorReflectionBinder()
             };
         }
 
@@ -50,6 +51,31 @@ namespace Cr7Sund.Framework.Impl
             return instance;
         }
 
+        public void ReleaseInstance(object instance, object name = null)
+        {
+            if (instance != null)
+            {
+                var binding = GetBinding(instance.GetType(), name) as IInjectionBinding;
+                if (binding == null)
+                {
+                    throw new InjectionException("InjectionBinder has no binding for:\n\tkey: " + instance.GetType() + "\nname: " + name, InjectionExceptionType.NULL_BINDING);
+                }
+
+                GetInjectorForBinding(binding).Destroy(instance);
+            }
+            else
+            {
+                // e.g.  
+                // private void AssignNull(ref GuaranteedUniqueInstances instances)
+                // {
+                //     instances = null;
+                // }
+                // AssignNull(ref instance1);
+                // binder.ReleaseInstance(instance1, SomeEnum.ONE);
+                throw new InjectionException("try to release an null instance", InjectionExceptionType.NULL_BINDING);
+            }
+        }
+
         protected virtual IInjector GetInjectorForBinding(IInjectionBinding binding)
         {
             return Injector;
@@ -69,17 +95,12 @@ namespace Cr7Sund.Framework.Impl
             return base.Bind<T>() as IInjectionBinding;
         }
 
-        public new IInjectionBinding GetBinding<T>()
-        {
-            return this.GetBinding(typeof(T), null) as IInjectionBinding;
-        }
-
         public IInjectionBinding GetBinding(Type type)
         {
             return this.GetBinding(type, null) as IInjectionBinding;
         }
 
-        public new IInjectionBinding GetBinding<T>(object name)
+        public new IInjectionBinding GetBinding<T>(object name = null)
         {
             return this.GetBinding(typeof(T), name) as IInjectionBinding;
         }

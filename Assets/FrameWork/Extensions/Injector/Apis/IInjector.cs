@@ -12,7 +12,11 @@ namespace Cr7Sund.Framework.Api
         /// Request that the provided target be injected.
         /// </summary> 
         object Inject(object target);
-
+        /// <summary> 
+        /// Request an release based on the instantiate instance.
+        /// This request is to recycle instance to pool 
+        /// </summary> 
+        void Destroy(object instance);
         /// <summary> 
         /// Clear the injections from the provided instance.
         /// Note that Uninject can only clean public fields ...therefore only
