@@ -73,11 +73,10 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual IBinding Bind(object key)
         {
-            if (BindingConst.FORBIDBOXING)
-            {
+#if FORBID_BOXING
                 if (key.GetType().IsValueType)
                     throw new BinderException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
-            }
+#endif
 
             _key.Add(key);
             return this;
@@ -90,11 +89,10 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding To(object value)
         {
-            if (BindingConst.FORBIDBOXING)
-            {
+#if FORBID_BOXING
                 if (value.GetType().IsValueType)
                     throw new BinderException($"{value} is not referenceType", BinderExceptionType.EXIST_BOXING);
-            }
+#endif
 
             _value.Add(value);
             if (resolver != null)
@@ -118,6 +116,7 @@ namespace Cr7Sund.Framework.Impl
         {
             _value.Remove(o);
         }
+
 
         public IBinding Weak()
         {

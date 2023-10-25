@@ -34,17 +34,11 @@ namespace Cr7Sund.Framework.Api
         /// <summary>
         ///  Retrieve a binding based on the provided Type
         /// </summary>
-        IBinding GetBinding<T>();
-
+        IBinding GetBinding<T>(object name = null);
         /// <summary>
         ///  Retrieve a binding based on the provided key
         /// </summary>
         IBinding GetBinding(object key);
-
-        /// <summary>
-        ///  Retrieve a binding based on the provided Type
-        /// </summary>
-        IBinding GetBinding<T>(object name);
 
         /// <summary>
         ///  Retrieve a binding based on the provided key
@@ -54,12 +48,7 @@ namespace Cr7Sund.Framework.Api
         /// <summary>
         /// Remove a binding based on the provided Key (generic)
         /// </summary>
-        void Unbind<T>();
-
-        /// <summary>
-        /// Remove a binding based on the provided Key (generic)
-        /// </summary>
-        void Unbind<T>(object name);
+        void Unbind<T>(object name = null);
 
         /// <summary>
         /// Remove a binding based on the provided Key (generic)

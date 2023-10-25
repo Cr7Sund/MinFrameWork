@@ -21,11 +21,10 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding Bind(object key)
         {
-            if (BindingConst.FORBIDBOXING)
-            {
+#if FORBID_BOXING
                 if (key.GetType().IsValueType)
                     throw new BinderException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
-            }
+#endif
 
             IBinding binding;
             binding = GetRawBinding();
@@ -37,7 +36,6 @@ namespace Cr7Sund.Framework.Impl
         {
             return new Binding(Resolver);
         }
-
 
         protected void Resolver(IBinding binding, object oldName = null)
         {
@@ -57,13 +55,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        public IBinding GetBinding<T>()
-        {
-            var key = typeof(T);
-            return this.GetBinding(key, null);
-        }
-
-        public IBinding GetBinding<T>(object name)
+        public IBinding GetBinding<T>(object name = null)
         {
             var key = typeof(T);
             return this.GetBinding(key, name);
@@ -88,17 +80,12 @@ namespace Cr7Sund.Framework.Impl
             return null;
         }
 
-        public void Unbind<T>()
-        {
-            Unbind(typeof(T), null);
-        }
-
         public void Unbind(object key)
         {
             Unbind(key, null);
         }
 
-        public void Unbind<T>(object name)
+        public void Unbind<T>(object name = null)
         {
             Unbind(typeof(T), name);
         }
