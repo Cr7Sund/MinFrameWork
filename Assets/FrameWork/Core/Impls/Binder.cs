@@ -21,11 +21,11 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding Bind(object key)
         {
-#if FORBID_BOXING
+            if (BindingConst.FORBID_BOXING)
+            {
                 if (key.GetType().IsValueType)
                     throw new BinderException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
-#endif
-
+            }
             IBinding binding;
             binding = GetRawBinding();
             binding.Bind(key);

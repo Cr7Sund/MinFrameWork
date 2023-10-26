@@ -11,7 +11,6 @@ namespace Cr7Sund.Framework.Impl
         public InjectionBinder()
         {
 
-
             Injector = new Injector
             {
                 Binder = this,
