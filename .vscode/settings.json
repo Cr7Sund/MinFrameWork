@@ -56,5 +56,11 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "MinFrameWork.sln"
+    "dotnet.defaultSolution": "MinFrameWork.sln",
+    "cSpell.words": [
+        "Doesnt",
+        "Poolable",
+        "Triggerable",
+        "unhandler"
+    ]
 }
