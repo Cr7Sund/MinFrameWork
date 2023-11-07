@@ -7,10 +7,6 @@ namespace Cr7Sund.Framework.Impl
     {
         public PoolExceptionType type { get; set; }
 
-        public PoolException() : base()
-        {
-        }
-
         /// Constructs a PoolException with a message and PoolExceptionType
         public PoolException(string message, PoolExceptionType exceptionType) : base(message)
         {

@@ -104,7 +104,7 @@ namespace Cr7Sund.Framework.Tests
             };
             InjectionException ex =
                 Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+            Assert.That(ex.Type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
         }
 
         [Test]
@@ -119,7 +119,7 @@ namespace Cr7Sund.Framework.Tests
             };
             InjectionException ex =
                 Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+            Assert.That(ex.Type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Cr7Sund.Framework.Impl
 {
 	public class EventDispatcherException : Exception
 	{
-		public EventDispatcherExceptionType type{ get; set;}
+		public EventDispatcherExceptionType Type { get; set; }
 
 		public EventDispatcherException() : base()
 		{
@@ -14,7 +14,7 @@ namespace Cr7Sund.Framework.Impl
 		/// Constructs an EventDispatcherException with a message and EventDispatcherExceptionType
 		public EventDispatcherException(string message, EventDispatcherExceptionType exceptionType) : base(message)
 		{
-			type = exceptionType;
+			Type = exceptionType;
 		}
 	}
 

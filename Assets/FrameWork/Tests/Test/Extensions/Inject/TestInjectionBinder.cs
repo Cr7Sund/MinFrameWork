@@ -127,7 +127,7 @@ namespace Cr7Sund.Framework.Tests
             };
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
             InjectionException ex = Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.type == InjectionExceptionType.NULL_BINDING);
+            Assert.That(ex.Type == InjectionExceptionType.NULL_BINDING);
         }
 
         [Test]
@@ -157,7 +157,7 @@ namespace Cr7Sund.Framework.Tests
             };
 
             InjectionException ex = Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.type == InjectionExceptionType.NULL_BINDING);
+            Assert.That(ex.Type == InjectionExceptionType.NULL_BINDING);
         }
 
         [Test]
@@ -262,10 +262,13 @@ namespace Cr7Sund.Framework.Tests
             Assert.AreEqual(InjectionBindingType.VALUE, binding.Type);
         }
 
+
         //RE:Issue #34. Ensure that a Singleton instance can properly use constructor injection
         [Test]
         public void TestConstructorToSingleton()
         {
+            ConstructorInjectsClassToBeInjected.Value = 0;
+            
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>();
             binder.Bind<ConstructorInjectsClassToBeInjected>().To<ConstructorInjectsClassToBeInjected>().AsSingleton();
             ConstructorInjectsClassToBeInjected instance = binder.GetInstance<ConstructorInjectsClassToBeInjected>();

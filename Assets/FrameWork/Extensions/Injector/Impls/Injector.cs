@@ -11,16 +11,12 @@ namespace Cr7Sund.Framework.Impl
         public IReflectionBinder Reflector { get; set; }
         public IPoolBinder PoolBinder { get; set; }
 
-        private static IInjectorFactory _factory;
+        private static IInjectorFactory _factory = new InjectorFactory();
         private IReflectionBinder _reflectionBinder;
         private IPoolBinder _poolBinder;
 
         public Injector()
         {
-            if (_factory == null)
-            {
-                _factory = new InjectorFactory();
-            }
             if (_reflectionBinder == null)
             {
                 _reflectionBinder = new InjectorReflectionBinder();

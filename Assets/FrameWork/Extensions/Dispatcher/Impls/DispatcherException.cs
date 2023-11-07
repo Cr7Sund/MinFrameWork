@@ -7,9 +7,6 @@ namespace Cr7Sund.Framework.Impl
     {
         public DispatcherExceptionType type { get; set; }
 
-        public DispatcherException() : base()
-        { }
-
         /// Constructs a DispatcherException with a message and DispatcherExceptionType
         public DispatcherException(string message, DispatcherExceptionType exceptionType) : base(message)
         {

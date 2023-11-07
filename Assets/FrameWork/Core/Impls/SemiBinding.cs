@@ -91,7 +91,7 @@ namespace Cr7Sund.Framework.Impl
             }
 
             int matchIndex = Array.IndexOf(objectValue, o);
-            if (matchIndex != CollectionUtil.UNMATCHINDEX)
+            if (matchIndex != ArrayExt.UNMATCHINDEX)
             {
                 this.objectValue = this.objectValue.SpliceValueAt(matchIndex);
             }

@@ -124,7 +124,7 @@ namespace Cr7Sund.Framework.Tests
             };
 
             EventDispatcherException ex = Assert.Throws<EventDispatcherException>(testDelegate);
-            Assert.That(ex.type == EventDispatcherExceptionType.TARGET_INVOCATION);
+            Assert.That(ex.Type == EventDispatcherExceptionType.TARGET_INVOCATION);
         }
 
         [Test]

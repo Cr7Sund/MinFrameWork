@@ -5,13 +5,9 @@ namespace Cr7Sund.Framework.Impl
 {
     public class PoolBinder : Binder, IPoolBinder
     {
-        private static IInstanceProvider poolInstanceProvider;
+        private static IInstanceProvider poolInstanceProvider = new PoolInstanceProvider();
         public PoolBinder()
         {
-            if (poolInstanceProvider == null)
-            {
-                poolInstanceProvider = new PoolInstanceProvider();
-            }
         }
 
         public IPool Get(Type type)

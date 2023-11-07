@@ -2,7 +2,7 @@ using System;
 
 namespace Cr7Sund.Framework.Util
 {
-    public static class CollectionUtil
+    public static class ArrayExt
     {
         public const int UNMATCHINDEX = -1;
         public static T[] SpliceValueAt<T>(this T[] instance, int splicePos)
@@ -39,7 +39,7 @@ namespace Cr7Sund.Framework.Util
                 }
             }
 
-            return CollectionUtil.UNMATCHINDEX;
+            return ArrayExt.UNMATCHINDEX;
         }
 
 
