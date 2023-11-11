@@ -10,14 +10,14 @@ namespace Cr7Sund.Framework.Impl
 
         public override PromisedT OnExecute(PromisedT value) => value;
 
-        public override void Execute(PromisedT value)
+        protected sealed override void Execute(PromisedT value)
         {
             try
             {
                 var resultPromise = OnExecuteAsync(value);
                 Assert.NotNull(resultPromise);
                 resultPromise
-                        .Progress(progress => this.ReportProgress((progress + this.SequenceID) * SliceLength ))
+                        .Progress(progress => this.ReportProgress((progress + this.SequenceID) * SliceLength))
                         .Then(
                             (newValue) => this.Resolve(newValue),
                             ex => this.Reject(ex)

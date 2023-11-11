@@ -11,9 +11,10 @@ namespace Cr7Sund.Framework.Tests
     {
         public static int result = 0;
         public static IPromise simulatePromise;
-        public static IPromise<int> simulatePromiseT;
+        public static IPromise<int> simulatePromiseOne;
+        public static IPromise<int> simulatePromiseSecond;
         public static string exceptionStr;
-        public static float currentProgress ;
+        public static float currentProgress;
     }
 
     public class TestBasePromiseCommand : PromiseCommand
@@ -34,7 +35,7 @@ namespace Cr7Sund.Framework.Tests
         public override void OnCatch(Exception e)
         {
             SimplePromise.exceptionStr = e.Message;
-            UnityEngine.Debug.Log("sdf");
+            UnityEngine.Debug.Log(e);
         }
     }
 

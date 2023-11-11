@@ -24,24 +24,21 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Execute()
         {
-            try
-            {
-                OnExecute();
-                this.Resolve();
+            OnExecute();
+            this.Resolve();
 
-                float progress = SliceLength * SequenceID;
-                if (progress > 0)
-                {
-                    this.ReportProgress(progress);
-                }
-            }
-            catch (Exception e)
+            float progress = SliceLength * SequenceID;
+            if (progress > 0)
             {
-                OnCatch(e);
-                this.Reject(e);
+                this.ReportProgress(progress);
             }
+
         }
 
+        public void Catch(Exception e)
+        {
+            OnCatch(e);
+        }
         public void Progress(float progress)
         {
             OnProgress(progress);
@@ -58,6 +55,8 @@ namespace Cr7Sund.Framework.Impl
         {
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
             ProgressHandlers(resultPromise, resultPromise.Progress);
+            resultPromise.Catch(resultPromise.Catch);
+
             return resultPromise;
         }
 

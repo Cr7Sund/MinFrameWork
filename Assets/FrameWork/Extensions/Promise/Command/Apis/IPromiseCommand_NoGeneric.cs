@@ -9,6 +9,7 @@ namespace Cr7Sund.Framework.Api
 
         void Execute();
         void Progress(float progress);
+        void Catch(Exception e);
 
         float SliceLength {get; set;}
         int SequenceID { get; set; }

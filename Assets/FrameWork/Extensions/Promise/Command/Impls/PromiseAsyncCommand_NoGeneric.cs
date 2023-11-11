@@ -10,7 +10,7 @@ namespace Cr7Sund.Framework.Impl
 
         public override void OnExecute() { }
 
-        public override void Execute()
+        public sealed override void Execute()
         {
             try
             {

@@ -70,12 +70,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void command_exception()
+        public void command_break_chain()
         {
-            // equal to
-            // var promise1 = new Promise();
-            // promise1.Then(new PromiseCommand_1().Resolve).Then(new PromiseCommand_1().Resolve);
-
             var promise = new TestBasePromiseCommand();
             promise.Then<SimplePromiseCommandTwo>().Then<ExceptionPromiseCommand>().Then<SimplePromiseCommandOne>();
 
