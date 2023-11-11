@@ -11,6 +11,8 @@ namespace Cr7Sund.Framework.Api
 
         /// A POOL HAS NO INSTANCE PROVIDER
         NO_INSTANCE_PROVIDER,
+        // NO_INSTANCE_TO_CREATE, it will cause circular 
+        NO_INSTANCE_TO_CREATE,
     }
 }
 

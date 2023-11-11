@@ -1,0 +1,115 @@
+using System;
+using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Tests;
+using Cr7Sund.Framework.Util;
+using NUnit.Framework;
+using UnityEditor.VersionControl;
+
+namespace Cr7Sund.Framework.PromiseCommandTest
+{
+
+    public class PromiseCommand_NoGenericTests
+    {
+
+        [TearDown]
+        public void Cleanup()
+        {
+            SimplePromise.result = 0;
+            SimplePromise.simulatePromise = null;
+            SimplePromise.exceptionStr = null;
+        }
+
+
+        [Test]
+        public void command_all_resolve()
+        {
+            // equal to
+            // var promise1 = new Promise();
+            // promise1.Then(new PromiseCommand_1().Resolve).Then(new PromiseCommand_1().Resolve);
+
+            var promise = new TestBasePromiseCommand();
+            promise.Then<SimplePromiseCommandTwo>().Then<SimplePromiseCommandOne>().Then(() => SimplePromise.result -= 200);
+
+            promise.Resolve();
+            Assert.AreEqual((((0 + 2) * 3) + 1) * 2 - 200, SimplePromise.result);
+        }
+
+        [Test]
+        public void command_with_async_operation()
+        {
+            var promise = new TestBasePromiseCommand();
+            promise.Then<SimplePromiseCommandTwo>().Then<SimpleAsyncPromiseCommandOne>().Then<SimplePromiseCommandOne>();
+
+            promise.Resolve();
+            Assert.AreEqual(6, SimplePromise.result);
+
+            SimplePromise.simulatePromise.Resolve();
+            Assert.AreEqual(((((0 + 2) * 3) + 3) * 5 + 1) * 2, SimplePromise.result);
+        }
+
+
+        [Test]
+        public void command_exception_rejectedState()
+        {
+            var promise = new TestBasePromiseCommand();
+            var rejectPromise = promise.Then<ExceptionPromiseCommand>() as Promise;
+            promise.Resolve();
+
+            Assert.AreEqual(PromiseState.Resolved, promise.CurState);
+            Assert.AreEqual(PromiseState.Rejected, rejectPromise.CurState);
+        }
+
+        [Test]
+        public void command_exception_trigger_catch()
+        {
+            var promise = new TestBasePromiseCommand();
+            var rejectPromise = promise.Then<ExceptionPromiseCommand>() as Promise;
+            promise.Resolve();
+            Assert.NotNull(SimplePromise.exceptionStr);
+        }
+
+        [Test]
+        public void command_exception()
+        {
+            // equal to
+            // var promise1 = new Promise();
+            // promise1.Then(new PromiseCommand_1().Resolve).Then(new PromiseCommand_1().Resolve);
+
+            var promise = new TestBasePromiseCommand();
+            promise.Then<SimplePromiseCommandTwo>().Then<ExceptionPromiseCommand>().Then<SimplePromiseCommandOne>();
+
+            promise.Resolve();
+            Assert.AreEqual((0 + 2) * 3, SimplePromise.result);
+        }
+
+
+        [Test]
+        public void can_handle_onProgress()
+        {
+            var promise = new TestBasePromiseCommand();
+
+            promise.Then<SimpleProgressCommand>();
+
+            promise.ReportProgress(1f);
+
+            Assert.AreEqual(1f, SimplePromise.currentProgress);
+        }
+
+        [Test]
+        public void can_report_simple_progress()
+        {
+            var promise = new TestBasePromiseCommand();
+
+            promise.Then<SimpleProgressCommand>();
+
+            for (var progress = 0.25f; progress < 1f; progress += 0.25f)
+                promise.ReportProgress(progress);
+            promise.ReportProgress(1f);
+
+            Assert.AreEqual(1f, SimplePromise.currentProgress);
+        }
+
+    }
+
+}

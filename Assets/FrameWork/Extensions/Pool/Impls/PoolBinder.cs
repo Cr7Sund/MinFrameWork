@@ -10,6 +10,27 @@ namespace Cr7Sund.Framework.Impl
         {
         }
 
+        public IPool<T> Get<T>() where T : class, new()
+        {
+            var type = typeof(T);
+            var binding = GetBinding(type);
+            IPool<T> retVal = null;
+            if (binding == null)
+            {
+                binding = GetRawBinding();
+                retVal = new Pool<T>();
+                retVal.poolType = type;
+                retVal.InstanceProvider = poolInstanceProvider;
+                binding.Bind(type).To(retVal);
+            }
+            else
+            {
+                retVal = binding.Value as IPool<T>;
+            }
+
+            return retVal;
+        }
+
         public IPool Get(Type type)
         {
             var binding = GetBinding(type);

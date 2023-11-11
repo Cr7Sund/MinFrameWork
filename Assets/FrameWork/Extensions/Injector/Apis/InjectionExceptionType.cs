@@ -17,7 +17,7 @@ namespace Cr7Sund.Framework.Api
         /// The instance being injected into resolved to null.
         NULL_TARGET,
         /// During an attempt to construct, constructors except primitive types was not allowed
-        NOEMPTY_CONSTRUCTOR,
+        NONEMPTY_CONSTRUCTOR,
         /// The value being injected into the target resolved to null.
         NULL_VALUE_INJECTION,
         /// During setter injection the requested setter resolved to null.

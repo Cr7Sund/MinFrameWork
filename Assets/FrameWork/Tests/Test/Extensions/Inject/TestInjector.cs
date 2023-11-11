@@ -118,7 +118,7 @@ namespace Cr7Sund.Framework.Tests
 				binder.GetInstance<IMap>();
 			};
 			var ex = Assert.Throws<InjectionException>(testDelegate);
-			Assert.AreEqual(InjectionExceptionType.NOEMPTY_CONSTRUCTOR, ex.Type);
+			Assert.AreEqual(InjectionExceptionType.NONEMPTY_CONSTRUCTOR, ex.Type);
 		}
 
 	}

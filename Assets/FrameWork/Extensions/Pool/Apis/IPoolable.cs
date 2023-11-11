@@ -36,7 +36,6 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         /// Release methods should clean up the instance sufficiently to remove prior state.
         void Release();
-
         /// <summary>
         /// Is this instance retained?
         /// </summary>

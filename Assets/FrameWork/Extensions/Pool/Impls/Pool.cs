@@ -5,7 +5,7 @@ using Cr7Sund.Framework.Api;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public class Pool<T> : Pool, IPool<T>
+    public class Pool<T> : Pool, IPool<T> where T : class, new()
     {
         public Pool() : base()
         {
@@ -14,8 +14,14 @@ namespace Cr7Sund.Framework.Impl
 
         new public T GetInstance()
         {
-            return (T)base.GetInstance();
+            return base.GetInstance() as T;
         }
+
+        new protected T GetNewInstance()
+        {
+            return new T();
+        }
+
     }
 
     public class Pool : IPool, IPoolable
@@ -62,36 +68,52 @@ namespace Cr7Sund.Framework.Impl
 
         public object GetInstance()
         {
+            var instance = getInstance();
+            if (instance is IPoolable)
+            {
+                (instance as IPoolable).Retain();
+            }
+            return instance;
+        }
+
+        private object getInstance()
+        {
             if (instancesAvailable.Count > 0)
             {
                 var retVal = instancesAvailable.Pop();
                 instancesInUse.Add(retVal);
+
                 return retVal;
             }
 
+            int instancesToCreate = NewInstanceToCreate();
+            if(instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) { return null; }
+
+            failIf(instancesToCreate <= 0, "Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE);
+            failIf(InstanceProvider == null, "A Pool of type: " + poolType + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);
+
+            for (int i = 0; i < instancesToCreate; i++)
+            {
+                var newInstance = GetNewInstance();
+                Add(newInstance);
+            }
+
+            return GetInstance(); // currently have free space
+        }
+
+        private int NewInstanceToCreate()
+        {
             int instancesToCreate = 0;
 
             // New fixed-size pool. Populate
             if (Count > 0)
             {
-                if (instanceCount == 0)
-                {
-                    instancesToCreate = Count;
-                }
-                else
-                {
-                    //Illegal overflow. Report and return null
-                    failIf(OverflowBehavior == PoolOverflowBehavior.EXCEPTION,
-                        "A pool has overflowed its limit.\n\t\tPool type: " + poolType,
-                        PoolExceptionType.OVERFLOW);
+                //Illegal overflow. Report and return null
+                failIf(instanceCount > 0 && OverflowBehavior == PoolOverflowBehavior.EXCEPTION,
+                    "A pool has overflowed its limit.\n\t\tPool type: " + poolType,
+                    PoolExceptionType.OVERFLOW);
 
-                    // Support debug warn
-                    if (OverflowBehavior == PoolOverflowBehavior.WARNING)
-                    {
-
-                    }
-                    return null;
-                }
+                instancesToCreate = Count;
             }
             else
             {
@@ -106,20 +128,12 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            if (instancesToCreate > 0)
-            {
-                failIf(InstanceProvider == null, "A Pool of type: " + poolType + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);
+            return instancesToCreate;
+        }
 
-                for (int i = 0; i < instancesToCreate; i++)
-                {
-                    var newInstance = InstanceProvider.GetInstance(poolType);
-                    Add(newInstance);
-                }
-
-                return GetInstance(); // currently have free space
-            }
-
-            return null;
+        protected object GetNewInstance()
+        {
+            return InstanceProvider.GetInstance(poolType);
         }
 
         public void ReturnInstance(object value)
@@ -141,6 +155,7 @@ namespace Cr7Sund.Framework.Impl
             instancesInUse.Clear();
             _instanceCount = 0;
         }
+
 
         #endregion
 

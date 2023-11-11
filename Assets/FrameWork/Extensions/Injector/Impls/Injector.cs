@@ -36,6 +36,7 @@ namespace Cr7Sund.Framework.Impl
             failIf(Binder == null, "Attempt to instantiate from Injector without a Binder", InjectionExceptionType.NO_BINDER);
             failIf(Factory == null, "Attempt to inject into Injector without a Factory", InjectionExceptionType.NO_FACTORY);
 
+
             object retVal = null;
             Type reflectionType = null;
 
@@ -52,12 +53,17 @@ namespace Cr7Sund.Framework.Impl
             if (retVal == null) // If we don't have an existing value , go ahead and create one
             {
                 var reflection = Reflector.Get(reflectionType);
-                failIf(reflection.ConstructorParameterCount > 0, "Attempt to inject a class with an only parameters constructor", InjectionExceptionType.NOEMPTY_CONSTRUCTOR);
+                // Actually we dont support construct inject
+                failIf(reflection == null, "Attempt to perform constructor injection without a reflection", InjectionExceptionType.NULL_REFLECTION, reflectionType, null);
+                failIf(reflection.Constructor == null, "Attempt to construction inject a null constructor", InjectionExceptionType.NULL_CONSTRUCTOR, reflectionType, null);
+                failIf(reflection.ConstructorParameterCount > 0, "Attempt to construction inject a constructor-with parameters", InjectionExceptionType.NONEMPTY_CONSTRUCTOR, reflectionType, null);
+
+                failIf(reflection.ConstructorParameterCount > 0, "Attempt to inject a class with an only parameters constructor", InjectionExceptionType.NONEMPTY_CONSTRUCTOR);
 
                 if (binding.Type == InjectionBindingType.POOL)
                 {
                     var pool = PoolBinder.Get(reflectionType);
-                    failIf(pool == null, "Attempt to instantiate a class with a null pool", InjectionExceptionType.NOEMPTY_CONSTRUCTOR);
+                    failIf(pool == null, "Attempt to instantiate a class with a null pool", InjectionExceptionType.NONEMPTY_CONSTRUCTOR);
                     retVal = pool.GetInstance();
                 }
                 else // handle other case
@@ -88,22 +94,19 @@ namespace Cr7Sund.Framework.Impl
 
         public object Inject(object target)
         {
-            failIf(Binder == null, "Attempt to inject into Injector without a Binder", InjectionExceptionType.NO_BINDER);
-            failIf(Reflector == null, "Attempt to inject without a reflector", InjectionExceptionType.NO_REFLECTOR);
-            failIf(target == null, "Attempt to inject into null instance", InjectionExceptionType.NULL_TARGET);
+            Type t = target.GetType();
+
+            failIf(Binder == null, "Attempt to inject into Injector without a Binder", InjectionExceptionType.NO_BINDER, t, target);
+            failIf(Reflector == null, "Attempt to inject without a reflector", InjectionExceptionType.NO_REFLECTOR, t, target);
+            failIf(target == null, "Attempt to inject into null instance", InjectionExceptionType.NULL_TARGET, t, target);
 
             //Some things can't be injected into. Bail out.
-            Type t = target.GetType();
             if (t.IsPrimitive || t == typeof(Decimal) || t == typeof(string))
             {
                 return target;
             }
 
             var reflection = Reflector.Get(t);
-            // Actually we dont support construct inject
-            failIf(reflection == null, "Attempt to perform constructor injection without a reflection", InjectionExceptionType.NULL_REFLECTION);
-            failIf(reflection.Constructor == null, "Attempt to construction inject a null constructor", InjectionExceptionType.NULL_CONSTRUCTOR);
-            failIf(reflection.ConstructorParameterCount > 0, "Attempt to construction inject a constructor-with parameters", InjectionExceptionType.NOEMPTY_CONSTRUCTOR);
 
             PerformFieldInjection(target, reflection);
             PostInject(target, reflection);

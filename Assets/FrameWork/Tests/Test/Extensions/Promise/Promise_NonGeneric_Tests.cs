@@ -1544,7 +1544,6 @@ namespace Cr7Sund.Framework.PromiseTest
                 var childPromise = new Promise();
                 var valuePromise = new Promise<int>();
                 Assert.AreEqual(5, Promise.GetPendingPromiseCount());
-
                 promise.Then(() => childPromise);
                 Assert.AreEqual(6, Promise.GetPendingPromiseCount());
                 promise.Then(() => valuePromise);

@@ -59,6 +59,7 @@
     "dotnet.defaultSolution": "MinFrameWork.sln",
     "cSpell.words": [
         "Doesnt",
+        "NULLOIDNAME",
         "Poolable",
         "Triggerable",
         "unhandler"
