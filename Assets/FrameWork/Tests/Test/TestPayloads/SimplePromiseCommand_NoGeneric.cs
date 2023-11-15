@@ -10,6 +10,7 @@ namespace Cr7Sund.Framework.Tests
     public class SimplePromise
     {
         public static int result = 0;
+        public static float floatResult = 0;
         public static IPromise simulatePromise;
         public static IPromise<int> simulatePromiseOne;
         public static IPromise<int> simulatePromiseSecond;
@@ -35,7 +36,6 @@ namespace Cr7Sund.Framework.Tests
         public override void OnCatch(Exception e)
         {
             SimplePromise.exceptionStr = e.Message;
-            UnityEngine.Debug.Log(e);
         }
     }
 

@@ -6,7 +6,7 @@ namespace Cr7Sund.Framework.Impl
 {
     public class SemiBinding : ISemiBinding
     {
-        protected object[] objectValue;
+        protected object[] _objectValue;
         public BindingConstraintType Constraint { get; set; }
         public bool UniqueValue { get; set; }
         public SemiBinding()
@@ -23,27 +23,27 @@ namespace Cr7Sund.Framework.Impl
             {
                 if (Constraint.Equals(BindingConstraintType.ONE))
                 {
-                    return (objectValue == null) ? null : objectValue[0];
+                    return (_objectValue == null) ? null : _objectValue[0];
                 }
-                return objectValue;
+                return _objectValue;
             }
         }
 
-        public int Count => objectValue == null ? 0 : objectValue.Length;
+        public int Count => _objectValue == null ? 0 : _objectValue.Length;
 
         public object this[int index]
         {
             get
             {
-                if (index < 0 || index >= objectValue.Length)
+                if (index < 0 || index >= _objectValue.Length)
                     throw new IndexOutOfRangeException();
-                return objectValue[index];
+                return _objectValue[index];
             }
             set
             {
-                if (index < 0 || index >= objectValue.Length)
+                if (index < 0 || index >= _objectValue.Length)
                     throw new IndexOutOfRangeException();
-                objectValue[index] = value;
+                _objectValue[index] = value;
             }
         }
 
@@ -52,9 +52,9 @@ namespace Cr7Sund.Framework.Impl
         #region IManagedList implementation
         public IManagedList Add(object o)
         {
-            if (objectValue == null || Constraint == BindingConstraintType.ONE)
+            if (_objectValue == null || Constraint == BindingConstraintType.ONE)
             {
-                objectValue = new object[1];
+                _objectValue = new object[1];
             }
             else
             {
@@ -63,12 +63,12 @@ namespace Cr7Sund.Framework.Impl
                     if (this.Contains(o)) return this;
                 }
 
-                var newItems = new object[objectValue.Length + 1];
-                Array.Copy(objectValue, newItems, objectValue.Length);
-                objectValue = newItems;
+                var newItems = new object[_objectValue.Length + 1];
+                Array.Copy(_objectValue, newItems, _objectValue.Length);
+                _objectValue = newItems;
             }
 
-            objectValue[objectValue.Length - 1] = o;
+            _objectValue[_objectValue.Length - 1] = o;
 
             return this;
         }
@@ -84,16 +84,16 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Remove(object o)
         {
-            if (o.Equals(objectValue) || objectValue == null)
+            if (o.Equals(_objectValue) || _objectValue == null)
             {
-                objectValue = null;
+                _objectValue = null;
                 return this;
             }
 
-            int matchIndex = Array.IndexOf(objectValue, o);
+            int matchIndex = Array.IndexOf(_objectValue, o);
             if (matchIndex != ArrayExt.UNMATCHINDEX)
             {
-                this.objectValue = this.objectValue.SpliceValueAt(matchIndex);
+                this._objectValue = this._objectValue.SpliceValueAt(matchIndex);
             }
 
             return this;
@@ -111,7 +111,7 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Contains(object o)
         {
-            return this.objectValue.Contains(o);
+            return this._objectValue.Contains(o);
         }
 
         #endregion

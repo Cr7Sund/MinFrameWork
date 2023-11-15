@@ -6,10 +6,10 @@ namespace Cr7Sund.Framework.Impl
 {
     public class Binder : IBinder
     {
-        protected Dictionary<object, Dictionary<object, IBinding>> bindings; // object is implicitly equal to type
+        protected Dictionary<object, Dictionary<object, IBinding>> _bindings; // object is implicitly equal to type
         public Binder()
         {
-            bindings = new Dictionary<object, Dictionary<object, IBinding>>();
+            _bindings = new Dictionary<object, Dictionary<object, IBinding>>();
         }
 
         #region IBinder implementation
@@ -68,7 +68,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding GetBinding(object key, object name)
         {
-            if (bindings.TryGetValue(key, out var dict))
+            if (_bindings.TryGetValue(key, out var dict))
             {
                 name = (name == null) ? BindingConst.NULLOIDNAME : name;
                 if (dict.ContainsKey(name))
@@ -101,7 +101,7 @@ namespace Cr7Sund.Framework.Impl
 
         public void Unbind(object key, object name)
         {
-            if (bindings.TryGetValue(key, out var dict))
+            if (_bindings.TryGetValue(key, out var dict))
             {
                 name = (name == null) ? BindingConst.NULLOIDNAME : name;
 
@@ -120,9 +120,9 @@ namespace Cr7Sund.Framework.Impl
             }
             object key = binding.Key;
             Dictionary<object, IBinding> dict;
-            if ((bindings.ContainsKey(key)))
+            if ((_bindings.ContainsKey(key)))
             {
-                dict = bindings[key];
+                dict = _bindings[key];
                 if (dict.ContainsKey(binding.Name))
                 {
                     IBinding useBinding = dict[binding.Name];
@@ -142,7 +142,7 @@ namespace Cr7Sund.Framework.Impl
         {
             object bindingName = binding.Name;
 
-            if (bindings.TryGetValue(key, out var dict))
+            if (_bindings.TryGetValue(key, out var dict))
             {
                 if (dict.TryGetValue(bindingName, out var existingBinding))
                 {
@@ -158,7 +158,7 @@ namespace Cr7Sund.Framework.Impl
             else
             {
                 dict = new Dictionary<object, IBinding>();
-                bindings[key] = dict;
+                _bindings[key] = dict;
             }
 
             //Remove nulled bindings

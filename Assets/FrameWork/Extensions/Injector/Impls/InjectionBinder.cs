@@ -116,7 +116,7 @@ namespace Cr7Sund.Framework.Impl
         {
             var set = new HashSet<Type>();
             var list = new List<Type>();
-            foreach (var pair in bindings)
+            foreach (var pair in _bindings)
             {
                 foreach (var bPair in pair.Value)
                 {

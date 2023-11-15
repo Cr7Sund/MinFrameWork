@@ -1,6 +1,6 @@
 using System;
-using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Tests
@@ -30,12 +30,12 @@ namespace Cr7Sund.Framework.Tests
     {
         public override void OnCatch(Exception e)
         {
-            UnityEngine.Debug.Log(e);
             throw e;
         }
 
         public override int OnExecute(int value)
         {
+            SimplePromise.result += 1;
             return (value + 1) * 2;
         }
 
@@ -48,11 +48,12 @@ namespace Cr7Sund.Framework.Tests
     {
         public override void OnCatch(Exception e)
         {
-
+            SimplePromise.result = -1;
         }
 
         public override int OnExecute(int value)
         {
+            SimplePromise.result = (SimplePromise.result + 2) * 3;
             return (value + 2) * 3;
         }
 
@@ -65,15 +66,23 @@ namespace Cr7Sund.Framework.Tests
     {
         public override float OnExecute(float value)
         {
-            return (value + 1) * 2;
+            SimplePromise.floatResult = (value + 1) * 2;
+            return SimplePromise.floatResult;
+        }
+
+        public override void OnCatch(Exception e)
+        {
+            UnityEngine.Debug.Log(e);
         }
     }
 
-    public class ConvertPromiseCommand : ConvertCommand<int>
+    public class ConvertPromiseCommand : PromiseCommand<int, float>
     {
-        public override object OnConvert(int value)
+        public override float OnExecute(int value)
         {
-            return (value + 3) * 4.2f;
+
+            SimplePromise.floatResult = (value + 3) * 4.2f;
+            return SimplePromise.floatResult;
         }
 
         public override void OnCatch(Exception e)
@@ -91,11 +100,13 @@ namespace Cr7Sund.Framework.Tests
             return SimplePromise.simulatePromiseOne.Then((value) =>
               {
                   SimplePromise.result = 10;
-                  UnityEngine.Debug.Log("First " + value + " :" + aggValue);
-                  // only  when return value , the chain promise  will continue the value chaining
                   return (value + aggValue + 3) * 5;
               });
 
+        }
+        public override void OnCatch(Exception e)
+        {
+            UnityEngine.Debug.Log(e);
         }
     }
 
@@ -106,12 +117,44 @@ namespace Cr7Sund.Framework.Tests
             SimplePromise.result += 2;
             return SimplePromise.simulatePromiseSecond.Then((value) =>
               {
-                  SimplePromise.result = 20;
-                  UnityEngine.Debug.Log("Second " + value + " :" + aggValue);
-                  // only  when return value , the chain promise  will continue the value chaining
+                  SimplePromise.result = (value + aggValue + 1) * 2; ;
                   return (value + aggValue + 1) * 2;
               });
 
+        }
+    }
+
+    public class SimpleAsyncException_Generic : PromiseAsyncCommand<int>
+    {
+        public override IPromise<int> OnExecuteAsync(int aggValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IPromise<int> OnCatchAsync(Exception ex)
+        {
+            return SimplePromise.simulatePromiseOne;
+        }
+    }
+
+
+    public class SimpleAsyncCatch_Generic : PromiseAsyncCommand<int>
+    {
+        public override IPromise<int> OnExecuteAsync(int aggValue)
+        {
+            Func<int, int> transform = (value) =>
+                        {
+                            throw new System.Exception();
+                        };
+            return SimplePromise.simulatePromiseSecond.Then(transform);
+        }
+
+        public override IPromise<int> OnCatchAsync(Exception ex)
+        {
+            return SimplePromise.simulatePromiseSecond.Then((value) =>
+            {
+                return (value + 1) * 2;
+            });
         }
     }
 
