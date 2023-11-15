@@ -12,14 +12,9 @@ namespace Cr7Sund.Framework.Impl
         #region Fields
 
         /// <summary>
-        /// Convert a simple value directly into a resolved promise.
-        /// </summary>
-        private static IPromise<PromisedT> resolvedPromise = new Promise<PromisedT>(PromiseState.Resolved);
-
-        /// <summary>
         /// The exception when the promise is rejected.
         /// </summary>
-        private Exception rejectionException;
+        protected Exception rejectionException;
 
         /// <summary>
         /// Error handlers.
@@ -28,7 +23,7 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// Completed handlers that accept no value.
         /// </summary>
-        private List<ResolveHandler<PromisedT>> resolveHandlers;
+        private List<ResolveHandler<object>> resolveHandlers;
         /// <summary>
         /// Progress handlers.
         /// </summary>
@@ -39,9 +34,9 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// The value when the promises is resolved.
         /// </summary>
-        protected PromisedT resolveValue;
+        protected object resolveValue;
 
-        public PromisedT Test_GetResolveValue() => resolveValue;
+        public object Test_GetResolveValue() => resolveValue;
 
         #endregion
 
@@ -125,10 +120,10 @@ namespace Cr7Sund.Framework.Impl
                 return Promise.Resolved();
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = _ => resultPromise.Resolve();
+            Action<object> resolveHandler = _ => resultPromise.Resolve();
 
             Action<Exception> rejectHandler = ex =>
             {
@@ -156,10 +151,10 @@ namespace Cr7Sund.Framework.Impl
                 return this;
             }
 
-            var resultPromise = new Promise<PromisedT>();
+            var resultPromise = GetRawPromise<PromisedT>();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = v => resultPromise.Resolve(v);
+            Action<object> resolveHandler = v => resultPromise.ResolveInternal(v);
 
             Action<Exception> rejectHandler = ex =>
             {
@@ -195,7 +190,8 @@ namespace Cr7Sund.Framework.Impl
             {
                 try
                 {
-                    onResolved(resolveValue);
+                    Assert.IsInstanceOf<PromisedT>(resolveValue);
+                    onResolved((PromisedT)resolveValue);
                     return Promise.Resolved();
                 }
                 catch (Exception ex)
@@ -204,15 +200,16 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler;
+            Action<object> resolveHandler;
             if (onResolved != null)
             {
                 resolveHandler = v =>
                 {
-                    onResolved(v);
+                    Assert.IsInstanceOf<PromisedT>(v);
+                    onResolved((PromisedT)v);
                     resultPromise.Resolve();
                 };
             }
@@ -262,7 +259,8 @@ namespace Cr7Sund.Framework.Impl
             {
                 try
                 {
-                    return onResolved(resolveValue);
+                    Assert.IsInstanceOf<PromisedT>(resolveValue);
+                    return onResolved((PromisedT)resolveValue);
                 }
                 catch (Exception ex)
                 {
@@ -270,15 +268,16 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler;
+            Action<object> resolveHandler;
             if (onResolved != null)
             {
                 resolveHandler = (v) =>
                 {
-                    onResolved(v)
+                    Assert.IsInstanceOf<PromisedT>(v);
+                    onResolved((PromisedT)v)
                         .Progress(progress => resultPromise.ReportProgress(progress))
                         .Then(
                             () => resultPromise.Resolve(),
@@ -343,20 +342,22 @@ namespace Cr7Sund.Framework.Impl
             {
                 try
                 {
-                    return onResolved(resolveValue);
+                    Assert.IsInstanceOf<PromisedT>(resolveValue);
+                    return onResolved((PromisedT)resolveValue);
                 }
                 catch (Exception ex)
                 {
-                    return Promise<ConvertedT>.Rejected(ex);
+                    return Rejected<ConvertedT>(ex);
                 }
             }
 
-            var resultPromise = new Promise<ConvertedT>();
+            var resultPromise = GetRawPromise<ConvertedT>();
             resultPromise.WithName(Name);
 
-            Action<PromisedT> resolveHandler = v =>
+            Action<object> resolveHandler = v =>
             {
-                onResolved(v)
+                Assert.IsInstanceOf<PromisedT>(v);
+                onResolved((PromisedT)v)
                     .Progress(progress => resultPromise.ReportProgress(progress))
                     .Then(
                         // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
@@ -401,12 +402,12 @@ namespace Cr7Sund.Framework.Impl
         public IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, ConvertedT> transform)
         {
             Assert.IsNotNull(transform);
-            return Then(value => Promise<ConvertedT>.Resolved(transform(value)));
+            return Then(value => Resolved<ConvertedT>(transform(value)));
         }
 
         public IPromise<IEnumerable<ConvertedT>> ThenAll<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain)
         {
-            return Then(value => Promise<ConvertedT>.All(chain(value)));
+            return Then(value => All<ConvertedT>(chain(value)));
         }
 
         public IPromise ThenAll(Func<PromisedT, IEnumerable<IPromise>> chain)
@@ -416,7 +417,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise<ConvertedT> ThenAny<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain)
         {
-            return Then(value => Promise<ConvertedT>.Any(chain(value)));
+            return Then(value => Any<ConvertedT>(chain(value)));
         }
 
         public IPromise ThenAny(Func<PromisedT, IEnumerable<IPromise>> chain)
@@ -426,7 +427,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise<ConvertedT> ThenRace<ConvertedT>(Func<PromisedT, IEnumerable<IPromise<ConvertedT>>> chain)
         {
-            return Then(value => Promise<ConvertedT>.Race(chain(value)));
+            return Then(value => Race<ConvertedT>(chain(value)));
         }
 
         public IPromise ThenRace(Func<PromisedT, IEnumerable<IPromise>> chain)
@@ -436,7 +437,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise<ConvertedT> ThenFirst<ConvertedT>(IEnumerable<Func<IPromise<ConvertedT>>> fns)
         {
-            return Then(value => Promise<ConvertedT>.First(fns));
+            return Then(value => First<ConvertedT>(fns));
         }
         public IPromise<PromisedT> Finally(Action onComplete)
         {
@@ -451,11 +452,11 @@ namespace Cr7Sund.Framework.Impl
                 }
                 catch (Exception ex)
                 {
-                    return Rejected(ex);
+                    return Rejected<PromisedT>(ex);
                 }
             }
 
-            var promise = new Promise<PromisedT>();
+            var promise = GetRawPromise<PromisedT>();
             promise.WithName(Name);
 
             this.Then(promise.Resolve);
@@ -483,7 +484,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise ContinueWith(Func<IPromise> onComplete)
         {
-            var promise = new Promise();
+            var promise = GetRawPromise();
             promise.WithName(Name);
 
             this.Then(x => promise.Resolve());
@@ -494,7 +495,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise<ConvertedT> ContinueWith<ConvertedT>(Func<IPromise<ConvertedT>> onComplete)
         {
-            var promise = new Promise();
+            var promise = GetRawPromise();
             promise.WithName(Name);
 
             this.Then(x => promise.Resolve());
@@ -516,6 +517,11 @@ namespace Cr7Sund.Framework.Impl
         #region IPendingPromise
 
         public void Resolve(PromisedT value)
+        {
+            this.ResolveInternal((object)value);
+        }
+
+        public void ResolveInternal(object value)
         {
             if (CurState != PromiseState.Pending)
             {
@@ -557,7 +563,7 @@ namespace Cr7Sund.Framework.Impl
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseException(
-                    "Attempt to resolve a promise that is already in state: " + CurState
+                    "Attempt to reject a promise that is already in state: " + CurState
                     + ", a promise can only be resolved when it is still in state: "
                     + PromiseState.Pending, PromiseExceptionType.Valid_STATE);
             }
@@ -578,7 +584,7 @@ namespace Cr7Sund.Framework.Impl
         #region private methods
 
         // Helper Function to invoke or register resolve/reject handlers
-        protected void ActionHandlers(IRejectable resultPromise, Action<PromisedT> resolveHandler, Action<Exception> rejectHandler)
+        protected void ActionHandlers(IRejectable resultPromise, Action<object> resolveHandler, Action<Exception> rejectHandler)
         {
             switch (CurState)
             {
@@ -618,14 +624,14 @@ namespace Cr7Sund.Framework.Impl
             });
         }
 
-        private void AddResolveHandler(Action<PromisedT> onResolved, IRejectable rejectable)
+        private void AddResolveHandler(Action<object> onResolved, IRejectable rejectable)
         {
             if (resolveHandlers == null)
             {
-                resolveHandlers = new List<ResolveHandler<PromisedT>>();
+                resolveHandlers = new List<ResolveHandler<object>>();
             }
 
-            resolveHandlers.Add(new ResolveHandler<PromisedT>()
+            resolveHandlers.Add(new ResolveHandler<object>()
             {
                 callback = onResolved,
                 rejectable = rejectable
@@ -675,7 +681,7 @@ namespace Cr7Sund.Framework.Impl
         }
 
         // Invoke all resolve handlers
-        private void InvokeResolveHandlers(PromisedT value)
+        private void InvokeResolveHandlers(object value)
         {
             if (resolveHandlers != null)
             {
@@ -712,14 +718,90 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
+        #endregion
+
+        #region Extension Method
+
+
         #region  public extension method
+
+        private static Promise<PromisedT> resolvePromise = new Promise<PromisedT>();
 
         // Convert an exception directly into a rejected promise.
         public static IPromise<PromisedT> Rejected(Exception ex)
         {
+            return resolvePromise.Rejected<PromisedT>(ex);
+        }
+
+        /// <summary>
+        /// Convert a simple value directly into a resolved promise.
+        /// </summary>
+        public static IPromise<PromisedT> Resolved(PromisedT promisedValue = default(PromisedT))
+        {
+            return resolvePromise.Resolved<PromisedT>(promisedValue);
+        }
+
+        public static IPromise<IEnumerable<PromisedT>> All(params IPromise<PromisedT>[] promises)
+        {
+            return resolvePromise.All(promises);
+        }
+        public static IPromise<IEnumerable<PromisedT>> All(IEnumerable<IPromise<PromisedT>> promises)
+        {
+            return resolvePromise.All(promises);
+        }
+
+        public static IPromise<PromisedT> Race(params IPromise<PromisedT>[] promises)
+        {
+            return resolvePromise.Race(promises);
+        }
+
+        public static IPromise<PromisedT> Race(IEnumerable<IPromise<PromisedT>> promises)
+        {
+            return resolvePromise.Race(promises);
+        }
+
+        public static IPromise<PromisedT> Any(params IPromise<PromisedT>[] promises)
+        {
+            return resolvePromise.Any(promises);
+        }
+
+        public static IPromise<PromisedT> Any(IEnumerable<IPromise<PromisedT>> promises)
+        {
+            return resolvePromise.Any(promises);
+        }
+
+        public static IPromise<PromisedT> First(params Func<IPromise<PromisedT>>[] fns)
+        {
+            return resolvePromise.First(fns);
+        }
+
+        public static IPromise<PromisedT> First(IEnumerable<Func<IPromise<PromisedT>>> fns)
+        {
+            return resolvePromise.First(fns);
+        }
+        #endregion
+
+        #region  protected extension method
+        // all below methods can be consider as static methods
+        // but we we want also support the inheritance to override
+
+        protected virtual Promise<ConvertedT> GetRawPromise<ConvertedT>()
+        {
+            return new Promise<ConvertedT>();
+        }
+
+        protected virtual Promise GetRawPromise()
+        {
+            return new Promise();
+        }
+
+        // Convert an exception directly into a rejected promise.
+        protected IPromise<ConvertedT> Rejected<ConvertedT>(Exception ex)
+        {
             Assert.NotNull(ex);
 
-            var promise = new Promise<PromisedT>(PromiseState.Rejected);
+            var promise = GetRawPromise<ConvertedT>();
+            promise.CurState = PromiseState.Rejected;
             promise.rejectionException = ex;
             return promise;
         }
@@ -727,9 +809,10 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// Convert a simple value directly into a resolved promise.
         /// </summary>
-        public static IPromise<PromisedT> Resolved(PromisedT promisedValue)
+        protected IPromise<ConvertedT> Resolved<ConvertedT>(ConvertedT promisedValue)
         {
-            var promise = resolvedPromise as Promise<PromisedT>;
+            var promise = GetRawPromise<ConvertedT>();
+            promise.CurState = PromiseState.Resolved;
             promise.resolveValue = promisedValue;
             return promise;
         }
@@ -738,27 +821,27 @@ namespace Cr7Sund.Framework.Impl
         /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise<IEnumerable<PromisedT>> All(params IPromise<PromisedT>[] promises)
+        protected IPromise<IEnumerable<ConvertedT>> All<ConvertedT>(params IPromise<ConvertedT>[] promises)
         {
-            return All((IEnumerable<IPromise<PromisedT>>)promises); // Cast is required to force use of the other All function.
+            return All((IEnumerable<IPromise<ConvertedT>>)promises); // Cast is required to force use of the other All function.
         }
 
         /// <summary>
         /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise<IEnumerable<PromisedT>> All(IEnumerable<IPromise<PromisedT>> promises)
+        protected IPromise<IEnumerable<ConvertedT>> All<ConvertedT>(IEnumerable<IPromise<ConvertedT>> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
             {
-                return Promise<IEnumerable<PromisedT>>.Resolved(Enumerable.Empty<PromisedT>());
+                return Resolved<IEnumerable<ConvertedT>>(Enumerable.Empty<ConvertedT>());
             }
 
             var remainingCount = promisesArray.Length;
-            var results = new PromisedT[remainingCount];
+            var results = new ConvertedT[remainingCount];
             var progress = new float[remainingCount];
-            var resultPromise = new Promise<IEnumerable<PromisedT>>();
+            var resultPromise = GetRawPromise<IEnumerable<ConvertedT>>();
             resultPromise.WithName("All");
 
             promisesArray.Each((promise, index) =>
@@ -804,9 +887,9 @@ namespace Cr7Sund.Framework.Impl
         /// otherwise, it will be rejected  when all of them are rejected
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise<PromisedT> Any(params IPromise<PromisedT>[] promises)
+        protected IPromise<ConvertedT> Any<ConvertedT>(params IPromise<ConvertedT>[] promises)
         {
-            return Any((IEnumerable<IPromise<PromisedT>>)promises); // Cast is required to force use of the other All function.
+            return Any((IEnumerable<IPromise<ConvertedT>>)promises); // Cast is required to force use of the other All function.
         }
 
         /// <summary>
@@ -814,7 +897,7 @@ namespace Cr7Sund.Framework.Impl
         /// otherwise, it will be rejected  when all of them are rejected
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise<PromisedT> Any(IEnumerable<IPromise<PromisedT>> promises)
+        protected IPromise<ConvertedT> Any<ConvertedT>(IEnumerable<IPromise<ConvertedT>> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -828,7 +911,7 @@ namespace Cr7Sund.Framework.Impl
             var remainingCount = promisesArray.Length;
             var progress = new float[remainingCount];
             var groupException = new PromiseGroupException(remainingCount);
-            var resultPromise = new Promise<PromisedT>();
+            var resultPromise = GetRawPromise<ConvertedT>();
             resultPromise.WithName("All");
 
             promisesArray.Each((promise, index) =>
@@ -874,16 +957,16 @@ namespace Cr7Sund.Framework.Impl
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise<PromisedT> Race(params IPromise<PromisedT>[] promises)
+        protected IPromise<ConvertedT> Race<ConvertedT>(params IPromise<ConvertedT>[] promises)
         {
-            return Race((IEnumerable<IPromise<PromisedT>>)promises); // Cast is required to force use of the other function.
+            return Race((IEnumerable<IPromise<ConvertedT>>)promises); // Cast is required to force use of the other function.
         }
 
         /// <summary>
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise<PromisedT> Race(IEnumerable<IPromise<PromisedT>> promises)
+        protected IPromise<ConvertedT> Race<ConvertedT>(IEnumerable<IPromise<ConvertedT>> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -894,7 +977,7 @@ namespace Cr7Sund.Framework.Impl
                 );
             }
             var remainingCount = promisesArray.Length;
-            var resultPromise = new Promise<PromisedT>();
+            var resultPromise = GetRawPromise<ConvertedT>();
             var progress = new float[remainingCount];
             resultPromise.WithName("All");
 
@@ -931,29 +1014,29 @@ namespace Cr7Sund.Framework.Impl
         /// Chain a number of operations using promises.
         /// Returns the value of the first promise that resolves, or otherwise the exception thrown by the last operation.
         /// </summary>
-        public static IPromise<PromisedT> First(params Func<IPromise<PromisedT>>[] fns)
+        protected IPromise<ConvertedT> First<ConvertedT>(params Func<IPromise<ConvertedT>>[] fns)
         {
-            return First((IEnumerable<Func<IPromise<PromisedT>>>)fns);
+            return First((IEnumerable<Func<IPromise<ConvertedT>>>)fns);
         }
 
         /// <summary>
         /// Chain a number of operations using promises.
         /// Returns the value of the first promise that resolves, or otherwise the exception thrown by the last operation.
         /// </summary>
-        public static IPromise<PromisedT> First(IEnumerable<Func<IPromise<PromisedT>>> fns)
+        protected IPromise<ConvertedT> First<ConvertedT>(IEnumerable<Func<IPromise<ConvertedT>>> fns)
         {
-            var promise = new Promise<PromisedT>();
+            var promise = GetRawPromise<ConvertedT>();
 
             int count = 0;
 
             fns.Aggregate(
-                Promise<PromisedT>.Rejected(new Exception()),
+                Rejected<ConvertedT>(new Exception()),
                 (prevPromise, fn) =>
                 {
                     int itemSequence = count;
                     ++count;
 
-                    var newPromise = new Promise<PromisedT>();
+                    var newPromise = GetRawPromise<ConvertedT>();
                     prevPromise
                         .Progress(v =>
                         {
@@ -989,7 +1072,6 @@ namespace Cr7Sund.Framework.Impl
 
         #endregion
 
-
     }
 
     /// <summary>
@@ -1000,7 +1082,7 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// Callback fn.
         /// </summary>
-        public Action<PromisedT> callback;
+        public Action<object> callback;
 
         /// <summary>
         /// The promise that is rejected when there is an error while invoking the handler.
