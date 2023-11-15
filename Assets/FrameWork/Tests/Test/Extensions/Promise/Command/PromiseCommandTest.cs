@@ -35,7 +35,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             // var promise1 = new Promise();
             // promise1.Then(new PromiseCommand_1().Resolve).Then(new PromiseCommand_1().Resolve);
 
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimplePromiseCommandTwo_Generic>().Then<SimplePromiseCommandOne_Generic>().Then((value) => value - 200);
             promise.Resolve(0);
             Assert.AreEqual((((0 + 2) * 3) + 1) * 2 - 200, ((Promise<int>)donePromise).Test_GetResolveValue());
@@ -44,7 +44,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_with_async_operation()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise1 = promise.Then<SimplePromiseCommandTwo_Generic>();
             var donePromise2 = donePromise1.Then<SimpleAsyncPromiseCommandOne_Generic>().Then<SimplePromiseCommandOne_Generic>();
 
@@ -58,7 +58,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_with_multiple_async_operation()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimpleAsyncPromiseCommandOne_Generic>()
             .Then<SimpleAsyncPromiseCommandSecond_Generic>();
 
@@ -73,7 +73,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_with_multiple_async_operation_misc_order_still_sequence_order()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimpleAsyncPromiseCommandOne_Generic>()
             .Then<SimpleAsyncPromiseCommandSecond_Generic>();
 
@@ -89,7 +89,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_with_multiple_async_operation_until_chaining_resolve()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimpleAsyncPromiseCommandOne_Generic>()
             .Then<SimpleAsyncPromiseCommandSecond_Generic>();
             promise.Resolve(0);
@@ -98,64 +98,39 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(1, SimplePromise.result);
 
             SimplePromise.simulatePromiseOne.Resolve(1);
-            Assert.AreEqual(20, SimplePromise.result);
+            Assert.AreEqual((((0 + 1 + 3) * 5) + 2 + 1) * 2, SimplePromise.result);
         }
 
         [Test]
         public void command_with_convert_type()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimplePromiseCommandTwo_Generic>()
-                .Then<ConvertPromiseCommand>();
+                .Then<ConvertPromiseCommand, float>();
 
             promise.Resolve(0);
 
-            Assert.AreEqual(((0 + 2) * 3 + 3) * 4.2f, ((PromiseCommand<int>)donePromise).Test_GetResolveValue());
+            Assert.AreEqual(((0 + 2) * 3 + 3) * 4.2f, ((CommandPromise<float>)donePromise).Test_GetResolveValue());
         }
 
         [Test]
         public void command_with_convert_changed_type()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<SimplePromiseCommandTwo_Generic>()
-                .Then<ConvertPromiseCommand>()
-                .Then<AnotherPromiseCommand, float>();
+                .Then<ConvertPromiseCommand, float>()
+                .Then<AnotherPromiseCommand>();
 
             promise.Resolve(0);
 
-            Assert.AreEqual((((0 + 2) * 3 + 3) * 4.2f + 1) * 2, ((PromiseCommand<float>)rejectPromise).Test_GetResolveValue());
-        }
-
-        [Test]
-        public void command_with_different_type_rejected()
-        {
-            var promise = new TestBasePromiseCommand_Generic();
-            var rejectPromise = promise.Then<SimplePromiseCommandTwo_Generic>()
-                .Then<AnotherPromiseCommand, float>();
-
-            promise.Resolve(0);
-
-            Assert.AreEqual(PromiseState.Rejected, ((Promise<float>)rejectPromise).CurState);
-        }
-
-        [Test]
-        public void command_after_converted_type_with_different_type()
-        {
-            var promise = new TestBasePromiseCommand_Generic();
-            var rejectPromise = promise.Then<SimplePromiseCommandTwo_Generic>()
-                .Then<ConvertPromiseCommand>()
-                .Then<SimplePromiseCommandOne_Generic>();
-
-            promise.Resolve(0);
-
-            Assert.AreEqual(PromiseState.Rejected, ((Promise<int>)rejectPromise).CurState);
+            Assert.AreEqual((((0 + 2) * 3 + 3) * 4.2f + 1) * 2, ((CommandPromise<float>)rejectPromise).Test_GetResolveValue());
         }
 
 
         [Test]
         public void command_exception_rejectedState()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<ExceptionPromiseCommand_Generic>() as Promise<int>;
             promise.Resolve(0);
 
@@ -166,7 +141,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<ExceptionPromiseCommand_Generic>() as Promise;
             promise.Resolve(0);
             Assert.NotNull(SimplePromise.exceptionStr);
@@ -175,7 +150,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_break_chain()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimplePromiseCommandTwo_Generic>();
             var finalPromise = donePromise.Then<ExceptionPromiseCommand_Generic>().Then<SimplePromiseCommandOne_Generic>();
 
@@ -185,9 +160,22 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
+        public void handle_rejected_catch_but_break_chain()
+        {
+            var promise = new CommandPromise<int>();
+            var finalPromise = promise.Then<SimplePromiseCommandTwo_Generic>()
+                 .Then<SimpleAsyncException_Generic>()
+                 .Then<SimplePromiseCommandTwo_Generic>();
+
+            promise.Resolve(0);
+            Assert.AreEqual(-1, SimplePromise.result);
+        }
+
+
+        [Test]
         public void can_handle_onProgress()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
 
             promise.Then<SimpleProgressCommand_Generic>();
 
@@ -199,7 +187,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void can_report_simple_progress()
         {
-            var promise = new TestBasePromiseCommand_Generic();
+            var promise = new CommandPromise<int>();
 
             promise.Then<SimpleProgressCommand_Generic>();
 
@@ -209,6 +197,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             Assert.AreEqual(1f, SimplePromise.currentProgress);
         }
+
+
 
     }
 

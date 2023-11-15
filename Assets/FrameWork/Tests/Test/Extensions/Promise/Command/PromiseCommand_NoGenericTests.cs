@@ -28,7 +28,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             // var promise1 = new Promise();
             // promise1.Then(new PromiseCommand_1().Resolve).Then(new PromiseCommand_1().Resolve);
 
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
+
             promise.Then<SimplePromiseCommandTwo>().Then<SimplePromiseCommandOne>().Then(() => SimplePromise.result -= 200);
 
             promise.Resolve();
@@ -38,7 +39,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_with_async_operation()
         {
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
+
             promise.Then<SimplePromiseCommandTwo>().Then<SimpleAsyncPromiseCommandOne>().Then<SimplePromiseCommandOne>();
 
             promise.Resolve();
@@ -52,7 +54,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_exception_rejectedState()
         {
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
+
             var rejectPromise = promise.Then<ExceptionPromiseCommand>() as Promise;
             promise.Resolve();
 
@@ -63,7 +66,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
             var rejectPromise = promise.Then<ExceptionPromiseCommand>() as Promise;
             promise.Resolve();
             Assert.NotNull(SimplePromise.exceptionStr);
@@ -72,7 +75,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_break_chain()
         {
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
+
             promise.Then<SimplePromiseCommandTwo>().Then<ExceptionPromiseCommand>().Then<SimplePromiseCommandOne>();
 
             promise.Resolve();
@@ -83,7 +87,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void can_handle_onProgress()
         {
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
+
 
             promise.Then<SimpleProgressCommand>();
 
@@ -95,7 +100,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void can_report_simple_progress()
         {
-            var promise = new TestBasePromiseCommand();
+            var promise = new CommandPromise();
+
 
             promise.Then<SimpleProgressCommand>();
 

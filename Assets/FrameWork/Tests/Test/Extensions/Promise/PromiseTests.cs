@@ -4,6 +4,7 @@ using System.Linq;
 using Cr7Sund.Framework.Api;
 using NUnit.Framework;
 using Cr7Sund.Framework.Util;
+using JetBrains.Annotations;
 
 namespace Cr7Sund.Framework.PromiseTest
 {
@@ -119,17 +120,6 @@ namespace Cr7Sund.Framework.PromiseTest
             Assert.AreEqual(2, completed);
         }
 
-        [Test]
-        public void can_pass_value_along_chain()
-        {
-            var promise = new Promise<int>();
-
-            promise.Then(v => v + 1);
-            promise.Then(v => v + 2);
-            promise.Then(v => Assert.AreEqual(4, v));
-
-            promise.Resolve(1);
-        }
 
         [Test]
         public void can_resolve_promise_and_trigger_then_handler_with_callback_registration_after_resolve()

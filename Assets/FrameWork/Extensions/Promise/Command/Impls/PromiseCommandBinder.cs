@@ -1,32 +1,32 @@
 using System;
 using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
+using NUnit.Framework;
 
 namespace Cr7Sund.Framework.Impl
 {
     public class PromiseCommandBinder : Binder, IPromiseCommandBinder
     {
         [Inject]
-        private IInjectionBinder injectionBinder;
+        private IInjectionBinder _injectionBinder;
 
-        [Inject]
-        public IPoolBinder poolBinder;
 
         public void ReactTo(object trigger)
         {
             var binding = GetBinding(trigger);
 
             var values = binding.Value as object[];
-            var command = ResolvedPromiseCommand.Resolved();
 
             float sliceLength = 1 / values.Length;
             for (int i = 0; i < values.Length; i++)
             {
-                command = command.Then(values[i] as IPromiseCommand);
-
+                var command = values[i] as ISequence;
                 command.SliceLength = sliceLength;
                 command.SequenceID = i;
             }
+
+            var firstCommand = values[0] as ICommandPromise;
+            firstCommand.Resolve();
         }
 
         public void ReactTo<PromisedT>(object trigger, PromisedT data)
@@ -34,24 +34,29 @@ namespace Cr7Sund.Framework.Impl
             var binding = GetBinding(trigger);
 
             var values = binding.Value as object[];
-            var command = ResolvedPromiseCommand<PromisedT>.Resolved(data);
+
+            Assert.Greater(values.Length, 0);
 
             float sliceLength = 1 / values.Length;
             for (int i = 0; i < values.Length; i++)
             {
-                command = command.Then(values[i] as IPromiseCommand<PromisedT>);
+                var command = values[i] as ISequence;
 
                 command.SliceLength = sliceLength;
                 command.SequenceID = i;
             }
+
+            var firstCommand = values[0] as ICommandPromise<PromisedT>;
+            firstCommand.Resolve(data);
         }
+
 
         #region IBinder implementation
 
         protected override IBinding GetRawBinding()
         {
             var binding = new PromiseCommandBinding(Resolver);
-            injectionBinder.Injector.Inject(binding);
+            _injectionBinder.Injector.Inject(binding);
             return binding;
         }
 
@@ -71,4 +76,5 @@ namespace Cr7Sund.Framework.Impl
         }
         #endregion
     }
+
 }

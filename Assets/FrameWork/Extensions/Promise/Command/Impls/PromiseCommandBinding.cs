@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 
 
@@ -8,20 +10,10 @@ namespace Cr7Sund.Framework.Impl
 {
     public class PromiseCommandBinding : Binding, IPromiseCommandBinding
     {
-        [Inject] private IPoolBinder poolBinder;
-        [Inject] private IInjectionBinder injectionBinder;
+        [Inject] private IPoolBinder _poolBinder;
+        [Inject] private IInjectionBinder _injectionBinder;
 
-        public bool UsePooling
-        {
-            get
-            {
-                return this.ValueConstraint == BindingConstraintType.MANY;
-            }
-            set
-            {
-                this.ValueConstraint = value ? BindingConstraintType.POOL : BindingConstraintType.MANY;
-            }
-        }
+        public bool UsePooling { get; set; }
 
         public PromiseCommandBinding(Binder.BindingResolver resolver)
         {
@@ -29,46 +21,370 @@ namespace Cr7Sund.Framework.Impl
             this.ValueConstraint = BindingConstraintType.MANY;
         }
 
-        public IPromiseCommandBinding Then<T>() where T : class, IPromiseCommand, new()
+        #region IPromiseCommandBinding Implementation
+
+        public new IPromiseCommandBinding To(object value)
         {
-            Assert.IsTrue(typeof(PromiseCommand).IsAssignableFrom(typeof(T)));
-
-            var resultPromise = InstantiateCommand<T>();
-
-            return this.To(resultPromise) as IPromiseCommandBinding;
+            return base.To(value) as IPromiseCommandBinding;
         }
 
-        private IPromiseCommand InstantiateCommand<T>() where T : class, IPromiseCommand, new()
+        IPromiseCommandBinding IPromiseCommandBinding.Then<T>()
         {
-            IPromiseCommand resultCommand = null;
+            var nextPromise = Instantiate<CommandPromise>();
+            var nextCommand = Instantiate<T>();
 
-            if (UsePooling)
+            Then(nextPromise, nextCommand);
+
+            return To(nextPromise);
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.Then<T, PromisedT>()
+        {
+            var nextPromise = Instantiate<CommandPromise<PromisedT>>();
+            var nextCommand = Instantiate<T>();
+
+            Then(nextPromise, nextCommand);
+
+            return To(nextPromise);
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.Then<T, PromisedT, ConvertedT>()
+        {
+            var nextPromise = Instantiate<CommandPromise<PromisedT, ConvertedT>>();
+            var nextCommand = Instantiate<T>();
+
+            Then(nextPromise, nextCommand);
+            // Assert.NotNull(prevValue, $"the first command try to Convert {typeof(PromisedT)} into {typeof(ConvertedT)}. Currently dont support that. ");
+
+            return To(nextPromise);
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenAll<PromisedT>(params IPromiseCommand<PromisedT>[] commands)
+        {
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count()];
+            for (int i = 0; i < promiseArray.Length; i++)
             {
-                var pool = poolBinder.Get<T>();
-                resultCommand = pool.GetInstance() as IPromiseCommand;
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenAll(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenAll<T1, T2, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenAll(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenAll<T1, T2, T3, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+                Instantiate<T3>()
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenAll(promiseArray, commands);
+            return this;
+        }
+
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenAny<PromisedT>(params IPromiseCommand<PromisedT>[] commands)
+        {
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count()];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenAny(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenAny<T1, T2, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenAny(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenAny<T1, T2, T3, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+                Instantiate<T3>()
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenAny(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenRace<PromisedT>(params IPromiseCommand<PromisedT>[] commands)
+        {
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count()];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenRace(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenRace<T1, T2, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenRace(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenRace<T1, T2, T3, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+                Instantiate<T3>()
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenRace(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenFirst<PromisedT>(params IPromiseCommand<PromisedT>[] commands)
+        {
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count()];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenFirst(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenFirst<T1, T2, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenFirst(promiseArray, commands);
+            return this;
+        }
+
+        IPromiseCommandBinding IPromiseCommandBinding.ThenFirst<T1, T2, T3, PromisedT>()
+        {
+            var commands = new List<IPromiseCommand<PromisedT>>
+            {
+                Instantiate<T1>(),
+                Instantiate<T2>(),
+                Instantiate<T3>()
+            };
+
+            var promiseArray = new CommandPromise<PromisedT>[commands.Count];
+            for (int i = 0; i < promiseArray.Length; i++)
+            {
+                promiseArray[i] = Instantiate<CommandPromise<PromisedT>>();
+            }
+
+            ThenFirst(promiseArray, commands);
+            return this;
+        }
+
+
+        #endregion
+
+        #region private methods
+
+        private void ThenAll<PromisedT>(CommandPromise<PromisedT>[] promiseArray, IEnumerable<IPromiseCommand<PromisedT>> commands)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise<PromisedT>>();
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise<PromisedT>();
+                To(prevValue);
+            }
+
+            prevValue.ThenAll(promiseArray, commands);
+        }
+
+        private void ThenRace<PromisedT>(CommandPromise<PromisedT>[] promiseArray, IEnumerable<IPromiseCommand<PromisedT>> commands)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise<PromisedT>>();
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise<PromisedT>();
+                To(prevValue);
+            }
+
+            prevValue.ThenRace(promiseArray, commands);
+        }
+
+        private void ThenFirst<PromisedT>(CommandPromise<PromisedT>[] promiseArray, IEnumerable<IPromiseCommand<PromisedT>> commands)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise<PromisedT>>();
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise<PromisedT>();
+                To(prevValue);
+            }
+
+            prevValue.ThenFirst(promiseArray, commands);
+        }
+
+        private void ThenAny<PromisedT>(CommandPromise<PromisedT>[] promiseArray, IEnumerable<IPromiseCommand<PromisedT>> commands)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise<PromisedT>>();
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise<PromisedT>();
+                To(prevValue);
+            }
+
+            prevValue.ThenAny(promiseArray, commands);
+        }
+
+        private void Then(ICommandPromise nextPromise, IPromiseCommand nextCommand)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise>();
+
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise();
+                To(prevValue);
+            }
+            prevValue.Then(nextPromise, nextCommand);
+        }
+
+        private void Then<PromisedT>(ICommandPromise<PromisedT> nextPromise, IPromiseCommand<PromisedT> nextCommand)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise<PromisedT>>();
+
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise<PromisedT>();
+                To(prevValue);
+            }
+
+            prevValue.Then(nextPromise, nextCommand);
+        }
+
+        private void Then<PromisedT, ConvertedT>(CommandPromise<PromisedT, ConvertedT> nextPromise, IPromiseCommand<PromisedT, ConvertedT> nextCommand)
+        {
+            var prevValue = FindPrevChainPromise<ICommandPromise<PromisedT>>();
+
+            if (prevValue == null)
+            {
+                prevValue = new CommandPromise<PromisedT>();
+                To(prevValue);
+            }
+
+            prevValue.Then(nextPromise, nextCommand);
+        }
+
+        private T FindPrevChainPromise<T>() where T : class
+        {
+            var values = Value as object[];
+            if (Value != null)
+            {
+                Assert.IsInstanceOf<T>(values[values.Length - 1]);
+                var prevValue = (T)values[values.Length - 1];
+                return prevValue;
             }
             else
             {
-                resultCommand = new T();
+                return null;
             }
-
-            if (resultCommand.IsRetain)
-            {
-                injectionBinder.Injector.Inject(resultCommand);
-            }
-
-            return resultCommand;
         }
 
-        public new IPromiseCommandBinding ToName(object name)
+        private T Instantiate<T>() where T : class, new()
         {
-            base.ToName(name);
-            if (this.Value is IPromiseCommand promiseCommand)
+            T result = null;
+
+            if (UsePooling)
             {
-                promiseCommand.WithName(name);
+                var pool = _poolBinder.Get<T>();
+                result = pool.GetInstance() as T;
             }
-            return this;
+            else
+            {
+                result = new T();
+            }
+
+            if (!UsePooling || (result is IPoolable poolable && poolable.IsRetain))
+            {
+                _injectionBinder.Injector.Inject(result);
+            }
+
+            return result;
         }
+
+        #endregion
     }
 
 
