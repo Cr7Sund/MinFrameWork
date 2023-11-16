@@ -15,6 +15,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             SimplePromise.simulatePromiseOne = new Promise<int>();
             SimplePromise.simulatePromiseSecond = new Promise<int>();
+            SimplePromise.simulatePromise = new Promise();
         }
 
         [TearDown]

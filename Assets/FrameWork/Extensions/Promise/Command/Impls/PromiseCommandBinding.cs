@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Framework.Api;
-using NUnit.Framework;
+using Cr7Sund.Framework.Util;
 
 
 namespace Cr7Sund.Framework.Impl
@@ -179,7 +179,7 @@ namespace Cr7Sund.Framework.Impl
             var values = Value as object[];
             if (Value != null)
             {
-                Assert.IsInstanceOf<T>(values[values.Length - 1]);
+                AssertUtil.IsInstanceOf<T>(values[values.Length - 1]);
                 var prevValue = (T)values[values.Length - 1];
                 return prevValue;
             }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-using NUnit.Framework;
 
 namespace Cr7Sund.Framework.Impl
 {
@@ -113,7 +112,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise Catch(Action<Exception> onRejected)
         {
-            Assert.NotNull(onRejected);
+            AssertUtil.NotNull(onRejected);
 
             if (CurState == PromiseState.Resolved)
             {
@@ -190,7 +189,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 try
                 {
-                    Assert.IsInstanceOf<PromisedT>(resolveValue);
+                    AssertUtil.IsInstanceOf<PromisedT>(resolveValue);
                     onResolved((PromisedT)resolveValue);
                     return Promise.Resolved();
                 }
@@ -208,7 +207,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 resolveHandler = v =>
                 {
-                    Assert.IsInstanceOf<PromisedT>(v);
+                    AssertUtil.IsInstanceOf<PromisedT>(v);
                     onResolved((PromisedT)v);
                     resultPromise.Resolve();
                 };
@@ -259,7 +258,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 try
                 {
-                    Assert.IsInstanceOf<PromisedT>(resolveValue);
+                    AssertUtil.IsInstanceOf<PromisedT>(resolveValue);
                     return onResolved((PromisedT)resolveValue);
                 }
                 catch (Exception ex)
@@ -276,7 +275,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 resolveHandler = (v) =>
                 {
-                    Assert.IsInstanceOf<PromisedT>(v);
+                    AssertUtil.IsInstanceOf<PromisedT>(v);
                     onResolved((PromisedT)v)
                         .Progress(progress => resultPromise.ReportProgress(progress))
                         .Then(
@@ -336,13 +335,13 @@ namespace Cr7Sund.Framework.Impl
         {
             // This version of the function must supply an onResolved.
             // Otherwise there is now way to get the converted value to pass to the resulting promise.
-            Assert.NotNull(onResolved);
+            AssertUtil.NotNull(onResolved);
 
             if (CurState == PromiseState.Resolved)
             {
                 try
                 {
-                    Assert.IsInstanceOf<PromisedT>(resolveValue);
+                    AssertUtil.IsInstanceOf<PromisedT>(resolveValue);
                     return onResolved((PromisedT)resolveValue);
                 }
                 catch (Exception ex)
@@ -356,7 +355,7 @@ namespace Cr7Sund.Framework.Impl
 
             Action<object> resolveHandler = v =>
             {
-                Assert.IsInstanceOf<PromisedT>(v);
+                AssertUtil.IsInstanceOf<PromisedT>(v);
                 onResolved((PromisedT)v)
                     .Progress(progress => resultPromise.ReportProgress(progress))
                     .Then(
@@ -401,7 +400,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, ConvertedT> transform)
         {
-            Assert.IsNotNull(transform);
+            AssertUtil.NotNull(transform);
             return Then(value => Resolved<ConvertedT>(transform(value)));
         }
 
@@ -441,7 +440,7 @@ namespace Cr7Sund.Framework.Impl
         }
         public IPromise<PromisedT> Finally(Action onComplete)
         {
-            Assert.IsNotNull(onComplete);
+            AssertUtil.NotNull(onComplete);
 
             if (CurState == PromiseState.Resolved)
             {
@@ -559,7 +558,7 @@ namespace Cr7Sund.Framework.Impl
 
         public void Reject(Exception ex)
         {
-            Assert.NotNull(ex);
+            AssertUtil.NotNull(ex);
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseException(
@@ -704,8 +703,8 @@ namespace Cr7Sund.Framework.Impl
 
         private void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)
         {
-            Assert.IsNotNull(callback);
-            Assert.IsNotNull(rejectable);
+            AssertUtil.NotNull(callback);
+            AssertUtil.NotNull(rejectable);
 
             try
             {
@@ -798,7 +797,7 @@ namespace Cr7Sund.Framework.Impl
         // Convert an exception directly into a rejected promise.
         protected IPromise<ConvertedT> Rejected<ConvertedT>(Exception ex)
         {
-            Assert.NotNull(ex);
+            AssertUtil.NotNull(ex);
 
             var promise = GetRawPromise<ConvertedT>();
             promise.CurState = PromiseState.Rejected;

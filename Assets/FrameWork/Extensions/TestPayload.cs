@@ -5,8 +5,7 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using UnityEngine;
 
-namespace Cr7Sund.Framework.Tests
-{
+namespace TestMono{
     public class SimplePromise
     {
         public static int result = 0;
@@ -82,7 +81,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override IPromise OnExecuteAsync()
         {
-            
+
             SimplePromise.simulatePromise.Then(() =>
             {
                 SimplePromise.result = (SimplePromise.result + 3) * 5;

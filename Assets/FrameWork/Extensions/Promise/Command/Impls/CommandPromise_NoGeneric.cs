@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-using NUnit.Framework;
 
 
 namespace Cr7Sund.Framework.Impl
@@ -41,7 +40,7 @@ namespace Cr7Sund.Framework.Impl
             if (_command is IPromiseAsyncCommand asyncCommand)
             {
                 var resultPromise = asyncCommand.OnExecuteAsync();
-                Assert.NotNull(resultPromise);
+                NUnit.Framework.Assert.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
                         .Then(
@@ -113,7 +112,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
         {
-            Assert.AreEqual(commands.Count(), promises.Count());
+            NUnit.Framework.Assert.AreEqual(commands.Count(), promises.Count());
             var commandArray = commands.ToArray();
 
             promises.Each((promise, index) =>

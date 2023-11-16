@@ -3,7 +3,6 @@ using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
 using NUnit.Framework;
-using UnityEditor.VersionControl;
 
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
@@ -28,6 +27,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             SimplePromise.simulatePromiseOne = new Promise<int>();
             SimplePromise.simulatePromiseSecond = new Promise<int>();
+            SimplePromise.simulatePromise = new Promise();
         }
 
         [TearDown]
@@ -68,6 +68,21 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
 
+        [Test]
+        public void command_injection()
+        {
+            injectionBinder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>();
+
+            var promiseBinding = promiseBinder.Bind(SomeEnum.ONE);
+
+            var binding = promiseBinding.
+                Then<TestInjectionCommand>()
+                ;
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE);
+            Assert.AreEqual(1, SimplePromise.result);
+        }
 
     }
 

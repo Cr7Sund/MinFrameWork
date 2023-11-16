@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-using NUnit.Framework;
 
 
 namespace Cr7Sund.Framework.Impl
@@ -24,7 +22,7 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Execute(object value)
         {
-            Assert.IsInstanceOf<PromisedT>(value);
+            NUnit.Framework.Assert.IsInstanceOf<PromisedT>(value);
 
             ExecuteInternal((PromisedT)value, this);
         }
@@ -125,7 +123,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void FulfillPromise(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands)
         {
-            Assert.AreEqual(commands.Count(), promises.Count());
+            NUnit.Framework.Assert.AreEqual(commands.Count(), promises.Count());
             var commandArray = commands.ToArray();
 
             promises.Each((promise, index) =>
@@ -176,7 +174,7 @@ namespace Cr7Sund.Framework.Impl
             if (command is IPromiseAsyncCommand<PromisedT> asyncCommand)
             {
                 var resultPromise = asyncCommand.OnExecuteAsync(value);
-                Assert.NotNull(resultPromise);
+                NUnit.Framework.Assert.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
                         .Then(
@@ -209,7 +207,7 @@ namespace Cr7Sund.Framework.Impl
             if (_command is IPromiseAsyncCommand<PromisedT, ConvertedT> asyncCommand)
             {
                 var resultPromise = asyncCommand.OnExecuteAsync(value);
-                Assert.NotNull(resultPromise);
+                NUnit.Framework.Assert.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
                         .Then(
@@ -232,7 +230,7 @@ namespace Cr7Sund.Framework.Impl
 
         public override void Execute(object value)
         {
-            Assert.IsInstanceOf<PromisedT>(value);
+            NUnit.Framework.Assert.IsInstanceOf<PromisedT>(value);
 
             ExecuteInternal((PromisedT)value, this);
         }

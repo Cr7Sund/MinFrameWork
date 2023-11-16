@@ -4,8 +4,15 @@ using NUnit.Framework;
 
 namespace Cr7Sund.Framework.Util
 {
-    public static class AssertExt
+    public static class AssertUtil
     {
+
+        private static bool IsRelease => true;
+        //   !MacroDefine.IsRelease || !MacroDefine.IsProfiler;
+
+
+        #region Extension
+
         /// <summary>
         ///  Verifies that a value is within a given range.
         /// </summary>
@@ -20,6 +27,8 @@ namespace Cr7Sund.Framework.Util
 
         public static void InRange<T>(T actual, T low, T high, IComparer<T> comparer)
         {
+            if (IsRelease) return;
+
             if (comparer.Compare(low, actual) > 0 || comparer.Compare(actual, high) > 0)
             {
                 throw new IndexOutOfRangeException($"Assert.InRange() Failure : Actual: {actual}, High :{high} Low: {low}");
@@ -62,5 +71,31 @@ namespace Cr7Sund.Framework.Util
                 return (x as IComparable<T>)?.CompareTo(y) ?? x.CompareTo(y);
             }
         }
+
+        #endregion
+
+
+        #region Assert Origin
+
+        public static void NotNull(object anObject)
+        {
+            if (IsRelease) return;
+            NUnit.Framework.Assert.IsNotNull(anObject);
+        }
+
+        public static void IsInstanceOf<T>(object resolveValue)
+        {
+            if (IsRelease) return;
+            NUnit.Framework.Assert.IsInstanceOf<T>(resolveValue);
+        }
+
+        public static void Greater(int length, int v)
+        {
+            if (IsRelease) return;
+            NUnit.Framework.Assert.Greater(length, v);
+        }
+
+        #endregion
+
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
-using NUnit.Framework;
+using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Impl
 {
@@ -17,7 +17,7 @@ namespace Cr7Sund.Framework.Impl
 
             var values = binding.Value as object[];
 
-            Assert.Greater(values.Length, 0);
+            AssertUtil.Greater(values.Length, 0);
 
             float sliceLength = 1 / values.Length;
             for (int i = 0; i < values.Length; i++)

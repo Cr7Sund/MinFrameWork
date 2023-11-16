@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
-using NUnit.Framework;
 using System.Linq;
 using Cr7Sund.Framework.Util;
 
@@ -149,7 +148,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise Catch(Action<Exception> onRejected)
         {
-            Assert.NotNull(onRejected);
+            AssertUtil.NotNull(onRejected);
 
             if (CurState == PromiseState.Resolved)
             {
@@ -325,7 +324,7 @@ namespace Cr7Sund.Framework.Impl
         {
             // This version of the function must supply an onResolved.
             // Otherwise there is now way to get the converted value to pass to the resulting promise.
-            Assert.IsNotNull(onResolved);
+            AssertUtil.NotNull(onResolved);
 
             if (CurState == PromiseState.Resolved)
             {
@@ -416,7 +415,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise Finally(Action onComplete)
         {
-            Assert.IsNotNull(onComplete);
+            AssertUtil.NotNull(onComplete);
 
             if (CurState == PromiseState.Resolved)
             {
@@ -527,7 +526,7 @@ namespace Cr7Sund.Framework.Impl
 
         public void Reject(Exception ex)
         {
-            Assert.NotNull(ex);
+            AssertUtil.NotNull(ex);
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseException(
@@ -672,8 +671,8 @@ namespace Cr7Sund.Framework.Impl
 
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)
         {
-            Assert.NotNull(callback);
-            Assert.NotNull(rejectable);
+            AssertUtil.NotNull(callback);
+            AssertUtil.NotNull(rejectable);
 
             try
             {
@@ -687,8 +686,8 @@ namespace Cr7Sund.Framework.Impl
 
         private void InvokeRejectHandler(Action<Exception> callback, IRejectable rejectable, Exception value)
         {
-            Assert.NotNull(callback);
-            Assert.NotNull(rejectable);
+            AssertUtil.NotNull(callback);
+            AssertUtil.NotNull(rejectable);
 
             try
             {
@@ -702,8 +701,8 @@ namespace Cr7Sund.Framework.Impl
 
         private void InvokeProgressHandler(Action<float> callback, IRejectable rejectable, float progress)
         {
-            Assert.NotNull(callback);
-            Assert.NotNull(rejectable);
+            AssertUtil.NotNull(callback);
+            AssertUtil.NotNull(rejectable);
 
             try
             {
@@ -725,7 +724,7 @@ namespace Cr7Sund.Framework.Impl
         // Convert an exception directly into a rejected promise.
         public static IPromise Rejected(Exception ex)
         {
-            Assert.NotNull(ex);
+            AssertUtil.NotNull(ex);
 
             var promise = new Promise(PromiseState.Rejected);
             promise.rejectionException = ex;

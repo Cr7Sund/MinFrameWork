@@ -11,7 +11,12 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
     public class PromiseCommand_NoGenericTests
     {
-
+        [SetUp]
+        public void Setup()
+        {
+            SimplePromise.simulatePromise = new Promise();
+        }
+        
         [TearDown]
         public void Cleanup()
         {

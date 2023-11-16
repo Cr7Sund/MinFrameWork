@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
-using log4net.DateFormatter;
 
 namespace Cr7Sund.Framework.Impl
 {

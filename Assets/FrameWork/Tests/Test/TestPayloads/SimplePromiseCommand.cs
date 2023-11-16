@@ -164,7 +164,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override void OnProgress(float progress)
         {
-            AssertExt.InRange(expectedStep - (progress - SimplePromise.currentProgress), -Math.E, Math.E);
+            AssertUtil.InRange(expectedStep - (progress - SimplePromise.currentProgress), -Math.E, Math.E);
             SimplePromise.currentProgress = progress;
         }
     }
@@ -178,6 +178,20 @@ namespace Cr7Sund.Framework.Tests
             return SimplePromise.result;
         }
 
+    }
+
+
+    public class TestInjectionCommand : PromiseCommand
+    {
+        [Inject]
+        public ISimpleInterface classToBeInjected;
+        public override void OnExecute()
+        {
+            if (classToBeInjected != null)
+            {
+                SimplePromise.result = 1;
+            }
+        }
     }
 }
 

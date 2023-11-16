@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
-using PlasticPipe.PlasticProtocol.Client;
 
 namespace Cr7Sund.Framework.Impl
 {

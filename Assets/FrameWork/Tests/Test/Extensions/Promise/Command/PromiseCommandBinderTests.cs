@@ -7,7 +7,6 @@ using UnityEditor.VersionControl;
 
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
-
     public class PromiseCommandBinderTests
     {
         private IInjectionBinder injectionBinder;
@@ -101,7 +100,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void command_with_convert_changed_type()
+        public void command_with_convert_continue_with_changed_type()
         {
             var promiseBinding = promiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimplePromiseCommandTwo_Generic>()
@@ -114,7 +113,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void first_is_resolved_when_first_promise_is_resolved_first()
+        public void then_first_return_first_resolved()
         {
             promiseBinder.Bind(SomeEnum.ONE)
                 .ThenFirst<
@@ -132,7 +131,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
 
         [Test]
-        public void race_is_resolved_when_first_promise_is_resolved_first()
+        public void race_is_resolved_when_promise_is_first_resolved_first()
         {
             promiseBinder.Bind(SomeEnum.ONE).ThenRace<
                  SimpleAsyncPromiseCommandOne_Generic,
@@ -146,7 +145,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void race_is_resolved_when_first_promise_is_resolved_first_chain()
+        public void race_is_resolved_continue_with()
         {
             promiseBinder.Bind(SomeEnum.ONE)
             .ThenRace<
@@ -162,7 +161,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void race_is_resolved_when_first_promise_is_rejected_first()
+        public void race_is_resolved_when_promise_is_rejected_firstly()
         {
             promiseBinder.Bind(SomeEnum.ONE)
             .ThenRace<
@@ -180,7 +179,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
 
         [Test]
-        public void race_is_resolved_when_first_promise_is_resolved_first_in_chain()
+        public void race_is_resolved_when_promise_is_rejected_next()
         {
             promiseBinder.Bind(SomeEnum.ONE)
             .ThenRace<
@@ -197,7 +196,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void any_is_resolved_when_first_promise_is_resolved_first()
+        public void any_is_resolved_when_promise_is_resolved_first()
         {
             promiseBinder.Bind(SomeEnum.ONE).ThenAny<
                  SimpleAsyncPromiseCommandOne_Generic,
@@ -211,7 +210,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void any_is_resolved_when_first_promise_is_resolved_first_chain()
+        public void any_is_resolved_continue_with()
         {
             promiseBinder.Bind(SomeEnum.ONE)
             .ThenAny<
@@ -227,7 +226,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void any_is_resolved_when_first_promise_is_rejected_first()
+        public void any_is_resolved_when_promise_is_rejected_first()
         {
             promiseBinder.Bind(SomeEnum.ONE)
             .ThenAny<
@@ -244,7 +243,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void any_is_resolved_when_first_promise_is_resolved_first_in_chain()
+        public void any_is_resolved_when_promise_is_rejected_next()
         {
             promiseBinder.Bind(SomeEnum.ONE)
             .ThenAny<

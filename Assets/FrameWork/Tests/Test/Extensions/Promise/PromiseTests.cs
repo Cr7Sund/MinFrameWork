@@ -4,7 +4,6 @@ using System.Linq;
 using Cr7Sund.Framework.Api;
 using NUnit.Framework;
 using Cr7Sund.Framework.Util;
-using JetBrains.Annotations;
 
 namespace Cr7Sund.Framework.PromiseTest
 {

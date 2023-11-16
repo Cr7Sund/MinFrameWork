@@ -1,5 +1,4 @@
 using System;
-using NUnit.Framework;
 
 namespace Cr7Sund.Framework.Util
 {
@@ -7,7 +6,7 @@ namespace Cr7Sund.Framework.Util
     {
         public ExceptionEventArgs(Exception exception)
         {
-            Assert.NotNull(exception);
+            AssertUtil.NotNull(exception);
             this.Exception = exception;
         }
 
