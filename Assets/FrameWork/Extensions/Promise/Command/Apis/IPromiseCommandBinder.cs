@@ -2,15 +2,13 @@ using System;
 
 namespace Cr7Sund.Framework.Api
 {
-    public interface IPromiseCommandBinder
+    public interface IPromiseCommandBinder<PromisedT>
     {
-        void ReactTo(object trigger);
-        void ReactTo<PromisedT>(object trigger, PromisedT data);
+        void ReactTo(object trigger, PromisedT data);
 
-        IPromiseCommandBinding Bind(object trigger);
-        IPromiseCommandBinding GetBinding(object key);
-        IPromiseCommandBinding GetBinding(object key, object name);
+        IPromiseCommandBinding<PromisedT> Bind(object trigger);
+        IPromiseCommandBinding<PromisedT> GetBinding(object key);
+        IPromiseCommandBinding<PromisedT> GetBinding(object key, object name);
     }
-
 
 }

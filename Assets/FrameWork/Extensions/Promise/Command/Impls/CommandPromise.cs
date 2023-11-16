@@ -101,7 +101,7 @@ namespace Cr7Sund.Framework.Impl
         {
             FulfillPromise(promises, commands);
 
-            Func<IPromise<PromisedT>>[] fns = null;
+            var fns = new Func<IPromise<PromisedT>>[promises.Count()];
             promises.Each((promise, index) =>
             {
                 fns[index] = () => promise;
@@ -137,14 +137,18 @@ namespace Cr7Sund.Framework.Impl
 
         #endregion
 
-        #region  IPromise Implementation
+        #region IPromise Implementation
 
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
         }
 
-
+        protected override Promise GetRawPromise()
+        {
+            return new CommandPromise();
+        }
+        
         #endregion
 
         #region IPoolable Implementation

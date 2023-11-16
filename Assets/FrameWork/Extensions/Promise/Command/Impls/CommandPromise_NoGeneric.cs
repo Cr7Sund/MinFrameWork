@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
 using NUnit.Framework;
@@ -12,6 +14,20 @@ namespace Cr7Sund.Framework.Impl
 
         public CommandPromise(PromiseState promiseState) : base(promiseState) { }
         public CommandPromise() : base() { }
+
+        #region IPromise Implementation
+
+        protected override Promise<T> GetRawPromise<T>()
+        {
+            return new CommandPromise<T>();
+        }
+
+        protected override Promise GetRawPromise()
+        {
+            return new CommandPromise();
+        }
+
+        #endregion
 
 
 
@@ -66,12 +82,44 @@ namespace Cr7Sund.Framework.Impl
         public virtual ICommandPromise Then(ICommandPromise resultPromise, IPromiseCommand promiseCommand)
         {
             ((CommandPromise)resultPromise)._command = promiseCommand;
-            
+
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
             ProgressHandlers(resultPromise, resultPromise.Progress);
             resultPromise.Catch(resultPromise.Catch);
 
             return resultPromise;
+        }
+      
+        public ICommandPromise ThenAll(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        {
+            FulfillPromise(promises, commands);
+
+            return Then(() => AllInternal(promises)) as ICommandPromise;
+        }
+
+        public ICommandPromise ThenRace(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        {
+            FulfillPromise(promises, commands);
+
+            return Then(() => RaceInternal(promises)) as ICommandPromise;
+        }
+
+        public ICommandPromise ThenAny(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        {
+            FulfillPromise(promises, commands);
+
+            return Then(() => AnyInternal(promises)) as ICommandPromise;
+        }
+
+        private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        {
+            Assert.AreEqual(commands.Count(), promises.Count());
+            var commandArray = commands.ToArray();
+
+            promises.Each((promise, index) =>
+            {
+                Then(promise, commandArray[index]);
+            });
         }
 
         #endregion
