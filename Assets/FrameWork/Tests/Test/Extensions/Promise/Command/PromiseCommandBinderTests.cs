@@ -12,7 +12,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
     {
         private IInjectionBinder injectionBinder;
         private IPoolBinder poolBinder;
-        private IPromiseCommandBinder promiseBinder;
+        private IPromiseCommandBinder<int> promiseBinder;
 
         [SetUp]
         public void Setup()
@@ -23,7 +23,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
 
-            promiseBinder = new PromiseCommandBinder();
+            promiseBinder = new PromiseCommandBinder<int>();
             injectionBinder.Injector.Inject(promiseBinder);
 
             SimplePromise.simulatePromiseOne = new Promise<int>();
@@ -34,7 +34,6 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void Cleanup()
         {
             SimplePromise.result = 0;
-            SimplePromise.simulatePromise = null;
         }
 
         [Test]
@@ -43,11 +42,13 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             var promiseBinding = promiseBinder.Bind(SomeEnum.ONE);
 
             var binding = promiseBinding.
-                Then<SimplePromiseCommandTwo>().Then<SimplePromiseCommandOne>().Then<SimplePromiseCommandTwo>()
+                Then<SimplePromiseCommandTwo_Generic>()
+                .Then<SimplePromiseCommandOne_Generic>()
+                .Then<SimplePromiseCommandTwo_Generic>()
                 ;
 
 
-            promiseBinder.ReactTo(SomeEnum.ONE);
+            promiseBinder.ReactTo(SomeEnum.ONE, 0);
 
             Assert.AreEqual((16 * 3), SimplePromise.result);
         }
@@ -57,12 +58,15 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promiseBinding = promiseBinder.Bind(SomeEnum.ONE);
 
-            promiseBinding.Then<SimplePromiseCommandTwo>().Then<SimpleAsyncPromiseCommandOne>().Then<SimplePromiseCommandOne>();
+            promiseBinding
+            .Then<SimplePromiseCommandTwo_Generic>()
+            .Then<SimpleAsyncPromiseCommandOne_Generic>()
+            .Then<SimplePromiseCommandOne_Generic>();
 
-            promiseBinder.ReactTo(SomeEnum.ONE);
+            promiseBinder.ReactTo(SomeEnum.ONE, 0);
             Assert.AreEqual(6, SimplePromise.result);
 
-            SimplePromise.simulatePromise.Resolve();
+            SimplePromise.simulatePromiseOne.Resolve(0);
 
             Assert.AreEqual(((((0 + 2) * 3) + 3) * 5 + 1) * 2, SimplePromise.result);
         }
@@ -72,8 +76,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
 
             var promiseBinding = promiseBinder.Bind(SomeEnum.ONE)
-                 .Then<SimpleAsyncPromiseCommandOne_Generic, int>()
-                 .Then<SimpleAsyncPromiseCommandSecond_Generic, int>();
+                 .Then<SimpleAsyncPromiseCommandOne_Generic>()
+                 .Then<SimpleAsyncPromiseCommandSecond_Generic>();
 
             promiseBinder.ReactTo(SomeEnum.ONE, 0);
 
@@ -87,8 +91,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_with_convert_type()
         {
             var promiseBinding = promiseBinder.Bind(SomeEnum.ONE)
-                   .Then<SimplePromiseCommandTwo_Generic, int>()
-                   .Then<ConvertPromiseCommand, int, float>();
+                   .Then<SimplePromiseCommandTwo_Generic>()
+                   .ThenConvert<ConvertPromiseCommand, float>();
 
 
             promiseBinder.ReactTo(SomeEnum.ONE, 0);
@@ -100,8 +104,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_with_convert_changed_type()
         {
             var promiseBinding = promiseBinder.Bind(SomeEnum.ONE)
-                .Then<SimplePromiseCommandTwo_Generic, int>()
-                .Then<ConvertPromiseCommand, int, float>()
+                .Then<SimplePromiseCommandTwo_Generic>()
+                .ThenConvert<ConvertPromiseCommand, float>()
                 .Then<AnotherPromiseCommand, float>();
 
             promiseBinder.ReactTo(SomeEnum.ONE, 0);
@@ -110,32 +114,166 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void command_all_simple_command()
+        public void first_is_resolved_when_first_promise_is_resolved_first()
         {
-            promiseBinder.Bind(SomeEnum.ONE).ThenAll(
-                new SimplePromiseCommandTwo_Generic(),
-                new SimplePromiseCommandOne_Generic(),
-                new SimplePromiseCommandTwo_Generic()
-                );
+            promiseBinder.Bind(SomeEnum.ONE)
+                .ThenFirst<
+                    ExceptionPromiseCommand_Generic,
+                    SimplePromiseCommandOne_Generic,
+                    SimplePromiseCommandTwo_Generic
+                    >()
+                 .Then<SimplePromiseCommandOne_Generic>();
 
-            promiseBinder.ReactTo(SomeEnum.ONE, 0);
 
-            Assert.AreEqual(27, SimplePromise.result);
+            promiseBinder.ReactTo(SomeEnum.ONE, 1);
+
+            Assert.AreEqual(10, SimplePromise.result);
+        }
+
+
+        [Test]
+        public void race_is_resolved_when_first_promise_is_resolved_first()
+        {
+            promiseBinder.Bind(SomeEnum.ONE).ThenRace<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 5);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            Assert.AreEqual(18, SimplePromise.result);
         }
 
         [Test]
-        public void command_all_simple_command_generic()
+        public void race_is_resolved_when_first_promise_is_resolved_first_chain()
         {
-            promiseBinder.Bind(SomeEnum.ONE).ThenAll<
-                 SimplePromiseCommandTwo_Generic,
-                 SimplePromiseCommandOne_Generic,
-                 SimplePromiseCommandTwo_Generic, int>();
+            promiseBinder.Bind(SomeEnum.ONE)
+            .ThenRace<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>()
+             .Then<SimplePromiseCommandOne_Generic>();
 
 
-            promiseBinder.ReactTo(SomeEnum.ONE, 0);
+            promiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
 
-            Assert.AreEqual(27, SimplePromise.result);
+            Assert.AreEqual(22, SimplePromise.result);
         }
+
+        [Test]
+        public void race_is_resolved_when_first_promise_is_rejected_first()
+        {
+            promiseBinder.Bind(SomeEnum.ONE)
+            .ThenRace<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>()
+            .Then<SimplePromiseCommandOne_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 5);
+            SimplePromise.simulatePromiseOne.Reject(new Exception());
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            Assert.AreEqual(18, SimplePromise.result);
+        }
+
+
+        [Test]
+        public void race_is_resolved_when_first_promise_is_resolved_first_in_chain()
+        {
+            promiseBinder.Bind(SomeEnum.ONE)
+            .ThenRace<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>()
+            .Then<SimplePromiseCommandOne_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+            SimplePromise.simulatePromiseOne.Reject(new Exception());
+
+            Assert.AreEqual(22, SimplePromise.result);
+        }
+
+        [Test]
+        public void any_is_resolved_when_first_promise_is_resolved_first()
+        {
+            promiseBinder.Bind(SomeEnum.ONE).ThenAny<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 5);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            Assert.AreEqual(18, SimplePromise.result);
+        }
+
+        [Test]
+        public void any_is_resolved_when_first_promise_is_resolved_first_chain()
+        {
+            promiseBinder.Bind(SomeEnum.ONE)
+            .ThenAny<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>()
+             .Then<SimplePromiseCommandOne_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            Assert.AreEqual(22, SimplePromise.result);
+        }
+
+        [Test]
+        public void any_is_resolved_when_first_promise_is_rejected_first()
+        {
+            promiseBinder.Bind(SomeEnum.ONE)
+            .ThenAny<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>()
+             .Then<SimplePromiseCommandOne_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseOne.Reject(new Exception());
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            Assert.AreEqual(22, SimplePromise.result);
+        }
+
+        [Test]
+        public void any_is_resolved_when_first_promise_is_resolved_first_in_chain()
+        {
+            promiseBinder.Bind(SomeEnum.ONE)
+            .ThenAny<
+                 SimpleAsyncPromiseCommandOne_Generic,
+                 SimpleAsyncPromiseCommandSecond_Generic>()
+             .Then<SimplePromiseCommandOne_Generic>();
+
+
+            promiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            SimplePromise.simulatePromiseOne.Reject(new Exception());
+
+            Assert.AreEqual(22, SimplePromise.result);
+        }
+
+        // [Test]
+        // public void command_no_value_chaining_value()
+        // {
+        //     promiseBinder.Bind(SomeEnum.ONE)
+        //         .Then<SimplePromiseCommandTwo>()
+        //         .Then<SimpleAsyncPromiseCommandOne_Generic>()
+        //         ;
+
+        //     promiseBinder.ReactTo(SomeEnum.ONE);
+
+        //     Assert.AreEqual(14, SimplePromise.result);
+        // }
+
     }
 
 }

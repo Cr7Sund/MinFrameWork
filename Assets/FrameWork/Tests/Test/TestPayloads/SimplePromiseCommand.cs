@@ -2,6 +2,8 @@ using System;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Cr7Sund.Framework.Tests
 {
@@ -35,7 +37,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override int OnExecute(int value)
         {
-            SimplePromise.result += 1;
+            SimplePromise.result = (value + 1) * 2;
             return (value + 1) * 2;
         }
 
@@ -53,7 +55,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override int OnExecute(int value)
         {
-            SimplePromise.result = (SimplePromise.result + 2) * 3;
+            SimplePromise.result = (value + 2) * 3;
             return (value + 2) * 3;
         }
 
@@ -85,21 +87,15 @@ namespace Cr7Sund.Framework.Tests
             return SimplePromise.floatResult;
         }
 
-        public override void OnCatch(Exception e)
-        {
-            base.OnCatch(e);
-        }
-
     }
 
     public class SimpleAsyncPromiseCommandOne_Generic : PromiseAsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
-            SimplePromise.result += 1;
             return SimplePromise.simulatePromiseOne.Then((value) =>
               {
-                  SimplePromise.result = 10;
+                  SimplePromise.result = (value + aggValue + 3) * 5;
                   return (value + aggValue + 3) * 5;
               });
 
@@ -171,6 +167,17 @@ namespace Cr7Sund.Framework.Tests
             AssertExt.InRange(expectedStep - (progress - SimplePromise.currentProgress), -Math.E, Math.E);
             SimplePromise.currentProgress = progress;
         }
+    }
+
+    public class ConvertPromiseEnumerableCommand : PromiseCommand<IEnumerable<int>, int>
+    {
+        public override int OnExecute(IEnumerable<int> values)
+        {
+            var first = values.First();
+            SimplePromise.result = (first + 1) * 2;
+            return SimplePromise.result;
+        }
+
     }
 }
 

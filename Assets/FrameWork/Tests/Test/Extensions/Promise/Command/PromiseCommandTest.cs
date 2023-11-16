@@ -90,12 +90,14 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_with_multiple_async_operation_until_chaining_resolve()
         {
             var promise = new CommandPromise<int>();
-            var donePromise = promise.Then<SimpleAsyncPromiseCommandOne_Generic>()
-            .Then<SimpleAsyncPromiseCommandSecond_Generic>();
+            promise
+                  .Then<SimpleAsyncPromiseCommandOne_Generic>()
+                  .Then<SimpleAsyncPromiseCommandSecond_Generic>();
+
             promise.Resolve(0);
 
             SimplePromise.simulatePromiseSecond.Resolve(2);
-            Assert.AreEqual(1, SimplePromise.result);
+            Assert.AreEqual(0, SimplePromise.result);
 
             SimplePromise.simulatePromiseOne.Resolve(1);
             Assert.AreEqual((((0 + 1 + 3) * 5) + 2 + 1) * 2, SimplePromise.result);
@@ -198,8 +200,80 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(1f, SimplePromise.currentProgress);
         }
 
+        [Test]
+        public void race_is_resolved_when_first_promise_is_resolved_first_chain_promise()
+        {
+            var commands = new PromiseCommand<int>[]{
+                new SimpleAsyncPromiseCommandOne_Generic(),
+                new SimpleAsyncPromiseCommandSecond_Generic()
+                };
 
+            var promises = new CommandPromise<int>[]{
+                    new CommandPromise<int>(),
+                    new CommandPromise<int>(),
+                };
 
+            var promise = new CommandPromise<int>();
+            promise
+             .ThenRace(promises, commands)
+             .Then<SimplePromiseCommandOne_Generic>()
+            ;
+
+            promise.Resolve(1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            Assert.AreEqual(22, SimplePromise.result);
+        }
+
+        [Test]
+        public void command_all_simple_command()
+        {
+            var commands = new PromiseCommand<int>[]{
+                new SimplePromiseCommandTwo_Generic(),
+                new SimplePromiseCommandTwo_Generic(),
+                new SimplePromiseCommandOne_Generic(),
+                };
+
+            var promises = new CommandPromise<int>[]{
+                    new CommandPromise<int>(),
+                    new CommandPromise<int>(),
+                    new CommandPromise<int>(),
+                };
+
+            var promise = new CommandPromise<int>();
+            promise
+                .ThenAll(promises, commands)
+                ;
+
+            promise.Resolve(1);
+
+            Assert.AreEqual(4, SimplePromise.result);
+        }
+
+        [Test]
+        public void command_all_simple_command_chain_all_result()
+        {
+            var commands = new PromiseCommand<int>[]{
+                new SimplePromiseCommandTwo_Generic(),
+                new SimplePromiseCommandTwo_Generic(),
+                new SimplePromiseCommandOne_Generic(),
+                };
+
+            var promises = new CommandPromise<int>[]{
+                    new CommandPromise<int>(),
+                    new CommandPromise<int>(),
+                    new CommandPromise<int>(),
+                };
+
+            var promise = new CommandPromise<int>();
+            promise
+                .ThenAll(promises, commands)
+                .Then<ConvertPromiseEnumerableCommand, int>();
+
+            promise.Resolve(1);
+
+            Assert.AreEqual(20, SimplePromise.result);
+        }
     }
 
 }
