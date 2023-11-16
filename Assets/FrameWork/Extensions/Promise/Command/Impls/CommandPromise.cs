@@ -22,7 +22,7 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Execute(object value)
         {
-            NUnit.Framework.Assert.IsInstanceOf<PromisedT>(value);
+            AssertUtil.IsInstanceOf<PromisedT>(value);
 
             ExecuteInternal((PromisedT)value, this);
         }
@@ -121,7 +121,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void FulfillPromise(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands)
         {
-            NUnit.Framework.Assert.AreEqual(commands.Count(), promises.Count());
+            AssertUtil.AreEqual(commands.Count(), promises.Count());
             var commandArray = commands.ToArray();
 
             promises.Each((promise, index) =>
@@ -182,7 +182,7 @@ namespace Cr7Sund.Framework.Impl
                     throw e;
                 }
 
-                NUnit.Framework.Assert.NotNull(resultPromise);
+                AssertUtil.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
                         .Then(
@@ -227,7 +227,7 @@ namespace Cr7Sund.Framework.Impl
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync(value);
-                    NUnit.Framework.Assert.NotNull(resultPromise);
+                    AssertUtil.NotNull(resultPromise);
                 }
                 catch (Exception e)
                 {
@@ -265,7 +265,7 @@ namespace Cr7Sund.Framework.Impl
 
         public override void Execute(object value)
         {
-            NUnit.Framework.Assert.IsInstanceOf<PromisedT>(value);
+            AssertUtil.IsInstanceOf<PromisedT>(value);
 
             ExecuteInternal((PromisedT)value, this);
         }

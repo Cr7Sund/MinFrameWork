@@ -50,7 +50,7 @@ namespace Cr7Sund.Framework.Impl
                     throw e;
                 }
 
-                NUnit.Framework.Assert.NotNull(resultPromise);
+                AssertUtil.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
                         .Then(
@@ -130,7 +130,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
         {
-            NUnit.Framework.Assert.AreEqual(commands.Count(), promises.Count());
+            AssertUtil.AreEqual(commands.Count(), promises.Count());
             var commandArray = commands.ToArray();
 
             promises.Each((promise, index) =>

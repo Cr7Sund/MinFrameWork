@@ -83,16 +83,22 @@ namespace Cr7Sund.Framework.Util
             NUnit.Framework.Assert.IsNotNull(anObject);
         }
 
-        public static void IsInstanceOf<T>(object resolveValue)
+        public static void IsInstanceOf<T>(object actual)
         {
             if (IsRelease) return;
-            NUnit.Framework.Assert.IsInstanceOf<T>(resolveValue);
+            NUnit.Framework.Assert.IsInstanceOf<T>(actual);
         }
 
-        public static void Greater(int length, int v)
+        public static void Greater(int arg1, int arg2)
         {
             if (IsRelease) return;
-            NUnit.Framework.Assert.Greater(length, v);
+            NUnit.Framework.Assert.Greater(arg1, arg2);
+        }
+
+        public static void AreEqual(int expected, int actual)
+        {
+            if (IsRelease) return;
+            NUnit.Framework.Assert.AreEqual(expected, actual);
         }
 
         #endregion
