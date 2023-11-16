@@ -39,7 +39,17 @@ namespace Cr7Sund.Framework.Impl
         {
             if (_command is IPromiseAsyncCommand asyncCommand)
             {
-                var resultPromise = asyncCommand.OnExecuteAsync();
+                IPromise resultPromise = null;
+                try
+                {
+                    resultPromise = asyncCommand.OnExecuteAsync();
+                }
+                catch (Exception e)
+                {
+                    this.Catch(e);
+                    throw e;
+                }
+
                 NUnit.Framework.Assert.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
@@ -50,7 +60,16 @@ namespace Cr7Sund.Framework.Impl
             }
             else if (_command is IPromiseCommand command)
             {
-                command.OnExecute();
+                try
+                {
+                    command.OnExecute();
+                }
+                catch (Exception e)
+                {
+                    this.Catch(e);
+                    throw e;
+                }
+
                 this.Resolve();
 
                 float progress = SliceLength * SequenceID;
@@ -84,7 +103,6 @@ namespace Cr7Sund.Framework.Impl
 
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
             ProgressHandlers(resultPromise, resultPromise.Progress);
-            resultPromise.Catch(resultPromise.Catch);
 
             return resultPromise;
         }

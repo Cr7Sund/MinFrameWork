@@ -170,8 +170,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                  .Then<SimpleAsyncException_Generic>()
                  .Then<SimplePromiseCommandTwo_Generic>();
 
-            promise.Resolve(0);
-            Assert.AreEqual(-1, SimplePromise.result);
+            promise.Resolve(1);
+            Assert.AreEqual(9, SimplePromise.result);
         }
 
 

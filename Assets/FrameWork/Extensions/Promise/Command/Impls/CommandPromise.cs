@@ -65,7 +65,6 @@ namespace Cr7Sund.Framework.Impl
             ((CommandPromise<PromisedT>)resultPromise)._command = promiseCommand;
 
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
-            resultPromise.Catch(resultPromise.Catch);
 
             ProgressHandlers(resultPromise, resultPromise.Progress);
             return resultPromise;
@@ -82,7 +81,6 @@ namespace Cr7Sund.Framework.Impl
             ((CommandPromise<PromisedT, ConvertedT>)resultPromise)._command = promiseCommand;
 
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
-            resultPromise.Catch(resultPromise.Catch);
 
             ProgressHandlers(resultPromise, resultPromise.Progress);
             return resultPromise;
@@ -146,7 +144,7 @@ namespace Cr7Sund.Framework.Impl
         {
             return new CommandPromise();
         }
-        
+
         #endregion
 
         #region IPoolable Implementation
@@ -173,7 +171,17 @@ namespace Cr7Sund.Framework.Impl
             var command = promise._command;
             if (command is IPromiseAsyncCommand<PromisedT> asyncCommand)
             {
-                var resultPromise = asyncCommand.OnExecuteAsync(value);
+                IPromise<PromisedT> resultPromise = null;
+                try
+                {
+                    resultPromise = asyncCommand.OnExecuteAsync(value);
+                }
+                catch (Exception e)
+                {
+                    promise.Catch(e);
+                    throw e;
+                }
+
                 NUnit.Framework.Assert.NotNull(resultPromise);
                 resultPromise
                         .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
@@ -184,7 +192,16 @@ namespace Cr7Sund.Framework.Impl
             }
             else if (command is IPromiseCommand<PromisedT> promiseCommand)
             {
-                var newValue = promiseCommand.OnExecute(value);
+                PromisedT newValue = default(PromisedT);
+                try
+                {
+                    newValue = promiseCommand.OnExecute(value);
+                }
+                catch (Exception e)
+                {
+                    promise.Catch(e);
+                    throw e;
+                }
                 promise.Resolve(newValue);
 
                 float progress = promise.SliceLength * promise.SequenceID;
@@ -206,8 +223,17 @@ namespace Cr7Sund.Framework.Impl
 
             if (_command is IPromiseAsyncCommand<PromisedT, ConvertedT> asyncCommand)
             {
-                var resultPromise = asyncCommand.OnExecuteAsync(value);
-                NUnit.Framework.Assert.NotNull(resultPromise);
+                IPromise<ConvertedT> resultPromise = null;
+                try
+                {
+                    resultPromise = asyncCommand.OnExecuteAsync(value);
+                    NUnit.Framework.Assert.NotNull(resultPromise);
+                }
+                catch (Exception e)
+                {
+                    promise.Catch(e);
+                    throw e;
+                }
                 resultPromise
                         .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
                         .Then(
@@ -217,7 +243,16 @@ namespace Cr7Sund.Framework.Impl
             }
             else if (_command is IPromiseCommand<PromisedT, ConvertedT> promiseCommand)
             {
-                var newValue = promiseCommand.OnExecute(value);
+                ConvertedT newValue = default(ConvertedT);
+                try
+                {
+                    newValue = promiseCommand.OnExecute(value);
+                }
+                catch (Exception e)
+                {
+                    promise.Catch(e);
+                    throw e;
+                }
                 promise.Resolve(newValue);
 
                 float progress = promise.SliceLength * promise.SequenceID;
