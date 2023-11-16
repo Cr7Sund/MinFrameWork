@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
 using NUnit.Framework;
 using System.Linq;
-using NUnit.Framework.Constraints;
 using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Impl
@@ -46,7 +45,7 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// Convert a simple value directly into a resolved promise.
         /// </summary>
-        private static IPromise resolvedPromise = new Promise(PromiseState.Resolved);
+        private static Promise resolvedPromise = new Promise(PromiseState.Resolved);
 
         #endregion
 
@@ -157,7 +156,7 @@ namespace Cr7Sund.Framework.Impl
                 return this;
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
             Action resolveHandler = () => resultPromise.Resolve();
@@ -205,7 +204,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
             Action resolveHandler;
@@ -271,7 +270,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
             Action resolveHandler;
@@ -340,7 +339,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var resultPromise = new Promise<ConvertedT>();
+            var resultPromise = GetRawPromise<ConvertedT>();
             resultPromise.WithName(Name);
 
             Action resolveHandler = () => onResolved()
@@ -382,7 +381,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise ThenAll(Func<IEnumerable<IPromise>> chain)
         {
-            return Then(() => All(chain()));
+            return Then(() => AllInternal(chain()));
         }
 
         public IPromise<IEnumerable<ConvertedT>> ThenAll<ConvertedT>(Func<IEnumerable<IPromise<ConvertedT>>> chain)
@@ -392,7 +391,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise ThenAny(Func<IEnumerable<IPromise>> chain)
         {
-            return Then(() => Promise.Any(chain()));
+            return Then(() => AnyInternal(chain()));
         }
 
         public IPromise<ConvertedT> ThenAny<ConvertedT>(Func<IEnumerable<IPromise<ConvertedT>>> chain)
@@ -402,12 +401,12 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise ThenSequence(Func<IEnumerable<Func<IPromise>>> chain)
         {
-            return Then(() => Sequence(chain()));
+            return Then(() => SequenceInternal(chain()));
         }
 
         public IPromise ThenRace(Func<IEnumerable<IPromise>> chain)
         {
-            return Then(() => Race(chain()));
+            return Then(() => RaceInternal(chain()));
         }
 
         public IPromise<ConvertedT> ThenRace<ConvertedT>(Func<IEnumerable<IPromise<ConvertedT>>> chain)
@@ -432,7 +431,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var promise = new Promise();
+            var promise = GetRawPromise();
             promise.WithName(Name);
 
             this.Then(promise.Resolve);
@@ -456,7 +455,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise ContinueWith(Func<IPromise> onComplete)
         {
-            var promise = new Promise();
+            var promise = GetRawPromise();
             promise.WithName(Name);
 
             this.Then(promise.Resolve);
@@ -466,7 +465,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPromise<ConvertedT> ContinueWith<ConvertedT>(Func<IPromise<ConvertedT>> onComplete)
         {
-            var promise = new Promise();
+            var promise = GetRawPromise();
             promise.WithName(Name);
 
             this.Then(promise.Resolve);
@@ -506,7 +505,7 @@ namespace Cr7Sund.Framework.Impl
             InvokeResolveHandlers();
         }
 
-        public void ResolveT<ConvertedT>(ConvertedT param)
+        public void ResolveWrap<ConvertedT>(ConvertedT param)
         {
             Resolve();
         }
@@ -718,7 +717,10 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
-        #region  public extension method
+
+        #endregion
+
+        #region static method
 
         // Convert an exception directly into a rejected promise.
         public static IPromise Rejected(Exception ex)
@@ -745,12 +747,39 @@ namespace Cr7Sund.Framework.Impl
         }
 
         /// <summary>
+        /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
+        /// Returns the value from the first promise that has resolved.
+        /// </summary>
+        public static IPromise Race(IEnumerable<IPromise> promises)
+        {
+            return resolvedPromise.RaceInternal(promises);
+        }
+
+        /// <summary>
+        /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
+        /// Returns the value from the first promise that has resolved.
+        /// </summary>
+        public static IPromise Race(params IPromise[] promises)
+        {
+            return resolvedPromise.RaceInternal(promises); // Cast is required to force use of the other function.
+        }
+
+        /// <summary>
         /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
         public static IPromise All(params IPromise[] promises)
         {
-            return All((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
+            return resolvedPromise.AllInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
+        }
+
+        /// <summary>
+        /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
+        /// Returns a promise of a collection of the resolved results.
+        /// </summary>
+        public static IPromise All(IEnumerable<IPromise> promises)
+        {
+            return resolvedPromise.AllInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
         }
 
         /// <summary>
@@ -760,7 +789,7 @@ namespace Cr7Sund.Framework.Impl
         /// </summary>
         public static IPromise Any(params IPromise[] promises)
         {
-            return Any((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
+            return resolvedPromise.AnyInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
         }
 
         /// <summary>
@@ -769,6 +798,67 @@ namespace Cr7Sund.Framework.Impl
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
         public static IPromise Any(IEnumerable<IPromise> promises)
+        {
+            return resolvedPromise.AnyInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
+        }
+        /// <summary>
+        /// Chain a number of operations using promises.
+        /// Takes a number of functions each of which starts an async operation and yields a promise.
+        /// </summary>
+        public static IPromise Sequence(params Func<IPromise>[] fns)
+        {
+            return resolvedPromise.SequenceInternal((IEnumerable<Func<IPromise>>)fns);
+        }
+
+        /// <summary>
+        /// Chain a sequence of operations using promises.
+        /// Takes a collection of functions each of which starts an async operation and yields a promise.
+        /// </summary>
+        public static IPromise Sequence(IEnumerable<Func<IPromise>> fns)
+        {
+            return resolvedPromise.SequenceInternal((IEnumerable<Func<IPromise>>)fns);
+        }
+
+        #endregion
+
+        #region private extension method
+
+        protected virtual Promise<ConvertedT> GetRawPromise<ConvertedT>()
+        {
+            return new Promise<ConvertedT>();
+        }
+
+        protected virtual Promise GetRawPromise()
+        {
+            return new Promise();
+        }
+
+
+        /// <summary>
+        /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
+        /// Returns a promise of a collection of the resolved results.
+        /// </summary>
+        protected IPromise AllInternal(params IPromise[] promises)
+        {
+            return AllInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
+        }
+
+        /// <summary>
+        /// Returns a promise that resolves when any of the promises in the enumerable argument have resolved.
+        /// otherwise, it will be rejected  when all of them are rejected
+        /// Returns a promise of a collection of the resolved results.
+        /// </summary>
+        protected IPromise AnyInternal(params IPromise[] promises)
+        {
+            return AnyInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other All function.
+        }
+
+        /// <summary>
+        /// Returns a promise that resolves when any of the promises in the enumerable argument have resolved.
+        /// otherwise, it will be rejected  when all of them are rejected
+        /// Returns a promise of a collection of the resolved results.
+        /// </summary>
+        protected IPromise AnyInternal(IEnumerable<IPromise> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -782,7 +872,7 @@ namespace Cr7Sund.Framework.Impl
             var remainingCount = promisesArray.Length;
             var progress = new float[remainingCount];
             var groupException = new PromiseGroupException(remainingCount);
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             resultPromise.WithName("All");
 
             promisesArray.Each((promise, index) =>
@@ -826,18 +916,18 @@ namespace Cr7Sund.Framework.Impl
         /// Chain a number of operations using promises.
         /// Takes a number of functions each of which starts an async operation and yields a promise.
         /// </summary>
-        public static IPromise Sequence(params Func<IPromise>[] fns)
+        protected IPromise SequenceInternal(params Func<IPromise>[] fns)
         {
-            return Sequence((IEnumerable<Func<IPromise>>)fns);
+            return SequenceInternal((IEnumerable<Func<IPromise>>)fns);
         }
 
         /// <summary>
         /// Chain a sequence of operations using promises.
         /// Takes a collection of functions each of which starts an async operation and yields a promise.
         /// </summary>
-        public static IPromise Sequence(IEnumerable<Func<IPromise>> fns)
+        protected IPromise SequenceInternal(IEnumerable<Func<IPromise>> fns)
         {
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
 
             int count = 0;
             fns.Aggregate(
@@ -873,7 +963,7 @@ namespace Cr7Sund.Framework.Impl
         /// Returns a promise that resolves when all of the promises in the enumerable argument have resolved.
         /// Returns a promise of a collection of the resolved results.
         /// </summary>
-        public static IPromise All(IEnumerable<IPromise> promises)
+        protected IPromise AllInternal(IEnumerable<IPromise> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -881,7 +971,7 @@ namespace Cr7Sund.Framework.Impl
                 return Resolved();
             }
             var remainingCount = promisesArray.Length;
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             var progress = new float[remainingCount];
             resultPromise.WithName("All");
 
@@ -929,16 +1019,16 @@ namespace Cr7Sund.Framework.Impl
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise Race(params IPromise[] promises)
+        protected IPromise RaceInternal(params IPromise[] promises)
         {
-            return Race((IEnumerable<IPromise>)promises); // Cast is required to force use of the other function.
+            return RaceInternal((IEnumerable<IPromise>)promises); // Cast is required to force use of the other function.
         }
 
         /// <summary>
         /// Returns a promise that resolves when the first of the promises in the enumerable argument have resolved.
         /// Returns the value from the first promise that has resolved.
         /// </summary>
-        public static IPromise Race(IEnumerable<IPromise> promises)
+        protected IPromise RaceInternal(IEnumerable<IPromise> promises)
         {
             var promisesArray = promises.ToArray();
             if (promisesArray.Length == 0)
@@ -949,7 +1039,7 @@ namespace Cr7Sund.Framework.Impl
                 );
             }
             var remainingCount = promisesArray.Length;
-            var resultPromise = new Promise();
+            var resultPromise = GetRawPromise();
             var progress = new float[remainingCount];
             resultPromise.WithName("All");
 
@@ -981,9 +1071,6 @@ namespace Cr7Sund.Framework.Impl
 
             return resultPromise;
         }
-
-        #endregion
-
 
         #endregion
 

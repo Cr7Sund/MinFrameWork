@@ -215,7 +215,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                resolveHandler = resultPromise.ResolveT;
+                resolveHandler = resultPromise.ResolveWrap;
             }
 
             Action<Exception> rejectHandler;
@@ -287,7 +287,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                resolveHandler = resultPromise.ResolveT;
+                resolveHandler = resultPromise.ResolveWrap;
             }
 
             Action<Exception> rejectHandler;
