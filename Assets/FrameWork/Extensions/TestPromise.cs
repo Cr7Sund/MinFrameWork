@@ -63,7 +63,7 @@ namespace TestMono
 
                 promise
                         .Then(command1.OnExecute, command1.OnCatch, command1.OnProgress)
-                        .Then(command2.OnExecute, command2.OnCatch, command2.OnProgress)
+                        .Then(command2.OnExecuteAsync, command2.OnCatch, command2.OnProgress)
                         .Then(command3.OnExecute, command3.OnCatch, command3.OnProgress);
 
 
