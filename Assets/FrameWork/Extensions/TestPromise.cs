@@ -39,15 +39,11 @@ namespace TestMono
             for (int a = 0; a < Count; a++)
             {
                 var promiseBinding = new CommandPromise();
-                SimplePromise.simulatePromise = new Promise();
 
                 promiseBinding
-                 .Then<SimplePromiseCommandTwo>()
-                 .Then<SimpleAsyncPromiseCommandOne>()
-                 .Then<SimplePromiseCommandOne>();
-
+                 .Then<SimplePromiseCommandOne>()
+                 .Then<SimplePromiseCommandTwo>();
                 promiseBinding.Resolve();
-                SimplePromise.simulatePromise.Resolve();
             }
         }
 
@@ -55,21 +51,14 @@ namespace TestMono
         {
             for (int a = 0; a < Count; a++)
             {
-                var promise = new Promise();
-                SimplePromise.simulatePromise = new Promise();
-                SimplePromiseCommandTwo command1 = new SimplePromiseCommandTwo();
-                SimpleAsyncPromiseCommandOne command2 = new SimpleAsyncPromiseCommandOne();
-                SimplePromiseCommandOne command3 = new SimplePromiseCommandOne();
+                var binder = new PromiseCommandBinder();
+                injectionBinder.Injector.Inject(binder);
 
-                promise
-                        .Then(command1.OnExecute, command1.OnCatch, command1.OnProgress)
-                        .Then(command2.OnExecuteAsync, command2.OnCatch, command2.OnProgress)
-                        .Then(command3.OnExecute, command3.OnCatch, command3.OnProgress);
+                binder.Bind("SomeEnum.TWO")
+                 .Then<SimplePromiseCommandOne>()
+                 .Then<SimplePromiseCommandTwo>();
 
-
-                promise.Resolve();
-
-                SimplePromise.simulatePromise.Resolve();
+                binder.ReactTo("SomeEnum.TWO");
             }
         }
 

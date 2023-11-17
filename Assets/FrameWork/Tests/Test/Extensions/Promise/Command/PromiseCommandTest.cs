@@ -120,7 +120,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_with_convert_changed_type()
         {
             var promise = new CommandPromise<int>();
-            var rejectPromise = promise.Then<SimplePromiseCommandTwo_Generic>()
+            var rejectPromise = promise
+                .Then<SimplePromiseCommandTwo_Generic>()
                 .Then<ConvertPromiseCommand, float>()
                 .Then<AnotherPromiseCommand>();
 
