@@ -20,11 +20,15 @@ namespace Cr7Sund.Framework.Impl
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
 
-        public virtual void Execute(object value)
+        public void Execute(PromisedT value)
+        {
+            ExecuteInternal(value, this);
+        }
+
+        protected virtual void ExecuteWarp(object value)
         {
             AssertUtil.IsInstanceOf<PromisedT>(value);
-
-            ExecuteInternal((PromisedT)value, this);
+            Execute((PromisedT)value);
         }
 
         public void Progress(float progress)
@@ -65,8 +69,8 @@ namespace Cr7Sund.Framework.Impl
             ((CommandPromise<PromisedT>)resultPromise)._command = promiseCommand;
 
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
-
             ProgressHandlers(resultPromise, resultPromise.Progress);
+            
             return resultPromise;
         }
 
@@ -78,10 +82,11 @@ namespace Cr7Sund.Framework.Impl
 
         public ICommandPromise<ConvertedT> Then<ConvertedT>(ICommandPromise<ConvertedT> resultPromise, IPromiseCommand<PromisedT, ConvertedT> promiseCommand)
         {
-            ((CommandPromise<PromisedT, ConvertedT>)resultPromise)._command = promiseCommand;
+            var specificPromise = (CommandPromise<ConvertedT>)resultPromise;
+            specificPromise._command = promiseCommand;
 
-            ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
-
+            AddConvertResolveHandler(specificPromise.ExecuteWarp, resultPromise);
+            AddRejectHandler(resultPromise.Reject, resultPromise);
             ProgressHandlers(resultPromise, resultPromise.Progress);
             return resultPromise;
         }
@@ -135,6 +140,7 @@ namespace Cr7Sund.Framework.Impl
 
         #region IPromise Implementation
 
+        private List<ResolveHandler<object>> convertResolveHandlers;
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
@@ -143,6 +149,40 @@ namespace Cr7Sund.Framework.Impl
         protected override Promise GetRawPromise()
         {
             return new CommandPromise();
+        }
+
+        private void AddConvertResolveHandler(Action<object> onResolved, IRejectable rejectable)
+        {
+            if (convertResolveHandlers == null)
+            {
+                convertResolveHandlers = new List<ResolveHandler<object>>();
+            }
+
+            convertResolveHandlers.Add(new ResolveHandler<object>()
+            {
+                callback = onResolved,
+                rejectable = rejectable
+            });
+        }
+
+        protected override void InvokeResolveHandlers(PromisedT value)
+        {
+            if (convertResolveHandlers != null)
+            {
+                for (int i = 0; i < convertResolveHandlers.Count; i++)
+                {
+                    var handler = convertResolveHandlers[i];
+                    InvokeHandler(handler.callback, handler.rejectable, value);
+                }
+            }
+
+            base.InvokeResolveHandlers(value);
+        }
+
+        protected override void ClearHandlers()
+        {
+            base.ClearHandlers();
+            this.convertResolveHandlers = null;
         }
 
         #endregion
@@ -263,7 +303,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        public override void Execute(object value)
+        protected override void ExecuteWarp(object value)
         {
             AssertUtil.IsInstanceOf<PromisedT>(value);
 

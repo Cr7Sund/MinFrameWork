@@ -48,7 +48,6 @@ namespace Cr7Sund.Framework.Impl
             return To(nextPromise);
         }
 
-
         IPromiseCommandBinding<PromisedT> IPromiseCommandBinding<PromisedT>.ThenConvert<T, ConvertedT>()
         {
             var nextPromise = Instantiate<CommandPromise<PromisedT, ConvertedT>>();
@@ -167,7 +166,7 @@ namespace Cr7Sund.Framework.Impl
             prevValue.Then(nextPromise, nextCommand);
         }
 
-        private void Then< ConvertedT>(CommandPromise<PromisedT, ConvertedT> nextPromise, IPromiseCommand<PromisedT, ConvertedT> nextCommand)
+        private void Then<ConvertedT>(CommandPromise<PromisedT, ConvertedT> nextPromise, IPromiseCommand<PromisedT, ConvertedT> nextCommand)
         {
             var prevValue = FindPrevChainPromise<CommandPromise<PromisedT>>();
 
@@ -202,7 +201,8 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                result = new T();
+                // equal new T()
+                result = Activator.CreateInstance<T>();
             }
 
             if (!UsePooling || (result is IPoolable poolable && poolable.IsRetain))

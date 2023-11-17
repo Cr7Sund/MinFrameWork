@@ -159,7 +159,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             promise.Resolve(0);
             Assert.AreEqual((0 + 2) * 3, ((Promise<int>)donePromise).Test_GetResolveValue());
-            Assert.Null(((Promise<int>)finalPromise).Test_GetResolveValue());
+            Assert.AreEqual(0, ((Promise<int>)finalPromise).Test_GetResolveValue());
         }
 
         [Test]

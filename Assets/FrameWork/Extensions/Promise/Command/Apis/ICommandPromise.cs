@@ -29,11 +29,9 @@ namespace Cr7Sund.Framework.Api
         ICommandPromise<PromisedT> ThenAny(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands);
         ICommandPromise<PromisedT> ThenRace(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands);
 
-        void Execute(object value);
+        void Execute(PromisedT value);
         void Progress(float progress);
         void Catch(Exception e);
-
-
     }
 
 }

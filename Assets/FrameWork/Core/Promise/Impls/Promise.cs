@@ -22,7 +22,7 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// Completed handlers that accept no value.
         /// </summary>
-        private List<ResolveHandler<object>> resolveHandlers;
+        private List<ResolveHandler<PromisedT>> resolveHandlers;
         /// <summary>
         /// Progress handlers.
         /// </summary>
@@ -33,9 +33,9 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// The value when the promises is resolved.
         /// </summary>
-        protected object resolveValue;
+        protected PromisedT resolveValue;
 
-        public object Test_GetResolveValue() => resolveValue;
+        public PromisedT Test_GetResolveValue() => resolveValue;
 
         #endregion
 
@@ -122,7 +122,7 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            Action<object> resolveHandler = _ => resultPromise.Resolve();
+            Action<PromisedT> resolveHandler = _ => resultPromise.Resolve();
 
             Action<Exception> rejectHandler = ex =>
             {
@@ -153,7 +153,7 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise<PromisedT>();
             resultPromise.WithName(Name);
 
-            Action<object> resolveHandler = v => resultPromise.ResolveInternal(v);
+            Action<PromisedT> resolveHandler = v => resultPromise.Resolve(v);
 
             Action<Exception> rejectHandler = ex =>
             {
@@ -202,7 +202,7 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            Action<object> resolveHandler;
+            Action<PromisedT> resolveHandler;
             if (onResolved != null)
             {
                 resolveHandler = v =>
@@ -270,7 +270,7 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            Action<object> resolveHandler;
+            Action<PromisedT> resolveHandler;
             if (onResolved != null)
             {
                 resolveHandler = (v) =>
@@ -353,7 +353,7 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise<ConvertedT>();
             resultPromise.WithName(Name);
 
-            Action<object> resolveHandler = v =>
+            Action<PromisedT> resolveHandler = v =>
             {
                 AssertUtil.IsInstanceOf<PromisedT>(v);
                 onResolved((PromisedT)v)
@@ -517,11 +517,6 @@ namespace Cr7Sund.Framework.Impl
 
         public void Resolve(PromisedT value)
         {
-            this.ResolveInternal((object)value);
-        }
-
-        public void ResolveInternal(object value)
-        {
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseException(
@@ -583,7 +578,7 @@ namespace Cr7Sund.Framework.Impl
         #region private methods
 
         // Helper Function to invoke or register resolve/reject handlers
-        protected void ActionHandlers(IRejectable resultPromise, Action<object> resolveHandler, Action<Exception> rejectHandler)
+        protected void ActionHandlers(IRejectable resultPromise, Action<PromisedT> resolveHandler, Action<Exception> rejectHandler)
         {
             switch (CurState)
             {
@@ -609,7 +604,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        private void AddRejectHandler(Action<Exception> onRejected, IRejectable rejectable)
+        protected void AddRejectHandler(Action<Exception> onRejected, IRejectable rejectable)
         {
             if (rejectHandlers == null)
             {
@@ -623,14 +618,14 @@ namespace Cr7Sund.Framework.Impl
             });
         }
 
-        private void AddResolveHandler(Action<object> onResolved, IRejectable rejectable)
+        private void AddResolveHandler(Action<PromisedT> onResolved, IRejectable rejectable)
         {
             if (resolveHandlers == null)
             {
-                resolveHandlers = new List<ResolveHandler<object>>();
+                resolveHandlers = new List<ResolveHandler<PromisedT>>();
             }
 
-            resolveHandlers.Add(new ResolveHandler<object>()
+            resolveHandlers.Add(new ResolveHandler<PromisedT>()
             {
                 callback = onResolved,
                 rejectable = rejectable
@@ -680,7 +675,7 @@ namespace Cr7Sund.Framework.Impl
         }
 
         // Invoke all resolve handlers
-        private void InvokeResolveHandlers(object value)
+        protected virtual void InvokeResolveHandlers(PromisedT value)
         {
             if (resolveHandlers != null)
             {
@@ -694,14 +689,14 @@ namespace Cr7Sund.Framework.Impl
             ClearHandlers();
         }
 
-        private void ClearHandlers()
+        protected virtual void ClearHandlers()
         {
             rejectHandlers = null;
             resolveHandlers = null;
             progressHandlers = null;
         }
 
-        private void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)
+        protected void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)
         {
             AssertUtil.NotNull(callback);
             AssertUtil.NotNull(rejectable);
@@ -735,7 +730,7 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         /// Convert a simple value directly into a resolved promise.
         /// </summary>
-        public static IPromise<PromisedT> Resolved(PromisedT promisedValue = default(PromisedT))
+        public static IPromise<PromisedT> Resolved(PromisedT promisedValue)
         {
             return resolvePromise.Resolved<PromisedT>(promisedValue);
         }
@@ -1076,12 +1071,12 @@ namespace Cr7Sund.Framework.Impl
     /// <summary>
     /// Represents a handler invoked when the promise is resolved.
     /// </summary>
-    public struct ResolveHandler<PromisedT>
+    public struct ResolveHandler<T>
     {
         /// <summary>
         /// Callback fn.
         /// </summary>
-        public Action<object> callback;
+        public Action<T> callback;
 
         /// <summary>
         /// The promise that is rejected when there is an error while invoking the handler.
