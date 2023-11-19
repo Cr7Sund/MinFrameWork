@@ -53,7 +53,7 @@ namespace Cr7Sund.Framework.Impl
         public Type poolType { get; set; }
 
         public int Available => instancesAvailable.Count;
-        public int instanceCount => _instanceCount;
+        public int InstanceCount => _instanceCount;
 
         public PoolOverflowBehavior OverflowBehavior { get; set; }
         public PoolInflationType inflationType { get; set; }
@@ -98,7 +98,7 @@ namespace Cr7Sund.Framework.Impl
                 Add(newInstance);
             }
 
-            return GetInstance(); // currently have free space
+            return getInstance();
         }
 
         private int NewInstanceToCreate()
@@ -109,7 +109,7 @@ namespace Cr7Sund.Framework.Impl
             if (Count > 0)
             {
                 //Illegal overflow. Report and return null
-                failIf(instanceCount > 0 && OverflowBehavior == PoolOverflowBehavior.EXCEPTION,
+                failIf(InstanceCount > 0 && OverflowBehavior == PoolOverflowBehavior.EXCEPTION,
                     "A pool has overflowed its limit.\n\t\tPool type: " + poolType,
                     PoolExceptionType.OVERFLOW);
 
@@ -117,14 +117,14 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                if (instanceCount == 0 || inflationType == PoolInflationType.INCREMENT)
+                if (InstanceCount == 0 || inflationType == PoolInflationType.INCREMENT)
                 {
                     // 1 or 4 
                     instancesToCreate = 1;
                 }
                 else
                 {
-                    instancesToCreate = instanceCount;
+                    instancesToCreate = InstanceCount;
                 }
             }
 
