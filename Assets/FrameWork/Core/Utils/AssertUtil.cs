@@ -7,8 +7,8 @@ namespace Cr7Sund.Framework.Util
     public static class AssertUtil
     {
 
-        private static bool IsRelease => true;
-        //   !MacroDefine.IsRelease || !MacroDefine.IsProfiler;
+        private static bool IsRelease => 
+          !MacroDefine.IsRelease || !MacroDefine.IsProfiler;
 
 
         #region Extension
@@ -101,6 +101,13 @@ namespace Cr7Sund.Framework.Util
             NUnit.Framework.Assert.AreEqual(expected, actual);
         }
 
+
+        public static void IsFalse(bool expected, string message)
+        {
+            if (IsRelease) return;
+            NUnit.Framework.Assert.IsFalse(expected, message);
+        }
+        
         #endregion
 
     }
