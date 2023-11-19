@@ -75,7 +75,7 @@ namespace Cr7Sund.Framework.Impl
         public int Id { get { return id; } }
 
         public object Name { get; protected set; }
-        public PromiseState CurState { get; private set; }
+        public PromiseState CurState { get; protected set; }
 
 
         #endregion
