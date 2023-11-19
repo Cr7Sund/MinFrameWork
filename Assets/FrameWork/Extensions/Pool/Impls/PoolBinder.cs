@@ -5,9 +5,16 @@ namespace Cr7Sund.Framework.Impl
 {
     public class PoolBinder : Binder, IPoolBinder
     {
-        private static IInstanceProvider poolInstanceProvider = new PoolInstanceProvider();
+        private IInstanceProvider _poolInstanceProvider;
+
         public PoolBinder()
         {
+            _poolInstanceProvider = PoolInstanceProvider.Singleton;
+        }
+
+        public PoolBinder(IInstanceProvider poolInstanceProvider)
+        {
+            _poolInstanceProvider = poolInstanceProvider;
         }
 
         public IPool<T> Get<T>() where T : class, new()
@@ -20,7 +27,7 @@ namespace Cr7Sund.Framework.Impl
                 binding = GetRawBinding();
                 retVal = new Pool<T>();
                 retVal.poolType = type;
-                retVal.InstanceProvider = poolInstanceProvider;
+                retVal.InstanceProvider = _poolInstanceProvider;
                 binding.Bind(type).To(retVal);
             }
             else
@@ -40,7 +47,7 @@ namespace Cr7Sund.Framework.Impl
                 binding = GetRawBinding();
                 retVal = new Pool();
                 retVal.poolType = type;
-                retVal.InstanceProvider = poolInstanceProvider;
+                retVal.InstanceProvider = _poolInstanceProvider;
                 binding.Bind(type).To(retVal);
             }
             else
@@ -52,15 +59,18 @@ namespace Cr7Sund.Framework.Impl
         }
     }
 
-    class PoolInstanceProvider : IInstanceProvider
+    public class PoolInstanceProvider : IInstanceProvider
     {
+        internal static readonly PoolInstanceProvider Singleton = new PoolInstanceProvider();
         public T GetInstance<T>()
         {
+            UnityEngine.Debug.Log(typeof(T));
             return Activator.CreateInstance<T>();
         }
 
         public object GetInstance(Type key)
         {
+            UnityEngine.Debug.Log(key);
             return Activator.CreateInstance(key);
         }
     }

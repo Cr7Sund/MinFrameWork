@@ -17,14 +17,8 @@ namespace Cr7Sund.Framework.Impl
 
         public Injector()
         {
-            if (_reflectionBinder == null)
-            {
-                _reflectionBinder = new InjectorReflectionBinder();
-            }
-            if (_poolBinder == null)
-            {
-                _poolBinder = new PoolBinder();
-            }
+            _reflectionBinder = new InjectorReflectionBinder();
+            _poolBinder = new PoolBinder(PoolInstanceProvider.Singleton);
 
             Factory = _factory;
             Reflector = _reflectionBinder;

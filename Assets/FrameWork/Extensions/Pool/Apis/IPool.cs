@@ -85,7 +85,7 @@ namespace Cr7Sund.Framework.Api
         /// <summary>
         /// Returns the total number of instances currently managed by this pool.
         /// </summary>
-        int instanceCount { get; }
+        int InstanceCount { get; }
 
         /// <summary>
         /// Gets or sets the overflow behavior of this pool.
