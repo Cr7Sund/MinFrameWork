@@ -32,12 +32,7 @@ using System;
 
 namespace Cr7Sund.Framework.Api
 {
-    public interface IPool<T> : IPool
-    {
-        new T GetInstance();
-    }
-
-    public interface IPool : IManagedList
+    public interface IBasePool :IPoolable
     {
         /// <summary>  
         /// A class that provides instances to the pool when it needs them.
@@ -46,24 +41,6 @@ namespace Cr7Sund.Framework.Api
         /// </summary>        
         IInstanceProvider InstanceProvider { get; set; }
 
-        /// <summary>
-        /// The object Type of the first object added to the pool.
-        /// Pool objects must be of the same concrete type. This property enforces that requirement. 
-        /// </summary>    
-        Type poolType { get; set; }
-
-        /// <summary>
-        /// Gets an instance from the pool if one is available.
-        /// </summary>
-        /// <returns>The instance.</returns>
-        object GetInstance();
-
-        /// <summary>
-        /// Returns an instance to the pool.
-        /// </summary>
-        /// If the instance being released implements IPoolable, the Release() method will be called.
-        /// <param name="value">The instance to be return to the pool.</param>
-        void ReturnInstance(object value);
 
         /// <summary>
         /// Remove all instance references from the Pool.
@@ -100,7 +77,57 @@ namespace Cr7Sund.Framework.Api
         /// <value>A PoolInflationType value.</value>
         PoolInflationType inflationType { get; set; }
     }
+    
+    
+    public interface IPool<T> : IBasePool, IManagedList
+    {
+        /// <summary>
+        /// Gets an instance from the pool if one is available.
+        /// </summary>
+        /// <returns>The instance.</returns>
+        T GetInstance();
 
+        /// <summary>
+        /// Returns an instance to the pool.
+        /// </summary>
+        /// If the instance being released implements IPoolable, the Release() method will be called.
+        /// <param name="value">The generic instance to be return to the pool.</param>
+        void ReturnInstance(T value);
+
+        /// <summary>
+        /// Returns an instance to the pool.
+        /// will do conversion nextly, so don't pass the value type object
+        /// </summary>
+        /// If the instance being released implements IPoolable, the Release() method will be called.
+        /// <param name="value">The instance to be return to the pool.</param>
+        void ReturnInstance(object value);
+    }
+
+   
+    public interface IPool : IBasePool, IManagedList
+    {
+        /// <summary>
+        /// The object Type of the first object added to the pool.
+        /// Pool objects must be of the same concrete type. This property enforces that requirement. 
+        /// </summary>    
+        Type poolType { get; set; }
+
+        /// <summary>
+        /// Gets an instance from the pool if one is available.
+        /// </summary>
+        /// <returns>The instance.</returns>
+        object GetInstance();
+
+        /// <summary>
+        /// Returns an instance to the pool.
+        /// </summary>
+        /// If the instance being released implements IPoolable, the Release() method will be called.
+        /// <param name="value">The instance to be return to the pool.</param>
+        void ReturnInstance(object value);
+
+    }
+
+   
     public enum PoolOverflowBehavior
     {
         /// Requesting more than the fixed size will throw an exception.
@@ -112,6 +139,7 @@ namespace Cr7Sund.Framework.Api
         /// Requesting more than the fixed size will return null and not throw an error.
         IGNORE
     }
+
 
     public enum PoolInflationType
     {

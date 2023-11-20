@@ -9,7 +9,7 @@ namespace Cr7Sund.Framework.Impl
 
         public PoolBinder()
         {
-            _poolInstanceProvider = PoolInstanceProvider.Singleton;
+            _poolInstanceProvider = new PoolInstanceProvider();
         }
 
         public PoolBinder(IInstanceProvider poolInstanceProvider)
@@ -17,7 +17,7 @@ namespace Cr7Sund.Framework.Impl
             _poolInstanceProvider = poolInstanceProvider;
         }
 
-        public IPool<T> Get<T>() where T : class, new()
+        public IPool<T> GetOrCreate<T>() where T : class, new()
         {
             var type = typeof(T);
             var binding = GetBinding(type);
@@ -26,7 +26,6 @@ namespace Cr7Sund.Framework.Impl
             {
                 binding = GetRawBinding();
                 retVal = new Pool<T>();
-                retVal.poolType = type;
                 retVal.InstanceProvider = _poolInstanceProvider;
                 binding.Bind(type).To(retVal);
             }
@@ -37,8 +36,8 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-
-        public IPool Get(Type type)
+        
+        public IPool GetOrCreate(Type type)
         {
             var binding = GetBinding(type);
             IPool retVal = null;
@@ -57,11 +56,35 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
+        
+        public IPool Get(Type type)
+        {
+            var binding = GetBinding(type);
+            IPool retVal = null;
+            if (binding != null)
+            {
+                retVal = binding.Value as IPool;
+            }
+
+            return retVal;
+        }
+        
+        public IPool<T> Get<T>() where T : class, new()
+        {
+            var binding = GetBinding(typeof(T));
+            IPool<T> retVal = null;
+            if (binding != null)
+            {
+                retVal = binding.Value as IPool<T>;
+            }
+
+            return retVal;
+        }
+
     }
 
     public class PoolInstanceProvider : IInstanceProvider
     {
-        internal static readonly PoolInstanceProvider Singleton = new PoolInstanceProvider();
         public T GetInstance<T>()
         {
             UnityEngine.Debug.Log(typeof(T));

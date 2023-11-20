@@ -5,10 +5,10 @@ namespace Cr7Sund.Framework.Impl
 {
     public class PoolException : Exception
     {
-        public PoolExceptionType type { get; set; }
+        public Enum type { get; set; }
 
         /// Constructs a PoolException with a message and PoolExceptionType
-        public PoolException(string message, PoolExceptionType exceptionType) : base(message)
+        public PoolException(string message, Enum exceptionType) : base(message)
         {
             type = exceptionType;
         }

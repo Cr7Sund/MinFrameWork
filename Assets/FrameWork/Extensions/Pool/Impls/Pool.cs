@@ -1,74 +1,36 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public class Pool<T> : Pool, IPool<T> where T : class, new()
+    public class Pool<T> : BasePool, IPool<T> where T : class, new()
     {
-        public Pool() : base()
-        {
-            poolType = typeof(T);
-        }
+        private HashSet<T> instancesInUse { get; set; }
+        public override int Available => instancesAvailable.Count;
+        public object Value => throw new System.NotImplementedException();
 
-        new public T GetInstance()
-        {
-            return base.GetInstance() as T;
-        }
-
-        new protected T GetNewInstance()
-        {
-            return new T();
-        }
-
-    }
-
-    public class Pool : IPool, IPoolable
-    {
         /// Stack of instances still in the Pool.
-        protected Stack instancesAvailable;
-        /// A HashSet of the objects checked out of the Pool.
-        protected HashSet<object> instancesInUse;
-        protected int _instanceCount;
-        protected int _size;
-
+        protected Stack<T> instancesAvailable;
 
         public Pool()
         {
-            instancesInUse = new HashSet<object>();
-            instancesAvailable = new Stack();
-
-            _size = 0;
-
-            OverflowBehavior = PoolOverflowBehavior.EXCEPTION;
-            inflationType = PoolInflationType.DOUBLE;
+            instancesInUse = new HashSet<T>();
+            instancesAvailable = new Stack<T>();
         }
 
-        #region IPool Implementation
-        public IInstanceProvider InstanceProvider { get; set; }
-
-        /// The object Type of the first object added to the pool.
-        /// Pool objects must be of the same concrete type. This property enforces that requirement. 
-        public Type poolType { get; set; }
-
-        public int Available => instancesAvailable.Count;
-        public int InstanceCount => _instanceCount;
-
-        public PoolOverflowBehavior OverflowBehavior { get; set; }
-        public PoolInflationType inflationType { get; set; }
-
-
-        public int Count => _size;
-
-        public void SetSize(int size)
+        public override void Clean()
         {
-            this._size = size;
+            instancesAvailable.Clear();
+            instancesInUse.Clear();
+            base.Clean();
         }
 
-        public object GetInstance()
+        #region  IPool Implementation
+
+        public T GetInstance()
         {
-            var instance = getInstance();
+            var instance = GetInstanceInternal();
             if (instance is IPoolable)
             {
                 (instance as IPoolable).Retain();
@@ -76,7 +38,38 @@ namespace Cr7Sund.Framework.Impl
             return instance;
         }
 
-        private object getInstance()
+        public void ReturnInstance(T value)
+        {
+            if (!instancesInUse.Contains(value)) return;
+
+            if (value is IPoolable)
+            {
+                (value as IPoolable).Restore();
+            }
+            instancesInUse.Remove(value);
+            instancesAvailable.Push(value);
+        }
+
+        public void ReturnInstance(object value)
+        {
+            AssertUtil.IsInstanceOf<T>(value);
+
+            ReturnInstance((T)value);
+        }
+
+        private void RemoveInstance(T value)
+        {
+            if (instancesInUse.Contains(value))
+            {
+                instancesInUse.Remove(value);
+            }
+            else
+            {
+                instancesAvailable.Pop();
+            }
+        }
+
+        private T GetInstanceInternal()
         {
             if (instancesAvailable.Count > 0)
             {
@@ -87,10 +80,10 @@ namespace Cr7Sund.Framework.Impl
             }
 
             int instancesToCreate = NewInstanceToCreate();
-            if(instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) { return null; }
+            if (instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) { return null; }
 
-            failIf(instancesToCreate <= 0, "Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE);
-            failIf(InstanceProvider == null, "A Pool of type: " + poolType + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);
+            AssertUtil.Greater(instancesToCreate, 0, new PoolException("Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE));
+            AssertUtil.NotNull(InstanceProvider, new PoolException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER));
 
             for (int i = 0; i < instancesToCreate; i++)
             {
@@ -98,77 +91,28 @@ namespace Cr7Sund.Framework.Impl
                 Add(newInstance);
             }
 
-            return getInstance();
+            return GetInstanceInternal();
         }
 
-        private int NewInstanceToCreate()
+        protected T GetNewInstance()
         {
-            int instancesToCreate = 0;
-
-            // New fixed-size pool. Populate
-            if (Count > 0)
-            {
-                //Illegal overflow. Report and return null
-                failIf(InstanceCount > 0 && OverflowBehavior == PoolOverflowBehavior.EXCEPTION,
-                    "A pool has overflowed its limit.\n\t\tPool type: " + poolType,
-                    PoolExceptionType.OVERFLOW);
-
-                instancesToCreate = Count;
-            }
-            else
-            {
-                if (InstanceCount == 0 || inflationType == PoolInflationType.INCREMENT)
-                {
-                    // 1 or 4 
-                    instancesToCreate = 1;
-                }
-                else
-                {
-                    instancesToCreate = InstanceCount;
-                }
-            }
-
-            return instancesToCreate;
-        }
-
-        protected object GetNewInstance()
-        {
-            return InstanceProvider.GetInstance(poolType);
-        }
-
-        public void ReturnInstance(object value)
-        {
-            if (instancesInUse.Contains(value))
-            {
-                if (value is IPoolable)
-                {
-                    (value as IPoolable).Restore();
-                }
-                instancesInUse.Remove(value);
-                instancesAvailable.Push(value);
-            }
-        }
-
-        public void Clean()
-        {
-            instancesAvailable.Clear();
-            instancesInUse.Clear();
-            _instanceCount = 0;
+            return InstanceProvider.GetInstance<T>();
         }
 
 
         #endregion
 
-        #region IManagedList Implementation
 
-        public object Value => GetInstance();
+
+        #region IManagedList Implementation
 
 
         public IManagedList Add(object value)
         {
-            failIf(value.GetType() != poolType, "Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + poolType.ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH);
+            AssertUtil.IsInstanceOf( typeof(T), value, new PoolException( "Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T).ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
+            
             _instanceCount++;
-            instancesAvailable.Push(value);
+            instancesAvailable.Push((T)value);
             return this;
         }
 
@@ -184,8 +128,10 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Remove(object value)
         {
+            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T).ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
+
             _instanceCount--;
-            RemoveInstance(value);
+            RemoveInstance((T)value);
             return this;
         }
 
@@ -199,62 +145,19 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-        public bool Contains(object o)
+        public bool Contains(object value)
         {
-            return instancesInUse.Contains(o);
+            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T).ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
+
+            return instancesInUse.Contains((T)value);
         }
 
 
         #endregion
 
-        #region  IPoolable Implementation
 
-        public bool IsRetain { get; private set; }
 
-        public void Restore()
-        {
-            Clean();
-            _size = 0;
-        }
 
-        public void Retain()
-        {
-            IsRetain = true;
-        }
 
-        public void Release()
-        {
-            IsRetain = false;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Permanently removes an instance from the Pool
-        /// </summary>
-        /// In the event that the removed Instance is in use, it is removed from instancesInUse.
-        /// Otherwise, it is presumed inactive, and the next available object is popped from
-        /// instancesAvailable.
-        /// <param name="value">An instance to remove permanently from the Pool.</param>
-        protected void RemoveInstance(object value)
-        {
-            failIf(value.GetType() != poolType, "Attempt to remove a instance from a pool that is of the wrong Type:\n\t\tPool type: " + poolType.ToString() + "\n\t\tInstance type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH);
-            if (instancesInUse.Contains(value))
-            {
-                instancesInUse.Remove(value);
-            }
-            else
-            {
-                instancesAvailable.Pop();
-            }
-        }
-
-        protected void failIf(bool condition, string message, PoolExceptionType type)
-        {
-            if (condition)
-            {
-                throw new PoolException(message, type);
-            }
-        }
     }
 }
