@@ -7,12 +7,8 @@ namespace Cr7Sund.Framework.Util
     public static class AssertUtil
     {
 
-        private static bool IsRelease => 
-          !MacroDefine.IsRelease || !MacroDefine.IsProfiler;
-
 
         #region Extension
-
         /// <summary>
         ///  Verifies that a value is within a given range.
         /// </summary>
@@ -27,11 +23,10 @@ namespace Cr7Sund.Framework.Util
 
         public static void InRange<T>(T actual, T low, T high, IComparer<T> comparer)
         {
-            if (IsRelease) return;
 
             if (comparer.Compare(low, actual) > 0 || comparer.Compare(actual, high) > 0)
             {
-                throw new IndexOutOfRangeException($"Assert.InRange() Failure : Actual: {actual}, High :{high} Low: {low}");
+                throw new AssertionException($"Assert.InRange() Failure : Actual: {actual}, High :{high} Low: {low}");
             }
         }
 
@@ -71,43 +66,167 @@ namespace Cr7Sund.Framework.Util
                 return (x as IComparable<T>)?.CompareTo(y) ?? x.CompareTo(y);
             }
         }
-
         #endregion
 
 
         #region Assert Origin
-
         public static void NotNull(object anObject)
         {
-            if (IsRelease) return;
-            NUnit.Framework.Assert.IsNotNull(anObject);
+            NotNull(anObject, "expected value is not null, but it is null");
+        }
+
+        public static void NotNull(object anObject, string message)
+        {
+            if (anObject == null)
+            {
+                throw new AssertionException(message);
+            }
+        }
+
+        public static void NotNull(object anObject, Exception e)
+        {
+            if (anObject == null)
+            {
+                throw e;
+            }
         }
 
         public static void IsInstanceOf<T>(object actual)
         {
-            if (IsRelease) return;
-            NUnit.Framework.Assert.IsInstanceOf<T>(actual);
+            IsInstanceOf<T>(actual, $"expect type{typeof(T)} but it is {actual.GetType()}");
+        }
+
+        public static void IsInstanceOf<T>(object actual, string message)
+        {
+            Assert.IsInstanceOf<T>(actual);
+            if (!typeof(T).IsInstanceOfType(actual))
+            {
+                throw new AssertionException(message);
+            }
+        }
+
+        public static void IsInstanceOf<T>(object actual, Exception e)
+        {
+            if (!typeof(T).IsInstanceOfType(actual))
+            {
+                throw e;
+            }
+        }
+
+        public static void IsInstanceOf(Type excepted, object actual)
+        {
+            IsInstanceOf(excepted, actual, $"type{excepted} disMatch {actual.GetType()}");
+        }
+
+
+        public static void IsInstanceOf(Type excepted, object actual, string message)
+        {
+            if (!excepted.IsInstanceOfType(actual))
+            {
+                throw new AssertionException(message);
+            }
+
+            Assert.IsInstanceOf(excepted, actual);
+        }
+
+        public static void IsInstanceOf(Type excepted, object actual, Exception e)
+        {
+            if (!excepted.IsInstanceOfType(actual))
+            {
+                throw e;
+            }
         }
 
         public static void Greater(int arg1, int arg2)
         {
-            if (IsRelease) return;
-            NUnit.Framework.Assert.Greater(arg1, arg2);
+            if (arg1 <= arg2)
+                throw new AssertionException($"");
         }
 
-        public static void AreEqual(int expected, int actual)
+        public static void Greater(int arg1, int arg2, Exception e)
         {
-            if (IsRelease) return;
-            NUnit.Framework.Assert.AreEqual(expected, actual);
+            if (arg1 <= arg2)
+                throw e;
         }
 
+        public static void LessOrEqual(int arg1, int arg2, string message)
+        {
+            if (arg1 > arg2)
+                throw new AssertionException(message);
+        }
+
+        public static void LessOrEqual(int arg1, int arg2, Exception e)
+        {
+            if (arg1 > arg2)
+                throw e;
+        }
+
+
+        public static void IsFalse(bool expected)
+        {
+            IsFalse(expected, "Expected false, but it's true");
+        }
 
         public static void IsFalse(bool expected, string message)
         {
-            if (IsRelease) return;
-            NUnit.Framework.Assert.IsFalse(expected, message);
+            if (expected)
+            {
+                throw new AssertionException(message);
+            }
         }
-        
+
+
+        public static void IsFalse(bool expected, Exception e)
+        {
+            if (expected)
+            {
+                throw e;
+            }
+
+        }
+
+        public static void IsTrue(bool expected)
+        {
+            IsTrue(expected, "Expected true, but it's false");
+        }
+
+        public static void IsTrue(bool expected, string message)
+        {
+            if (!expected)
+            {
+                throw new AssertionException(message);
+            }
+        }
+
+        public static void IsTrue(bool expected, Exception e)
+        {
+            if (!expected)
+            {
+                throw e;
+            }
+
+        }
+
+        public static void AreEqual(object expected, object actual)
+        {
+            AreEqual(expected, actual, "Expected " + expected + ", but it's " + actual);
+        }
+
+        public static void AreEqual(object expected, object actual, string message)
+        {
+            if (!expected.Equals(actual))
+            {
+                throw new AssertionException(message);
+            }
+        }
+
+        public static void AreEqual(object expected, object actual, Exception e)
+        {
+            if (!expected.Equals(actual))
+            {
+                throw e;
+            }
+        }
         #endregion
 
     }
