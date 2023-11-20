@@ -35,7 +35,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             var promise = new CommandPromise();
 
-            promise.Then<SimplePromiseCommandTwo>().Then<SimplePromiseCommandOne>().Then(() => SimplePromise.result -= 200);
+            promise.Then<SimpleCommandTwo>().Then<SimpleCommandOne>().Then(() => SimplePromise.result -= 200);
 
             promise.Resolve();
             Assert.AreEqual((((0 + 2) * 3) + 1) * 2 - 200, SimplePromise.result);
@@ -46,7 +46,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promise = new CommandPromise();
 
-            promise.Then<SimplePromiseCommandTwo>().Then<SimpleAsyncPromiseCommandOne>().Then<SimplePromiseCommandOne>();
+            promise.Then<SimpleCommandTwo>().Then<SimpleAsyncCommandOne>().Then<SimpleCommandOne>();
 
             promise.Resolve();
             Assert.AreEqual(6, SimplePromise.result);
@@ -61,7 +61,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promise = new CommandPromise();
 
-            var rejectPromise = promise.Then<ExceptionPromiseCommand>() as Promise;
+            var rejectPromise = promise.Then<ExceptionCommand>() as Promise;
             promise.Resolve();
 
             Assert.AreEqual(PromiseState.Resolved, promise.CurState);
@@ -72,7 +72,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_exception_trigger_catch()
         {
             var promise = new CommandPromise();
-            var rejectPromise = promise.Then<ExceptionPromiseCommand>() as Promise;
+            var rejectPromise = promise.Then<ExceptionCommand>() as Promise;
             promise.Resolve();
             Assert.NotNull(SimplePromise.exceptionStr);
         }
@@ -82,7 +82,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promise = new CommandPromise();
 
-            promise.Then<SimplePromiseCommandTwo>().Then<ExceptionPromiseCommand>().Then<SimplePromiseCommandOne>();
+            promise.Then<SimpleCommandTwo>().Then<ExceptionCommand>().Then<SimpleCommandOne>();
 
             promise.Resolve();
             Assert.AreEqual((0 + 2) * 3, SimplePromise.result);

@@ -141,7 +141,7 @@ namespace Cr7Sund.Framework.PromiseTest
             SimplePromise.simulatePromiseOne = new Promise<int>();
 
             var exampleCommand = new SimpleAsyncException_Generic();
-            var exampleCommand1 = new SimplePromiseCommandTwo_Generic();
+            var exampleCommand1 = new SimpleCommandTwoGeneric();
             var finalPromise = promise.Then(exampleCommand.OnExecuteAsync, exampleCommand.OnCatchAsync)
                  .Then(exampleCommand1.OnExecute)
                  .Catch((ex) => SimplePromise.result = -2);

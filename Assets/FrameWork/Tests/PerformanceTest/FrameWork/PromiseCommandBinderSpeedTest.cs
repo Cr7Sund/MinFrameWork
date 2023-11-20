@@ -33,8 +33,8 @@ namespace Cr7Sund.Framework.Tests
                 var promiseBinding = new CommandPromise();
 
                 promiseBinding
-                 .Then<SimplePromiseCommandOne>()
-                 .Then<SimplePromiseCommandTwo>();
+                 .Then<SimpleCommandOne>()
+                 .Then<SimpleCommandTwo>();
                 promiseBinding.Resolve();
             })
             .WarmupCount(PromiseSpeedTest.warmupCount)
@@ -49,12 +49,12 @@ namespace Cr7Sund.Framework.Tests
         {
             Measure.Method(() =>
             {
-                var binder = new PromiseCommandBinder();
+                var binder = new CommandPromiseBinder();
                 injectionBinder.Injector.Inject(binder);
 
                 binder.Bind(SomeEnum.TWO)
-                 .Then<SimplePromiseCommandOne>()
-                 .Then<SimplePromiseCommandTwo>();
+                 .Then<SimpleCommandOne>()
+                 .Then<SimpleCommandTwo>();
 
                 binder.ReactTo(SomeEnum.TWO);
             })

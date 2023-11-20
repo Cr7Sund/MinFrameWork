@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Cr7Sund.Framework.Tests
 {
-    public class TestBasePromiseCommand_Generic : PromiseCommand<int>
+    public class TestBaseCommandGeneric : Command<int>
     {
         public override int OnExecute(int value)
         {
@@ -15,7 +15,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class ExceptionPromiseCommand_Generic : PromiseCommand<int>
+    public class ExceptionCommandGeneric : Command<int>
     {
         public override int OnExecute(int value)
         {
@@ -28,7 +28,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class SimplePromiseCommandOne_Generic : PromiseCommand<int>
+    public class SimpleCommandOneGeneric : Command<int>
     {
         public override void OnCatch(Exception e)
         {
@@ -46,7 +46,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class SimplePromiseCommandTwo_Generic : PromiseCommand<int>
+    public class SimpleCommandTwoGeneric : Command<int>
     {
         public override void OnCatch(Exception e)
         {
@@ -64,7 +64,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class AnotherPromiseCommand : PromiseCommand<float>
+    public class AnotherCommand : Command<float>
     {
         public override float OnExecute(float value)
         {
@@ -78,7 +78,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class ConvertPromiseCommand : PromiseCommand<int, float>
+    public class ConvertCommand : Command<int, float>
     {
         public override float OnExecute(int value)
         {
@@ -89,7 +89,7 @@ namespace Cr7Sund.Framework.Tests
 
     }
 
-    public class SimpleAsyncPromiseCommandOne_Generic : PromiseAsyncCommand<int>
+    public class SimpleAsyncCommandOneGeneric : AsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
@@ -106,7 +106,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class SimpleAsyncPromiseCommandSecond_Generic : PromiseAsyncCommand<int>
+    public class SimpleAsyncCommandSecondGeneric : AsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
@@ -120,7 +120,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class SimpleAsyncException_Generic : PromiseAsyncCommand<int>
+    public class SimpleAsyncException_Generic : AsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
@@ -134,7 +134,7 @@ namespace Cr7Sund.Framework.Tests
     }
 
 
-    public class SimpleAsyncCatch_Generic : PromiseAsyncCommand<int>
+    public class SimpleAsyncCatch_Generic : AsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
@@ -154,7 +154,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class SimpleProgressCommand_Generic : PromiseCommand<int>
+    public class SimpleProgressCommand_Generic : Command<int>
     {
         public const float expectedStep = 0.25f;
         public override int OnExecute(int value)
@@ -169,7 +169,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    public class ConvertPromiseEnumerableCommand : PromiseCommand<IEnumerable<int>, int>
+    public class ConvertEnumerableCommand : Command<IEnumerable<int>, int>
     {
         public override int OnExecute(IEnumerable<int> values)
         {
@@ -181,7 +181,7 @@ namespace Cr7Sund.Framework.Tests
     }
 
 
-    public class TestInjectionCommand : PromiseCommand
+    public class TestInjectionCommand : Command
     {
         [Inject]
         public ISimpleInterface classToBeInjected;

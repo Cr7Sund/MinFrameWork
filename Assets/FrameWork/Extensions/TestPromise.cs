@@ -13,7 +13,7 @@ namespace TestMono
         private const int Count = 100;
         private IInjectionBinder injectionBinder;
         private IPoolBinder poolBinder;
-        private IPromiseCommandBinder promiseBinder;
+        private ICommandPromiseBinder _commandPromiseBinder;
         private ICommandPromise commandPromise;
         private IPromise promise;
 
@@ -27,13 +27,13 @@ namespace TestMono
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
 
-            promiseBinder = new PromiseCommandBinder();
-            injectionBinder.Injector.Inject(promiseBinder);
+            _commandPromiseBinder = new CommandPromiseBinder();
+            injectionBinder.Injector.Inject(_commandPromiseBinder);
 
             commandPromise = new CommandPromise();
             promise = new Promise();
         }
-        // Start is called before the first frame update
+        
         void  TestPromiseCommand()
         {
             for (int a = 0; a < Count; a++)
@@ -41,8 +41,8 @@ namespace TestMono
                 var promiseBinding = new CommandPromise();
 
                 promiseBinding
-                 .Then<SimplePromiseCommandOne>()
-                 .Then<SimplePromiseCommandTwo>();
+                 .Then<SimpleCommandOne>()
+                 .Then<SimpleCommandTwo>();
                 promiseBinding.Resolve();
             }
         }
@@ -51,12 +51,12 @@ namespace TestMono
         {
             for (int a = 0; a < Count; a++)
             {
-                var binder = new PromiseCommandBinder();
+                var binder = new CommandPromiseBinder();
                 injectionBinder.Injector.Inject(binder);
 
                 binder.Bind("SomeEnum.TWO")
-                 .Then<SimplePromiseCommandOne>()
-                 .Then<SimplePromiseCommandTwo>();
+                 .Then<SimpleCommandOne>()
+                 .Then<SimpleCommandTwo>();
 
                 binder.ReactTo("SomeEnum.TWO");
             }
@@ -87,7 +87,7 @@ namespace TestMono
         }
     }
 
-    public class TestSimplePromiseCommandOne : PromiseCommand
+    public class TestSimpleCommandOne : Command
     {
         public override void OnCatch(Exception e)
         {

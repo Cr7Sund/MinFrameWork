@@ -17,7 +17,7 @@ namespace TestMono{
         public static float currentProgress;
     }
 
-    public class TestBasePromiseCommand : PromiseCommand
+    public class TestBaseCommand : Command
     {
         public override void OnExecute()
         {
@@ -25,7 +25,7 @@ namespace TestMono{
         }
     }
 
-    public class ExceptionPromiseCommand : PromiseCommand
+    public class ExceptionCommand : Command
     {
         public override void OnExecute()
         {
@@ -38,7 +38,7 @@ namespace TestMono{
         }
     }
 
-    public class SimplePromiseCommandOne : PromiseCommand
+    public class SimpleCommandOne : Command
     {
         public override void OnCatch(Exception e)
         {
@@ -55,7 +55,7 @@ namespace TestMono{
         }
     }
 
-    public class SimplePromiseCommandTwo : PromiseCommand
+    public class SimpleCommandTwo : Command
     {
         public override void OnCatch(Exception e)
         {
@@ -72,7 +72,7 @@ namespace TestMono{
         }
     }
 
-    public class SimpleAsyncPromiseCommandOne : PromiseAsyncCommand
+    public class SimpleAsyncCommandOne : AsyncCommand
     {
         public override void OnCatch(Exception e)
         {
@@ -94,7 +94,7 @@ namespace TestMono{
         }
     }
 
-    public class SimpleProgressCommand : PromiseCommand
+    public class SimpleProgressCommand : Command
     {
         public const float expectedStep = 0.25f;
         public override void OnExecute()

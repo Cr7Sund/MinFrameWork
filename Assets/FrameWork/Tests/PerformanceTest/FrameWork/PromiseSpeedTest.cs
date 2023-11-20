@@ -33,7 +33,7 @@ namespace Cr7Sund.Framework.Tests
             var promise = new Promise();
             Measure.Method(() =>
             {
-                var command = new SimplePromiseCommandOne();
+                var command = new SimpleCommandOne();
                 promise.Then(command.OnExecute, command.OnCatch, command.OnProgress);
 
             })
@@ -49,7 +49,7 @@ namespace Cr7Sund.Framework.Tests
             var promise = new Promise<int>();
             Measure.Method(() =>
             {
-                var command = new SimplePromiseCommandOne_Generic();
+                var command = new SimpleCommandOneGeneric();
                 promise.Then(command.OnExecute);
 
             })
@@ -68,7 +68,7 @@ namespace Cr7Sund.Framework.Tests
             {
                 var promise = new Promise();
 
-                var command = new SimplePromiseCommandOne();
+                var command = new SimpleCommandOne();
                 promise.Then(command.OnExecute, command.OnCatch, command.OnProgress);
                 promise.Resolve();
             })
@@ -88,8 +88,8 @@ namespace Cr7Sund.Framework.Tests
                 var promise = new Promise();
                 SimplePromise.simulatePromise = new Promise();
 
-                var command1 = new SimplePromiseCommandOne();
-                var command2 = new SimplePromiseCommandTwo();
+                var command1 = new SimpleCommandOne();
+                var command2 = new SimpleCommandTwo();
                 promise
                     .Then(command1.OnExecute, command1.OnCatch, command1.OnProgress)
                     .Then(command2.OnExecute, command2.OnCatch, command2.OnProgress);
@@ -111,9 +111,9 @@ namespace Cr7Sund.Framework.Tests
                            var promise = new Promise();
                            SimplePromise.simulatePromise = new Promise();
 
-                           var command1 = new SimplePromiseCommandTwo();
-                           var command2 = new SimpleAsyncPromiseCommandOne();
-                           var command3 = new SimplePromiseCommandOne();
+                           var command1 = new SimpleCommandTwo();
+                           var command2 = new SimpleAsyncCommandOne();
+                           var command3 = new SimpleCommandOne();
                            promise
                                 .Then(command1.OnExecute, command1.OnCatch, command1.OnProgress)
                                 .Then(command2.OnExecuteAsync, command2.OnCatch, command2.OnProgress)
@@ -137,9 +137,9 @@ namespace Cr7Sund.Framework.Tests
                        {
                            var promise = new Promise<int>();
 
-                           var command1 = new SimplePromiseCommandTwo_Generic();
-                           var command2 = new ConvertPromiseCommand();
-                           var command3 = new AnotherPromiseCommand();
+                           var command1 = new SimpleCommandTwoGeneric();
+                           var command2 = new ConvertCommand();
+                           var command3 = new AnotherCommand();
                            promise
                                 .Then(command1.OnExecute)
                                 .Then(command2.OnExecute)
@@ -165,7 +165,7 @@ namespace Cr7Sund.Framework.Tests
             Measure.Method(() =>
             {
                 promiseBinding
-                 .Then<SimplePromiseCommandOne>();
+                 .Then<SimpleCommandOne>();
             })
             .WarmupCount(warmupCount)
             .MeasurementCount(executeCount)
@@ -181,7 +181,7 @@ namespace Cr7Sund.Framework.Tests
             Measure.Method(() =>
             {
                 promiseBinding
-                                .Then<SimplePromiseCommandOne_Generic>();
+                                .Then<SimpleCommandOneGeneric>();
 
             })
             .WarmupCount(warmupCount)
@@ -200,7 +200,7 @@ namespace Cr7Sund.Framework.Tests
                 var promiseBinding = new CommandPromise();
 
                 promiseBinding
-                 .Then<SimplePromiseCommandOne>();
+                 .Then<SimpleCommandOne>();
                 promiseBinding.Resolve();
             })
             .WarmupCount(warmupCount)
@@ -218,8 +218,8 @@ namespace Cr7Sund.Framework.Tests
                 var promiseBinding = new CommandPromise();
 
                 promiseBinding
-                 .Then<SimplePromiseCommandOne>()
-                 .Then<SimplePromiseCommandTwo>();
+                 .Then<SimpleCommandOne>()
+                 .Then<SimpleCommandTwo>();
                 promiseBinding.Resolve();
             })
             .WarmupCount(warmupCount)
@@ -238,9 +238,9 @@ namespace Cr7Sund.Framework.Tests
                            SimplePromise.simulatePromise = new Promise();
 
                            promiseBinding
-                            .Then<SimplePromiseCommandTwo>()
-                            .Then<SimpleAsyncPromiseCommandOne>()
-                            .Then<SimplePromiseCommandOne>();
+                            .Then<SimpleCommandTwo>()
+                            .Then<SimpleAsyncCommandOne>()
+                            .Then<SimpleCommandOne>();
 
                            promiseBinding.Resolve();
                            SimplePromise.simulatePromise.Resolve();
@@ -260,9 +260,9 @@ namespace Cr7Sund.Framework.Tests
                 var promiseBinding = new CommandPromise<int>();
 
                 promiseBinding
-                .Then<SimplePromiseCommandTwo_Generic>()
-                .Then<ConvertPromiseCommand, float>()
-                .Then<AnotherPromiseCommand>();
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<ConvertCommand, float>()
+                .Then<AnotherCommand>();
 
                 promiseBinding.Resolve(0);
             })
