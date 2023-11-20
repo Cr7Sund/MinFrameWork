@@ -2,7 +2,7 @@
 
 namespace Cr7Sund.Framework.Api
 {
-    public interface IBaseCommand
+    public interface IBaseCommand : IPoolable
     {
         void OnCatch(Exception e);
         void OnProgress(float progress);

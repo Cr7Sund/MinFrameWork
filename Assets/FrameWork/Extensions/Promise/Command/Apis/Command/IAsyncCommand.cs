@@ -3,14 +3,14 @@ using Cr7Sund.Framework.Api;
 
 namespace Cr7Sund.Framework.Api
 {
-    public interface IPromiseAsyncCommand : IBaseCommand
+    public interface IAsyncCommand : IBaseCommand
     {
         IPromise OnExecuteAsync();
         IPromise OnCatchAsync(Exception ex);
     }
 
 
-    public interface IPromiseAsyncCommand<PromisedT> : IBaseCommand
+    public interface IAsyncCommand<PromisedT> : IBaseCommand
     {
         IPromise<PromisedT> OnExecuteAsync(PromisedT value);
         IPromise<PromisedT> OnCatchAsync(Exception ex);

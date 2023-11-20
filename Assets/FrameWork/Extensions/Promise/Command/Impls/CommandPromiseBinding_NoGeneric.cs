@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Framework.Api;
@@ -8,37 +6,43 @@ using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public class PromiseCommandBinding : Binding, IPromiseCommandBinding
+    public class CommandPromiseBinding : Binding, ICommandPromiseBinding
     {
         [Inject] private IPoolBinder _poolBinder;
         [Inject] private IInjectionBinder _injectionBinder;
+        [Inject] private ICommandBinder _commandBinder;
+        
+        public bool UsePooling { get; private set; }
 
-        public bool UsePooling { get; set; }
-
-        public PromiseCommandBinding(Binder.BindingResolver resolver)
+        public CommandPromiseBinding(Binder.BindingResolver resolver):base(resolver)
         {
-            this.resolver = resolver;
             this.ValueConstraint = BindingConstraintType.MANY;
         }
 
         #region IPromiseCommandBinding Implementation
 
-        public new IPromiseCommandBinding To(object value)
+        public ICommandPromiseBinding AsPool()
         {
-            return base.To(value) as IPromiseCommandBinding;
+            this.UsePooling = true;
+            return this;
+        }
+        
+        private new ICommandPromiseBinding To(object value)
+        {
+            return base.To(value) as ICommandPromiseBinding;
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.Then<T>()
+        ICommandPromiseBinding ICommandPromiseBinding.Then<T>()
         {
-            var nextPromise = Instantiate<CommandPromise>();
-            var nextCommand = Instantiate<T>();
+            var nextPromise = InstantiatePromise();
+            var nextCommand = InstantiateCommand<T>();
 
             Then(nextPromise, nextCommand);
 
             return To(nextPromise);
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.ThenAny(params IPromiseCommand[] commands)
+        ICommandPromiseBinding ICommandPromiseBinding.ThenAny(params ICommand[] commands)
         {
             var promiseArray = InstantiateNoValuePromise(commands);
 
@@ -46,21 +50,21 @@ namespace Cr7Sund.Framework.Impl
             return To(nextPromise);
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.ThenAny<T1, T2>()
+        ICommandPromiseBinding ICommandPromiseBinding.ThenAny<T1, T2>()
         {
             InstantiateNoValuePromise<T1, T2>(out var commands, out var promiseArray);
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.ThenAny<T1, T2, T3>()
+        ICommandPromiseBinding ICommandPromiseBinding.ThenAny<T1, T2, T3>()
         {
             InstantiateNoValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.ThenRace(params IPromiseCommand[] commands)
+        ICommandPromiseBinding ICommandPromiseBinding.ThenRace(params ICommand[] commands)
         {
             var promiseArray = InstantiateNoValuePromise(commands);
 
@@ -68,7 +72,7 @@ namespace Cr7Sund.Framework.Impl
             return To(nextPromise);
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.ThenRace<T1, T2>()
+        ICommandPromiseBinding ICommandPromiseBinding.ThenRace<T1, T2>()
         {
             InstantiateNoValuePromise<T1, T2>(out var commands, out var promiseArray);
 
@@ -76,7 +80,7 @@ namespace Cr7Sund.Framework.Impl
             return To(nextPromise);
         }
 
-        IPromiseCommandBinding IPromiseCommandBinding.ThenRace<T1, T2, T3>()
+        ICommandPromiseBinding ICommandPromiseBinding.ThenRace<T1, T2, T3>()
         {
             InstantiateNoValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
 
@@ -90,21 +94,21 @@ namespace Cr7Sund.Framework.Impl
         #region private methods
 
 
-        private ICommandPromise ThenRace(ICommandPromise[] promiseArray, IEnumerable<IPromiseCommand> commands)
+        private ICommandPromise ThenRace(ICommandPromise[] promiseArray, IEnumerable<ICommand> commands)
         {
             var prevValue = FindPrevChainPromise<CommandPromise>();
             return prevValue.ThenRace(promiseArray, commands);
         }
 
 
-        private ICommandPromise ThenAny(ICommandPromise[] promiseArray, IEnumerable<IPromiseCommand> commands)
+        private ICommandPromise ThenAny(ICommandPromise[] promiseArray, IEnumerable<ICommand> commands)
         {
             var prevValue = FindPrevChainPromise<CommandPromise>();
 
             return prevValue.ThenAny(promiseArray, commands);
         }
 
-        private void Then(ICommandPromise nextPromise, IPromiseCommand nextCommand)
+        private void Then(ICommandPromise nextPromise, ICommand nextCommand)
         {
             var prevValue = FindPrevChainPromise<CommandPromise>();
 
@@ -129,21 +133,33 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        private T Instantiate<T>() where T : class, new()
+        private CommandPromise InstantiatePromise()
         {
-            T result = null;
+            CommandPromise result = null;
 
             if (UsePooling)
             {
-                var pool = _poolBinder.Get<T>();
-                result = pool.GetInstance() as T;
+                var pool = _poolBinder.GetOrCreate<CommandPromise>();
+                result = pool.GetInstance();
+                if (result.IsRetain)
+                {
+                    _injectionBinder.Injector.Inject(result);
+                }
             }
             else
             {
-                result = new T();
+                result = new CommandPromise();
             }
 
-            if (!UsePooling || (result is IPoolable poolable && poolable.IsRetain))
+            return result;
+        }
+
+        private T InstantiateCommand<T>() where T : class, IBaseCommand
+        {
+            T result = null;
+
+            result = _commandBinder.Get<T>();
+            if (!UsePooling || result is IPoolable { IsRetain: false })
             {
                 _injectionBinder.Injector.Inject(result);
             }
@@ -152,46 +168,46 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
-        private void InstantiateNoValuePromise<T1, T2>(out List<IPromiseCommand> commands, out CommandPromise[] promiseArray)
-            where T1 : class, IPromiseCommand, new()
-            where T2 : class, IPromiseCommand, new()
+        private void InstantiateNoValuePromise<T1, T2>(out List<ICommand> commands, out CommandPromise[] promiseArray)
+            where T1 : class, ICommand, new()
+            where T2 : class, ICommand, new()
         {
-            commands = new List<IPromiseCommand>
+            commands = new List<ICommand>
             {
-                Instantiate<T1>(),
-                Instantiate<T2>(),
+                InstantiateCommand<T1>(),
+                InstantiateCommand<T2>(),
             };
             promiseArray = new CommandPromise[commands.Count];
             for (int i = 0; i < promiseArray.Length; i++)
             {
-                promiseArray[i] = Instantiate<CommandPromise>();
+                promiseArray[i] = InstantiatePromise();
             }
         }
 
-        private void InstantiateNoValuePromise<T1, T2, T3>(out List<IPromiseCommand> commands, out CommandPromise[] promiseArray)
-            where T1 : class, IPromiseCommand, new()
-            where T2 : class, IPromiseCommand, new()
-            where T3 : class, IPromiseCommand, new()
+        private void InstantiateNoValuePromise<T1, T2, T3>(out List<ICommand> commands, out CommandPromise[] promiseArray)
+            where T1 : class, ICommand, new()
+            where T2 : class, ICommand, new()
+            where T3 : class, ICommand, new()
         {
-            commands = new List<IPromiseCommand>
+            commands = new List<ICommand>
             {
-                Instantiate<T1>(),
-                Instantiate<T2>(),
-                Instantiate<T3>(),
+                InstantiateCommand<T1>(),
+                InstantiateCommand<T2>(),
+                InstantiateCommand<T3>(),
             };
             promiseArray = new CommandPromise[commands.Count];
             for (int i = 0; i < promiseArray.Length; i++)
             {
-                promiseArray[i] = Instantiate<CommandPromise>();
+                promiseArray[i] = InstantiatePromise();
             }
         }
 
-        private CommandPromise[] InstantiateNoValuePromise(IPromiseCommand[] commands)
+        private CommandPromise[] InstantiateNoValuePromise(ICommand[] commands)
         {
             var promiseArray = new CommandPromise[commands.Count()];
             for (int i = 0; i < promiseArray.Length; i++)
             {
-                promiseArray[i] = Instantiate<CommandPromise>();
+                promiseArray[i] = InstantiatePromise();
             }
 
             return promiseArray;

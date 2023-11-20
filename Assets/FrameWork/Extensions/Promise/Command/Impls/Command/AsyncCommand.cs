@@ -4,7 +4,7 @@ using Cr7Sund.Framework.Impl;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public abstract class PromiseAsyncCommand<PromisedT> : PromiseCommand<PromisedT>, IPromiseAsyncCommand<PromisedT>
+    public abstract class AsyncCommand<PromisedT> : Command<PromisedT>, IAsyncCommand<PromisedT>
     {
         public sealed override PromisedT OnExecute(PromisedT value)
         {
@@ -17,7 +17,7 @@ namespace Cr7Sund.Framework.Impl
 
     }
 
-    public abstract class PromiseAsyncCommand<PromisedT, ConvertedT> : PromiseCommand<PromisedT, ConvertedT>, IPromiseAsyncCommand<PromisedT, ConvertedT>
+    public abstract class AsyncCommand<PromisedT, ConvertedT> : Command<PromisedT, ConvertedT>, IPromiseAsyncCommand<PromisedT, ConvertedT>
     {
         public sealed override ConvertedT OnExecute(PromisedT value)
         {

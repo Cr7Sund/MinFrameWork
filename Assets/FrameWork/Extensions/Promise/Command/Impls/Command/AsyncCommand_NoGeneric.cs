@@ -1,10 +1,9 @@
 ﻿using System;
 using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public abstract class PromiseAsyncCommand : PromiseCommand, IPromiseAsyncCommand
+    public abstract class AsyncCommand : Command, IAsyncCommand
     {
         public sealed override void OnExecute()
         {

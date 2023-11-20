@@ -5,7 +5,7 @@ using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public class PromiseCommandBinder : Binder, IPromiseCommandBinder
+    public class CommandPromiseBinder : Binder, ICommandPromiseBinder
     {
         [Inject]
         private IInjectionBinder _injectionBinder;
@@ -30,6 +30,7 @@ namespace Cr7Sund.Framework.Impl
 
             var firstCommand = values[0] as ICommandPromise;
             firstCommand.Resolve();
+            firstCommand.Release();
         }
 
 
@@ -37,24 +38,24 @@ namespace Cr7Sund.Framework.Impl
 
         protected override IBinding GetRawBinding()
         {
-            var binding = new PromiseCommandBinding(Resolver);
+            var binding = new CommandPromiseBinding(Resolver);
             _injectionBinder.Injector.Inject(binding);
             return binding;
         }
 
-        public new virtual IPromiseCommandBinding Bind(object trigger)
+        public new virtual ICommandPromiseBinding Bind(object trigger)
         {
-            return base.Bind(trigger) as IPromiseCommandBinding;
+            return base.Bind(trigger) as ICommandPromiseBinding;
         }
 
-        public new IPromiseCommandBinding GetBinding(object key)
+        public new ICommandPromiseBinding GetBinding(object key)
         {
-            return base.GetBinding(key) as IPromiseCommandBinding;
+            return base.GetBinding(key) as ICommandPromiseBinding;
         }
 
-        public new IPromiseCommandBinding GetBinding(object key, object name)
+        public new ICommandPromiseBinding GetBinding(object key, object name)
         {
-            return this.GetBinding(key, null) as IPromiseCommandBinding;
+            return this.GetBinding(key, null) as ICommandPromiseBinding;
         }
         #endregion
     }

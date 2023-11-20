@@ -5,10 +5,9 @@ using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Framework.Impl
 {
-    public class PromiseCommandBinder<PromisedT> : Binder, IPromiseCommandBinder<PromisedT>
+    public class CommandPromiseBinder<PromisedT> : Binder, ICommandPromiseBinder<PromisedT>
     {
-        [Inject]
-        private IInjectionBinder _injectionBinder;
+        [Inject] private IInjectionBinder _injectionBinder;
 
 
         public void ReactTo(object trigger, PromisedT data)
@@ -30,6 +29,7 @@ namespace Cr7Sund.Framework.Impl
 
             var firstCommand = values[0] as ICommandPromise<PromisedT>;
             firstCommand.Resolve(data);
+            firstCommand.Release();
         }
 
 
@@ -37,26 +37,26 @@ namespace Cr7Sund.Framework.Impl
 
         protected override IBinding GetRawBinding()
         {
-            var binding = new PromiseCommandBinding<PromisedT>(Resolver);
+            var binding = new CommandPromiseBinding<PromisedT>(Resolver);
             _injectionBinder.Injector.Inject(binding);
             return binding;
         }
 
-        public new virtual IPromiseCommandBinding<PromisedT> Bind(object trigger)
+        public new virtual ICommandPromiseBinding<PromisedT> Bind(object trigger)
         {
-            return base.Bind(trigger) as IPromiseCommandBinding<PromisedT>;
+            return base.Bind(trigger) as ICommandPromiseBinding<PromisedT>;
         }
 
-        public new IPromiseCommandBinding<PromisedT> GetBinding(object key)
+        public new ICommandPromiseBinding<PromisedT> GetBinding(object key)
         {
-            return base.GetBinding(key) as IPromiseCommandBinding<PromisedT>;
+            return base.GetBinding(key) as ICommandPromiseBinding<PromisedT>;
         }
 
-        public new IPromiseCommandBinding<PromisedT> GetBinding(object key, object name)
+        public new ICommandPromiseBinding<PromisedT> GetBinding(object key, object name)
         {
-            return this.GetBinding(key, null) as IPromiseCommandBinding<PromisedT>;
+            return this.GetBinding(key, null) as ICommandPromiseBinding<PromisedT>;
         }
+
         #endregion
     }
-
 }

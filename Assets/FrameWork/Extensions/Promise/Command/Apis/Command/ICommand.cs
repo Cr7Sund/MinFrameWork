@@ -1,16 +1,16 @@
 ﻿namespace Cr7Sund.Framework.Api
 {
-    public interface IPromiseCommand : IBaseCommand
+    public interface ICommand : IBaseCommand
     {
         void OnExecute();
     }
     
-    public interface IPromiseCommand<PromisedT> : IBaseCommand
+    public interface ICommand<PromisedT> : IBaseCommand
     {
         PromisedT OnExecute(PromisedT value);
     }
 
-    public interface IPromiseCommand<PromisedT, ConvertedT> : IBaseCommand
+    public interface ICommand<PromisedT, ConvertedT> : IBaseCommand
     {
         ConvertedT OnExecute(PromisedT value);
     }

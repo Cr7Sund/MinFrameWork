@@ -9,6 +9,7 @@ namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromise : Promise, ICommandPromise
     {
+        [Inject] private IPoolBinder _poolBinder;
         protected IBaseCommand _command;
 
         public CommandPromise(PromiseState promiseState) : base(promiseState) { }
@@ -27,9 +28,7 @@ namespace Cr7Sund.Framework.Impl
         }
 
         #endregion
-
-
-
+        
         #region IPromiseCommand Implementation
 
         public float SliceLength { get; set; }
@@ -37,7 +36,7 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Execute()
         {
-            if (_command is IPromiseAsyncCommand asyncCommand)
+            if (_command is IAsyncCommand asyncCommand)
             {
                 IPromise resultPromise = null;
                 try
@@ -47,6 +46,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     this.Catch(e);
+                    this.Release();
                     throw e;
                 }
 
@@ -54,11 +54,18 @@ namespace Cr7Sund.Framework.Impl
                 resultPromise
                         .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
                         .Then(
-                            () => this.Resolve(),
-                            ex => this.Reject(ex)
-                        );
+                            () =>
+                            {
+                                this.Resolve();
+                                this.Release();
+                            },
+                            ex =>
+                            {
+                                this.Reject(ex);
+                                this.Release();
+                            });
             }
-            else if (_command is IPromiseCommand command)
+            else if (_command is ICommand command)
             {
                 try
                 {
@@ -67,6 +74,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     this.Catch(e);
+                    this.Release();
                     throw e;
                 }
 
@@ -77,6 +85,7 @@ namespace Cr7Sund.Framework.Impl
                 {
                     this.ReportProgress(progress);
                 }
+                this.Release();
             }
 
         }
@@ -90,16 +99,16 @@ namespace Cr7Sund.Framework.Impl
             _command.OnProgress(progress);
         }
 
-        public virtual ICommandPromise Then<T>() where T : IPromiseCommand, new()
+        public virtual ICommandPromise Then<T>() where T : ICommand, new()
         {
             var resultPromise = new CommandPromise();
 
             return this.Then(resultPromise, new T());
         }
 
-        public virtual ICommandPromise Then(ICommandPromise resultPromise, IPromiseCommand promiseCommand)
+        public virtual ICommandPromise Then(ICommandPromise resultPromise, ICommand command)
         {
-            ((CommandPromise)resultPromise)._command = promiseCommand;
+            ((CommandPromise)resultPromise)._command = command;
 
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
             ProgressHandlers(resultPromise, resultPromise.Progress);
@@ -107,28 +116,28 @@ namespace Cr7Sund.Framework.Impl
             return resultPromise;
         }
       
-        public ICommandPromise ThenAll(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        public ICommandPromise ThenAll(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             FulfillPromise(promises, commands);
 
             return Then(() => AllInternal(promises)) as ICommandPromise;
         }
 
-        public ICommandPromise ThenRace(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        public ICommandPromise ThenRace(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             FulfillPromise(promises, commands);
 
             return Then(() => RaceInternal(promises)) as ICommandPromise;
         }
 
-        public ICommandPromise ThenAny(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        public ICommandPromise ThenAny(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             FulfillPromise(promises, commands);
 
             return Then(() => AnyInternal(promises)) as ICommandPromise;
         }
 
-        private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<IPromiseCommand> commands)
+        private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             AssertUtil.AreEqual(commands.Count(), promises.Count());
             var commandArray = commands.ToArray();
@@ -153,12 +162,22 @@ namespace Cr7Sund.Framework.Impl
         public void Restore()
         {
             IsRetain = false;
+
+            this.CurState = PromiseState.Pending;
+            this.Name = string.Empty;
+
+            _command = null;
         }
 
-        public virtual void Release() { }
+        public virtual void Release()
+        {
+            if (!IsRetain) return;
+            _command?.Release();
+            _poolBinder?.Get<CommandPromise>().ReturnInstance(this);
+        }
 
         #endregion
 
-
+        public IBaseCommand Test_GetCommand() => _command;
     }
 }

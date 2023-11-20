@@ -18,7 +18,7 @@ namespace Cr7Sund.Framework.Impl
         public Injector()
         {
             _reflectionBinder = new InjectorReflectionBinder();
-            _poolBinder = new PoolBinder(PoolInstanceProvider.Singleton);
+            _poolBinder = new PoolBinder();
 
             Factory = _factory;
             Reflector = _reflectionBinder;
@@ -56,7 +56,7 @@ namespace Cr7Sund.Framework.Impl
 
                 if (binding.Type == InjectionBindingType.POOL)
                 {
-                    var pool = PoolBinder.Get(reflectionType);
+                    var pool = PoolBinder.GetOrCreate(reflectionType);
                     failIf(pool == null, "Attempt to instantiate a class with a null pool", InjectionExceptionType.NONEMPTY_CONSTRUCTOR);
                     retVal = pool.GetInstance();
                 }

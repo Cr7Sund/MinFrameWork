@@ -11,7 +11,7 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        ICommandPromise<PromisedT> Then<T>() where T : IPromiseCommand<PromisedT>, new();
+        ICommandPromise<PromisedT> Then<T>() where T : ICommand<PromisedT>, new();
 
         // ICommandPromise<ConvertedT> Then<T, ConvertedT>() where T : ICommandPromise<ConvertedT>, new();
         /// <summary>
@@ -19,15 +19,15 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         /// <param name="resultPromise"></param>
         /// <returns></returns>
-        ICommandPromise<PromisedT> Then(ICommandPromise<PromisedT> resultPromise, IPromiseCommand<PromisedT> command);
+        ICommandPromise<PromisedT> Then(ICommandPromise<PromisedT> resultPromise, ICommand<PromisedT> command);
 
-        ICommandPromise<ConvertedT> Then<T, ConvertedT>() where T : IPromiseCommand<PromisedT, ConvertedT>, new();
-        ICommandPromise<ConvertedT> Then<ConvertedT>(ICommandPromise<ConvertedT> resultPromise, IPromiseCommand<PromisedT, ConvertedT> command);
+        ICommandPromise<ConvertedT> Then<T, ConvertedT>() where T : ICommand<PromisedT, ConvertedT>, new();
+        ICommandPromise<ConvertedT> Then<ConvertedT>(ICommandPromise<ConvertedT> resultPromise, ICommand<PromisedT, ConvertedT> command);
 
-        ICommandPromise<IEnumerable<PromisedT>> ThenAll(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands);
-        ICommandPromise<PromisedT> ThenFirst(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands);
-        ICommandPromise<PromisedT> ThenAny(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands);
-        ICommandPromise<PromisedT> ThenRace(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<IPromiseCommand<PromisedT>> commands);
+        ICommandPromise<IEnumerable<PromisedT>> ThenAll(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<ICommand<PromisedT>> commands);
+        ICommandPromise<PromisedT> ThenFirst(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<ICommand<PromisedT>> commands);
+        ICommandPromise<PromisedT> ThenAny(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<ICommand<PromisedT>> commands);
+        ICommandPromise<PromisedT> ThenRace(IEnumerable<ICommandPromise<PromisedT>> promises, IEnumerable<ICommand<PromisedT>> commands);
 
         void Execute(PromisedT value);
         void Progress(float progress);
