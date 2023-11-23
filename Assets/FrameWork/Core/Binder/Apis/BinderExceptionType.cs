@@ -4,6 +4,8 @@ namespace Cr7Sund.Framework.Api
     {
 
         // there exist boxing operation
-        EXIST_BOXING
+        EXIST_BOXING,
+        // bind different binding with same key and same name
+        CONFLICT_IN_BINDER
     }
 }

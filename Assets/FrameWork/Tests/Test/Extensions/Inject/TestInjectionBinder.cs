@@ -345,7 +345,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestUnnamedInstanceBeforeNamedInstance()
         {
             binder.Bind<ISimpleInterface>().To<PolymorphicClass>();
-            binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
+            binder.Bind<ISimpleInterface>().ToName(SomeEnum.ONE).To<SimpleInterfaceImplementer>();
 
             var instance1 = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE);
             var instance2 = binder.GetInstance<ISimpleInterface>();

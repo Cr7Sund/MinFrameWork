@@ -153,7 +153,12 @@ namespace Cr7Sund.Framework.Impl
                         {
                             dict.Remove(bindingName);
                         }
+                        else
+                        {
+                            throw new BinderException("Binder cannot register a new Bindings when the binder is in a conflicted state.\nConflicts: ", BinderExceptionType.CONFLICT_IN_BINDER);
+                        }
                     }
+
                 }
             }
             else

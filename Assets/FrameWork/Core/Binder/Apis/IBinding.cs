@@ -56,6 +56,7 @@ namespace Cr7Sund.Framework.Api
         IBinding To<T>();
         /// <summary>
         ///     Qualify a binding using a value, such as a string or enum
+        ///     should be call first otherwise maybe cause an conflict BinderException
         /// </summary>
         IBinding ToName(object name);
 

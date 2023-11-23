@@ -30,8 +30,8 @@ namespace Cr7Sund.Framework.Tests
         public void TestNameBinding()
         {
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassOne>();
-            binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>().ToName("marker");
-            binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassThree>().ToName("strange");
+            binder.Bind<InjectableSuperClass>().ToName("marker").To<InjectableDerivedClassTwo>();
+            binder.Bind<InjectableSuperClass>().ToName("strange").To<InjectableDerivedClassThree>();
 
             var binding = binder.GetBinding<InjectableSuperClass>();
             Assert.IsNotNull(binding);
@@ -64,17 +64,7 @@ namespace Cr7Sund.Framework.Tests
             binding = binder.GetBinding<InjectableSuperClass>();
             Assert.IsNull(binding);
         }
-
-
-        [Test]
-        public void TestNotOverwriteBinding()
-        {
-            binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassOne>().ToName("duplicate");
-            binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>().ToName("duplicate");
-
-            Assert.AreEqual(typeof(InjectableDerivedClassOne), binder.GetBinding<InjectableSuperClass>("duplicate").Value as Type);
-        }
-
+        
         [Test]
         public void TestOverwriteBinding()
         {
@@ -82,6 +72,16 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>().ToName("duplicate");
 
             Assert.AreEqual(typeof(InjectableDerivedClassTwo), binder.GetBinding<InjectableSuperClass>("duplicate").Value as Type);
+        }
+ 
+        [Test]
+        public void TestConflict_Binder_exception()
+        {
+            binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassOne>();
+            
+
+            var ex =Assert.Throws<BinderException>(() => { binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>();});
+            UnityEngine.Assertions.Assert.AreEqual(BinderExceptionType.CONFLICT_IN_BINDER, ex.Type);
         }
     }
 }
