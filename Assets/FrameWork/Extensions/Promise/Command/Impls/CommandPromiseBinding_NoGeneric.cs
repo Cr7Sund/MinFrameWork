@@ -18,6 +18,7 @@ namespace Cr7Sund.Framework.Impl
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             ValueConstraint = BindingConstraintType.MANY;
+            KeyConstraint = BindingConstraintType.ONE;
         }
 
 

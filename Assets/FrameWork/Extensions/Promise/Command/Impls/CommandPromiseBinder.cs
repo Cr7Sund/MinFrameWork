@@ -25,9 +25,11 @@ namespace Cr7Sund.Framework.Impl
                 command.SequenceID = i;
             }
 
-            var firstCommand = binding.FirstPromise;
+            // var lastCommand = values[^1] as ICommandPromise<PromisedT>;
+            // lastCommand.Catch((ex) => UnityEngine.Debug.Log(ex));
+
+            ICommandPromise<PromisedT> firstCommand = binding.FirstPromise;
             firstCommand.Resolve(data);
-            firstCommand.Release();
         }
 
 

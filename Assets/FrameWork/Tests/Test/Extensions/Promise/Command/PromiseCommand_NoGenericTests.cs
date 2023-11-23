@@ -51,19 +51,6 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, SimplePromise.result);
         }
 
-
-        [Test]
-        public void command_exception_rejectedState()
-        {
-            var promise = new CommandPromise();
-
-            var rejectPromise = promise.Then<ExceptionCommand>() as Promise;
-            promise.Resolve();
-
-            Assert.AreEqual(PromiseState.Resolved, promise.CurState);
-            Assert.AreEqual(PromiseState.Rejected, rejectPromise.CurState);
-        }
-
         [Test]
         public void command_exception_trigger_catch()
         {

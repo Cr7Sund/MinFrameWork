@@ -670,9 +670,9 @@ namespace Cr7Sund.Framework.Impl
 
         protected virtual void ClearHandlers()
         {
-            _rejectHandlers = null;
-            _resolveHandlers = null;
-            _progressHandlers = null;
+            _rejectHandlers.Clear();
+            _resolveHandlers.Clear();
+            _progressHandlers.Clear();
         }
 
         protected void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)

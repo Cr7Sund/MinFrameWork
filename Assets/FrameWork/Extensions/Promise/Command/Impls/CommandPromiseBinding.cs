@@ -17,6 +17,7 @@ namespace Cr7Sund.Framework.Impl
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             ValueConstraint = BindingConstraintType.MANY;
+            KeyConstraint = BindingConstraintType.ONE;
         }
 
 
@@ -66,7 +67,7 @@ namespace Cr7Sund.Framework.Impl
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenAny(
             params ICommand<PromisedT>[] commands)
         {
-            var promiseArray = InstantiateValuePromise(commands);
+            var promiseArray = InstantiateArrayPromise(commands);
 
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
@@ -74,7 +75,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenAny<T1, T2>()
         {
-            InstantiateValuePromise<T1, T2>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2>(out var commands, out var promiseArray);
 
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
@@ -82,7 +83,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenAny<T1, T2, T3>()
         {
-            InstantiateValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2, T3>(out var commands, out var promiseArray);
 
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
@@ -91,7 +92,7 @@ namespace Cr7Sund.Framework.Impl
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenRace(
             params ICommand<PromisedT>[] commands)
         {
-            var promiseArray = InstantiateValuePromise(commands);
+            var promiseArray = InstantiateArrayPromise(commands);
 
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
@@ -99,7 +100,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenRace<T1, T2>()
         {
-            InstantiateValuePromise<T1, T2>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2>(out var commands, out var promiseArray);
 
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
@@ -107,7 +108,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenRace<T1, T2, T3>()
         {
-            InstantiateValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2, T3>(out var commands, out var promiseArray);
 
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
@@ -116,7 +117,7 @@ namespace Cr7Sund.Framework.Impl
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenFirst(
             params ICommand<PromisedT>[] commands)
         {
-            var promiseArray = InstantiateValuePromise(commands);
+            var promiseArray = InstantiateArrayPromise(commands);
 
             var nextPromise = ThenFirst(promiseArray, commands);
             return To(nextPromise);
@@ -124,7 +125,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenFirst<T1, T2>()
         {
-            InstantiateValuePromise<T1, T2>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2>(out var commands, out var promiseArray);
 
             var nextPromise = ThenFirst(promiseArray, commands);
             return To(nextPromise);
@@ -132,7 +133,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.ThenFirst<T1, T2, T3>()
         {
-            InstantiateValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2, T3>(out var commands, out var promiseArray);
 
             var nextPromise = ThenFirst(promiseArray, commands);
             return To(nextPromise);
@@ -198,6 +199,17 @@ namespace Cr7Sund.Framework.Impl
             return _firstPromise as ICommandPromise<T>;
         }
 
+        private T InstantiateCommand<T>() where T : class, IBaseCommand
+        {
+            var result = _commandBinder.Get<T>();
+            if (result == null)
+            {
+                result = _commandBinder.GetOrCreate<T>();
+                _injectionBinder.Injector.Inject(result);
+            }
+            return result;
+        }
+
         private ICommandPromise<T> InstantiatePromise<T>()
         {
             CommandPromise<T> result;
@@ -235,30 +247,20 @@ namespace Cr7Sund.Framework.Impl
 
             return result;
         }
-
-        private T InstantiateCommand<T>() where T : class, IBaseCommand
-        {
-            var result = _commandBinder.Get<T>();
-            if (result == null)
-            {
-                result = _commandBinder.GetOrCreate<T>();
-                _injectionBinder.Injector.Inject(result);
-            }
-            return result;
-        }
-
-        private ICommandPromise<PromisedT>[] InstantiateValuePromise(ICommand<PromisedT>[] commands)
+        
+        private ICommandPromise<PromisedT>[] InstantiateArrayPromise(ICommand<PromisedT>[] commands)
         {
             var promiseArray = new ICommandPromise<PromisedT>[commands.Count()];
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise<PromisedT>();
+                _promiseList.Add(promiseArray[i]);
             }
 
             return promiseArray;
         }
 
-        private void InstantiateValuePromise<T1, T2>(out List<ICommand<PromisedT>> commands,
+        private void InstantiateArrayPromise<T1, T2>(out List<ICommand<PromisedT>> commands,
             out ICommandPromise<PromisedT>[] promiseArray)
             where T1 : class, ICommand<PromisedT>, new()
             where T2 : class, ICommand<PromisedT>, new()
@@ -272,10 +274,12 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise<PromisedT>();
+                _promiseList.Add(promiseArray[i]);
+                _promiseList.Add(promiseArray[i]);
             }
         }
 
-        private void InstantiateValuePromise<T1, T2, T3>(out List<ICommand<PromisedT>> commands,
+        private void InstantiateArrayPromise<T1, T2, T3>(out List<ICommand<PromisedT>> commands,
             out ICommandPromise<PromisedT>[] promiseArray)
             where T1 : class, ICommand<PromisedT>, new()
             where T2 : class, ICommand<PromisedT>, new()
@@ -291,6 +295,30 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise<PromisedT>();
+                _promiseList.Add(promiseArray[i]);
+            }
+        }
+
+        private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
+        private int _curCount = 0;
+
+        private void ReleasePromise()
+        {
+            int promiseLength = _value.Count + _promiseList.Count;
+            _curCount++;
+            if (_curCount == promiseLength)
+            {
+                var values = Value as object[];
+                foreach (var item in values)
+                {
+                    var poolable = item as IPoolable;
+                    poolable.Release();
+                }
+
+                foreach (var item in _promiseList)
+                {
+                    item.Release();
+                }
             }
         }
         #endregion

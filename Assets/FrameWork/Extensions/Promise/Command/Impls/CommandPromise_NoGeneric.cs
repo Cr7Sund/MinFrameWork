@@ -8,18 +8,16 @@ namespace Cr7Sund.Framework.Impl
     public class CommandPromise : Promise, ICommandPromise
     {
         private IBaseCommand _command;
-        
+
         public IPoolBinder PoolBinder;
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
 
-        public IBaseCommand Test_GetCommand()
-        {
-            return _command;
-        }
 
+
+        
         #region IPromise Implementation
         protected override Promise<T> GetRawPromise<T>()
         {
@@ -74,7 +72,6 @@ namespace Cr7Sund.Framework.Impl
                 {
                     ReportProgress(progress);
                 }
-                Release();
             }
 
         }
@@ -126,24 +123,7 @@ namespace Cr7Sund.Framework.Impl
 
             return Then(() => AnyInternal(promises)) as ICommandPromise;
         }
-
-        private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
-        {
-            var commandPromises = promises as ICommandPromise[] ?? promises.ToArray();
-            var commandArray = commands.ToArray();
-            AssertUtil.AreEqual(commandPromises.Length, commandArray.Length);
-
-            commandPromises.Each((promise, index) =>
-            {
-                Then(promise, commandArray[index]);
-            });
-        }
-
-        private void WrapProgress(float progress)
-        {
-            ReportProgress((progress + SequenceID) * SliceLength);
-        }
-
+        
         public override void Reject(Exception ex)
         {
             base.Reject(ex);
@@ -154,6 +134,28 @@ namespace Cr7Sund.Framework.Impl
         {
             base.Resolve();
             Release();
+        }
+        
+        public IBaseCommand Test_GetCommand()
+        {
+            return _command;
+        }
+        
+        private void WrapProgress(float progress)
+        {
+            ReportProgress((progress + SequenceID) * SliceLength);
+        }
+        
+        private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
+        {
+            var commandPromises = promises as ICommandPromise[] ?? promises.ToArray();
+            var commandArray = commands.ToArray();
+            AssertUtil.AreEqual(commandPromises.Length, commandArray.Length);
+
+            commandPromises.Each((promise, index) =>
+            {
+                Then(promise, commandArray[index]);
+            });
         }
         #endregion
 
@@ -175,8 +177,8 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Release()
         {
-            if (!IsRetain) return;
-            PoolBinder?.Get<CommandPromise>().ReturnInstance(this);
+            var pool = PoolBinder?.Get<CommandPromise>();
+            pool?.ReturnInstance(this);
         }
         #endregion
     }

@@ -18,58 +18,7 @@ namespace Cr7Sund.Framework.Impl
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
 
-        private  void ExecuteInternal(PromisedT value)
-        {
-            var command = _command;
-            if (command is IAsyncCommand<PromisedT> asyncCommand)
-            {
-                IPromise<PromisedT> resultPromise;
-                try
-                {
-                    resultPromise = asyncCommand.OnExecuteAsync(value);
-                }
-                catch (Exception e)
-                {
-                    Catch(e);
-                    Release();
-                    throw e;
-                }
 
-                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
-                resultPromise
-                    .Progress(WrapProgress)
-                    .Then(Resolve, Reject);
-            }
-            else if (command is ICommand<PromisedT> promiseCommand)
-            {
-                PromisedT newValue;
-                try
-                {
-                    newValue = promiseCommand.OnExecute(value);
-                }
-                catch (Exception e)
-                {
-                    Catch(e);
-                    Release();
-                    throw e;
-                }
-
-                Resolve(newValue);
-
-                float progress = SliceLength * SequenceID;
-                if (progress > 0)
-                {
-                    ReportProgress(progress);
-                }
-
-                Release();
-            }
-        }
-
-        public IBaseCommand Test_GetCommand()
-        {
-            return _command;
-        }
 
         #region IPromiseCommand Implementation
         public void Execute(PromisedT value)
@@ -175,14 +124,12 @@ namespace Cr7Sund.Framework.Impl
             return Then(_ => Any<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
 
-        private void FulfillPromise(IEnumerable<ICommandPromise<PromisedT>> promises,
-            IEnumerable<ICommand<PromisedT>> commands)
-        {
-            AssertUtil.AreEqual(commands.Count(), promises.Count());
-            var commandArray = commands.ToArray();
 
-            promises.Each((promise, index) => { Then(promise, commandArray[index]); });
+        public IBaseCommand Test_GetCommand()
+        {
+            return _command;
         }
+
         public override void Reject(Exception ex)
         {
             base.Reject(ex);
@@ -200,6 +147,62 @@ namespace Cr7Sund.Framework.Impl
             ReportProgress((progress + SequenceID) * SliceLength);
         }
         
+        private void FulfillPromise(IEnumerable<ICommandPromise<PromisedT>> promises,
+            IEnumerable<ICommand<PromisedT>> commands)
+        {
+            AssertUtil.AreEqual(commands.Count(), promises.Count());
+            var commandArray = commands.ToArray();
+
+            promises.Each((promise, index) => { Then(promise, commandArray[index]); });
+        }
+
+                
+        private  void ExecuteInternal(PromisedT value)
+        {
+            var command = _command;
+            if (command is IAsyncCommand<PromisedT> asyncCommand)
+            {
+                IPromise<PromisedT> resultPromise;
+                try
+                {
+                    resultPromise = asyncCommand.OnExecuteAsync(value);
+                }
+                catch (Exception e)
+                {
+                    Catch(e);
+                    Release();
+                    throw e;
+                }
+
+                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
+                resultPromise
+                    .Progress(WrapProgress)
+                    .Then(Resolve, Reject);
+            }
+            else if (command is ICommand<PromisedT> promiseCommand)
+            {
+                PromisedT newValue;
+                try
+                {
+                    newValue = promiseCommand.OnExecute(value);
+                }
+                catch (Exception e)
+                {
+                    Catch(e);
+                    Release();
+                    throw e;
+                }
+
+                Resolve(newValue);
+
+                float progress = SliceLength * SequenceID;
+                if (progress > 0)
+                {
+                    ReportProgress(progress);
+                }
+            }
+        }
+
         #endregion
 
         #region IPromise Implementation
@@ -241,7 +244,7 @@ namespace Cr7Sund.Framework.Impl
         protected override void ClearHandlers()
         {
             base.ClearHandlers();
-            _convertResolveHandlers = null;
+            _convertResolveHandlers.Clear();
         }
         #endregion
 
@@ -260,13 +263,13 @@ namespace Cr7Sund.Framework.Impl
             Name = string.Empty;
 
             _command = null;
-            _convertResolveHandlers = null;
+            _convertResolveHandlers?.Clear();
         }
 
         public virtual void Release()
         {
-            if (!IsRetain) return;
-            PoolBinder?.Get<CommandPromise<PromisedT>>().ReturnInstance(this);
+            var pool = PoolBinder?.Get<CommandPromise<PromisedT>>();
+            pool?.ReturnInstance(this);
         }
         #endregion
     }
@@ -318,8 +321,6 @@ namespace Cr7Sund.Framework.Impl
                 {
                     ReportProgress(progress);
                 }
-
-                Release();
             }
         }
 

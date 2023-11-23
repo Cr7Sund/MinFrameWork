@@ -47,12 +47,12 @@ namespace Cr7Sund.Framework.Tests
         [Performance]
         public void ChainBinderCommand()
         {
-            var binder = new CommandPromiseBinder();
-            injectionBinder.Injector.Inject(binder);
 
             Measure.Method(() =>
                 {
-          
+                    var binder = new CommandPromiseBinder();
+                    injectionBinder.Injector.Inject(binder);
+
                     binder.Bind(SomeEnum.TWO)
                         .Then<SimpleCommandOne>()
                         .Then<SimpleCommandTwo>();
@@ -70,10 +70,12 @@ namespace Cr7Sund.Framework.Tests
         [Performance]
         public void ChainBinderCommand_Pool()
         {
-            var binder = new CommandPromiseBinder();
-            injectionBinder.Injector.Inject(binder);
+ 
             Measure.Method(() =>
                 {
+                    var binder = new CommandPromiseBinder();
+                    injectionBinder.Injector.Inject(binder);
+                    
                     binder.Bind(SomeEnum.TWO).AsPool()
                         .Then<SimpleCommandOne>()
                         .Then<SimpleCommandTwo>();
