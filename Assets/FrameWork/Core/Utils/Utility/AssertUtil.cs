@@ -1,3 +1,18 @@
+/*
+ * we don't recommend the api provide message like below
+ *
+        public static void IsFalse(bool expected, string message)
+        {
+            if (expected)
+            {
+                throw new AssertionException(message);
+            }
+        }
+        
+ * since we want to utilize the assert message, the last but not the least to delay the string message to generate
+ * and if you want to show your custom error message,
+ * instead we recommend pass an new specific exception type to provide meaningful error messages.
+ */
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -76,14 +91,6 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void NotNull(object anObject, string message)
-        {
-            if (anObject == null)
-            {
-                throw new AssertionException(message);
-            }
-        }
-
         public static void NotNull(object anObject, Exception e)
         {
             if (anObject == null)
@@ -100,14 +107,6 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsInstanceOf<T>(object actual, string message)
-        {
-            if (!typeof(T).IsInstanceOfType(actual))
-            {
-                throw new AssertionException(message);
-            }
-        }
-
         public static void IsInstanceOf<T>(object actual, Exception e)
         {
             if (!typeof(T).IsInstanceOfType(actual))
@@ -121,14 +120,6 @@ namespace Cr7Sund.Framework.Util
             if (!excepted.IsInstanceOfType(actual))
             {
                 throw new AssertionException($"type{excepted} disMatch {actual.GetType()}");
-            }
-        }
-
-        public static void IsInstanceOf(Type excepted, object actual, string message)
-        {
-            if (!excepted.IsInstanceOfType(actual))
-            {
-                throw new AssertionException(message);
             }
         }
 
@@ -173,15 +164,6 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsFalse(bool expected, string message)
-        {
-            if (expected)
-            {
-                throw new AssertionException(message);
-            }
-        }
-
-
         public static void IsFalse(bool expected, Exception e)
         {
             if (expected)
@@ -199,14 +181,6 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsTrue(bool expected, string message)
-        {
-            if (!expected)
-            {
-                throw new AssertionException(message);
-            }
-        }
-
         public static void IsTrue(bool expected, Exception e)
         {
             if (!expected)
@@ -221,14 +195,6 @@ namespace Cr7Sund.Framework.Util
             if (!expected.Equals(actual))
             {
                 throw new AssertionException($"Expected {expected}  but it's {actual}");
-            }
-        }
-
-        public static void AreEqual(object expected, object actual, string message)
-        {
-            if (!expected.Equals(actual))
-            {
-                throw new AssertionException(message);
             }
         }
 
