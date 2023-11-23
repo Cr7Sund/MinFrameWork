@@ -1,7 +1,6 @@
-﻿
-namespace Cr7Sund.Logger
+﻿namespace Cr7Sund.Logger
 {
-    static class LogCreator
+    internal static class LogCreator
     {
         public static ILog Create()
         {

@@ -5,21 +5,20 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 namespace Cr7Sund.Logger
 {
     public class LogServer
     {
-        private Socket clientSocket;
-        private ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
-        private CancellationTokenSource cts;
 
         private const string host = "127.0.0.1";
         private const int port = 11000;
-        private static int reconnectInterval = 5000; // 重连间隔，单位为毫秒
         public const int BufferSize = 1024;
-        byte[] buffer = new byte[BufferSize];
         private const byte messageType = 1;
+        private static readonly int reconnectInterval = 5000; // 重连间隔，单位为毫秒
+        private readonly byte[] buffer = new byte[BufferSize];
+        private readonly ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
+        private Socket clientSocket;
+        private CancellationTokenSource cts;
 
         public async Task StartServer()
         {
@@ -44,14 +43,14 @@ namespace Cr7Sund.Logger
 
                     cts = new CancellationTokenSource();
                     // 创建发送和接收任务
-                    Task sendTask = Task.Run(() => SendMessages(clientSocket), cts.Token);
-                    Task receiveTask = Task.Run(() => ReceiveMessages(clientSocket), cts.Token);
+                    var sendTask = Task.Run(() => SendMessages(clientSocket), cts.Token);
+                    var receiveTask = Task.Run(() => ReceiveMessages(clientSocket), cts.Token);
 
                     break;
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine("Socket exception: " + ex.ToString());
+                    Console.WriteLine("Socket exception: " + ex);
                     Console.WriteLine("Failed to connect to server. Retrying in " + reconnectInterval + " ms...");
                     await Task.Delay(reconnectInterval);
                 }
@@ -86,7 +85,7 @@ namespace Cr7Sund.Logger
                     // 构造消息头
                     byte[] headerBytes = new byte[5];
                     BitConverter.GetBytes(messageBytes.Length).CopyTo(headerBytes, 0);
-                    headerBytes[4] = (byte)messageType;
+                    headerBytes[4] = messageType;
 
                     // 合并消息头和消息体
                     byte[] packetBytes = new byte[headerBytes.Length + messageBytes.Length];
@@ -103,7 +102,6 @@ namespace Cr7Sund.Logger
                         {
                             case SocketError.Shutdown:
                                 break;
-                            default: break;
                         }
                         Debug.UnityEditorError($"Send Message Error: {e.Message}");
 
@@ -143,7 +141,7 @@ namespace Cr7Sund.Logger
                     }
                     else
                     {
-                        Debug.UnityEditorDebug($"Received message: Server has closed");
+                        Debug.UnityEditorDebug("Received message: Server has closed");
                         break;
                     }
 
@@ -155,12 +153,11 @@ namespace Cr7Sund.Logger
                     {
                         case SocketError.Shutdown:
                             break;
-                        default: break;
                     }
                     Debug.UnityEditorError($"Receive message SocketError: {e.Message}");
                     break;
                 }
-                catch (System.ObjectDisposedException e)
+                catch (ObjectDisposedException e)
                 {
                     if (e.ObjectName == "System.Net.Sockets.Socket")
                     {

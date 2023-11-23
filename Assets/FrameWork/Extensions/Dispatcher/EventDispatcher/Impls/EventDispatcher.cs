@@ -1,40 +1,39 @@
 /**
 * @class Cr7Sund.Framework.Api.EventDispatcher
-* 
+*
 * A Dispatcher that uses IEvent to send messages.
-* 
-* Whenever the Dispatcher executes a `Dispatch()`, observers will be 
+*
+* Whenever the Dispatcher executes a `Dispatch()`, observers will be
 * notified of any event (Key) for which they have registered.
-* 
+*
 * EventDispatcher dispatches TmEvent : IEvent.
-* 
+*
 * The EventDispatcher is the only Dispatcher currently released with Strange
 * (though by separating EventDispatcher from Dispatcher I'm obviously
-	* signalling that I don't think it's the only possible one).
-* 
+    * signalling that I don't think it's the only possible one).
+*
 * EventDispatcher is both an ITriggerProvider and an ITriggerable.
-* 
+*
 * @see Cr7Sund.Framework.Api.IEvent
 * @see Cr7Sund.Framework.Api.ITriggerProvider
 * @see Cr7Sund.Framework.Api
 */
+using Cr7Sund.Framework.Api;
 using System;
 using System.Collections.Generic;
-using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class EventDispatcher : Binder, IEventDispatcher
     {
 
-        /// The list of clients that will be triggered as a consequence of an Event firing.
-		protected HashSet<ITriggerable> triggerClients;
-        protected HashSet<ITriggerable> triggerClientRemovals;
-        protected bool isTriggeringClients;
-
         // The eventPool is shared across all EventDispatchers for efficiency
         public static IPool<TmEvent> eventPool;
-        private static IInstanceProvider _instanceProvider= new EventInstanceProvider();
+        private static readonly IInstanceProvider _instanceProvider = new EventInstanceProvider();
+        protected bool isTriggeringClients;
+        protected HashSet<ITriggerable> triggerClientRemovals;
+
+        /// The list of clients that will be triggered as a consequence of an Event firing.
+        protected HashSet<ITriggerable> triggerClients;
 
         public EventDispatcher()
         {
@@ -45,8 +44,94 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        #region IBinder Implementation 
 
+        private void FlushRemoval()
+        {
+            if (triggerClientRemovals == null)
+            {
+                return;
+            }
+            foreach (var target in triggerClientRemovals)
+            {
+                if (triggerClients.Contains(target))
+                {
+                    triggerClients.Remove(target);
+                }
+            }
+            triggerClientRemovals.Clear();
+        }
+
+
+        private void InvokeEventCallback(IEvent evt, EventCallback callback)
+        {
+            try
+            {
+                callback(evt);
+            }
+            catch (InvalidCastException)
+            {
+                object target = callback.Target;
+                string methodName = callback.Method.Name;
+                string message = "An EventCallback is attempting an illegal cast. One possible reason is not typing the payload to IEvent in your callback. Another is illegal casting of the data.\nTarget class: " + target + " method: " + methodName;
+                throw new EventDispatcherException(message, EventDispatcherExceptionType.TARGET_INVOCATION);
+            }
+        }
+
+        private void InternalReleaseEvent(IEvent evt)
+        {
+            if (evt is IPoolable poolable)
+            {
+                poolable.Release();
+            }
+        }
+
+        private IEvent ConformDataToEvent(object eventType, object data)
+        {
+            IEvent retVal = null;
+            if (eventType == null)
+            {
+                throw new EventDispatcherException("Attempt to Dispatch to null.\ndata: " + data, EventDispatcherExceptionType.EVENT_KEY_NULL);
+            }
+            if (eventType is IEvent)
+            {
+                //Client provided a full-formed event
+                retVal = (IEvent)eventType;
+            }
+            else if (data == null)
+            {
+                //Client provided just an event ID. Create an event for injection
+                retVal = CreateEvent(eventType, null);
+            }
+            else if (data is IEvent)
+            {
+                //Client provided both an evertType and a full-formed IEvent
+                retVal = (IEvent)data;
+            }
+            else
+            {
+                //Client provided an eventType and some data which is not a IEvent.
+                retVal = CreateEvent(eventType, data);
+            }
+            return retVal;
+        }
+
+        private IEvent CreateEvent(object eventType, object value)
+        {
+            var retVal = eventPool.GetInstance();
+            retVal.Type = eventType;
+            retVal.Target = this;
+            retVal.Data = value;
+            return retVal;
+        }
+
+        private void CleanEvent(IEvent evt)
+        {
+            evt.Target = null;
+            evt.Data = null;
+            evt.Type = null;
+        }
+
+        #region IBinder Implementation
         protected override IBinding GetRawBinding()
         {
             return new EventBinding(Resolver);
@@ -56,11 +141,9 @@ namespace Cr7Sund.Framework.Impl
         {
             return base.Bind(key) as IEventBinding;
         }
-
         #endregion
 
         #region ITriggerProvider Implementation
-
         public int TriggerableCount
         {
             get
@@ -95,11 +178,9 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
         }
-
         #endregion
 
         #region IDispatcher Implementation
-
         public void Dispatch(object eventType)
         {
             Dispatch(eventType, null);
@@ -119,7 +200,7 @@ namespace Cr7Sund.Framework.Impl
             if (triggerClients != null)
             {
                 isTriggeringClients = true;
-                foreach (ITriggerable trigger in triggerClients)
+                foreach (var trigger in triggerClients)
                 {
                     if (!trigger.Trigger(eventType, evt))
                     {
@@ -148,7 +229,7 @@ namespace Cr7Sund.Framework.Impl
                 return;
             }
 
-            var callbacks = (binding.Value as object[]).Clone() as object[];
+            object[] callbacks = (binding.Value as object[]).Clone() as object[];
             if (callbacks == null)
             {
                 InternalReleaseEvent(evt);
@@ -157,12 +238,12 @@ namespace Cr7Sund.Framework.Impl
 
             for (int i = 0; i < callbacks.Length; i++)
             {
-                var callback = callbacks[i];
+                object callback = callbacks[i];
                 if (callback == null) continue;
 
                 callbacks[i] = null;
 
-                var curCallback = binding.Value as object[];
+                object[] curCallback = binding.Value as object[];
                 if (Array.IndexOf(curCallback, callback) == -1)
                     continue;
                 if (callback is EventCallback evtCallback)
@@ -177,11 +258,9 @@ namespace Cr7Sund.Framework.Impl
 
             InternalReleaseEvent(evt);
         }
-
         #endregion
 
         #region ITriggerable Implementation
-
         public bool Trigger<T>(object data)
         {
             return Trigger(typeof(T), data);
@@ -189,8 +268,8 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Trigger(object key, object data)
         {
-            bool allow = (data is IEvent && System.Object.ReferenceEquals((data as IEvent).Target, this) == false) ||
-                (key is IEvent && System.Object.ReferenceEquals((data as IEvent).Target, this) == false);
+            bool allow = data is IEvent && ReferenceEquals((data as IEvent).Target, this) == false ||
+                         key is IEvent && ReferenceEquals((data as IEvent).Target, this) == false;
 
             if (allow)
             {
@@ -198,14 +277,12 @@ namespace Cr7Sund.Framework.Impl
             }
             return true;
         }
-
         #endregion
 
         #region IEventDispatcher Implementation
-
         public void AddListener(object evt, EventCallback callback)
         {
-            IBinding binding = GetBinding(evt);
+            var binding = GetBinding(evt);
             if (binding == null)
             {
                 Bind(evt).To(callback);
@@ -218,7 +295,7 @@ namespace Cr7Sund.Framework.Impl
 
         public void AddListener(object evt, EmptyCallback callback)
         {
-            IBinding binding = GetBinding(evt);
+            var binding = GetBinding(evt);
             if (binding == null)
             {
                 Bind(evt).To(callback);
@@ -261,7 +338,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void RemoveDelegateListener(object evt, Delegate callback)
         {
-            IBinding binding = GetBinding(evt);
+            var binding = GetBinding(evt);
             RemoveValue(binding, callback);
         }
 
@@ -276,95 +353,6 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
         }
-
         #endregion
-
-
-        private void FlushRemoval()
-        {
-            if (triggerClientRemovals == null)
-            {
-                return;
-            }
-            foreach (var target in triggerClientRemovals)
-            {
-                if (triggerClients.Contains(target))
-                {
-                    triggerClients.Remove(target);
-                }
-            }
-            triggerClientRemovals.Clear();
-        }
-
-
-        private void InvokeEventCallback(IEvent evt, EventCallback callback)
-        {
-            try
-            {
-                callback(evt);
-            }
-            catch (InvalidCastException)
-            {
-                object target = callback.Target;
-                var methodName = callback.Method.Name;
-                string message = "An EventCallback is attempting an illegal cast. One possible reason is not typing the payload to IEvent in your callback. Another is illegal casting of the data.\nTarget class: " + target + " method: " + methodName;
-                throw new EventDispatcherException(message, EventDispatcherExceptionType.TARGET_INVOCATION);
-            }
-        }
-
-        private void InternalReleaseEvent(IEvent evt)
-        {
-            if (evt is IPoolable poolable)
-            {
-                poolable.Release();
-            }
-        }
-
-        private IEvent ConformDataToEvent(object eventType, object data)
-        {
-            IEvent retVal = null;
-            if (eventType == null)
-            {
-                throw new EventDispatcherException("Attempt to Dispatch to null.\ndata: " + data, EventDispatcherExceptionType.EVENT_KEY_NULL);
-            }
-            else if (eventType is IEvent)
-            {
-                //Client provided a full-formed event
-                retVal = (IEvent)eventType;
-            }
-            else if (data == null)
-            {
-                //Client provided just an event ID. Create an event for injection
-                retVal = CreateEvent(eventType, null);
-            }
-            else if (data is IEvent)
-            {
-                //Client provided both an evertType and a full-formed IEvent
-                retVal = (IEvent)data;
-            }
-            else
-            {
-                //Client provided an eventType and some data which is not a IEvent.
-                retVal = CreateEvent(eventType, data);
-            }
-            return retVal;
-        }
-
-        private IEvent CreateEvent(object eventType, object value)
-        {
-            var retVal = eventPool.GetInstance();
-            retVal.Type = eventType;
-            retVal.Target = this;
-            retVal.Data = value;
-            return retVal;
-        }
-
-        private void CleanEvent(IEvent evt)
-        {
-            evt.Target = null;
-            evt.Data = null;
-            evt.Type = null;
-        }
-
     }
 }

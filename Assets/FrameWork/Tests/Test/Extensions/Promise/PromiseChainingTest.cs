@@ -1,21 +1,17 @@
-using Cr7Sund.Framework.Impl;
-using System;
-using System.Linq;
 using Cr7Sund.Framework.Api;
-using NUnit.Framework;
-using Cr7Sund.Framework.Util;
-using System.Threading.Tasks;
+using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
-
+using NUnit.Framework;
+using System;
 namespace Cr7Sund.Framework.PromiseTest
 {
     public class PromiseChainingTest
     {
-        static IPromise<float> asyncFloatPromise;
-        private IPromise<int> promise;
-        private int intResult;
-        private float floatResult;
+        private static IPromise<float> asyncFloatPromise;
         private ExampleCommand command;
+        private float floatResult;
+        private int intResult;
+        private IPromise<int> promise;
 
         [SetUp]
         public void SetUp()
@@ -33,11 +29,11 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chaining_value_simple()
         {
             promise
-                 .Then(v => v + 1)
-                 .Then(v =>
-                    {
-                        intResult = v + 2;
-                    });
+                .Then(v => v + 1)
+                .Then(v =>
+                {
+                    intResult = v + 2;
+                });
 
             promise.Resolve(1);
             Assert.AreEqual(4, intResult);
@@ -48,12 +44,12 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chaining_value_multiple()
         {
             promise
-                 .Then(v => v + 1)
-                 .Then(v => v + 2)
-                 .Then(v =>
-                    {
-                        intResult = v + 3;
-                    });
+                .Then(v => v + 1)
+                .Then(v => v + 2)
+                .Then(v =>
+                {
+                    intResult = v + 3;
+                });
 
             promise.Resolve(0);
             Assert.AreEqual(6, intResult);
@@ -64,15 +60,15 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chaining_value_async()
         {
             promise
-                 .Then(v =>
-                    {
-                        return v + 1;
-                    })
-                 .Then(command.AsyncFunc)
-                 .Then(v =>
-                    {
-                        floatResult = v + 3f;
-                    });
+                .Then(v =>
+                {
+                    return v + 1;
+                })
+                .Then(command.AsyncFunc)
+                .Then(v =>
+                {
+                    floatResult = v + 3f;
+                });
 
             promise.Resolve(0);
             asyncFloatPromise.Resolve(2);
@@ -83,16 +79,16 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chaining_value_exception()
         {
             Exception e = null;
-            Func<int, int> exceptionHandler = (v) => throw new System.Exception("west");
+            Func<int, int> exceptionHandler = v => throw new Exception("west");
             promise
-                 .Then(v => v + 1)
-                 .Then(exceptionHandler)
-                 .Then(v =>
-                    {
-                        intResult = v + 3;
-                    })
+                .Then(v => v + 1)
+                .Then(exceptionHandler)
+                .Then(v =>
+                {
+                    intResult = v + 3;
+                })
                 .Catch(ex => e = ex)
-                    ;
+                ;
 
             promise.Resolve(0);
             Assert.AreEqual(0, intResult);
@@ -104,12 +100,12 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chaining_value_convert_simple()
         {
             promise
-                 .Then(v => v + 1)
-                 .Then(command.ConvertFunc)
-                 .Then(v =>
-                    {
-                        floatResult = v + 2f;
-                    });
+                .Then(v => v + 1)
+                .Then(command.ConvertFunc)
+                .Then(v =>
+                {
+                    floatResult = v + 2f;
+                });
 
             promise.Resolve(1);
             Assert.AreEqual(6f, floatResult);
@@ -119,14 +115,14 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chaining_value_convert_async()
         {
             promise
-                    .Then(command.Func)
-                    .Then(command.ConvertFunc)
-                    .Then(command.AsyncFunc)
-                    .Then(v =>
-                    {
-                        floatResult = v + 2f;
-                        return floatResult;
-                    });
+                .Then(command.Func)
+                .Then(command.ConvertFunc)
+                .Then(command.AsyncFunc)
+                .Then(v =>
+                {
+                    floatResult = v + 2f;
+                    return floatResult;
+                });
 
             promise.Resolve(1);
             asyncFloatPromise.Resolve(2);
@@ -143,8 +139,8 @@ namespace Cr7Sund.Framework.PromiseTest
             var exampleCommand = new SimpleAsyncException_Generic();
             var exampleCommand1 = new SimpleCommandTwoGeneric();
             var finalPromise = promise.Then(exampleCommand.OnExecuteAsync, exampleCommand.OnCatchAsync)
-                 .Then(exampleCommand1.OnExecute)
-                 .Catch((ex) => SimplePromise.result = -2);
+                .Then(exampleCommand1.OnExecute)
+                .Catch(ex => SimplePromise.result = -2);
 
             promise.Resolve(0);
             // SimplePromise.simulatePromiseOne.Resolve(7);
@@ -183,9 +179,6 @@ namespace Cr7Sund.Framework.PromiseTest
                     return v + 1 + t;
                 });
             }
-
-
         }
-
     }
 }

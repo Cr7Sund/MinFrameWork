@@ -1,9 +1,7 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
-
 namespace Cr7Sund.Framework.Tests
 {
     public class PromiseCommandBinderSpeedTest
@@ -16,54 +14,79 @@ namespace Cr7Sund.Framework.Tests
         {
             injectionBinder = new InjectionBinder();
             poolBinder = new PoolBinder();
-
+            injectionBinder.Bind<ICommandBinder>().To<CommandBinder>().AsSingleton();
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
 
-          
+
         }
 
 
 
-        [Test, Performance]
+        [Test]
+        [Performance]
         public void ChainPromiseCommand()
         {
             Measure.Method(() =>
-            {
-                var promiseBinding = new CommandPromise();
+                {
+                    var promiseBinding = new CommandPromise();
 
-                promiseBinding
-                 .Then<SimpleCommandOne>()
-                 .Then<SimpleCommandTwo>();
-                promiseBinding.Resolve();
-            })
-            .WarmupCount(PromiseSpeedTest.warmupCount)
-            .MeasurementCount(PromiseSpeedTest.executeCount)
-            .IterationsPerMeasurement(PromiseSpeedTest.iterationCount)
-            .GC()
-            .Run();
+                    promiseBinding
+                        .Then<SimpleCommandOne>()
+                        .Then<SimpleCommandTwo>();
+                    promiseBinding.Resolve();
+                })
+                .WarmupCount(PromiseSpeedTest.warmupCount)
+                .MeasurementCount(PromiseSpeedTest.executeCount)
+                .IterationsPerMeasurement(PromiseSpeedTest.iterationCount)
+                .GC()
+                .Run();
         }
 
-        [Test, Performance]
+        [Test]
+        [Performance]
         public void ChainBinderCommand()
         {
+            var binder = new CommandPromiseBinder();
+            injectionBinder.Injector.Inject(binder);
+
             Measure.Method(() =>
-            {
-                var binder = new CommandPromiseBinder();
-                injectionBinder.Injector.Inject(binder);
+                {
+          
+                    binder.Bind(SomeEnum.TWO)
+                        .Then<SimpleCommandOne>()
+                        .Then<SimpleCommandTwo>();
 
-                binder.Bind(SomeEnum.TWO)
-                 .Then<SimpleCommandOne>()
-                 .Then<SimpleCommandTwo>();
-
-                binder.ReactTo(SomeEnum.TWO);
-            })
-            .WarmupCount(PromiseSpeedTest.warmupCount)
-            .MeasurementCount(PromiseSpeedTest.executeCount)
-            .IterationsPerMeasurement(PromiseSpeedTest.iterationCount)
-            .GC()
-            .Run();
+                    binder.ReactTo(SomeEnum.TWO);
+                })
+                .WarmupCount(PromiseSpeedTest.warmupCount)
+                .MeasurementCount(PromiseSpeedTest.executeCount)
+                .IterationsPerMeasurement(PromiseSpeedTest.iterationCount)
+                .GC()
+                .Run();
         }
+
+        [Test]
+        [Performance]
+        public void ChainBinderCommand_Pool()
+        {
+            var binder = new CommandPromiseBinder();
+            injectionBinder.Injector.Inject(binder);
+            Measure.Method(() =>
+                {
+                    binder.Bind(SomeEnum.TWO).AsPool()
+                        .Then<SimpleCommandOne>()
+                        .Then<SimpleCommandTwo>();
+
+                    binder.ReactTo(SomeEnum.TWO);
+                })
+                .WarmupCount(PromiseSpeedTest.warmupCount)
+                .MeasurementCount(PromiseSpeedTest.executeCount)
+                .IterationsPerMeasurement(PromiseSpeedTest.iterationCount)
+                .GC()
+                .Run();
+        }
+
 
     }
 }

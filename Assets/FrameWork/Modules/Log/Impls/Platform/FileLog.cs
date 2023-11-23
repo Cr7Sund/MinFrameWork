@@ -1,64 +1,51 @@
-
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Cr7Sund.Logger
 {
-    class FileLog : ILog
+    internal class FileLog : ILog
         , ILogFlushable
     {
-        private Dictionary<LogType, ILogWritable> _writers;
         // 日志保存上限日期
         private const int _timeout = 3 * 24 * 3600;
         /// <summary> 时间戳基准 </summary>
         internal static readonly DateTime StandardTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        private Dictionary<LogType, ILogWritable> _writers;
 
-        #region Input
-
-        private void Write(LogType type, LogLevel level, string msg) 
+        public void Initialize()
         {
-            var writer = GetLogNode(type);
-            writer.Write(level.ToString(), string.Empty, msg);
+            LogFileManager.ExistOrCreate(LogFileUtil.LogDirector);
+            _writers = new Dictionary<LogType, ILogWritable>();
         }
 
-        private void Write(LogType type, LogEventData data)
+        public void Dispose()
         {
-            var writer = GetLogNode(type);
-            writer.Write(data.type.ToString(), data.id, data);
+            foreach (var writer in _writers.Values)
+                (writer as IDisposable)?.Dispose();
+            _writers.Clear();
         }
 
-        public string Format(LogEventData data)
+        /// <summary>
+        ///     强制写入
+        /// </summary>
+        /// <param name="logType"></param>
+        public void Flush(LogType logType)
         {
-            Write(LogType.Event, data);
-
-#if UNITY_EDITOR
-           var sb = new System.Text.StringBuilder();
-            sb.Append(string.Format("[{0}] Type : {1}, ID : {2} ", LogLevel.Event, data.type, data.id ));
-            sb.Append("Info : {");
-
-            foreach(var current in data.info)
-                sb.Append($"{current.Key} : {current.Value}");
-
-            sb.Append("}");
-            return sb.ToString();
-#else
-            return string.Empty;
-#endif
+            try
+            {
+                var writer = GetLogNode(logType);
+                writer.Flush();
+            }
+            catch (Exception e)
+            {
+                Debug.UnityEditorError($"Flush failed : {e.Message} \n {e.StackTrace}");
+            }
         }
 
-        public string Format(LogLevel level,LogChannel logChannel, string format, params object[] args)
+        private ILogWritable GetLogNode(LogType logType)
         {
-            string result = LogFormatUtility.Format(format, args);
-            Write(LogType.Code, level, result);
-            string logMessage = string.Format("[{0}][{1}]{2}", level, logChannel, result);
-            return logMessage;
-        }
-
-        #endregion
-
-        private ILogWritable GetLogNode(LogType logType) 
-        {
-            if (!_writers.TryGetValue(logType, out ILogWritable writer))
+            if (!_writers.TryGetValue(logType, out var writer))
             {
                 writer = LogWriterFactory.Create(logType);
                 try
@@ -75,22 +62,22 @@ namespace Cr7Sund.Logger
         }
 
         /// <summary>
-        /// 检查日志是否超时
+        ///     检查日志是否超时
         /// </summary>
         /// <param name="logType"></param>
         private void CheckLogFileTimeout(LogType logType)
         {
-            var logFiles = LogFileManager.GetFilesInDirector(LogFileUtil.GetFileDirector(logType));
+            string[] logFiles = LogFileManager.GetFilesInDirector(LogFileUtil.GetFileDirector(logType));
             if (logFiles.Length <= 0) return;
 
-            var curTime = (DateTime.UtcNow - StandardTime).TotalSeconds;
+            double curTime = (DateTime.UtcNow - StandardTime).TotalSeconds;
             string fileTime;
 
-            Debug.UnityEditorDebug($"开始检查日志文件是否超时");
+            Debug.UnityEditorDebug("开始检查日志文件是否超时");
             for (int i = 0, len = logFiles.Length; i < len; i++)
             {
-                fileTime = System.IO.Path.GetFileNameWithoutExtension(logFiles[i]);
-                if (Int64.TryParse(fileTime, out long time))
+                fileTime = Path.GetFileNameWithoutExtension(logFiles[i]);
+                if (long.TryParse(fileTime, out long time))
                 {
                     if (time + _timeout < curTime)
                     {
@@ -101,34 +88,45 @@ namespace Cr7Sund.Logger
             }
         }
 
-        public void Initialize()
+        #region Input
+        private void Write(LogType type, LogLevel level, string msg)
         {
-            LogFileManager.ExistOrCreate(LogFileUtil.LogDirector);
-            _writers = new Dictionary<LogType, ILogWritable>();
+            var writer = GetLogNode(type);
+            writer.Write(level.ToString(), string.Empty, msg);
         }
 
-        /// <summary>
-        /// 强制写入
-        /// </summary>
-        /// <param name="logType"></param>
-        public void Flush(LogType logType)
+        private void Write(LogType type, LogEventData data)
         {
-            try
-            {
-                var writer = GetLogNode(logType);
-                writer.Flush();
-            }
-            catch(Exception e) 
-            {
-                Debug.UnityEditorError($"Flush failed : {e.Message} \n {e.StackTrace}");
-            }
+            var writer = GetLogNode(type);
+            writer.Write(data.type, data.id, data);
         }
 
-        public void Dispose()
+        public string Format(LogEventData data)
         {
-            foreach (var writer in _writers.Values)
-                (writer as IDisposable)?.Dispose();
-            _writers.Clear();
+            Write(LogType.Event, data);
+
+#if UNITY_EDITOR
+            var sb = new System.Text.StringBuilder();
+            sb.Append(string.Format("[{0}] Type : {1}, ID : {2} ", LogLevel.Event, data.type, data.id));
+            sb.Append("Info : {");
+
+            foreach (var current in data.info)
+                sb.Append($"{current.Key} : {current.Value}");
+
+            sb.Append("}");
+            return sb.ToString();
+#else
+            return string.Empty;
+#endif
         }
+
+        public string Format(LogLevel level, LogChannel logChannel, string format, params object[] args)
+        {
+            string result = LogFormatUtility.Format(format, args);
+            Write(LogType.Code, level, result);
+            string logMessage = string.Format("[{0}][{1}]{2}", level, logChannel, result);
+            return logMessage;
+        }
+        #endregion
     }
 }

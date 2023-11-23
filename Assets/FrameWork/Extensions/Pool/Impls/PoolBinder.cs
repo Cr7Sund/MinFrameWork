@@ -1,11 +1,11 @@
-using System;
 using Cr7Sund.Framework.Api;
-
+using System;
+using UnityEngine;
 namespace Cr7Sund.Framework.Impl
 {
     public class PoolBinder : Binder, IPoolBinder
     {
-        private IInstanceProvider _poolInstanceProvider;
+        private readonly IInstanceProvider _poolInstanceProvider;
 
         public PoolBinder()
         {
@@ -36,7 +36,7 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-        
+
         public IPool GetOrCreate(Type type)
         {
             var binding = GetBinding(type);
@@ -56,7 +56,7 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-        
+
         public IPool Get(Type type)
         {
             var binding = GetBinding(type);
@@ -68,7 +68,7 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-        
+
         public IPool<T> Get<T>() where T : class, new()
         {
             var binding = GetBinding(typeof(T));
@@ -80,20 +80,17 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-
     }
 
     public class PoolInstanceProvider : IInstanceProvider
     {
         public T GetInstance<T>()
         {
-            UnityEngine.Debug.Log(typeof(T));
             return Activator.CreateInstance<T>();
         }
 
         public object GetInstance(Type key)
         {
-            UnityEngine.Debug.Log(key);
             return Activator.CreateInstance(key);
         }
     }

@@ -1,18 +1,16 @@
 /**
  * @interface Cr7Sund.Framework.Api.IEventBinding
- * 
+ *
  * Binding interface for EventDispatcher.
- * 
- * EventBindings technically allow any Key, but require either an 
+ *
+ * EventBindings technically allow any Key, but require either an
  * EmptyCallback (no arguments) or an EventCallback (one argument).
- * 
+ *
  * The IEvent only accepts strings as keys, so in the standard MVCSContext
  * setup, your EventBinder keys should also be strings.
- * 
+ *
  * @see Cr7Sund.Framework.Api.IEvent
  */
-
-using System;
 
 namespace Cr7Sund.Framework.Api
 {

@@ -1,24 +1,24 @@
 {
-    "name": "Cr7Sund.Tests",
-    "rootNamespace": "",
-    "references": [
-        "GUID:fe13ff8c968d49d48ba40db5a43374e8",
-        "GUID:7e0d4cf51db150f438768a680ebea3c4",
-        "GUID:0acc523941302664db1f4e527237feb3",
-        "GUID:27619889b8ba8c24980f49ee34dbb44a",
-        "GUID:223252a96ed121b44b07d7ced0c3f14b"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
-    "autoReferenced": false,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Cr7Sund.Tests",
+  "rootNamespace": "",
+  "references": [
+    "GUID:fe13ff8c968d49d48ba40db5a43374e8",
+    "GUID:7e0d4cf51db150f438768a680ebea3c4",
+    "GUID:0acc523941302664db1f4e527237feb3",
+    "GUID:27619889b8ba8c24980f49ee34dbb44a",
+    "GUID:223252a96ed121b44b07d7ced0c3f14b"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

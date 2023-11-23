@@ -1,22 +1,26 @@
+using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
-
-
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromise : Promise, ICommandPromise
     {
-        [Inject] private IPoolBinder _poolBinder;
-        protected IBaseCommand _command;
+        private IBaseCommand _command;
+        
+        public IPoolBinder PoolBinder;
 
-        public CommandPromise(PromiseState promiseState) : base(promiseState) { }
-        public CommandPromise() : base() { }
+        public float SliceLength { get; set; }
+        public int SequenceID { get; set; }
+        public bool IsRetain { get; private set; }
+
+        public IBaseCommand Test_GetCommand()
+        {
+            return _command;
+        }
 
         #region IPromise Implementation
-
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
@@ -26,44 +30,29 @@ namespace Cr7Sund.Framework.Impl
         {
             return new CommandPromise();
         }
-
         #endregion
-        
+
         #region IPromiseCommand Implementation
-
-        public float SliceLength { get; set; }
-        public int SequenceID { get; set; }
-
         public virtual void Execute()
         {
             if (_command is IAsyncCommand asyncCommand)
             {
-                IPromise resultPromise = null;
+                IPromise resultPromise;
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync();
                 }
                 catch (Exception e)
                 {
-                    this.Catch(e);
-                    this.Release();
+                    Catch(e);
+                    Release();
                     throw e;
                 }
 
                 AssertUtil.NotNull(resultPromise);
                 resultPromise
-                        .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
-                        .Then(
-                            () =>
-                            {
-                                this.Resolve();
-                                this.Release();
-                            },
-                            ex =>
-                            {
-                                this.Reject(ex);
-                                this.Release();
-                            });
+                    .Progress(WrapProgress)
+                    .Then(Resolve, Reject);
             }
             else if (_command is ICommand command)
             {
@@ -73,19 +62,19 @@ namespace Cr7Sund.Framework.Impl
                 }
                 catch (Exception e)
                 {
-                    this.Catch(e);
-                    this.Release();
+                    Catch(e);
+                    Release();
                     throw e;
                 }
 
-                this.Resolve();
+                Resolve();
 
                 float progress = SliceLength * SequenceID;
                 if (progress > 0)
                 {
-                    this.ReportProgress(progress);
+                    ReportProgress(progress);
                 }
-                this.Release();
+                Release();
             }
 
         }
@@ -94,6 +83,7 @@ namespace Cr7Sund.Framework.Impl
         {
             _command.OnCatch(e);
         }
+
         public void Progress(float progress)
         {
             _command.OnProgress(progress);
@@ -103,7 +93,7 @@ namespace Cr7Sund.Framework.Impl
         {
             var resultPromise = new CommandPromise();
 
-            return this.Then(resultPromise, new T());
+            return Then(resultPromise, new T());
         }
 
         public virtual ICommandPromise Then(ICommandPromise resultPromise, ICommand command)
@@ -115,7 +105,7 @@ namespace Cr7Sund.Framework.Impl
 
             return resultPromise;
         }
-      
+
         public ICommandPromise ThenAll(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             FulfillPromise(promises, commands);
@@ -139,21 +129,35 @@ namespace Cr7Sund.Framework.Impl
 
         private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
-            AssertUtil.AreEqual(commands.Count(), promises.Count());
+            var commandPromises = promises as ICommandPromise[] ?? promises.ToArray();
             var commandArray = commands.ToArray();
+            AssertUtil.AreEqual(commandPromises.Length, commandArray.Length);
 
-            promises.Each((promise, index) =>
+            commandPromises.Each((promise, index) =>
             {
                 Then(promise, commandArray[index]);
             });
         }
 
+        private void WrapProgress(float progress)
+        {
+            ReportProgress((progress + SequenceID) * SliceLength);
+        }
+
+        public override void Reject(Exception ex)
+        {
+            base.Reject(ex);
+            Release();
+        }
+
+        public override void Resolve()
+        {
+            base.Resolve();
+            Release();
+        }
         #endregion
 
         #region IPoolable Implementation
-
-        public bool IsRetain { get; private set; }
-
         public void Retain()
         {
             IsRetain = true;
@@ -163,8 +167,8 @@ namespace Cr7Sund.Framework.Impl
         {
             IsRetain = false;
 
-            this.CurState = PromiseState.Pending;
-            this.Name = string.Empty;
+            CurState = PromiseState.Pending;
+            Name = string.Empty;
 
             _command = null;
         }
@@ -172,12 +176,8 @@ namespace Cr7Sund.Framework.Impl
         public virtual void Release()
         {
             if (!IsRetain) return;
-            _command?.Release();
-            _poolBinder?.Get<CommandPromise>().ReturnInstance(this);
+            PoolBinder?.Get<CommandPromise>().ReturnInstance(this);
         }
-
         #endregion
-
-        public IBaseCommand Test_GetCommand() => _command;
     }
 }

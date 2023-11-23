@@ -1,19 +1,19 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
-	public class GuaranteedUniqueInstances
-	{
-		public int uid { get; set; }
+    public class GuaranteedUniqueInstances
+    {
 
-		private static int counter = 0;
+        private static int counter;
 
-		public GuaranteedUniqueInstances()
-		{
-			uid = ++counter;
-		}
+        public GuaranteedUniqueInstances()
+        {
+            uid = ++counter;
+        }
+        public int uid { get; set; }
 
-		public static void Reset() => counter = 0;
-	}
+        public static void Reset()
+        {
+            counter = 0;
+        }
+    }
 }
-

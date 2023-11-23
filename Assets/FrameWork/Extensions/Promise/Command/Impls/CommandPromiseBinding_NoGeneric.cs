@@ -1,32 +1,33 @@
-using System.Collections.Generic;
-using System.Linq;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-
-
+using System.Collections.Generic;
+using System.Linq;
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromiseBinding : Binding, ICommandPromiseBinding
     {
-        [Inject] private IPoolBinder _poolBinder;
-        [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private ICommandBinder _commandBinder;
-        
-        public bool UsePooling { get; private set; }
+        [Inject] private IInjectionBinder _injectionBinder;
+        [Inject] private IPoolBinder _poolBinder;
 
-        public CommandPromiseBinding(Binder.BindingResolver resolver):base(resolver)
+        private ICommandPromise _firstPromise;
+
+        public bool UsePooling { get; private set; }
+        public ICommandPromise FirstPromise => _firstPromise;
+
+        public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
-            this.ValueConstraint = BindingConstraintType.MANY;
+            ValueConstraint = BindingConstraintType.MANY;
         }
+
 
         #region IPromiseCommandBinding Implementation
-
         public ICommandPromiseBinding AsPool()
         {
-            this.UsePooling = true;
+            UsePooling = true;
             return this;
         }
-        
+
         private new ICommandPromiseBinding To(object value)
         {
             return base.To(value) as ICommandPromiseBinding;
@@ -44,7 +45,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenAny(params ICommand[] commands)
         {
-            var promiseArray = InstantiateNoValuePromise(commands);
+            ICommandPromise[] promiseArray = InstantiateNoValuePromise(commands);
 
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
@@ -87,64 +88,53 @@ namespace Cr7Sund.Framework.Impl
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
         }
-
-
         #endregion
 
         #region private methods
-
-
         private ICommandPromise ThenRace(ICommandPromise[] promiseArray, IEnumerable<ICommand> commands)
         {
-            var prevValue = FindPrevChainPromise<CommandPromise>();
+            ICommandPromise prevValue = FindPrevChainPromise();
             return prevValue.ThenRace(promiseArray, commands);
         }
 
 
         private ICommandPromise ThenAny(ICommandPromise[] promiseArray, IEnumerable<ICommand> commands)
         {
-            var prevValue = FindPrevChainPromise<CommandPromise>();
+            ICommandPromise prevValue = FindPrevChainPromise();
 
             return prevValue.ThenAny(promiseArray, commands);
         }
 
         private void Then(ICommandPromise nextPromise, ICommand nextCommand)
         {
-            var prevValue = FindPrevChainPromise<CommandPromise>();
+            ICommandPromise prevValue = FindPrevChainPromise();
 
             prevValue.Then(nextPromise, nextCommand);
         }
 
 
-        private T FindPrevChainPromise<T>() where T : class, new()
+        private ICommandPromise FindPrevChainPromise()
         {
-            var values = Value as object[];
-            if (Value != null)
+            if (Value is object[] values)
             {
-                AssertUtil.IsInstanceOf<T>(values[values.Length - 1]);
-                var prevValue = (T)values[values.Length - 1];
+                var prevValue = (ICommandPromise)values[^1];
                 return prevValue;
             }
-            else
-            {
-                var firstValue = new T();
-                To(firstValue);
-                return firstValue;
-            }
+
+            _firstPromise = InstantiatePromise();
+            To(_firstPromise);
+            return _firstPromise;
         }
 
         private CommandPromise InstantiatePromise()
         {
-            CommandPromise result = null;
+            CommandPromise result;
 
             if (UsePooling)
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise>();
                 result = pool.GetInstance();
-                if (result.IsRetain)
-                {
-                    _injectionBinder.Injector.Inject(result);
-                }
+                result.PoolBinder = _poolBinder;
             }
             else
             {
@@ -156,11 +146,10 @@ namespace Cr7Sund.Framework.Impl
 
         private T InstantiateCommand<T>() where T : class, IBaseCommand
         {
-            T result = null;
-
-            result = _commandBinder.Get<T>();
-            if (!UsePooling || result is IPoolable { IsRetain: false })
+            var result = _commandBinder.Get<T>();
+            if (result == null)
             {
+                result = _commandBinder.GetOrCreate<T>();
                 _injectionBinder.Injector.Inject(result);
             }
 
@@ -168,23 +157,23 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
-        private void InstantiateNoValuePromise<T1, T2>(out List<ICommand> commands, out CommandPromise[] promiseArray)
+        private void InstantiateNoValuePromise<T1, T2>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
             where T1 : class, ICommand, new()
             where T2 : class, ICommand, new()
         {
             commands = new List<ICommand>
             {
                 InstantiateCommand<T1>(),
-                InstantiateCommand<T2>(),
+                InstantiateCommand<T2>()
             };
-            promiseArray = new CommandPromise[commands.Count];
+            promiseArray = new ICommandPromise[commands.Count];
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
             }
         }
 
-        private void InstantiateNoValuePromise<T1, T2, T3>(out List<ICommand> commands, out CommandPromise[] promiseArray)
+        private void InstantiateNoValuePromise<T1, T2, T3>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
             where T1 : class, ICommand, new()
             where T2 : class, ICommand, new()
             where T3 : class, ICommand, new()
@@ -193,18 +182,18 @@ namespace Cr7Sund.Framework.Impl
             {
                 InstantiateCommand<T1>(),
                 InstantiateCommand<T2>(),
-                InstantiateCommand<T3>(),
+                InstantiateCommand<T3>()
             };
-            promiseArray = new CommandPromise[commands.Count];
+            promiseArray = new ICommandPromise[commands.Count];
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
             }
         }
 
-        private CommandPromise[] InstantiateNoValuePromise(ICommand[] commands)
+        private ICommandPromise[] InstantiateNoValuePromise(ICommand[] commands)
         {
-            var promiseArray = new CommandPromise[commands.Count()];
+            var promiseArray = new ICommandPromise[commands.Count()];
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
@@ -212,7 +201,6 @@ namespace Cr7Sund.Framework.Impl
 
             return promiseArray;
         }
-
         #endregion
     }
 

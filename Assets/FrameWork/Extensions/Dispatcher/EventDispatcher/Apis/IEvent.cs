@@ -1,9 +1,9 @@
 /**
  * @interface Cr7Sund.Framework.Api.IEvent
- * 
+ *
  * The interface for an event sent by the EventDispatcher
  */
- 
+
 namespace Cr7Sund.Framework.Api
 {
     public interface IEvent

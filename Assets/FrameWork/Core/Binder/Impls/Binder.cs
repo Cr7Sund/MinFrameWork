@@ -1,11 +1,13 @@
-using System;
-using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
-
+using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
 {
     public class Binder : IBinder
     {
+
+
+        /// A handler for resolving the nature of a binding during chained commands
+        public delegate void BindingResolver(IBinding binding, object oldName = null);
         protected Dictionary<object, Dictionary<object, IBinding>> _bindings; // object is implicitly equal to type
         public Binder()
         {
@@ -13,7 +15,6 @@ namespace Cr7Sund.Framework.Impl
         }
 
         #region IBinder implementation
-
         public IBinding Bind<T>()
         {
             return Bind(typeof(T));
@@ -58,19 +59,19 @@ namespace Cr7Sund.Framework.Impl
         public IBinding GetBinding<T>(object name = null)
         {
             var key = typeof(T);
-            return this.GetBinding(key, name);
+            return GetBinding(key, name);
         }
 
         public IBinding GetBinding(object key)
         {
-            return this.GetBinding(key, null);
+            return GetBinding(key, null);
         }
 
         public IBinding GetBinding(object key, object name)
         {
             if (_bindings.TryGetValue(key, out var dict))
             {
-                name = (name == null) ? BindingConst.NULLOIDNAME : name;
+                name = name == null ? BindingConst.NULLOIDNAME : name;
                 if (dict.ContainsKey(name))
                 {
                     return dict[name];
@@ -103,7 +104,7 @@ namespace Cr7Sund.Framework.Impl
         {
             if (_bindings.TryGetValue(key, out var dict))
             {
-                name = (name == null) ? BindingConst.NULLOIDNAME : name;
+                name = name == null ? BindingConst.NULLOIDNAME : name;
 
                 if (dict.ContainsKey(name))
                 {
@@ -120,12 +121,12 @@ namespace Cr7Sund.Framework.Impl
             }
             object key = binding.Key;
             Dictionary<object, IBinding> dict;
-            if ((_bindings.ContainsKey(key)))
+            if (_bindings.ContainsKey(key))
             {
                 dict = _bindings[key];
                 if (dict.ContainsKey(binding.Name))
                 {
-                    IBinding useBinding = dict[binding.Name];
+                    var useBinding = dict[binding.Name];
                     useBinding.RemoveValue(value);
 
                     //If result is empty, clean it out
@@ -138,7 +139,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        public virtual void ResolveBinding(Api.IBinding binding, object key, object oldName = null)
+        public virtual void ResolveBinding(IBinding binding, object key, object oldName = null)
         {
             object bindingName = binding.Name;
 
@@ -178,12 +179,6 @@ namespace Cr7Sund.Framework.Impl
         public virtual void OnRemove()
         {
         }
-
         #endregion
-
-
-        /// A handler for resolving the nature of a binding during chained commands
-        public delegate void BindingResolver(IBinding binding, object oldName = null);
-
     }
 }

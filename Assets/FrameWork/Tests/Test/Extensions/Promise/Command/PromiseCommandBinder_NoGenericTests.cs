@@ -1,17 +1,15 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
 using NUnit.Framework;
-
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
 
     public class PromiseCommandBinderNoGenericTests
     {
+        private ICommandPromiseBinder _commandPromiseBinder;
         private IInjectionBinder injectionBinder;
         private IPoolBinder poolBinder;
-        private ICommandPromiseBinder _commandPromiseBinder;
 
         [SetUp]
         public void Setup()
@@ -22,7 +20,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(new CommandBinder());
-            
+
             _commandPromiseBinder = new CommandPromiseBinder();
             injectionBinder.Injector.Inject(_commandPromiseBinder);
 
@@ -43,14 +41,13 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
-            var binding = promiseBinding.
-                Then<SimpleCommandTwo>().Then<SimpleCommandOne>().Then<SimpleCommandTwo>()
+            var binding = promiseBinding.Then<SimpleCommandTwo>().Then<SimpleCommandOne>().Then<SimpleCommandTwo>()
                 ;
 
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
 
-            Assert.AreEqual((16 * 3), SimplePromise.result);
+            Assert.AreEqual(16 * 3, SimplePromise.result);
         }
 
         [Test]
@@ -65,7 +62,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             SimplePromise.simulatePromise.Resolve();
 
-            Assert.AreEqual(((((0 + 2) * 3) + 3) * 5 + 1) * 2, SimplePromise.result);
+            Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, SimplePromise.result);
         }
 
 
@@ -76,8 +73,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
-            var binding = promiseBinding.
-                Then<TestInjectionCommand>()
+            var binding = promiseBinding.Then<TestInjectionCommand>()
                 ;
 
 
@@ -85,7 +81,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(1, SimplePromise.result);
         }
 
-            [Test]
+        [Test]
         public void get_same_instance_from_commandBinder()
         {
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
@@ -93,30 +89,13 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
 
-            var objects = binding.Value as object[];
+            object[] objects = binding.Value as object[];
 
             var itemB = ((CommandPromise)objects[3]).Test_GetCommand();
             var itemA = ((CommandPromise)objects[1]).Test_GetCommand();
 
 
             Assert.AreEqual(itemA, itemB);
-        }
-
-        [Test]
-        public void release_command_after_resolved()
-        {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
-                .Then<SimpleCommandOne>()
-                .Then<SimpleCommandTwo>()
-                .Then<SimpleCommandOne>();
-
-            var objects = binding.Value as object[];
-            var commandPromise = (CommandPromise)objects[1];
-            var itemA = commandPromise.Test_GetCommand();
-
-            _commandPromiseBinder.ReactTo(SomeEnum.ONE);
-
-            Assert.AreEqual(false, itemA.IsRetain);
         }
 
         [Test]
@@ -127,25 +106,23 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
 
-            var objects = binding.Value as object[];
+            object[] objects = binding.Value as object[];
             var commandPromise = (CommandPromise)objects[1];
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
 
             Assert.AreEqual(false, commandPromise.IsRetain);
         }
-        
+
         [Test]
         public void return_instance_to_pool_by_resolved()
         {
-            var promisePool = poolBinder.GetOrCreate<CommandPromise>();
-            return;
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
-
             
+            var promisePool = poolBinder.Get<CommandPromise>();
             Assert.AreEqual(0, promisePool.Available);
             Assert.AreEqual(4, promisePool.InstanceCount);
 

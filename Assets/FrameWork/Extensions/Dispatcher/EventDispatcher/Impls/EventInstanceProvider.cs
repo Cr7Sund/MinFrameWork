@@ -1,6 +1,5 @@
-using System;
 using Cr7Sund.Framework.Api;
-
+using System;
 namespace Cr7Sund.Framework.Impl
 {
     public class EventInstanceProvider : IInstanceProvider
@@ -8,7 +7,7 @@ namespace Cr7Sund.Framework.Impl
         public T GetInstance<T>()
         {
             object instance = new TmEvent();
-            T retVal = (T)instance;
+            var retVal = (T)instance;
             return retVal;
         }
 

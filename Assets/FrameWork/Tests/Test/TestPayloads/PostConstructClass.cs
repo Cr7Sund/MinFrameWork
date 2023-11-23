@@ -1,14 +1,9 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
     public class PostConstructClass
     {
         [Inject]
-        public float floatVal ;
-
-        public PostConstructClass()
-        { }
+        public float floatVal;
 
         [PostConstruct]
         public void MultiplyBy2()
@@ -17,4 +12,3 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 }
-

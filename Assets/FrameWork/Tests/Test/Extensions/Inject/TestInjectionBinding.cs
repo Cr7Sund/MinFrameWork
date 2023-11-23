@@ -1,8 +1,7 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
-
+using System;
 namespace Cr7Sund.Framework.Tests
 {
     public class TestInjectionBinding
@@ -16,7 +15,7 @@ namespace Cr7Sund.Framework.Tests
                 Assert.That(typeof(SimpleInterfaceImplementer) == binding.Value as Type);
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.DEFAULT);
             };
-            InjectionBinding defaultBinding = new InjectionBinding(resolver);
+            var defaultBinding = new InjectionBinding(resolver);
             defaultBinding.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>();
         }
 
@@ -31,7 +30,7 @@ namespace Cr7Sund.Framework.Tests
                 Assert.That(instance == binding.Value);
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.SINGLETON);
             };
-            InjectionBinding defaultBinding = new InjectionBinding(resolver);
+            var defaultBinding = new InjectionBinding(resolver);
             defaultBinding.Bind<ISimpleInterface>().ToValue(instance);
         }
 
@@ -45,7 +44,7 @@ namespace Cr7Sund.Framework.Tests
                 Assert.That(instance == binding.Value);
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.VALUE);
             };
-            InjectionBinding defaultBinding = new InjectionBinding(resolver);
+            var defaultBinding = new InjectionBinding(resolver);
             defaultBinding.Bind<ISimpleInterface>().ToValue(instance);
         }
 
@@ -57,7 +56,7 @@ namespace Cr7Sund.Framework.Tests
             Binder.BindingResolver resolver = delegate (IBinding binding, object oldName)
             {
                 Assert.That(binding.Value as Type == typeof(InjectableDerivedClass));
-                InjectionBindingType correctType = (a == 0) ? InjectionBindingType.DEFAULT : InjectionBindingType.SINGLETON;
+                var correctType = a == 0 ? InjectionBindingType.DEFAULT : InjectionBindingType.SINGLETON;
                 Assert.That((binding as InjectionBinding).Type == correctType);
                 a++;
             };
@@ -68,7 +67,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestValueChainBinding()
         {
             int a = 0;
-            InjectableDerivedClass testValue = new InjectableDerivedClass();
+            var testValue = new InjectableDerivedClass();
 
             Binder.BindingResolver resolver = delegate (IBinding binding, object oldName)
             {
@@ -84,7 +83,7 @@ namespace Cr7Sund.Framework.Tests
                     Assert.That(binding.Value == testValue);
                 }
 
-                InjectionBindingType correctType = (a == 0) ? InjectionBindingType.DEFAULT : InjectionBindingType.VALUE;
+                var correctType = a == 0 ? InjectionBindingType.DEFAULT : InjectionBindingType.VALUE;
                 Assert.That((binding as InjectionBinding).Type == correctType);
 
                 a++;
@@ -95,14 +94,16 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestIllegalValueBinding()
         {
-            MarkerClass illegalValue = new MarkerClass();
+            var illegalValue = new MarkerClass();
 
-            Binder.BindingResolver resolver = delegate (IBinding binding, object oldName) { };
-            TestDelegate testDelegate = delegate ()
+            Binder.BindingResolver resolver = delegate
+            {
+            };
+            TestDelegate testDelegate = delegate
             {
                 new InjectionBinding(resolver).Bind<InjectableSuperClass>().ToValue(illegalValue);
             };
-            InjectionException ex =
+            var ex =
                 Assert.Throws<InjectionException>(testDelegate);
             Assert.That(ex.Type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
         }
@@ -110,14 +111,16 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestIllegalTypeBinding()
         {
-            MarkerClass illegalValue = new MarkerClass();
+            var illegalValue = new MarkerClass();
 
-            Binder.BindingResolver resolver = delegate (IBinding binding, object oldName) { };
-            TestDelegate testDelegate = delegate ()
+            Binder.BindingResolver resolver = delegate
+            {
+            };
+            TestDelegate testDelegate = delegate
             {
                 new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<SimpleInterfaceImplementer>();
             };
-            InjectionException ex =
+            var ex =
                 Assert.Throws<InjectionException>(testDelegate);
             Assert.That(ex.Type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
         }

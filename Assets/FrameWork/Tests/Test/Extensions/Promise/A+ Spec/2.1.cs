@@ -1,8 +1,7 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
-
+using System;
 namespace Cr7Sund.Framework.PromiseTest.A__Spec
 {
     public class _2_1
@@ -32,7 +31,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 var fulfilledPromise = new Promise<object>();
                 fulfilledPromise.Resolve(new object());
 
-                var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => fulfilledPromise.Resolve(new object()));
+                var promiseException = Assert.Throws<PromiseException>(() => fulfilledPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
                 Assert.AreEqual(PromiseState.Resolved, fulfilledPromise.CurState);
             }
@@ -41,9 +40,9 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _must_have_a_value_which_must_not_change()
             {
-                var promisedValue = new object();
+                object promisedValue = new object();
                 var fulfilledPromise = new Promise<object>();
-                var handled = 0;
+                int handled = 0;
 
                 fulfilledPromise.Then(v =>
                 {
@@ -53,7 +52,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                 fulfilledPromise.Resolve(promisedValue);
 
-                var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => fulfilledPromise.Resolve(new object()));
+                var promiseException = Assert.Throws<PromiseException>(() => fulfilledPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
                 Assert.AreEqual(1, handled);
             }
@@ -69,7 +68,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 var rejectedPromise = new Promise<object>();
                 rejectedPromise.Reject(new Exception());
 
-                var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => rejectedPromise.Resolve(new object()));
+                var promiseException = Assert.Throws<PromiseException>(() => rejectedPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
                 Assert.AreEqual(PromiseState.Rejected, rejectedPromise.CurState);
             }
@@ -80,7 +79,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var rejectedPromise = new Promise<object>();
                 var reason = new Exception();
-                var handled = 0;
+                int handled = 0;
 
                 rejectedPromise.Catch(e =>
                 {
@@ -90,7 +89,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                 rejectedPromise.Reject(reason);
 
-                var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => rejectedPromise.Reject(new Exception()));
+                var promiseException = Assert.Throws<PromiseException>(() => rejectedPromise.Reject(new Exception()));
                 Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
                 Assert.AreEqual(1, handled);
             }

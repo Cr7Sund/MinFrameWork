@@ -1,5 +1,4 @@
 ﻿using System;
-
 namespace Cr7Sund.Logger
 {
     internal class MMFileOverflowException : Exception
@@ -8,7 +7,7 @@ namespace Cr7Sund.Logger
 
         public MMFileOverflowException(int length, string message) : base(message)
         {
-            this.Length = length;
+            Length = length;
         }
     }
 }

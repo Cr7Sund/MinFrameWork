@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromiseBinder : Binder, ICommandPromiseBinder
@@ -15,9 +12,10 @@ namespace Cr7Sund.Framework.Impl
         {
             var binding = GetBinding(trigger);
 
-            var values = binding.Value as object[];
+            object[] values = binding.Value as object[];
 
-            AssertUtil.Greater(values.Length, 0);
+            AssertUtil.Greater(values.Length, 0, new PromiseException(
+                "can not react a empty promise command", PromiseExceptionType.EMPTY_PROMISE_TOREACT));
 
             float sliceLength = 1 / values.Length;
             for (int i = 0; i < values.Length; i++)
@@ -28,14 +26,13 @@ namespace Cr7Sund.Framework.Impl
                 command.SequenceID = i;
             }
 
-            var firstCommand = values[0] as ICommandPromise;
+            var firstCommand = binding.FirstPromise;
             firstCommand.Resolve();
             firstCommand.Release();
         }
 
 
         #region IBinder implementation
-
         protected override IBinding GetRawBinding()
         {
             var binding = new CommandPromiseBinding(Resolver);
@@ -55,7 +52,7 @@ namespace Cr7Sund.Framework.Impl
 
         public new ICommandPromiseBinding GetBinding(object key, object name)
         {
-            return this.GetBinding(key, null) as ICommandPromiseBinding;
+            return base.GetBinding(key, null) as ICommandPromiseBinding;
         }
         #endregion
     }

@@ -1,6 +1,6 @@
 ﻿namespace Cr7Sund.Logger
 {
-    class EventLogWriterBuilder : LogWriterBuilder
+    internal class EventLogWriterBuilder : LogWriterBuilder
     {
         public override void BuildLogWriter()
         {

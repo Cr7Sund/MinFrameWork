@@ -1,8 +1,7 @@
-using System;
-using NUnit.Framework;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
-
+using NUnit.Framework;
+using System;
 namespace Cr7Sund.Framework.PromiseTest.A__Spec
 {
     public class _2_2
@@ -18,12 +17,12 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                 var resultPromise = promise
                     .Then(
-                        (Func<object, IPromise>)null,
+                        null,
                         ex => { }
                     );
 
-                var resolves = 0;
-                var errors = 0;
+                int resolves = 0;
+                int errors = 0;
                 resultPromise.Then(() => ++resolves);
                 resultPromise.Catch(ex => ++errors);
 
@@ -45,8 +44,8 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                         null
                     );
 
-                var resolved = 0;
-                var errors = 0;
+                int resolved = 0;
+                int errors = 0;
                 var e = new Exception();
                 resultPromise.Then(() => ++resolved);
                 resultPromise.Catch(ex =>
@@ -72,8 +71,8 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                         null
                     );
 
-                var resolved = 0;
-                var errors = 0;
+                int resolved = 0;
+                int errors = 0;
                 var e = new Exception();
                 resultPromise.Then(v => ++resolved);
                 resultPromise.Catch(ex =>
@@ -98,8 +97,8 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var promise = new Promise<object>();
 
-                var promisedValue = new object();
-                var resolved = false;
+                object promisedValue = new object();
+                bool resolved = false;
 
                 promise.Then(
                     v =>
@@ -120,7 +119,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             public void _it_must_not_be_called_before_promise_is_fulfilled()
             {
                 var promise = new Promise<object>();
-                var resolved = false;
+                bool resolved = false;
 
                 promise.Then(
                     v => resolved = true,
@@ -135,8 +134,8 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             public void _it_must_not_be_called_more_than_once()
             {
                 var promise = new Promise<object>();
-                var promisedValue = new object();
-                var resolved = 0;
+                object promisedValue = new object();
+                int resolved = 0;
 
                 promise.Then(
                     v => ++resolved,
@@ -158,7 +157,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var promise = new Promise<object>();
                 var rejectedReason = new Exception();
-                var errored = false;
+                bool errored = false;
 
                 promise.Then(
                     v => { },
@@ -179,7 +178,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             public void _it_must_not_be_called_before_promise_is_rejected()
             {
                 var promise = new Promise<object>();
-                var errored = false;
+                bool errored = false;
 
                 promise.Then(
                     v => { },
@@ -195,7 +194,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var promise = new Promise<object>();
                 var rejectedReason = new Exception();
-                var errored = 0;
+                int errored = 0;
 
                 promise.Then(
                     v => { },
@@ -223,7 +222,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var promise = new Promise<object>();
 
-                var order = 0;
+                int order = 0;
 
                 promise.Then(_ =>
                 {
@@ -248,7 +247,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var promise = new Promise<object>();
 
-                var order = 0;
+                int order = 0;
 
                 promise.Then(_ =>
                 {
@@ -282,7 +281,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             {
                 var promise = new Promise<object>();
 
-                var order = 0;
+                int order = 0;
 
                 promise.Catch(_ =>
                 {
@@ -307,6 +306,53 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
         public class then_must_return_a_promise
         {
 
+            // 2.2.7.3
+            [Test]
+            public void _If_onFulfilled_is_not_a_function_and_promise1_is_fulfilled_promise2_must_be_fulfilled_with_the_same_value_as_promise1()
+            {
+                var promise1 = new Promise<object>();
+
+                var promise2 = promise1.Catch(_ =>
+                    throw new Exception("There shouldn't be an error")
+                );
+
+                object promisedValue = new object();
+                int promise2ThenHandler = 0;
+
+                promise2.Then(v =>
+                {
+                    Assert.AreEqual(promisedValue, v);
+                    ++promise2ThenHandler;
+                });
+
+                promise1.Resolve(promisedValue);
+
+                Assert.AreEqual(1, promise2ThenHandler);
+            }
+
+            [Test]
+            public void _If_onRejected_is_not_a_function_and_promise1_is_rejected_promise2_must_be_rejected_with_the_same_reason_as_promise1()
+            {
+                var promise1 = new Promise<object>();
+
+                var promise2 = promise1.Then(_ =>
+                    throw new Exception("There shouldn't be a then callback")
+                );
+
+                var e = new Exception();
+                int promise2CatchHandler = 0;
+
+                promise2.Catch(ex =>
+                {
+                    Assert.AreEqual(e, ex);
+                    ++promise2CatchHandler;
+                });
+
+                promise1.Reject(e);
+
+                Assert.AreEqual(1, promise2CatchHandler);
+            }
+
             // 2.2.7.1
             public class _If_either_onFulfilled_or_onRejected_returns_a_value_x_fulfill_promise_with_x
             {
@@ -315,13 +361,13 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 {
                     var promise1 = new Promise<object>();
 
-                    var promisedValue1 = new object();
-                    var promisedValue2 = new object();
+                    object promisedValue1 = new object();
+                    object promisedValue2 = new object();
 
                     var promise2 =
                         promise1.Then(_ => promisedValue2);
 
-                    var promise1ThenHandler = 0;
+                    int promise1ThenHandler = 0;
                     promise1.Then(v =>
                     {
                         Assert.AreEqual(promisedValue1, v);
@@ -329,7 +375,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                     });
 
-                    var promise2ThenHandler = 0;
+                    int promise2ThenHandler = 0;
                     promise2.Then(v =>
                     {
                         Assert.AreEqual(promisedValue2, v);
@@ -346,7 +392,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_no_value_in_catch()
                 {
-                    var callbackInvoked = false;
+                    bool callbackInvoked = false;
 
                     new Promise<object>((res, rej) => rej(new Exception()))
                         .Catch(_ => { })
@@ -358,9 +404,9 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_no_value_in_then()
                 {
-                    var callbackInvoked = false;
-                    var resolveHandlerInvoked = false;
-                    var rejectHandlerInvoked = false;
+                    bool callbackInvoked = false;
+                    bool resolveHandlerInvoked = false;
+                    bool rejectHandlerInvoked = false;
 
                     new Promise((res, rej) => rej(new Exception()))
                         .Then(
@@ -377,8 +423,8 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_value_in_catch()
                 {
-                    var expectedValue = "Value returned from Catch";
-                    var actualValue = string.Empty;
+                    string expectedValue = "Value returned from Catch";
+                    string actualValue = string.Empty;
 
                     new Promise<string>((res, rej) => rej(new Exception()))
                         .Catch(_ => expectedValue)
@@ -390,8 +436,8 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_value_in_then()
                 {
-                    var expectedValue = "Value returned from reject handler";
-                    var actualValue = string.Empty;
+                    string expectedValue = "Value returned from reject handler";
+                    string actualValue = string.Empty;
 
                     new Promise<string>((res, rej) => rej(new Exception()))
                         .Then(
@@ -406,7 +452,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_non_generic_promise1_is_rejected()
                 {
-                    var callbackInvoked = false;
+                    bool callbackInvoked = false;
 
                     new Promise((res, rej) => rej(new Exception()))
                         .Catch(_ => { })
@@ -432,7 +478,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                     promise1.Catch(_ => throw new Exception("This shouldn't happen!"));
 
-                    var errorHandledForPromise2 = 0;
+                    int errorHandledForPromise2 = 0;
                     promise2.Catch(ex =>
                     {
                         Assert.AreEqual(e, ex);
@@ -458,7 +504,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                     promise1.Catch(_ => throw new Exception("This shouldn't happen!"));
 
-                    var errorHandledForPromise2 = 0;
+                    int errorHandledForPromise2 = 0;
                     promise2.Catch(ex =>
                     {
                         Assert.AreEqual(e, ex);
@@ -482,7 +528,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                     promise1.Catch(_ => throw new Exception("This shouldn't happen!"));
 
-                    var errorHandledForPromise2 = 0;
+                    int errorHandledForPromise2 = 0;
                     promise2.Catch(ex =>
                     {
                         Assert.AreEqual(e, ex);
@@ -494,53 +540,6 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
 
                     Assert.AreEqual(1, errorHandledForPromise2);
                 }
-            }
-
-            // 2.2.7.3
-            [Test]
-            public void _If_onFulfilled_is_not_a_function_and_promise1_is_fulfilled_promise2_must_be_fulfilled_with_the_same_value_as_promise1()
-            {
-                var promise1 = new Promise<object>();
-
-                var promise2 = promise1.Catch(_ =>
-                    throw new Exception("There shouldn't be an error")
-                );
-
-                var promisedValue = new object();
-                var promise2ThenHandler = 0;
-
-                promise2.Then(v =>
-                {
-                    Assert.AreEqual(promisedValue, v);
-                    ++promise2ThenHandler;
-                });
-
-                promise1.Resolve(promisedValue);
-
-                Assert.AreEqual(1, promise2ThenHandler);
-            }
-
-            [Test]
-            public void _If_onRejected_is_not_a_function_and_promise1_is_rejected_promise2_must_be_rejected_with_the_same_reason_as_promise1()
-            {
-                var promise1 = new Promise<object>();
-
-                var promise2 = promise1.Then(_ =>
-                    throw new Exception("There shouldn't be a then callback")
-                );
-
-                var e = new Exception();
-                var promise2CatchHandler = 0;
-
-                promise2.Catch(ex =>
-                {
-                    Assert.AreEqual(e, ex);
-                    ++promise2CatchHandler;
-                });
-
-                promise1.Reject(e);
-
-                Assert.AreEqual(1, promise2CatchHandler);
             }
         }
     }

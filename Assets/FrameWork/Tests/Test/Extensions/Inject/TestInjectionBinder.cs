@@ -1,21 +1,21 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using UnityEngine.TestTools;
-
 namespace Cr7Sund.Framework.Tests
 {
     [TestFixture]
     public class TestinjectionBinder : IPrebuildSetup, IPostBuildCleanup
     {
-        IInjectionBinder binder;
 
         [SetUp]
         public void Setup()
         {
             binder = new InjectionBinder();
         }
+        private IInjectionBinder binder;
 
         public void Cleanup()
         {
@@ -32,7 +32,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestGetBindingFlat()
         {
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
-            IInjectionBinding binding = binder.GetBinding<InjectableSuperClass>();
+            var binding = binder.GetBinding<InjectableSuperClass>();
             Assert.IsNotNull(binding);
         }
 
@@ -40,7 +40,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestGetBindingAbstract()
         {
             binder.Bind<ISimpleInterface>().To<ClassWithConstructorParameters>();
-            IInjectionBinding binding = binder.GetBinding<ISimpleInterface>();
+            var binding = binder.GetBinding<ISimpleInterface>();
             Assert.IsNotNull(binding);
         }
 
@@ -48,7 +48,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestGetNamedBinding()
         {
             binder.Bind<ISimpleInterface>().To<ClassWithConstructorParameters>().ToName(nameof(MarkerClass));
-            IInjectionBinding binding = binder.GetBinding<ISimpleInterface>(nameof(MarkerClass));
+            var binding = binder.GetBinding<ISimpleInterface>(nameof(MarkerClass));
             Assert.IsNotNull(binding);
         }
 
@@ -57,7 +57,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>();
 
-            ClassToBeInjected instance = binder.GetInstance(typeof(ClassToBeInjected)) as ClassToBeInjected;
+            var instance = binder.GetInstance(typeof(ClassToBeInjected)) as ClassToBeInjected;
 
             Assert.IsNotNull(instance);
             Assert.That(instance is ClassToBeInjected);
@@ -68,7 +68,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>();
 
-            ClassToBeInjected instance = binder.GetInstance<ClassToBeInjected>();
+            var instance = binder.GetInstance<ClassToBeInjected>();
 
             Assert.IsNotNull(instance);
             Assert.That(instance is ClassToBeInjected);
@@ -79,7 +79,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>().ToName(nameof(MarkerClass));
 
-            ClassToBeInjected instance = binder.GetInstance(typeof(ClassToBeInjected), nameof(MarkerClass)) as ClassToBeInjected;
+            var instance = binder.GetInstance(typeof(ClassToBeInjected), nameof(MarkerClass)) as ClassToBeInjected;
 
             Assert.IsNotNull(instance);
             Assert.That(instance is ClassToBeInjected);
@@ -90,7 +90,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>().ToName(nameof(MarkerClass));
 
-            ClassToBeInjected instance = binder.GetInstance<ClassToBeInjected>(nameof(MarkerClass));
+            var instance = binder.GetInstance<ClassToBeInjected>(nameof(MarkerClass));
 
             Assert.IsNotNull(instance);
             Assert.That(instance is ClassToBeInjected);
@@ -101,7 +101,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>().ToName(SomeEnum.ONE);
 
-            ClassToBeInjected instance = binder.GetInstance(typeof(ClassToBeInjected), SomeEnum.ONE) as ClassToBeInjected;
+            var instance = binder.GetInstance(typeof(ClassToBeInjected), SomeEnum.ONE) as ClassToBeInjected;
 
             Assert.IsNotNull(instance);
             Assert.That(instance is ClassToBeInjected);
@@ -112,7 +112,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>().ToName(SomeEnum.ONE);
 
-            ClassToBeInjected instance = binder.GetInstance<ClassToBeInjected>(SomeEnum.ONE);
+            var instance = binder.GetInstance<ClassToBeInjected>(SomeEnum.ONE);
 
             Assert.IsNotNull(instance);
             Assert.That(instance is ClassToBeInjected);
@@ -121,12 +121,12 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestInjectionErrorFailureToProvideDependency()
         {
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 binder.GetInstance<InjectableSuperClass>();
             };
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
-            InjectionException ex = Assert.Throws<InjectionException>(testDelegate);
+            var ex = Assert.Throws<InjectionException>(testDelegate);
             Assert.That(ex.Type == InjectionExceptionType.NULL_BINDING);
         }
 
@@ -135,7 +135,7 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
             binder.Bind<int>().ToValue(42);
-            InjectableSuperClass testValue = binder.GetInstance<InjectableSuperClass>();
+            var testValue = binder.GetInstance<InjectableSuperClass>();
             Assert.IsNotNull(testValue);
             Assert.That(testValue.intValue == 42);
         }
@@ -145,18 +145,18 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
             binder.Bind<int>().ToValue(42);
-            InjectableSuperClass testValueBeforeUnbinding = binder.GetInstance<InjectableSuperClass>();
+            var testValueBeforeUnbinding = binder.GetInstance<InjectableSuperClass>();
             Assert.IsNotNull(testValueBeforeUnbinding);
             Assert.That(testValueBeforeUnbinding.intValue == 42);
 
             binder.Unbind<int>();
 
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 binder.GetInstance<InjectableSuperClass>();
             };
 
-            InjectionException ex = Assert.Throws<InjectionException>(testDelegate);
+            var ex = Assert.Throws<InjectionException>(testDelegate);
             Assert.That(ex.Type == InjectionExceptionType.NULL_BINDING);
         }
 
@@ -166,10 +166,10 @@ namespace Cr7Sund.Framework.Tests
             GuaranteedUniqueInstances.Reset();
 
             binder.Bind<GuaranteedUniqueInstances>().To<GuaranteedUniqueInstances>().ToName(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             Assert.AreNotEqual(instance1.uid, instance2.uid);
             Assert.AreNotSame(instance1, instance2);
             Assert.AreEqual(1, instance1.uid);
@@ -185,8 +185,8 @@ namespace Cr7Sund.Framework.Tests
             GuaranteedUniqueInstances.Reset();
 
             binder.Bind<GuaranteedUniqueInstances>().To<GuaranteedUniqueInstances>().ToName(SomeEnum.ONE).AsPool();
-            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             Assert.AreNotEqual(instance1.uid, instance2.uid);
             Assert.AreNotSame(instance1, instance2);
             Assert.AreEqual(1, instance1.uid);
@@ -194,8 +194,8 @@ namespace Cr7Sund.Framework.Tests
 
             binder.ReleaseInstance(instance1, SomeEnum.ONE);
             binder.ReleaseInstance(instance2, SomeEnum.ONE);
-            GuaranteedUniqueInstances instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             Assert.LessOrEqual(instance3.uid, 2);
             Assert.LessOrEqual(instance4.uid, 2);
         }
@@ -206,8 +206,8 @@ namespace Cr7Sund.Framework.Tests
             GuaranteedUniqueInstances.Reset();
 
             binder.Bind<GuaranteedUniqueInstances>().To<GuaranteedUniqueInstances>().ToName(SomeEnum.ONE).AsPool();
-            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance1 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance2 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             Assert.AreNotEqual(instance1.uid, instance2.uid);
             Assert.AreNotSame(instance1, instance2);
             Assert.AreEqual(1, instance1.uid);
@@ -222,8 +222,8 @@ namespace Cr7Sund.Framework.Tests
                 binder.ReleaseInstance(instance2, SomeEnum.ONE);
             };
             Assert.Throws<InjectionException>(testDelegate);
-            GuaranteedUniqueInstances instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
-            GuaranteedUniqueInstances instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
+            var instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             Assert.LessOrEqual(instance3.uid, 4); // since we dont actually return , we will expand the pool to adjust
             Assert.LessOrEqual(instance4.uid, 4);
         }
@@ -236,10 +236,10 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestValueToSingleton()
         {
-            GuaranteedUniqueInstances uniqueInstance = new GuaranteedUniqueInstances();
+            var uniqueInstance = new GuaranteedUniqueInstances();
             binder.Bind<GuaranteedUniqueInstances>().ToValue(uniqueInstance);
-            GuaranteedUniqueInstances instance1 = binder.GetInstance<GuaranteedUniqueInstances>();
-            GuaranteedUniqueInstances instance2 = binder.GetInstance<GuaranteedUniqueInstances>();
+            var instance1 = binder.GetInstance<GuaranteedUniqueInstances>();
+            var instance2 = binder.GetInstance<GuaranteedUniqueInstances>();
             Assert.AreEqual(instance1.uid, instance2.uid);
             Assert.AreSame(instance1, instance2);
         }
@@ -248,8 +248,8 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestValueToSingletonBinding()
         {
-            InjectableSuperClass instance = new InjectableSuperClass();
-            InjectionBinding binding = binder.Bind<InjectableSuperClass>().ToValue(instance).AsSingleton() as InjectionBinding;
+            var instance = new InjectableSuperClass();
+            var binding = binder.Bind<InjectableSuperClass>().ToValue(instance).AsSingleton() as InjectionBinding;
             Assert.AreEqual(InjectionBindingType.VALUE, binding.Type);
         }
 
@@ -257,8 +257,8 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestSingletonToValueBinding()
         {
-            InjectableSuperClass instance = new InjectableSuperClass();
-            InjectionBinding binding = binder.Bind<InjectableSuperClass>().AsSingleton().ToValue(instance) as InjectionBinding;
+            var instance = new InjectableSuperClass();
+            var binding = binder.Bind<InjectableSuperClass>().AsSingleton().ToValue(instance) as InjectionBinding;
             Assert.AreEqual(InjectionBindingType.VALUE, binding.Type);
         }
 
@@ -268,10 +268,10 @@ namespace Cr7Sund.Framework.Tests
         public void TestConstructorToSingleton()
         {
             ConstructorInjectsClassToBeInjected.Value = 0;
-            
+
             binder.Bind<ClassToBeInjected>().To<ClassToBeInjected>();
             binder.Bind<ConstructorInjectsClassToBeInjected>().To<ConstructorInjectsClassToBeInjected>().AsSingleton();
-            ConstructorInjectsClassToBeInjected instance = binder.GetInstance<ConstructorInjectsClassToBeInjected>();
+            var instance = binder.GetInstance<ConstructorInjectsClassToBeInjected>();
             Assert.IsNotNull(instance.injected);
             Assert.AreEqual(1, ConstructorInjectsClassToBeInjected.Value);
         }
@@ -282,12 +282,12 @@ namespace Cr7Sund.Framework.Tests
         public void TestDoublePostConstruct()
         {
             PostConstructSimple.PostConstructCount = 0;
-            PostConstructSimple instance = new PostConstructSimple();
+            var instance = new PostConstructSimple();
             binder.Bind<PostConstructSimple>().ToValue(instance);
             binder.Bind<InjectsPostConstructSimple>().To<InjectsPostConstructSimple>();
 
-            InjectsPostConstructSimple instance1 = binder.GetInstance<InjectsPostConstructSimple>();
-            InjectsPostConstructSimple instance2 = binder.GetInstance<InjectsPostConstructSimple>();
+            var instance1 = binder.GetInstance<InjectsPostConstructSimple>();
+            var instance2 = binder.GetInstance<InjectsPostConstructSimple>();
 
             Assert.AreSame(instance, instance1.pcs);
             Assert.AreNotSame(instance1, instance2);
@@ -299,11 +299,11 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ISimpleInterface>().Bind<IAnotherSimpleInterface>().To<PolymorphicClass>();
 
-            ISimpleInterface callOnce = binder.GetInstance<ISimpleInterface>();
+            var callOnce = binder.GetInstance<ISimpleInterface>();
             Assert.NotNull(callOnce);
             Assert.IsInstanceOf<PolymorphicClass>(callOnce);
 
-            IAnotherSimpleInterface callAgain = binder.GetInstance<IAnotherSimpleInterface>();
+            var callAgain = binder.GetInstance<IAnotherSimpleInterface>();
             Assert.NotNull(callAgain);
             Assert.IsInstanceOf<PolymorphicClass>(callAgain);
         }
@@ -313,11 +313,11 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ISimpleInterface>().Bind<IAnotherSimpleInterface>().To<PolymorphicClass>().AsSingleton();
 
-            ISimpleInterface callOnce = binder.GetInstance<ISimpleInterface>();
+            var callOnce = binder.GetInstance<ISimpleInterface>();
             Assert.NotNull(callOnce);
             Assert.IsInstanceOf<PolymorphicClass>(callOnce);
 
-            IAnotherSimpleInterface callAgain = binder.GetInstance<IAnotherSimpleInterface>();
+            var callAgain = binder.GetInstance<IAnotherSimpleInterface>();
             Assert.NotNull(callAgain);
             Assert.IsInstanceOf<PolymorphicClass>(callAgain);
 
@@ -333,8 +333,8 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
             binder.Bind<ISimpleInterface>().To<PolymorphicClass>();
 
-            ISimpleInterface instance1 = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE);
-            ISimpleInterface instance2 = binder.GetInstance<ISimpleInterface>();
+            var instance1 = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE);
+            var instance2 = binder.GetInstance<ISimpleInterface>();
 
             Assert.That(instance1 is SimpleInterfaceImplementer);
             Assert.That(instance2 is PolymorphicClass);
@@ -347,8 +347,8 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<ISimpleInterface>().To<PolymorphicClass>();
             binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
 
-            ISimpleInterface instance1 = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE);
-            ISimpleInterface instance2 = binder.GetInstance<ISimpleInterface>();
+            var instance1 = binder.GetInstance<ISimpleInterface>(SomeEnum.ONE);
+            var instance2 = binder.GetInstance<ISimpleInterface>();
 
             Assert.That(instance1 is SimpleInterfaceImplementer);
             Assert.That(instance2 is PolymorphicClass);
@@ -359,13 +359,13 @@ namespace Cr7Sund.Framework.Tests
         {
             binder.Bind<ISimpleInterface>().Bind<IAnotherSimpleInterface>().To<PolymorphicClass>();
 
-            System.Collections.Generic.List<Type> list = new System.Collections.Generic.List<Type>();
+            var list = new List<Type>();
             list.Add(typeof(PolymorphicClass));
             int count = binder.Reflect(list);
 
             Assert.AreEqual(1, count);
 
-            IReflectedClass reflected = binder.Injector.Reflector.Get<PolymorphicClass>();
+            var reflected = binder.Injector.Reflector.Get<PolymorphicClass>();
             Assert.True(((ReflectedClass)reflected).PreGenerated);
         }
 
@@ -379,7 +379,7 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<int>().ToValue(42);
             binder.Bind<string>().ToValue("zaphod"); //primitives won't get reflected...
 
-            System.Collections.Generic.List<Type> list = new System.Collections.Generic.List<Type>();
+            var list = new List<Type>();
             list.Add(typeof(HasNamedInjections));
             list.Add(typeof(SimpleInterfaceImplementer));
             list.Add(typeof(PolymorphicClass));
@@ -387,19 +387,19 @@ namespace Cr7Sund.Framework.Tests
             list.Add(typeof(int));
 
             int count = binder.Reflect(list);
-            Assert.AreEqual(4, count);             //...so list length will not include primitives
+            Assert.AreEqual(4, count); //...so list length will not include primitives
 
-            IReflectedClass reflected1 = binder.Injector.Reflector.Get<HasNamedInjections>();
+            var reflected1 = binder.Injector.Reflector.Get<HasNamedInjections>();
             Assert.True(((ReflectedClass)reflected1).PreGenerated);
 
-            IReflectedClass reflected2 = binder.Injector.Reflector.Get<SimpleInterfaceImplementer>();
+            var reflected2 = binder.Injector.Reflector.Get<SimpleInterfaceImplementer>();
             Assert.True(((ReflectedClass)reflected2).PreGenerated);
 
-            IReflectedClass reflected3 = binder.Injector.Reflector.Get<PolymorphicClass>();
+            var reflected3 = binder.Injector.Reflector.Get<PolymorphicClass>();
             Assert.True(((ReflectedClass)reflected3).PreGenerated);
             Assert.AreNotEqual(reflected2.Constructor, reflected3.Constructor);
 
-            IReflectedClass reflected4 = binder.Injector.Reflector.Get<InjectableDerivedClass>();
+            var reflected4 = binder.Injector.Reflector.Get<InjectableDerivedClass>();
             Assert.True(((ReflectedClass)reflected4).PreGenerated);
         }
 
@@ -414,22 +414,22 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<string>().ToValue("zaphod"); //primitives won't get reflected...
 
             int count = binder.ReflectAll();
-            Assert.AreEqual(4, count);             //...so list length will not include primitives
+            Assert.AreEqual(4, count); //...so list length will not include primitives
 
-            ISimpleInterface s = binder.GetInstance<ISimpleInterface>();
+            var s = binder.GetInstance<ISimpleInterface>();
             Assert.IsTrue(s is PolymorphicClass);
 
-            IReflectedClass reflected1 = binder.Injector.Reflector.Get<HasNamedInjections>();
+            var reflected1 = binder.Injector.Reflector.Get<HasNamedInjections>();
             Assert.True(((ReflectedClass)reflected1).PreGenerated);
 
-            IReflectedClass reflected2 = binder.Injector.Reflector.Get<SimpleInterfaceImplementer>();
+            var reflected2 = binder.Injector.Reflector.Get<SimpleInterfaceImplementer>();
             Assert.True(((ReflectedClass)reflected2).PreGenerated);
 
-            IReflectedClass reflected3 = binder.Injector.Reflector.Get<PolymorphicClass>();
+            var reflected3 = binder.Injector.Reflector.Get<PolymorphicClass>();
             Assert.True(((ReflectedClass)reflected3).PreGenerated);
             Assert.AreNotEqual(reflected2.Constructor, reflected3.Constructor);
 
-            IReflectedClass reflected4 = binder.Injector.Reflector.Get<InjectableDerivedClass>();
+            var reflected4 = binder.Injector.Reflector.Get<InjectableDerivedClass>();
             Assert.True(((ReflectedClass)reflected4).PreGenerated);
 
         }
@@ -442,21 +442,19 @@ namespace Cr7Sund.Framework.Tests
             binder.GetInstance<IPool<SimpleInterfaceImplementer>>().InstanceProvider = binder;
             binder.Bind<IUsesPool>().To<UsesPool>().AsSingleton();
 
-            IUsesPool instance = binder.GetInstance<IUsesPool>();
+            var instance = binder.GetInstance<IUsesPool>();
 
             Assert.IsNotNull(instance);
             Assert.IsNotNull(instance.Instance1);
             Assert.IsNotNull(instance.Instance2);
         }
-
-
     }
 
-    interface ITestPooled : IPoolable
+    internal interface ITestPooled : IPoolable
     {
     }
 
-    class TestPooled : ITestPooled
+    internal class TestPooled : ITestPooled
     {
         public void Restore()
         {
@@ -476,13 +474,13 @@ namespace Cr7Sund.Framework.Tests
         public bool IsRetain { get; set; }
     }
 
-    interface IUsesPool
+    internal interface IUsesPool
     {
         ISimpleInterface Instance1 { get; set; }
         ISimpleInterface Instance2 { get; set; }
     }
 
-    class UsesPool : IUsesPool
+    internal class UsesPool : IUsesPool
     {
         [Inject]
         public IPool<SimpleInterfaceImplementer> pool;
@@ -493,8 +491,8 @@ namespace Cr7Sund.Framework.Tests
         [PostConstruct]
         public void PostConstruct()
         {
-            Instance1 = pool.GetInstance() as ISimpleInterface;
-            Instance2 = pool.GetInstance() as ISimpleInterface;
+            Instance1 = pool.GetInstance();
+            Instance2 = pool.GetInstance();
         }
     }
 }

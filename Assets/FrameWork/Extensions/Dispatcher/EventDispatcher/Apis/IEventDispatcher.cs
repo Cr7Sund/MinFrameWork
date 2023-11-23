@@ -1,14 +1,14 @@
 /**
  * @interface Cr7Sund.Framework.Api.IEventDispatcher
- * 
+ *
  * Interface for allowing a client to register as an observer.
- * 
- * EventDispatcher allows a client to register as an observer. Whenever the 
+ *
+ * EventDispatcher allows a client to register as an observer. Whenever the
  * Dispatcher executes a `Dispatch()`, observers will be notified of any event
  * (Key) for which they have registered.
- * 
+ *
  * EventDispatcher dispatches IEvents.
- * 
+ *
  * @see Cr7Sund.Framework.Api.IEvent
  */
 

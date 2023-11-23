@@ -1,8 +1,8 @@
 /**
  * @interface Cr7Sund.Framework.Api.ISemiBinding
- * 
+ *
  * A managed list of values.
- * 
+ *
  * A SemiBinding is the smallest atomic part of the strange framework. It represents
  * either the Value or the Name arm of the binding.
  * <br />
@@ -17,7 +17,7 @@
  *  <li>Value - MANY</li>
  *  <li>Name - ONE</li>
  * </ul>
- * 
+ *
  * @see Cr7Sund.Framework.Api.BindingConstraintType
  */
 
@@ -29,9 +29,11 @@ namespace Cr7Sund.Framework.Api
         /// <summary>  Set or get the constraint.  </summary>
         BindingConstraintType Constraint { get; set; }
 
-        /// <summary>  A secondary constraint that ensures that this SemiBinding will never contain multiple values equivalent to each other. </summary> 
+        /// <summary>
+        ///     A secondary constraint that ensures that this SemiBinding will never contain multiple values equivalent to
+        ///     each other.
+        /// </summary>
         bool UniqueValue { get; set; }
-
     }
 
 

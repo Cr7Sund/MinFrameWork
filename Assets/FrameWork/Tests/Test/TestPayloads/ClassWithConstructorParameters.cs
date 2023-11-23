@@ -1,53 +1,36 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
-	public class ClassWithConstructorParameters : ISimpleInterface
-	{
-		private int _intValue;
-		private string _stringValue;
+    public class ClassWithConstructorParameters : ISimpleInterface
+    {
 
-		//Two constructors. One is tagged to be the constructor used during injection
-		public ClassWithConstructorParameters()
-		{
-			this._intValue = 42;
-			this._stringValue = "Liberator";
-		}
+        //Two constructors. One is tagged to be the constructor used during injection
+        public ClassWithConstructorParameters()
+        {
+            intValue = 42;
+            stringValue = "Liberator";
+        }
 
-		public ClassWithConstructorParameters(int intValue, string stringValue)
-		{
-			this._intValue = intValue;
-			this._stringValue = stringValue;
-		}
+        public ClassWithConstructorParameters(int intValue, string stringValue)
+        {
+            this.intValue = intValue;
+            this.stringValue = stringValue;
+        }
 
-		public void DeConstruct()
-		{
-			this._intValue = 0;
-		}
+        public string stringValue
+        {
+            get;
+            set;
+        }
 
-		public int intValue
-		{
-			get
-			{
-				return _intValue;
-			}
-			set
-			{
-				_intValue = value;
-			}
-		}
+        public int intValue
+        {
+            get;
+            set;
+        }
 
-		public string stringValue
-		{
-			get
-			{
-				return _stringValue;
-			}
-			set
-			{
-				_stringValue = value;
-			}
-		}
-	}
+        public void DeConstruct()
+        {
+            intValue = 0;
+        }
+    }
 }
-

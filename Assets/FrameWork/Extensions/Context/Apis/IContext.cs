@@ -1,15 +1,14 @@
 /**
  * @interface Cr7Sund.Framework.Api.IContext
- * 
+ *
  * A Context is the entry point to the binding framework.
- * 
+ *
  * Implement this interface to create the binding context suitable for your application.
- * 
+ *
  * In a typical Unity3D setup, an extension of MVCSContext should be instantiated from the ContextView.
  */
 
 using System;
-
 namespace Cr7Sund.Framework.Api
 {
     public interface IContext : IBinder
@@ -45,6 +44,6 @@ namespace Cr7Sund.Framework.Api
         MANUAL_MAPPING = 1,
         /// Context startup will halt after all bindings are mapped, but before firing ContextEvent.START (or the analogous Signal).
         /// If this flag is invoked, the developer must call context.Launch()
-        MANUAL_LAUNCH = 2,
+        MANUAL_LAUNCH = 2
     }
 }

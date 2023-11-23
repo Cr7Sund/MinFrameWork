@@ -1,25 +1,24 @@
 ﻿using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-
 namespace Cr7Sund.Logger
 {
-    struct MMFileHeader
+    internal struct MMFileHeader
     {
         public int position;
         public int length;
 
-        public readonly static int PositionIndex = 0;
-        public readonly static int LengthIndex = PositionIndex + sizeof(int);
-        public readonly static int FileIndex = LengthIndex + sizeof(int);
+        public static readonly int PositionIndex = 0;
+        public static readonly int LengthIndex = PositionIndex + sizeof(int);
+        public static readonly int FileIndex = LengthIndex + sizeof(int);
 
-        public readonly static int ContextIndex = FileIndex;
+        public static readonly int ContextIndex = FileIndex;
     }
 
-    class MMFile : IDisposable
+    internal class MMFile : IDisposable
     {
-        private readonly MemoryMappedFile _mmf;
         private readonly MemoryMappedViewAccessor _accessor;
+        private readonly MemoryMappedFile _mmf;
 
         public MMFile(string path, int capacity = 2048)
         {
@@ -42,10 +41,16 @@ namespace Cr7Sund.Logger
                 header.length = capacity;
                 WriteHeader(header);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 UnityEngine.Debug.Log(e);
             }
+        }
+
+        public void Dispose()
+        {
+            _accessor?.Dispose();
+            _mmf?.Dispose();
         }
 
         private MMFileHeader ReadHeader()
@@ -75,14 +80,14 @@ namespace Cr7Sund.Logger
             var header = ReadHeader();
             return header.position <= 0;
         }
-        
+
         public byte[] ReadAll()
         {
             if (_accessor == null)
                 throw new Exception("The accessor has not been initialized!!!");
 
             var header = ReadHeader();
-            var result = new byte[header.position];
+            byte[] result = new byte[header.position];
             _accessor.ReadArray(MMFileHeader.ContextIndex, result, 0, header.position);
             return result;
         }
@@ -90,17 +95,17 @@ namespace Cr7Sund.Logger
         public void Write(byte[] sources, int offset, int length)
         {
             if (_accessor == null)
-                throw new System.Exception("The accessor has not been initialized");
+                throw new Exception("The accessor has not been initialized");
 
             if (!_accessor.CanWrite)
-                throw new System.Exception("The accessor is write-protected");
+                throw new Exception("The accessor is write-protected");
 
             var header = ReadHeader();
-            var absolutePosition = header.position + MMFileHeader.ContextIndex;
+            int absolutePosition = header.position + MMFileHeader.ContextIndex;
 
             if (absolutePosition + length > header.length)
             {
-                var overflow = absolutePosition + length - header.length;
+                int overflow = absolutePosition + length - header.length;
                 throw new MMFileOverflowException(overflow, "Write overflow!");
             }
 
@@ -115,15 +120,5 @@ namespace Cr7Sund.Logger
             header.position = 0;
             WriteHeader(header);
         }
-
-        public void Dispose()
-        {
-            _accessor?.Dispose();
-            _mmf?.Dispose();
-        }
     }
 }
-
-
-
-

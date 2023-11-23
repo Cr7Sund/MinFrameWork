@@ -1,19 +1,14 @@
+using Cr7Sund.Framework.Api;
 using System;
 using System.Reflection;
-using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class Injector : IInjector
     {
-        public IInjectorFactory Factory { get; set; }
-        public IInjectionBinder Binder { get; set; }
-        public IReflectionBinder Reflector { get; set; }
-        public IPoolBinder PoolBinder { get; set; }
 
-        private static IInjectorFactory _factory = new InjectorFactory();
-        private IReflectionBinder _reflectionBinder;
-        private IPoolBinder _poolBinder;
+        private static readonly IInjectorFactory _factory = new InjectorFactory();
+        private readonly IPoolBinder _poolBinder;
+        private readonly IReflectionBinder _reflectionBinder;
 
         public Injector()
         {
@@ -24,6 +19,10 @@ namespace Cr7Sund.Framework.Impl
             Reflector = _reflectionBinder;
             PoolBinder = _poolBinder;
         }
+        public IPoolBinder PoolBinder { get; set; }
+        public IInjectorFactory Factory { get; set; }
+        public IInjectionBinder Binder { get; set; }
+        public IReflectionBinder Reflector { get; set; }
 
         public object Instantiate(IInjectionBinding binding)
         {
@@ -34,7 +33,7 @@ namespace Cr7Sund.Framework.Impl
             object retVal = null;
             Type reflectionType = null;
 
-            var bindingValue = binding.Value;
+            object bindingValue = binding.Value;
             if (bindingValue is not Type)
             {
                 retVal = bindingValue;
@@ -88,14 +87,14 @@ namespace Cr7Sund.Framework.Impl
 
         public object Inject(object target)
         {
-            Type t = target.GetType();
+            var t = target.GetType();
 
             failIf(Binder == null, "Attempt to inject into Injector without a Binder", InjectionExceptionType.NO_BINDER, t, target);
             failIf(Reflector == null, "Attempt to inject without a reflector", InjectionExceptionType.NO_REFLECTOR, t, target);
             failIf(target == null, "Attempt to inject into null instance", InjectionExceptionType.NULL_TARGET, t, target);
 
             //Some things can't be injected into. Bail out.
-            if (t.IsPrimitive || t == typeof(Decimal) || t == typeof(string))
+            if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))
             {
                 return target;
             }
@@ -125,13 +124,13 @@ namespace Cr7Sund.Framework.Impl
             failIf(Reflector == null, "Attempt to inject without a reflector", InjectionExceptionType.NO_REFLECTOR);
             failIf(target == null, "Attempt to inject into null instance", InjectionExceptionType.NULL_TARGET);
 
-            Type t = target.GetType();
-            if (t.IsPrimitive || t == typeof(Decimal) || t == typeof(string))
+            var t = target.GetType();
+            if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))
             {
                 return;
             }
 
-            IReflectedClass reflection = Reflector.Get(t);
+            var reflection = Reflector.Get(t);
 
             PerformUninjection(target, reflection);
         }
@@ -164,7 +163,7 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < reflection.Fields.Length; i++)
             {
                 var pair = reflection.Fields[i];
-                var value = GetValueInjection(pair.Item1, pair.Item2, target);
+                object value = GetValueInjection(pair.Item1, pair.Item2, target);
                 InjectValueIntoPoint(value, target, pair.Item3);
             }
         }
@@ -204,7 +203,7 @@ namespace Cr7Sund.Framework.Impl
         {
             var binding = Binder.GetBinding(t, name);
             failIf(binding == null, "Attempt to Instantiate a null binding.", InjectionExceptionType.NULL_BINDING, t, name, target);
-            var bindingValue = binding.Value;
+            object bindingValue = binding.Value;
 
             object retVal = null;
             if (binding.Type == InjectionBindingType.VALUE)
@@ -233,6 +232,5 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-
     }
 }

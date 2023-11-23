@@ -1,7 +1,7 @@
-﻿
+﻿using System;
 namespace Cr7Sund.Logger
 {
-    static class LogWriterFactory
+    internal static class LogWriterFactory
     {
         public static ILogWritable Create(LogType type)
         {
@@ -17,11 +17,10 @@ namespace Cr7Sund.Logger
                     builder = new EventLogWriterBuilder();
                     break;
                 default:
-                    throw new System.Exception("未支持的日志类型");
+                    throw new Exception("未支持的日志类型");
             }
 
             return LogWriterDirector.Construct(builder);
         }
     }
 }
-

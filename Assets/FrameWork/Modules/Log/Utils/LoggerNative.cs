@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
 using ZstdNet;
-
 namespace Cr7Sund.Logger
 {
     /// <summary>
-    /// zstd
+    ///     zstd
     /// </summary>
-    partial class LoggerNative
+    internal class LoggerNative
     {
 
         #region zstd
-
-
         public static byte[] ZstdCompress(byte[] source)
         {
             if (source.Length <= 0) return source;
@@ -47,8 +42,6 @@ namespace Cr7Sund.Logger
                 throw new Exception($"Could not compress the log file:{e}");
             }
         }
-
         #endregion
-
     }
 }

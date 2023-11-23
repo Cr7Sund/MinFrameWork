@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-
 namespace Cr7Sund.Framework.Util
 {
     /// <summary>
-    /// enumerable's linq-like extension methods
+    ///     enumerable's linq-like extension methods
     /// </summary>
     public static class EnumerableExt
     {
@@ -20,7 +19,7 @@ namespace Cr7Sund.Framework.Util
         {
             int index = 0;
 
-            foreach (T item in source)
+            foreach (var item in source)
             {
                 fn.Invoke(item, index);
                 index++;
@@ -28,7 +27,7 @@ namespace Cr7Sund.Framework.Util
         }
 
         /// <summary>
-        /// Convert a variable length argument list of items to an enumerable.
+        ///     Convert a variable length argument list of items to an enumerable.
         /// </summary>
         public static IEnumerable<T> FromItems<T>(params T[] items)
         {

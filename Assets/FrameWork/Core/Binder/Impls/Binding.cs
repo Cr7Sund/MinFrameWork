@@ -1,14 +1,13 @@
 using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class Binding : IBinding
     {
-        public Binder.BindingResolver resolver;
-        protected ISemiBinding _key;
-        protected ISemiBinding _value;
-        protected object _name;
         protected bool _isWeak;
+        protected ISemiBinding _key;
+        protected object _name;
+        protected ISemiBinding _value;
+        public Binder.BindingResolver resolver;
 
         public Binding(Binder.BindingResolver resolver)
         {
@@ -31,10 +30,12 @@ namespace Cr7Sund.Framework.Impl
 
 
         #region IBinding implementation
-
         public BindingConstraintType ValueConstraint
         {
-            get => _value.Constraint;
+            get
+            {
+                return _value.Constraint;
+            }
             set
             {
                 _value.Constraint = value;
@@ -43,7 +44,10 @@ namespace Cr7Sund.Framework.Impl
 
         public BindingConstraintType KeyConstraint
         {
-            get => _key.Constraint;
+            get
+            {
+                return _key.Constraint;
+            }
             set
             {
                 _key.Constraint = value;
@@ -52,23 +56,50 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Unique
         {
-            get => _value.UniqueValue;
+            get
+            {
+                return _value.UniqueValue;
+            }
             set
             {
                 _value.UniqueValue = value;
             }
         }
 
-        public object Key => _key.Value;
-        public object Value => _value.Value;
+        public object Key
+        {
+            get
+            {
+                return _key.Value;
+            }
+        }
+        public object Value
+        {
+            get
+            {
+                return _value.Value;
+            }
+        }
 
-        public object Name => (_name == null) ? BindingConst.NULLOIDNAME : _name;
+        public object Name
+        {
+            get
+            {
+                return _name == null ? BindingConst.NULLOIDNAME : _name;
+            }
+        }
 
-        public bool IsWeak => _isWeak;
+        public bool IsWeak
+        {
+            get
+            {
+                return _isWeak;
+            }
+        }
 
         public IBinding Bind<T>()
         {
-            return this.Bind(typeof(T));
+            return Bind(typeof(T));
         }
 
         public virtual IBinding Bind(object key)
@@ -104,7 +135,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding ToName(object o)
         {
-            object toName = (o == null) ? BindingConst.NULLOIDNAME : o;
+            object toName = o == null ? BindingConst.NULLOIDNAME : o;
             object oldName = _name;
 
             _name = toName;
@@ -125,7 +156,6 @@ namespace Cr7Sund.Framework.Impl
             _isWeak = true;
             return this;
         }
-
         #endregion
     }
 

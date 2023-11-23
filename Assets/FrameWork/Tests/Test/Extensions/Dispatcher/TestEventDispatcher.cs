@@ -1,17 +1,15 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
-
 namespace Cr7Sund.Framework.Tests
 {
     public class TestEventDispatcher
     {
-        IEventDispatcher dispatcher;
         private const int INIT_VALUE = 42;
         private const int INCREMENT = 4;
         private const int PAYLOAD = 8;
         private int confirmationValue = 42;
+        private IEventDispatcher dispatcher;
 
         [SetUp]
         public void SetUp()
@@ -82,33 +80,33 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestTriggerClientRemoval()
         {
-            Assert.AreEqual(0, (dispatcher as ITriggerProvider).TriggerableCount);
+            Assert.AreEqual(0, dispatcher.TriggerableCount);
 
-            EventDispatcher anotherDispatcher1 = new EventDispatcher();
-            (dispatcher as ITriggerProvider).AddTriggerable(anotherDispatcher1);
+            var anotherDispatcher1 = new EventDispatcher();
+            dispatcher.AddTriggerable(anotherDispatcher1);
 
-            Assert.AreEqual(1, (dispatcher as ITriggerProvider).TriggerableCount);
+            Assert.AreEqual(1, dispatcher.TriggerableCount);
 
-            EventDispatcher anotherDispatcher2 = new EventDispatcher();
-            (dispatcher as ITriggerProvider).AddTriggerable(anotherDispatcher2);
+            var anotherDispatcher2 = new EventDispatcher();
+            dispatcher.AddTriggerable(anotherDispatcher2);
 
-            Assert.AreEqual(2, (dispatcher as ITriggerProvider).TriggerableCount);
+            Assert.AreEqual(2, dispatcher.TriggerableCount);
 
             dispatcher.AddListener(SomeEnum.ONE, removeTriggerClientMethod);
             dispatcher.Dispatch(SomeEnum.ONE, anotherDispatcher1);
 
-            Assert.AreEqual(1, (dispatcher as ITriggerProvider).TriggerableCount);
+            Assert.AreEqual(1, dispatcher.TriggerableCount);
 
             dispatcher.AddListener(SomeEnum.ONE, removeTriggerClientMethod);
             dispatcher.Dispatch(SomeEnum.ONE, anotherDispatcher2);
 
-            Assert.AreEqual(0, (dispatcher as ITriggerProvider).TriggerableCount);
+            Assert.AreEqual(0, dispatcher.TriggerableCount);
         }
 
         private void removeTriggerClientMethod(IEvent evt)
         {
-            EventDispatcher target = evt.Data as EventDispatcher;
-            (dispatcher as ITriggerProvider).RemoveTriggerable(target);
+            var target = evt.Data as EventDispatcher;
+            dispatcher.RemoveTriggerable(target);
         }
 
         [Test]
@@ -118,12 +116,12 @@ namespace Cr7Sund.Framework.Tests
             // badArgumentMethod 's parameter should inherit from IEvent
             dispatcher.AddListener(SomeEnum.ONE, badArgumentMethod);
 
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 dispatcher.Dispatch(SomeEnum.ONE, PAYLOAD);
             };
 
-            EventDispatcherException ex = Assert.Throws<EventDispatcherException>(testDelegate);
+            var ex = Assert.Throws<EventDispatcherException>(testDelegate);
             Assert.That(ex.Type == EventDispatcherExceptionType.TARGET_INVOCATION);
         }
 
@@ -166,4 +164,3 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 }
-

@@ -1,9 +1,7 @@
-﻿
-using System.Text;
-
+﻿using System.Text;
 namespace Cr7Sund.Logger
 {
-    class ConsoleLog : ILog
+    internal class ConsoleLog : ILog
     {
 
         public string Format(LogLevel level, LogChannel logChannel, string format, params object[] args)
@@ -12,6 +10,14 @@ namespace Cr7Sund.Logger
             string logMessage = string.Format("[{0}][{1}]{2}", level, logChannel, result);
 
             return result;
+        }
+
+        public void Initialize()
+        {
+
+        }
+        public void Dispose()
+        {
         }
 
         public string Format(LogEventData data)
@@ -29,14 +35,6 @@ namespace Cr7Sund.Logger
 #else
             return string.Empty;
 #endif
-        }
-
-        public void Initialize()
-        {
-
-        }
-        public void Dispose()
-        {
         }
     }
 }

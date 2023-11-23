@@ -1,15 +1,13 @@
-using System;
 namespace Cr7Sund.Framework.Tests
 {
     public class ConstructorInjectsClassToBeInjected
     {
+        public static int Value;
         [Inject]
         public ClassToBeInjected injected;
-        public static int Value = 0;
         public ConstructorInjectsClassToBeInjected()
         {
             Value++;
         }
     }
 }
-

@@ -1,8 +1,7 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
-
+using System;
 namespace Cr7Sund.Framework.PromiseTimerTest
 {
     public class PromiseTimerTests
@@ -13,7 +12,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
             var testObject = new PromiseTimer();
 
             const int testFrame = 3;
-            var hasResolved = false;
+            bool hasResolved = false;
 
             testObject.WaitUntil(timeData => timeData.elapsedUpdates == testFrame)
                 .Then(() => hasResolved = true)
@@ -34,7 +33,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
             var testObject = new PromiseTimer();
 
             const float testTime = 2f;
-            var hasResolved = false;
+            bool hasResolved = false;
 
             testObject.WaitFor(testTime)
                 .Then(() => hasResolved = true)
@@ -51,7 +50,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
             var testObject = new PromiseTimer();
 
             const float testTime = 1f;
-            var hasResolved = false;
+            bool hasResolved = false;
 
             testObject.WaitFor(testTime)
                 .Then(() => hasResolved = true)
@@ -67,9 +66,9 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            var hasResolved = false;
+            bool hasResolved = false;
 
-            var doResolve = false;
+            bool doResolve = false;
 
             testObject.WaitUntil(timeData => doResolve)
                 .Then(() => hasResolved = true)
@@ -88,9 +87,9 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            var hasResovled = false;
+            bool hasResovled = false;
 
-            var doWait = true;
+            bool doWait = true;
 
             testObject.WaitWhile(timeData => doWait)
                 .Then(() => hasResovled = true)
@@ -109,7 +108,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            var runCount = 0;
+            int runCount = 0;
 
             testObject
                 .WaitUntil(timeData =>
@@ -130,7 +129,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         public void when_promise_is_not_cancelled_by_user_resolve_promise()
         {
             var testObject = new PromiseTimer();
-            var hasResolved = false;
+            bool hasResolved = false;
             Exception caughtException = null;
 
 
@@ -169,7 +168,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
             testObject.Update(1.0f);
 
             Assert.AreEqual(typeof(PromiseTimerException), caughtException.GetType());
-            Assert.AreEqual(PromiseTimerExceptionType.CANCEL_TIMER ,((PromiseTimerException)caughtException).Type);
+            Assert.AreEqual(PromiseTimerExceptionType.CANCEL_TIMER, ((PromiseTimerException)caughtException).Type);
             Assert.AreEqual(caughtException.Message, "Promise was cancelled by user.");
         }
 
@@ -178,7 +177,7 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            Exception expectedException = new Exception();
+            var expectedException = new Exception();
             Exception caughtException = null;
 
 
@@ -197,9 +196,9 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            var p1Updates = 0;
-            var p2Updates = 0;
-            var p3Updates = 0;
+            int p1Updates = 0;
+            int p2Updates = 0;
+            int p3Updates = 0;
 
             testObject
                 .WaitUntil(timeData =>
@@ -237,9 +236,9 @@ namespace Cr7Sund.Framework.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            var p1Updates = 0;
-            var p2Updates = 0;
-            var p3Updates = 0;
+            int p1Updates = 0;
+            int p2Updates = 0;
+            int p3Updates = 0;
 
             var p1 = testObject
                 .WaitUntil(timeData =>

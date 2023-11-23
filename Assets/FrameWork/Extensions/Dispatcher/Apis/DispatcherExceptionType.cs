@@ -9,4 +9,3 @@ namespace Cr7Sund.Framework.Api
         ILLEGAL_CALLBACK_HANDLER
     }
 }
-

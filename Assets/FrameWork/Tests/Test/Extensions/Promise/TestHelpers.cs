@@ -1,15 +1,14 @@
-using System;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using NUnit.Framework;
-
+using System;
 namespace Cr7Sund.Framework.PromiseTest
 {
     internal static class TestHelpers
     {
         /// <summary>
-        /// Helper function that checks that the given action doesn't trigger the 
-        /// unhandled exception handler.
+        ///     Helper function that checks that the given action doesn't trigger the
+        ///     unhandled exception handler.
         /// </summary>
         internal static void VerifyDoesntThrowUnhandledException(Action testAction)
         {

@@ -1,12 +1,8 @@
 ﻿// #if UNITY_STANDALONE
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using Cr7Sund.Framework.Util;
+using System;
+using System.Diagnostics;
 using UnityEngine;
-
-
 namespace Cr7Sund.Logger
 {
     internal class RpcLog : ILog
@@ -24,27 +20,10 @@ namespace Cr7Sund.Logger
             return logMessage;
         }
 
-        public string Format(LogEventData data)
-        {
-            return string.Empty;
-        }
-
         public async void Initialize()
         {
             server = new LogServer();
             await server.StartServer();
-        }
-
-        private void WriteToDevice(string logString, string stackTrace, LogLevel type)
-        {
-            var logInfo = new LogInfo
-            {
-                TimeStamp = TimeUtils.ConvertToTimestamp(System.DateTime.Now),
-                Info = logString,
-                StackTrace = stackTrace
-            };
-            string logMsg = JsonUtility.ToJson(logInfo);
-            server?.SendAsync(logMsg);
         }
 
         public void Dispose()
@@ -52,13 +31,29 @@ namespace Cr7Sund.Logger
             server?.DisConnect();
         }
 
+        public string Format(LogEventData data)
+        {
+            return string.Empty;
+        }
+
+        private void WriteToDevice(string logString, string stackTrace, LogLevel type)
+        {
+            var logInfo = new LogInfo
+            {
+                TimeStamp = TimeUtils.ConvertToTimestamp(DateTime.Now),
+                Info = logString,
+                StackTrace = stackTrace
+            };
+            string logMsg = JsonUtility.ToJson(logInfo);
+            server?.SendAsync(logMsg);
+        }
     }
 
     public class LogInfo
     {
-        public long TimeStamp;
         public string Info;
         public string StackTrace;
+        public long TimeStamp;
     }
 }
 // #endif

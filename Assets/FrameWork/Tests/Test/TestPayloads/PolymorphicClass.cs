@@ -1,24 +1,14 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
-	public class PolymorphicClass : ISimpleInterface, IAnotherSimpleInterface
-	{
-		public PolymorphicClass ()
-		{
-		}
+    public class PolymorphicClass : ISimpleInterface, IAnotherSimpleInterface
+    {
 
-		#region ISimpleInterface implementation
+        #region IAnotherSimpleInterface implementation
+        public string stringValue { get; set; }
+        #endregion
 
-		public int intValue { get; set;}
-
-		#endregion
-
-		#region IAnotherSimpleInterface implementation
-
-		public string stringValue { get; set;}
-
-		#endregion
-	}
+        #region ISimpleInterface implementation
+        public int intValue { get; set; }
+        #endregion
+    }
 }
-

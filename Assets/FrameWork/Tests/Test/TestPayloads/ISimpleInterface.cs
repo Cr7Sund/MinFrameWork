@@ -1,5 +1,3 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
     public interface ISimpleInterface
@@ -7,4 +5,3 @@ namespace Cr7Sund.Framework.Tests
         int intValue { get; set; }
     }
 }
-

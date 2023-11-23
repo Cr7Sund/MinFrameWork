@@ -1,11 +1,10 @@
-﻿
-namespace Cr7Sund.Logger
+﻿namespace Cr7Sund.Logger
 {
     /// <summary>
-    /// 日志文件格式化
-    /// zstd 压缩
+    ///     日志文件格式化
+    ///     zstd 压缩
     /// </summary>
-    class LogFileFormatter : ILogFileFormatting
+    internal class LogFileFormatter : ILogFileFormatting
     {
         public byte[] Formatting(byte[] buffer)
         {

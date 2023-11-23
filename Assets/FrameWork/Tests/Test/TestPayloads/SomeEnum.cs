@@ -1,5 +1,3 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
     public enum SomeEnum
@@ -10,4 +8,3 @@ namespace Cr7Sund.Framework.Tests
         FOUR
     }
 }
-

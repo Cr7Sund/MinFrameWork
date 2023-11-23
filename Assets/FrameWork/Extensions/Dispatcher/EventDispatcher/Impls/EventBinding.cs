@@ -1,15 +1,14 @@
+using Cr7Sund.Framework.Api;
 using System;
 using System.Collections.Generic;
-using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class EventBinding : Binding, IEventBinding
     {
-        private Dictionary<Delegate, EventCallbackType> callbackTypes;
+        private readonly Dictionary<Delegate, EventCallbackType> callbackTypes;
 
 
-        public EventBinding(Impl.Binder.BindingResolver resolver) : base(resolver)
+        public EventBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             ValueConstraint = BindingConstraintType.MANY;
 
@@ -22,7 +21,7 @@ namespace Cr7Sund.Framework.Impl
 
         }
 
-        #region  IBinding Implementation
+        #region IBinding Implementation
         IEventBinding IEventBinding.Bind(object key)
         {
             return base.Bind(key) as IEventBinding;
@@ -41,7 +40,7 @@ namespace Cr7Sund.Framework.Impl
         private IEventBinding ToDelegateValue(Delegate value)
         {
             base.To(value);
-            StoreMethodType(value as Delegate);
+            StoreMethodType(value);
             return this;
         }
 
@@ -72,11 +71,9 @@ namespace Cr7Sund.Framework.Impl
                     throw new DispatcherException("Event callbacks must have either one or no arguments", DispatcherExceptionType.ILLEGAL_CALLBACK_HANDLER);
             }
         }
-
         #endregion
 
-        #region  IEventBinding Implementation
-
+        #region IEventBinding Implementation
         public EventCallbackType TypeForCallback(EventCallback callback)
         {
             if (callbackTypes.ContainsKey(callback))
@@ -94,8 +91,6 @@ namespace Cr7Sund.Framework.Impl
             }
             return EventCallbackType.NOT_FOUND;
         }
-
-
         #endregion
     }
 }

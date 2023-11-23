@@ -1,16 +1,14 @@
 using System;
-
-[AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Field)]
 public sealed class Inject : Attribute
 {
     // See the attribute guidelines at
     //  http://go.microsoft.com/fwlink/?LinkId=85236
-    readonly object name;
 
     // This is a positional argument
     public Inject(object name)
     {
-        this.name = name;
+        Name = name;
     }
     public Inject()
     {
@@ -18,7 +16,7 @@ public sealed class Inject : Attribute
 
     public object Name
     {
-        get { return name; }
+        get;
     }
 }
 
@@ -26,9 +24,7 @@ public sealed class Inject : Attribute
 
 
 //Tag [PostConstruct] to perform post-injection construction actions
-[AttributeUsage(AttributeTargets.Method,
-        AllowMultiple = false,
-        Inherited = true)]
+[AttributeUsage(AttributeTargets.Method)]
 public class PostConstruct : Attribute
 {
     public PostConstruct() { }
@@ -40,4 +36,3 @@ public class PostConstruct : Attribute
 
     public int priority { get; set; }
 }
-

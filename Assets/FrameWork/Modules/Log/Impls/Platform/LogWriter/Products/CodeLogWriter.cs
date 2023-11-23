@@ -1,14 +1,19 @@
 ﻿using System;
-
 namespace Cr7Sund.Logger
 {
-    class CodeLogWriter : LogWriter<string>
+    internal class CodeLogWriter : LogWriter<string>
     {
         public CodeLogWriter(ILogFileFormatting formatter, MMFile mmFile) : base(formatter, mmFile)
         {
         }
 
-        protected override LogType LogType => LogType.Code;
+        protected override LogType LogType
+        {
+            get
+            {
+                return LogType.Code;
+            }
+        }
 
         protected override string Formatting(string level, string id, string msg)
         {

@@ -1,6 +1,6 @@
 ﻿namespace Cr7Sund.Logger
 {
-    enum LogLevel
+    internal enum LogLevel
     {
         Trace,
         Debug,
@@ -8,15 +8,15 @@
         Warn,
         Error,
         Fatal,
-        Event,
+        Event
     }
 
-    enum LogType : byte
-    { 
+    internal enum LogType : byte
+    {
         /// <summary> 代码日志 </summary>
         Code = 1,
 
         /// <summary> 埋点日志 </summary>
-        Event = 1 << 1,
+        Event = 1 << 1
     }
 }

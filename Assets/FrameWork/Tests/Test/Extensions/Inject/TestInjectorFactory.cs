@@ -1,55 +1,55 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
-
 namespace Cr7Sund.Framework.Tests
 {
 
     public class TestInjectorFactory
     {
-        IInjectorFactory factory;
-        Binder.BindingResolver resolver;
+        private IInjectorFactory factory;
+        private Binder.BindingResolver resolver;
 
         [SetUp]
         public void SetUp()
         {
             factory = new InjectorFactory();
-            resolver = delegate (IBinding binding, object oldName) { };
+            resolver = delegate
+            {
+            };
         }
 
         [Test]
         public void TestInstantiation()
         {
-            IInjectionBinding defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
-            InjectableDerivedClass testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
+            var testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
             Assert.IsNotNull(testResult);
         }
 
         [Test]
         public void TestInstantiationFactory()
         {
-            IInjectionBinding defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
-            InjectableDerivedClass testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
+            var testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
             Assert.IsNotNull(testResult);
             int defaultValue = testResult.intValue;
             //Set a value
             testResult.intValue = 42;
             //Now get an instance again and ensure it's a different instance
-            InjectableDerivedClass testResult2 = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var testResult2 = factory.Get(defaultBinding) as InjectableDerivedClass;
             Assert.That(testResult2.intValue == defaultValue);
         }
 
         [Test]
         public void TestInstantiateSingleton()
         {
-            IInjectionBinding defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().AsSingleton();
-            InjectableDerivedClass testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().AsSingleton();
+            var testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
             Assert.IsNotNull(testResult);
             //Set a value
             testResult.intValue = 42;
             //Now get an instance again and ensure it's the same instance
-            InjectableDerivedClass testResult2 = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var testResult2 = factory.Get(defaultBinding) as InjectableDerivedClass;
             Assert.That(testResult2.intValue == 42);
         }
 
@@ -57,17 +57,17 @@ namespace Cr7Sund.Framework.Tests
         public void TestNamedInstances()
         {
             //Create two named instances
-            IInjectionBinding defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.ONE);
-            IInjectionBinding defaultBinding2 = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.TWO);
+            var defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.ONE);
+            var defaultBinding2 = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.TWO);
 
-            InjectableDerivedClass testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
             int defaultValue = testResult.intValue;
             Assert.IsNotNull(testResult);
             //Set a value
             testResult.intValue = 42;
 
             //Now get an instance again and ensure it's a different instance
-            InjectableDerivedClass testResult2 = factory.Get(defaultBinding2) as InjectableDerivedClass;
+            var testResult2 = factory.Get(defaultBinding2) as InjectableDerivedClass;
             Assert.IsNotNull(testResult2);
             Assert.That(testResult2.intValue == defaultValue);
         }
@@ -78,17 +78,17 @@ namespace Cr7Sund.Framework.Tests
         public void TestNamedSingletons()
         {
             //Create two named singletons
-            IInjectionBinding defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.ONE).AsSingleton();
-            IInjectionBinding defaultBinding2 = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.TWO).AsSingleton();
+            var defaultBinding = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.ONE).AsSingleton();
+            var defaultBinding2 = new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToName(SomeEnum.TWO).AsSingleton();
 
-            InjectableDerivedClass testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
+            var testResult = factory.Get(defaultBinding) as InjectableDerivedClass;
             int defaultValue = testResult.intValue;
             Assert.IsNotNull(testResult);
             //Set a value
             testResult.intValue = 42;
 
             //Now get an instance again and ensure it's a different instance
-            InjectableDerivedClass testResult2 = factory.Get(defaultBinding2) as InjectableDerivedClass;
+            var testResult2 = factory.Get(defaultBinding2) as InjectableDerivedClass;
             Assert.IsNotNull(testResult2);
             Assert.That(testResult2.intValue == defaultValue);
         }
@@ -96,12 +96,12 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestValueMap()
         {
-            InjectableDerivedClass testvalue = new InjectableDerivedClass();
+            var testvalue = new InjectableDerivedClass();
             testvalue.intValue = 42;
-            IInjectionBinding binding = new InjectionBinding(resolver).Bind<InjectableSuperClass>()
-            .To<InjectableDerivedClass>()
-            .ToValue(testvalue);
-            InjectableDerivedClass testResult = factory.Get(binding) as InjectableDerivedClass;
+            var binding = new InjectionBinding(resolver).Bind<InjectableSuperClass>()
+                .To<InjectableDerivedClass>()
+                .ToValue(testvalue);
+            var testResult = factory.Get(binding) as InjectableDerivedClass;
             Assert.IsNotNull(testResult);
             Assert.That(testResult.intValue == testvalue.intValue);
             Assert.That(testResult.intValue == 42);
@@ -124,10 +124,10 @@ namespace Cr7Sund.Framework.Tests
             IPool<ClassToBeInjected> myPool = factory.Get(binding) as Pool<ClassToBeInjected>;
             Assert.NotNull(myPool);
 
-            ClassToBeInjected instance1 = myPool.GetInstance() as ClassToBeInjected;
+            var instance1 = myPool.GetInstance();
             Assert.NotNull(instance1);
 
-            ClassToBeInjected instance2 = myPool.GetInstance() as ClassToBeInjected;
+            var instance2 = myPool.GetInstance();
             Assert.NotNull(instance2);
 
             Assert.AreNotSame(instance1, instance2);

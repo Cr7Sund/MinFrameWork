@@ -1,53 +1,67 @@
-﻿using System.Collections.Generic;
-using Cr7Sund.Framework.Api;
+﻿using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-
+using System;
+using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
 {
     public class Pool<T> : BasePool, IPool<T> where T : class, new()
     {
-        private HashSet<T> instancesInUse { get; set; }
-        public override int Available => instancesAvailable.Count;
-        public object Value => throw new System.NotImplementedException();
 
         /// Stack of instances still in the Pool.
-        protected Stack<T> instancesAvailable;
+        private readonly Stack<T> _instancesAvailable;
 
         public Pool()
         {
-            instancesInUse = new HashSet<T>();
-            instancesAvailable = new Stack<T>();
+            InstancesInUse = new HashSet<T>();
+            _instancesAvailable = new Stack<T>();
+        }
+        private HashSet<T> InstancesInUse
+        {
+            get;
+        }
+        public override int Available
+        {
+            get
+            {
+                return _instancesAvailable.Count;
+            }
+        }
+        public object Value
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public override void Clean()
         {
-            instancesAvailable.Clear();
-            instancesInUse.Clear();
+            _instancesAvailable.Clear();
+            InstancesInUse.Clear();
             base.Clean();
         }
 
-        #region  IPool Implementation
-
+        #region IPool Implementation
         public T GetInstance()
         {
             var instance = GetInstanceInternal();
-            if (instance is IPoolable)
+            if (instance is IPoolable poolable)
             {
-                (instance as IPoolable).Retain();
+                poolable.Retain();
             }
             return instance;
         }
 
         public void ReturnInstance(T value)
         {
-            if (!instancesInUse.Contains(value)) return;
+            if (!InstancesInUse.Contains(value)) return;
 
-            if (value is IPoolable)
+            if (value is IPoolable poolable)
             {
-                (value as IPoolable).Restore();
+                poolable.Restore();
             }
-            instancesInUse.Remove(value);
-            instancesAvailable.Push(value);
+            InstancesInUse.Remove(value);
+            _instancesAvailable.Push(value);
         }
 
         public void ReturnInstance(object value)
@@ -59,28 +73,28 @@ namespace Cr7Sund.Framework.Impl
 
         private void RemoveInstance(T value)
         {
-            if (instancesInUse.Contains(value))
+            if (InstancesInUse.Contains(value))
             {
-                instancesInUse.Remove(value);
+                InstancesInUse.Remove(value);
             }
             else
             {
-                instancesAvailable.Pop();
+                _instancesAvailable.Pop();
             }
         }
 
         private T GetInstanceInternal()
         {
-            if (instancesAvailable.Count > 0)
+            if (_instancesAvailable.Count > 0)
             {
-                var retVal = instancesAvailable.Pop();
-                instancesInUse.Add(retVal);
+                var retVal = _instancesAvailable.Pop();
+                InstancesInUse.Add(retVal);
 
                 return retVal;
             }
 
             int instancesToCreate = NewInstanceToCreate();
-            if (instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) { return null; }
+            if (_instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) { return null; }
 
             AssertUtil.Greater(instancesToCreate, 0, new PoolException("Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE));
             AssertUtil.NotNull(InstanceProvider, new PoolException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER));
@@ -94,25 +108,21 @@ namespace Cr7Sund.Framework.Impl
             return GetInstanceInternal();
         }
 
-        protected T GetNewInstance()
+        private T GetNewInstance()
         {
             return InstanceProvider.GetInstance<T>();
         }
-
-
         #endregion
 
 
 
         #region IManagedList Implementation
-
-
         public IManagedList Add(object value)
         {
-            AssertUtil.IsInstanceOf( typeof(T), value, new PoolException( "Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T).ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
-            
+            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T) + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
+
             _instanceCount++;
-            instancesAvailable.Push((T)value);
+            _instancesAvailable.Push((T)value);
             return this;
         }
 
@@ -120,7 +130,7 @@ namespace Cr7Sund.Framework.Impl
         {
             for (int i = 0; i < list.Length; i++)
             {
-                this.Add(list[i]);
+                Add(list[i]);
             }
 
             return this;
@@ -128,7 +138,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Remove(object value)
         {
-            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T).ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T) + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
 
             _instanceCount--;
             RemoveInstance((T)value);
@@ -139,7 +149,7 @@ namespace Cr7Sund.Framework.Impl
         {
             for (int i = 0; i < list.Length; i++)
             {
-                this.Remove(list[i]);
+                Remove(list[i]);
             }
 
             return this;
@@ -147,17 +157,10 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Contains(object value)
         {
-            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T).ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T) + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
 
-            return instancesInUse.Contains((T)value);
+            return InstancesInUse.Contains((T)value);
         }
-
-
         #endregion
-
-
-
-
-
     }
 }

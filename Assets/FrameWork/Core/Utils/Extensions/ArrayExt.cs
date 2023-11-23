@@ -1,5 +1,4 @@
 using System;
-
 namespace Cr7Sund.Framework.Util
 {
     public static class ArrayExt
@@ -18,7 +17,7 @@ namespace Cr7Sund.Framework.Util
                 }
                 newList[i + mod] = instance[i];
             }
-            return (newList.Length == 0) ? null : newList;
+            return newList.Length == 0 ? null : newList;
         }
 
         public static bool Contains<T>(this T[] instance, T o)
@@ -39,9 +38,7 @@ namespace Cr7Sund.Framework.Util
                 }
             }
 
-            return ArrayExt.UNMATCHINDEX;
+            return UNMATCHINDEX;
         }
-
-
     }
 }

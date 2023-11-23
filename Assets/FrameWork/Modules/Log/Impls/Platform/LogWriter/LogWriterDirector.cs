@@ -1,6 +1,6 @@
 ﻿namespace Cr7Sund.Logger
 {
-    static class LogWriterDirector
+    internal static class LogWriterDirector
     {
         public static ILogWritable Construct(LogWriterBuilder builder)
         {

@@ -1,13 +1,9 @@
-using System;
 using Cr7Sund.Framework.Api;
-
+using System;
 namespace Cr7Sund.Framework.Impl
 {
     public class InjectionBinding : Binding, IInjectionBinding
     {
-        private InjectionBindingType _type = InjectionBindingType.DEFAULT;
-        private bool _toInject = true;
-        private bool _isCrossContext = false;
 
 
         public InjectionBinding(Binder.BindingResolver resolver) : base(resolver)
@@ -15,14 +11,50 @@ namespace Cr7Sund.Framework.Impl
             KeyConstraint = BindingConstraintType.MANY;
         }
 
+        private void ValidBindingType(Type objType)
+        {
+            if (KeyConstraint.Equals(BindingConstraintType.ONE))
+            {
+                var keyType = Key as Type;
+                if (keyType.IsAssignableFrom(objType) == false)
+                {
+                    throw new InjectionException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                }
+            }
+            else
+            {
+                object[] keys = Key as object[];
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    var keyType = keys[i] as Type;
+                    if (keyType.IsAssignableFrom(objType) == false)
+                    {
+                        throw new InjectionException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                    }
+                }
+
+            }
+        }
+
 
         #region IInjectionBinding implementation
+        public bool IsCrossContext
+        {
+            get;
+            private set;
+        }
 
-        public bool IsCrossContext => _isCrossContext;
+        public bool IsToInject
+        {
+            get;
+            private set;
+        } = true;
 
-        public bool IsToInject => _toInject;
-
-        public InjectionBindingType Type { get => _type; set => _type = value; }
+        public InjectionBindingType Type
+        {
+            get;
+            set;
+        } = InjectionBindingType.DEFAULT;
 
         public IInjectionBinding AsDefault()
         {
@@ -32,7 +64,7 @@ namespace Cr7Sund.Framework.Impl
                 return this;
             }
 
-            _type = InjectionBindingType.DEFAULT;
+            Type = InjectionBindingType.DEFAULT;
             if (resolver != null)
             {
                 resolver(this);
@@ -48,7 +80,7 @@ namespace Cr7Sund.Framework.Impl
                 return this;
             }
 
-            _type = InjectionBindingType.POOL;
+            Type = InjectionBindingType.POOL;
             if (resolver != null)
             {
                 resolver(this);
@@ -64,7 +96,7 @@ namespace Cr7Sund.Framework.Impl
                 return this;
             }
 
-            _type = InjectionBindingType.SINGLETON;
+            Type = InjectionBindingType.SINGLETON;
             if (resolver != null)
             {
                 resolver(this);
@@ -75,7 +107,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IInjectionBinding CrossContext()
         {
-            _isCrossContext = true;
+            IsCrossContext = true;
             if (resolver != null)
             {
                 resolver(this);
@@ -85,15 +117,12 @@ namespace Cr7Sund.Framework.Impl
 
         public IInjectionBinding ToInject(bool value)
         {
-            _toInject = value;
+            IsToInject = value;
             return this;
         }
-
         #endregion
 
-        #region  IBinding implementation 
-
-
+        #region IBinding implementation
         public new IInjectionBinding Bind<T>()
         {
             return base.Bind<T>() as IInjectionBinding;
@@ -106,8 +135,8 @@ namespace Cr7Sund.Framework.Impl
 
         public IInjectionBinding ToValue(object o)
         {
-            this.Type = InjectionBindingType.VALUE;
-            this.SetValue(o);
+            Type = InjectionBindingType.VALUE;
+            SetValue(o);
             return this;
         }
 
@@ -141,33 +170,6 @@ namespace Cr7Sund.Framework.Impl
         {
             return base.Weak() as IInjectionBinding;
         }
-
         #endregion
-
-        private void ValidBindingType(Type objType)
-        {
-            if (this.KeyConstraint.Equals(BindingConstraintType.ONE))
-            {
-                var keyType = Key as Type;
-                if (keyType.IsAssignableFrom(objType) == false)
-                {
-                    throw new InjectionException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
-                }
-            }
-            else
-            {
-                object[] keys = Key as object[];
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    var keyType = keys[i] as Type;
-                    if (keyType.IsAssignableFrom(objType) == false)
-                    {
-                        throw new InjectionException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
-                    }
-                }
-
-            }
-        }
-
     }
 }

@@ -1,6 +1,4 @@
-using System.Dynamic;
 using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class CrossContext : Context, ICrossContext
@@ -18,17 +16,20 @@ namespace Cr7Sund.Framework.Impl
         protected IEventDispatcher _crossContextDispatcher;
 
         private ICrossContextInjectionBinder _injectionBinder;
-  
+
         public CrossContext(object view) : base(view)
-        { }
+        {
+        }
 
         public CrossContext(object view, ContextStartupFlags flags) : base(view, flags)
-        { }
+        {
+        }
 
         public CrossContext(object view, bool autoMapping) : base(view, autoMapping)
-        { }
+        {
+        }
 
-        #region  IContext Implementation
+        #region IContext Implementation
         protected override void AddCoreComponents()
         {
             base.AddCoreComponents();
@@ -82,22 +83,32 @@ namespace Cr7Sund.Framework.Impl
 
             return base.RemoveContext(context);
         }
-
         #endregion
 
-        #region  ICrossContext Implementation
-
+        #region ICrossContext Implementation
         public IEventDispatcher CrossContextDispatcher
         {
-            get => _crossContextDispatcher;
-            set => _crossContextDispatcher = value;
+            get
+            {
+                return _crossContextDispatcher;
+            }
+            set
+            {
+                _crossContextDispatcher = value;
+            }
         }
 
         /// A Binder that handles dependency injection binding and instantiation
         public ICrossContextInjectionBinder InjectionBinder
         {
-            get => _injectionBinder ?? (_injectionBinder = new CrossContextInjectionBinder());
-            set => _injectionBinder = value;
+            get
+            {
+                return _injectionBinder ?? (_injectionBinder = new CrossContextInjectionBinder());
+            }
+            set
+            {
+                _injectionBinder = value;
+            }
         }
 
         public void AssignCrossContext(ICrossContext childContext)
@@ -124,7 +135,6 @@ namespace Cr7Sund.Framework.Impl
         {
             return null;
         }
-
         #endregion
     }
 }

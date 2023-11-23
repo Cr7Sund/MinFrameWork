@@ -1,13 +1,12 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
-
+using System;
 namespace Cr7Sund.Framework.Tests
 {
-    class TestBinding
+    internal class TestBinding
     {
-        IBinding binding;
+        private IBinding binding;
 
         [SetUp]
         public void Setup()
@@ -39,17 +38,17 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestKeyToWithMultipleChainedValues()
         {
-            ClassWithConstructorParameters test1 = new ClassWithConstructorParameters(1, "abc");
-            ClassWithConstructorParameters test2 = new ClassWithConstructorParameters(2, "def");
-            ClassWithConstructorParameters test3 = new ClassWithConstructorParameters(3, "ghi");
+            var test1 = new ClassWithConstructorParameters(1, "abc");
+            var test2 = new ClassWithConstructorParameters(2, "def");
+            var test3 = new ClassWithConstructorParameters(3, "ghi");
 
             ((Binding)binding).ValueConstraint = BindingConstraintType.MANY;
             // binding.Unique = false;
 
             binding.Bind<ISimpleInterface>()
-                    .To(test1).ToName("abc")
-                    .To(test2).ToName("def")
-                    .To(test3).ToName("ghi");
+                .To(test1).ToName("abc")
+                .To(test2).ToName("def")
+                .To(test3).ToName("ghi");
             Assert.That(binding.Key as Type == typeof(ISimpleInterface));
 
             object[] values = ((Binding)binding).Value as object[];
@@ -57,11 +56,10 @@ namespace Cr7Sund.Framework.Tests
             Assert.That(values.Length == 3);
             for (int a = 0; a < values.Length; a++)
             {
-                ISimpleInterface value = values[a] as ISimpleInterface;
+                var value = values[a] as ISimpleInterface;
                 Assert.IsNotNull(value);
                 Assert.That(value.intValue == a + 1);
             }
         }
-
     }
 }

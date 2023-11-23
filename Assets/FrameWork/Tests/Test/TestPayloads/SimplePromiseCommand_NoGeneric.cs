@@ -1,15 +1,12 @@
-using System;
-using System.Diagnostics;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
-using UnityEngine;
-
+using System;
 namespace Cr7Sund.Framework.Tests
 {
     public class SimplePromise
     {
-        public static int result = 0;
+        public static int result;
         public static float floatResult = 0;
         public static IPromise simulatePromise;
         public static IPromise<int> simulatePromiseOne;
@@ -82,7 +79,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override IPromise OnExecuteAsync()
         {
-            
+
             SimplePromise.simulatePromise.Then(() =>
             {
                 SimplePromise.result = (SimplePromise.result + 3) * 5;
@@ -110,4 +107,3 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 }
-

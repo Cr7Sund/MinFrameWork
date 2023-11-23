@@ -1,35 +1,39 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-
+using System;
 namespace Cr7Sund.Framework.Impl
 {
     public class SemiBinding : ISemiBinding
     {
         protected object[] _objectValue;
-        public BindingConstraintType Constraint { get; set; }
-        public bool UniqueValue { get; set; }
         public SemiBinding()
         {
             Constraint = BindingConstraintType.ONE;
             UniqueValue = true;
         }
+        public BindingConstraintType Constraint { get; set; }
+        public bool UniqueValue { get; set; }
 
         #region ISemiBinding implementation
-
         public virtual object Value
         {
             get
             {
                 if (Constraint.Equals(BindingConstraintType.ONE))
                 {
-                    return (_objectValue == null) ? null : _objectValue[0];
+                    return _objectValue?[0];
                 }
                 return _objectValue;
             }
         }
 
-        public int Count => _objectValue == null ? 0 : _objectValue.Length;
+        public int Count
+        {
+            get
+            {
+                return _objectValue?.Length ?? 0;
+            }
+        }
 
         public object this[int index]
         {
@@ -46,7 +50,6 @@ namespace Cr7Sund.Framework.Impl
                 _objectValue[index] = value;
             }
         }
-
         #endregion
 
         #region IManagedList implementation
@@ -60,10 +63,10 @@ namespace Cr7Sund.Framework.Impl
             {
                 if (UniqueValue)
                 {
-                    if (this.Contains(o)) return this;
+                    if (Contains(o)) return this;
                 }
 
-                var newItems = new object[_objectValue.Length + 1];
+                object[] newItems = new object[_objectValue.Length + 1];
                 Array.Copy(_objectValue, newItems, _objectValue.Length);
                 _objectValue = newItems;
             }
@@ -77,7 +80,7 @@ namespace Cr7Sund.Framework.Impl
         {
             for (int i = 0; i < list.Length; i++)
             {
-                this.Add(list[i]);
+                Add(list[i]);
             }
             return this;
         }
@@ -93,7 +96,7 @@ namespace Cr7Sund.Framework.Impl
             int matchIndex = Array.IndexOf(_objectValue, o);
             if (matchIndex != ArrayExt.UNMATCHINDEX)
             {
-                this._objectValue = this._objectValue.SpliceValueAt(matchIndex);
+                _objectValue = _objectValue.SpliceValueAt(matchIndex);
             }
 
             return this;
@@ -104,16 +107,15 @@ namespace Cr7Sund.Framework.Impl
         {
             for (int i = 0; i < list.Length; i++)
             {
-                this.Remove(list[i]);
+                Remove(list[i]);
             }
             return this;
         }
 
         public bool Contains(object o)
         {
-            return this._objectValue.Contains(o);
+            return _objectValue.Contains(o);
         }
-
         #endregion
     }
 

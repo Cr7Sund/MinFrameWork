@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 namespace Cr7Sund.Framework.Api
 {
     public interface ICommandPromise : IPromise, ISequence, IPoolable
@@ -13,7 +12,5 @@ namespace Cr7Sund.Framework.Api
         void Execute();
         void Progress(float progress);
         void Catch(Exception e);
-
-
     }
 }

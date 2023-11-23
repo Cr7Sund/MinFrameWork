@@ -1,11 +1,11 @@
 ﻿namespace Cr7Sund.Logger
 {
-    abstract class LogWriterBuilder
+    internal abstract class LogWriterBuilder
     {
-        protected ILogWritable _writer;
-        protected MMFile _mmFile;
 
         protected ILogFileFormatting _formatter;
+        protected MMFile _mmFile;
+        protected ILogWritable _writer;
 
         public void BuildFormatter()
         {

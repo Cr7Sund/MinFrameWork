@@ -1,10 +1,10 @@
-using System;
-using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using UnityEngine;
 namespace Cr7Sund.Framework.Tests
 {
     public class TestBaseCommandGeneric : Command<int>
@@ -74,7 +74,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override void OnCatch(Exception e)
         {
-            UnityEngine.Debug.Log(e);
+            Debug.Log(e);
         }
     }
 
@@ -86,23 +86,22 @@ namespace Cr7Sund.Framework.Tests
             SimplePromise.floatResult = (value + 3) * 4.2f;
             return SimplePromise.floatResult;
         }
-
     }
 
     public class SimpleAsyncCommandOneGeneric : AsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
-            return SimplePromise.simulatePromiseOne.Then((value) =>
-              {
-                  SimplePromise.result = (value + aggValue + 3) * 5;
-                  return (value + aggValue + 3) * 5;
-              });
+            return SimplePromise.simulatePromiseOne.Then(value =>
+            {
+                SimplePromise.result = (value + aggValue + 3) * 5;
+                return (value + aggValue + 3) * 5;
+            });
 
         }
         public override void OnCatch(Exception e)
         {
-            UnityEngine.Debug.Log(e);
+            Debug.Log(e);
         }
     }
 
@@ -111,11 +110,12 @@ namespace Cr7Sund.Framework.Tests
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
             SimplePromise.result += 2;
-            return SimplePromise.simulatePromiseSecond.Then((value) =>
-              {
-                  SimplePromise.result = (value + aggValue + 1) * 2; ;
-                  return (value + aggValue + 1) * 2;
-              });
+            return SimplePromise.simulatePromiseSecond.Then(value =>
+            {
+                SimplePromise.result = (value + aggValue + 1) * 2;
+                ;
+                return (value + aggValue + 1) * 2;
+            });
 
         }
     }
@@ -138,16 +138,16 @@ namespace Cr7Sund.Framework.Tests
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
-            Func<int, int> transform = (value) =>
-                        {
-                            throw new System.Exception();
-                        };
+            Func<int, int> transform = value =>
+            {
+                throw new Exception();
+            };
             return SimplePromise.simulatePromiseSecond.Then(transform);
         }
 
         public override IPromise<int> OnCatchAsync(Exception ex)
         {
-            return SimplePromise.simulatePromiseSecond.Then((value) =>
+            return SimplePromise.simulatePromiseSecond.Then(value =>
             {
                 return (value + 1) * 2;
             });
@@ -173,11 +173,10 @@ namespace Cr7Sund.Framework.Tests
     {
         public override int OnExecute(IEnumerable<int> values)
         {
-            var first = values.First();
+            int first = values.First();
             SimplePromise.result = (first + 1) * 2;
             return SimplePromise.result;
         }
-
     }
 
 
@@ -194,4 +193,3 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 }
-

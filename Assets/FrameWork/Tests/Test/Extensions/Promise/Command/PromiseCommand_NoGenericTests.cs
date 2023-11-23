@@ -1,11 +1,7 @@
-using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
-using Cr7Sund.Framework.Util;
 using NUnit.Framework;
-using UnityEditor.VersionControl;
-
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
 
@@ -16,7 +12,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             SimplePromise.simulatePromise = new Promise();
         }
-        
+
         [TearDown]
         public void Cleanup()
         {
@@ -38,7 +34,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             promise.Then<SimpleCommandTwo>().Then<SimpleCommandOne>().Then(() => SimplePromise.result -= 200);
 
             promise.Resolve();
-            Assert.AreEqual((((0 + 2) * 3) + 1) * 2 - 200, SimplePromise.result);
+            Assert.AreEqual(((0 + 2) * 3 + 1) * 2 - 200, SimplePromise.result);
         }
 
         [Test]
@@ -52,7 +48,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(6, SimplePromise.result);
 
             SimplePromise.simulatePromise.Resolve();
-            Assert.AreEqual(((((0 + 2) * 3) + 3) * 5 + 1) * 2, SimplePromise.result);
+            Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, SimplePromise.result);
         }
 
 
@@ -110,13 +106,12 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             promise.Then<SimpleProgressCommand>();
 
-            for (var progress = 0.25f; progress < 1f; progress += 0.25f)
+            for (float progress = 0.25f; progress < 1f; progress += 0.25f)
                 promise.ReportProgress(progress);
             promise.ReportProgress(1f);
 
             Assert.AreEqual(1f, SimplePromise.currentProgress);
         }
-
     }
 
 }

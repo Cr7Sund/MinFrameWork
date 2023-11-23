@@ -1,9 +1,9 @@
 /**
  * @interface Cr7Sund.Framework.Api.IDispatcher
- * 
+ *
  * A Dispatcher sends notification to any registered listener.
  * It represents the subject in a standard Observer pattern.
- * 
+ *
  * In MVCSContext the dispatched notification is an IEvent.
  */
 
@@ -20,4 +20,3 @@ namespace Cr7Sund.Framework.Api
         void Dispatch(object eventType, object data);
     }
 }
-

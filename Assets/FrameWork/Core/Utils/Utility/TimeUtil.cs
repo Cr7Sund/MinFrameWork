@@ -1,5 +1,4 @@
 using System;
-
 namespace Cr7Sund.Framework.Util
 {
     public class TimeUtils

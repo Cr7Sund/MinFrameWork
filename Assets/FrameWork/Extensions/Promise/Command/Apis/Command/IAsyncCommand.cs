@@ -1,6 +1,4 @@
 ﻿using System;
-using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Api
 {
     public interface IAsyncCommand : IBaseCommand
@@ -17,7 +15,7 @@ namespace Cr7Sund.Framework.Api
     }
 
 
-    public interface IPromiseAsyncCommand<PromisedT, ConvertedT> : IBaseCommand
+    public interface IPromiseAsyncCommand<in PromisedT, ConvertedT> : IBaseCommand
     {
         IPromise<ConvertedT> OnExecuteAsync(PromisedT value);
         IPromise<ConvertedT> OnCatchAsync(Exception ex);

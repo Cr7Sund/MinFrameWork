@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
-
 namespace Cr7Sund.Logger
 {
     internal class Debug
     {
-        [Conditional(MacroDefine.UNITY_EDITOR), Conditional(MacroDefine.DEBUG)]
+        [Conditional(MacroDefine.UNITY_EDITOR)]
+        [Conditional(MacroDefine.DEBUG)]
         public static void UnityEditorDebug(string format, params object[] args)
         {
             if (args.Length <= 0)
@@ -13,7 +13,8 @@ namespace Cr7Sund.Logger
                 UnityEngine.Debug.LogFormat(format, args);
         }
 
-        [Conditional(MacroDefine.UNITY_EDITOR), Conditional(MacroDefine.DEBUG)]
+        [Conditional(MacroDefine.UNITY_EDITOR)]
+        [Conditional(MacroDefine.DEBUG)]
         public static void UnityEditorWarning(string format, params object[] args)
         {
             if (args.Length <= 0)
@@ -22,7 +23,8 @@ namespace Cr7Sund.Logger
                 UnityEngine.Debug.LogWarningFormat(format, args);
         }
 
-        [Conditional(MacroDefine.UNITY_EDITOR), Conditional(MacroDefine.DEBUG)]
+        [Conditional(MacroDefine.UNITY_EDITOR)]
+        [Conditional(MacroDefine.DEBUG)]
         public static void UnityEditorError(string format, params object[] args)
         {
             if (args.Length <= 0)

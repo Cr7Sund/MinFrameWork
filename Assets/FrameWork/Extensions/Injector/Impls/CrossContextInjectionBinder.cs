@@ -1,6 +1,5 @@
-using System;
 using Cr7Sund.Framework.Api;
-
+using System;
 namespace Cr7Sund.Framework.Impl
 {
     public class CrossContextInjectionBinder : InjectionBinder, ICrossContextInjectionBinder
@@ -10,7 +9,7 @@ namespace Cr7Sund.Framework.Impl
         public override IInjectionBinding GetBinding(Type type, object name)
         {
             var binding = base.GetBinding(type, name);
-            if (binding == null)// Attempt to get this from the cross context.Cross context is always SECOND PRIORITY.Local injections always override
+            if (binding == null) // Attempt to get this from the cross context.Cross context is always SECOND PRIORITY.Local injections always override
             {
                 if (CrossContextBinder != null)
                 {
@@ -53,10 +52,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 return CrossContextBinder.Injector;
             }
-            else
-            {
-                return base.GetInjectorForBinding(binding);
-            }
+            return base.GetInjectorForBinding(binding);
         }
     }
 }

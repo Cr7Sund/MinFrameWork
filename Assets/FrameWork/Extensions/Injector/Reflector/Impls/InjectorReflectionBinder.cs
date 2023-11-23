@@ -1,17 +1,16 @@
 /**
  * @class strange.extensions.reflector.impl.ReflectionBinder
- * 
+ *
  * Uses System.Reflection to create `ReflectedClass` instances.
- * 
- * Reflection is a slow process. This binder isolates the calls to System.Reflector 
+ *
+ * Reflection is a slow process. This binder isolates the calls to System.Reflector
  * and caches the result, meaning that Reflection is performed only once per class.
  */
 
+using Cr7Sund.Framework.Api;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class InjectorReflectionBinder : Binder, IReflectionBinder
@@ -36,7 +35,8 @@ namespace Cr7Sund.Framework.Impl
                 binding.Bind(type).To(reflected);
 
                 reflected.PreGenerated = false;
-                retVal = reflected; ;
+                retVal = reflected;
+                ;
             }
             else
             {
@@ -62,13 +62,13 @@ namespace Cr7Sund.Framework.Impl
         private void MapPostConstructors(IReflectedClass reflected, IBinding binding, Type type)
         {
             var methods = type.GetMethods(BindingFlags.FlattenHierarchy |
-                                                         BindingFlags.Public |
-                                                         BindingFlags.NonPublic |
-                                                         BindingFlags.Instance |
-                                                         BindingFlags.InvokeMethod);
-            foreach (MethodInfo method in methods)
+                                          BindingFlags.Public |
+                                          BindingFlags.NonPublic |
+                                          BindingFlags.Instance |
+                                          BindingFlags.InvokeMethod);
+            foreach (var method in methods)
             {
-                var tagged = method.GetCustomAttributes(typeof(PostConstruct), true);
+                object[] tagged = method.GetCustomAttributes(typeof(PostConstruct), true);
                 if (tagged.Length > 0)
                 {
                     if (reflected.PostConstructor == null)
@@ -90,12 +90,12 @@ namespace Cr7Sund.Framework.Impl
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var field in fields)
             {
-                var injections = field.GetCustomAttributes(typeof(Inject), true);
+                object[] injections = field.GetCustomAttributes(typeof(Inject), true);
 
                 if (injections.Length > 0)
                 {
-                    Inject attr = injections[0] as Inject;
-                    Type pointType = field.FieldType;
+                    var attr = injections[0] as Inject;
+                    var pointType = field.FieldType;
                     object bindingName = attr.Name;
 
                     var pair = new Tuple<Type, object, FieldInfo>(pointType, bindingName, field);
@@ -113,9 +113,9 @@ namespace Cr7Sund.Framework.Impl
         private ConstructorInfo FindPreferredConstructor(Type type)
         {
             var constructors = type.GetConstructors(BindingFlags.FlattenHierarchy |
-                                                                          BindingFlags.Public |
-                                                                          BindingFlags.Instance |
-                                                                          BindingFlags.InvokeMethod);
+                                                    BindingFlags.Public |
+                                                    BindingFlags.Instance |
+                                                    BindingFlags.InvokeMethod);
 
             if (constructors.Length == 1)
             {

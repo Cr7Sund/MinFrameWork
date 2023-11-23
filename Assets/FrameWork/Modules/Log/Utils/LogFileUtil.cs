@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
 using UnityEngine;
-
 namespace Cr7Sund.Logger
 {
-    static class LogFileUtil
+    internal static class LogFileUtil
     {
 
         private static readonly string _dataPath = Application.dataPath;
@@ -24,7 +23,7 @@ namespace Cr7Sund.Logger
 #endif
 
 #if UNITY_EDITOR
-        public static string LogDirector = System.Environment.CurrentDirectory.Replace("\\", "/") + "/ExtAssets/Logs";
+        public static string LogDirector = Environment.CurrentDirectory.Replace("\\", "/") + "/ExtAssets/Logs";
 #else
         public static string LogDirector = _persistentDataPath + "/Logs";
 #endif
@@ -47,7 +46,7 @@ namespace Cr7Sund.Logger
         public static readonly int LogMemorySize = 1024 * 1024;
 
         /// <summary>
-        /// 获取对应类型日志的MMF名称
+        ///     获取对应类型日志的MMF名称
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
@@ -60,12 +59,12 @@ namespace Cr7Sund.Logger
                 case LogType.Event:
                     return "event";
                 default:
-                    throw new System.Exception("未支持的日志类型");
+                    throw new Exception("未支持的日志类型");
             }
         }
 
         /// <summary>
-        /// 获取对应日志文件所在的文件夹
+        ///     获取对应日志文件所在的文件夹
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
@@ -74,16 +73,16 @@ namespace Cr7Sund.Logger
             switch (type)
             {
                 case LogType.Code:
-                    return LogFileUtil._codeDirector;
+                    return _codeDirector;
                 case LogType.Event:
-                    return LogFileUtil._eventDirector;
+                    return _eventDirector;
                 default:
-                    throw new System.Exception("未支持的日志类型");
+                    throw new Exception("未支持的日志类型");
             }
         }
 
         /// <summary>
-        /// 拼接对应日志本地缓存的路径
+        ///     拼接对应日志本地缓存的路径
         /// </summary>
         /// <param name="type"></param>
         /// <param name="file"></param>
@@ -97,12 +96,12 @@ namespace Cr7Sund.Logger
                 case LogType.Event:
                     return Path.Combine(_eventDirector, $"{file}.bytes");
                 default:
-                    throw new System.Exception("未支持的日志类型");
+                    throw new Exception("未支持的日志类型");
             }
         }
 
         /// <summary>
-        /// 获取对应日志MMF所在路径
+        ///     获取对应日志MMF所在路径
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
@@ -111,17 +110,17 @@ namespace Cr7Sund.Logger
             switch (type)
             {
                 case LogType.Code:
-                    return LogFileUtil._codeMMFPath;
+                    return _codeMMFPath;
                 case LogType.Event:
-                    return LogFileUtil._eventMMFPath;
+                    return _eventMMFPath;
                 default:
-                    throw new System.Exception("未支持的日志类型");
+                    throw new Exception("未支持的日志类型");
 
             }
         }
 
         /// <summary>
-        /// 获取游戏包里的文件路径
+        ///     获取游戏包里的文件路径
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="includeUpdate"></param>
@@ -130,9 +129,8 @@ namespace Cr7Sund.Logger
         {
             //找不到再从内置资源里取
             if (Application.platform == RuntimePlatform.Android)
-                return $"{_dataPath}!assets/{LogFileUtil._configPath}";
-            else
-                return Path.Combine(_streamingAssetsPath, LogFileUtil._configPath);
+                return $"{_dataPath}!assets/{_configPath}";
+            return Path.Combine(_streamingAssetsPath, _configPath);
         }
     }
 }

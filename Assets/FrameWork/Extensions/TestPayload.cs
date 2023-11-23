@@ -1,14 +1,12 @@
-using System;
-using System.Diagnostics;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
-using UnityEngine;
-
-namespace TestMono{
+using System;
+namespace TestMono
+{
     public class SimplePromise
     {
-        public static int result = 0;
+        public static int result;
         public static float floatResult = 0;
         public static IPromise simulatePromise;
         public static IPromise<int> simulatePromiseOne;
@@ -109,4 +107,3 @@ namespace TestMono{
         }
     }
 }
-

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-
 namespace Cr7Sund.Logger
 {
-    static class LogFileManager
+    internal static class LogFileManager
     {
         public static void Append(string path, byte[] buffer, int offset, int length)
         {
@@ -40,7 +38,7 @@ namespace Cr7Sund.Logger
         {
             try
             {
-                if (System.IO.File.Exists(file)) System.IO.File.Delete(file);
+                if (File.Exists(file)) File.Delete(file);
             }
             catch (Exception e)
             {
@@ -58,8 +56,8 @@ namespace Cr7Sund.Logger
 
         public static void ExistOrCreate(string director)
         {
-            if (!System.IO.Directory.Exists(director))
-                System.IO.Directory.CreateDirectory(director);
+            if (!Directory.Exists(director))
+                Directory.CreateDirectory(director);
         }
     }
 }

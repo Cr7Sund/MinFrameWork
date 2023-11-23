@@ -1,24 +1,22 @@
+using Cr7Sund.Framework.Api;
 using System;
 using System.Collections.Generic;
-using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class InjectionBinder : Binder, IInjectionBinder
     {
-        public IInjector Injector { get; set; }
 
         public InjectionBinder()
         {
 
             Injector = new Injector
             {
-                Binder = this,
+                Binder = this
             };
         }
+        public IInjector Injector { get; set; }
 
-        #region  IInstanceProvider implementation
-
+        #region IInstanceProvider implementation
         public object GetInstance(Type key)
         {
             return GetInstance(key, null);
@@ -27,26 +25,26 @@ namespace Cr7Sund.Framework.Impl
         public T GetInstance<T>(object name)
         {
             object instance = GetInstance(typeof(T), name);
-            T retVal = (T)instance;
+            var retVal = (T)instance;
             return retVal;
         }
 
         public T GetInstance<T>()
         {
             object instance = GetInstance(typeof(T), null);
-            T retVal = (T)instance;
+            var retVal = (T)instance;
             return retVal;
         }
 
         public virtual object GetInstance(Type key, object name)
         {
-            var binding = GetBinding(key, name) as IInjectionBinding;
+            var binding = GetBinding(key, name);
             if (binding == null)
             {
                 throw new InjectionException("InjectionBinder has no binding for:\n\tkey: " + key + "\nname: " + name, InjectionExceptionType.NULL_BINDING);
             }
 
-            var instance = GetInjectorForBinding(binding).Instantiate(binding);
+            object instance = GetInjectorForBinding(binding).Instantiate(binding);
             return instance;
         }
 
@@ -54,7 +52,7 @@ namespace Cr7Sund.Framework.Impl
         {
             if (instance != null)
             {
-                var binding = GetBinding(instance.GetType(), name) as IInjectionBinding;
+                var binding = GetBinding(instance.GetType(), name);
                 if (binding == null)
                 {
                     throw new InjectionException("InjectionBinder has no binding for:\n\tkey: " + instance.GetType() + "\nname: " + name, InjectionExceptionType.NULL_BINDING);
@@ -79,11 +77,9 @@ namespace Cr7Sund.Framework.Impl
         {
             return Injector;
         }
-
         #endregion
 
-        #region  IBinder implementation
-
+        #region IBinder implementation
         protected override IBinding GetRawBinding()
         {
             return new InjectionBinding(Resolver);
@@ -96,22 +92,21 @@ namespace Cr7Sund.Framework.Impl
 
         public IInjectionBinding GetBinding(Type type)
         {
-            return this.GetBinding(type, null) as IInjectionBinding;
+            return GetBinding(type, null);
         }
 
         public new IInjectionBinding GetBinding<T>(object name = null)
         {
-            return this.GetBinding(typeof(T), name) as IInjectionBinding;
+            return GetBinding(typeof(T), name);
         }
 
         public virtual IInjectionBinding GetBinding(Type type, object name)
         {
             return base.GetBinding(type, name) as IInjectionBinding;
         }
-
         #endregion
 
-        #region  IInjectionBinder Implementation
+        #region IInjectionBinder Implementation
         public int ReflectAll()
         {
             var set = new HashSet<Type>();
@@ -153,9 +148,6 @@ namespace Cr7Sund.Framework.Impl
             }
             return count;
         }
-
         #endregion
-
-
     }
 }

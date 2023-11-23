@@ -1,16 +1,14 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-
 namespace Cr7Sund.Framework.Util
 {
     public static class AssertUtil
     {
 
-
         #region Extension
         /// <summary>
-        ///  Verifies that a value is within a given range.
+        ///     Verifies that a value is within a given range.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="actual"></param>
@@ -39,12 +37,12 @@ namespace Cr7Sund.Framework.Util
         {
             public int Compare(T x, T y)
             {
-                Type typeFromHandle = typeof(T);
-                if (!typeFromHandle.IsValueType || (typeFromHandle.IsGenericType && typeFromHandle.GetGenericTypeDefinition().IsAssignableFrom(typeof(Nullable<>))))
+                var typeFromHandle = typeof(T);
+                if (!typeFromHandle.IsValueType || typeFromHandle.IsGenericType && typeFromHandle.GetGenericTypeDefinition().IsAssignableFrom(typeof(Nullable<>)))
                 {
-                    if (object.Equals(x, default(T)))
+                    if (Equals(x, default(T)))
                     {
-                        if (object.Equals(y, default(T)))
+                        if (Equals(y, default(T)))
                         {
                             return 0;
                         }
@@ -52,7 +50,7 @@ namespace Cr7Sund.Framework.Util
                         return -1;
                     }
 
-                    if (object.Equals(y, default(T)))
+                    if (Equals(y, default(T)))
                     {
                         return -1;
                     }
@@ -72,7 +70,10 @@ namespace Cr7Sund.Framework.Util
         #region Assert Origin
         public static void NotNull(object anObject)
         {
-            NotNull(anObject, "expected value is not null, but it is null");
+            if (anObject == null)
+            {
+                NotNull(anObject, new AssertionException($"expected value is not null, but it is null"));
+            }
         }
 
         public static void NotNull(object anObject, string message)
@@ -93,12 +94,14 @@ namespace Cr7Sund.Framework.Util
 
         public static void IsInstanceOf<T>(object actual)
         {
-            IsInstanceOf<T>(actual, $"expect type{typeof(T)} but it is {actual.GetType()}");
+            if (!typeof(T).IsInstanceOfType(actual))
+            {
+                throw new AssertionException($"expect type{typeof(T)} but it is {actual.GetType()}");
+            }
         }
 
         public static void IsInstanceOf<T>(object actual, string message)
         {
-            Assert.IsInstanceOf<T>(actual);
             if (!typeof(T).IsInstanceOfType(actual))
             {
                 throw new AssertionException(message);
@@ -115,9 +118,11 @@ namespace Cr7Sund.Framework.Util
 
         public static void IsInstanceOf(Type excepted, object actual)
         {
-            IsInstanceOf(excepted, actual, $"type{excepted} disMatch {actual.GetType()}");
+            if (!excepted.IsInstanceOfType(actual))
+            {
+                throw new AssertionException($"type{excepted} disMatch {actual.GetType()}");
+            }
         }
-
 
         public static void IsInstanceOf(Type excepted, object actual, string message)
         {
@@ -125,8 +130,6 @@ namespace Cr7Sund.Framework.Util
             {
                 throw new AssertionException(message);
             }
-
-            Assert.IsInstanceOf(excepted, actual);
         }
 
         public static void IsInstanceOf(Type excepted, object actual, Exception e)
@@ -140,7 +143,7 @@ namespace Cr7Sund.Framework.Util
         public static void Greater(int arg1, int arg2)
         {
             if (arg1 <= arg2)
-                throw new AssertionException($"");
+                throw new AssertionException($"excepted {arg1} greater than {arg2}");
         }
 
         public static void Greater(int arg1, int arg2, Exception e)
@@ -149,10 +152,10 @@ namespace Cr7Sund.Framework.Util
                 throw e;
         }
 
-        public static void LessOrEqual(int arg1, int arg2, string message)
+        public static void LessOrEqual(int arg1, int arg2)
         {
             if (arg1 > arg2)
-                throw new AssertionException(message);
+                throw new AssertionException($"excepted {arg1} LessOrEqual {arg2}");
         }
 
         public static void LessOrEqual(int arg1, int arg2, Exception e)
@@ -164,7 +167,10 @@ namespace Cr7Sund.Framework.Util
 
         public static void IsFalse(bool expected)
         {
-            IsFalse(expected, "Expected false, but it's true");
+            if (expected)
+            {
+                throw new AssertionException("Expected false, but it's true");
+            }
         }
 
         public static void IsFalse(bool expected, string message)
@@ -187,7 +193,10 @@ namespace Cr7Sund.Framework.Util
 
         public static void IsTrue(bool expected)
         {
-            IsTrue(expected, "Expected true, but it's false");
+            if (!expected)
+            {
+                throw new AssertionException("Expected true, but it's false");
+            }
         }
 
         public static void IsTrue(bool expected, string message)
@@ -209,7 +218,10 @@ namespace Cr7Sund.Framework.Util
 
         public static void AreEqual(object expected, object actual)
         {
-            AreEqual(expected, actual, "Expected " + expected + ", but it's " + actual);
+            if (!expected.Equals(actual))
+            {
+                throw new AssertionException($"Expected {expected}  but it's {actual}");
+            }
         }
 
         public static void AreEqual(object expected, object actual, string message)
@@ -228,6 +240,5 @@ namespace Cr7Sund.Framework.Util
             }
         }
         #endregion
-
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Cr7Sund
 {
     /// <summary>
-    /// 宏定义
+    ///     宏定义
     /// </summary>
     public static class MacroDefine
     {

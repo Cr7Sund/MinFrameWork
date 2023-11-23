@@ -1,20 +1,19 @@
-using System;
 using Cr7Sund.Framework.Api;
-
+using System;
 namespace Cr7Sund.Framework.Impl
 {
     public static class PromiseHelpers
     {
         /// <summary>
-        /// Returns a promise that resolves with all of the specified promises have resolved.
-        /// Returns a promise of a tuple of the resolved results.
+        ///     Returns a promise that resolves with all of the specified promises have resolved.
+        ///     Returns a promise of a tuple of the resolved results.
         /// </summary>
         public static IPromise<Tuple<T1, T2>> All<T1, T2>(IPromise<T1> p1, IPromise<T2> p2)
         {
             var val1 = default(T1);
             var val2 = default(T2);
-            var numUnresolved = 2;
-            var alreadyRejected = false;
+            int numUnresolved = 2;
+            bool alreadyRejected = false;
             var promise = new Promise<Tuple<T1, T2>>();
 
             p1
@@ -63,8 +62,8 @@ namespace Cr7Sund.Framework.Impl
         }
 
         /// <summary>
-        /// Returns a promise that resolves with all of the specified promises have resolved.
-        /// Returns a promise of a tuple of the resolved results.
+        ///     Returns a promise that resolves with all of the specified promises have resolved.
+        ///     Returns a promise of a tuple of the resolved results.
         /// </summary>
         public static IPromise<Tuple<T1, T2, T3>> All<T1, T2, T3>(IPromise<T1> p1, IPromise<T2> p2, IPromise<T3> p3)
         {
@@ -73,8 +72,8 @@ namespace Cr7Sund.Framework.Impl
         }
 
         /// <summary>
-        /// Returns a promise that resolves with all of the specified promises have resolved.
-        /// Returns a promise of a tuple of the resolved results.
+        ///     Returns a promise that resolves with all of the specified promises have resolved.
+        ///     Returns a promise of a tuple of the resolved results.
         /// </summary>
         public static IPromise<Tuple<T1, T2, T3, T4>> All<T1, T2, T3, T4>(IPromise<T1> p1, IPromise<T2> p2, IPromise<T3> p3, IPromise<T4> p4)
         {

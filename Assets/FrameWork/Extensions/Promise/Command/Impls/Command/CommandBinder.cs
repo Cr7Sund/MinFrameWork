@@ -1,22 +1,32 @@
-using System;
 using Cr7Sund.Framework.Api;
-
+using System;
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandBinder : Binder, ICommandBinder
     {
-        public T Get<T>() where T : class, IBaseCommand
+        T ICommandBinder.GetOrCreate<T>()
         {
-            var binding = this.GetBinding<T>();
+            var binding = GetBinding<T>();
             if (binding == null)
             {
                 var tInstance = Activator.CreateInstance<T>();
                 binding = Bind<T>().To(tInstance);
             }
-            
+
             var bindingValue = binding.Value as T;
-            bindingValue.Retain();
             return bindingValue;
+        }
+        
+        T ICommandBinder.Get<T>()
+        {
+            var binding = GetBinding<T>();
+            if (binding != null)
+            {
+                var bindingValue = binding.Value as T;
+                return bindingValue;
+            }
+
+            return null;
         }
     }
 }

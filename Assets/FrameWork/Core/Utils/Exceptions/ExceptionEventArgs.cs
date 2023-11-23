@@ -1,5 +1,4 @@
 using System;
-
 namespace Cr7Sund.Framework.Util
 {
     public class ExceptionEventArgs : EventArgs
@@ -7,7 +6,7 @@ namespace Cr7Sund.Framework.Util
         public ExceptionEventArgs(Exception exception)
         {
             AssertUtil.NotNull(exception);
-            this.Exception = exception;
+            Exception = exception;
         }
 
         public Exception Exception

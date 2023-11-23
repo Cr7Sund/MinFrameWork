@@ -1,29 +1,22 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
-	public class ClassWithConstructorParametersOnlyOneConstructor
-	{
-		private string _stringVal;
-		public string stringVal
-		{
-			get
-			{
-				return _stringVal;
-			}
+    public class ClassWithConstructorParametersOnlyOneConstructor
+    {
 
-		}
+        public ClassWithConstructorParametersOnlyOneConstructor()
+        {
+            stringVal = "defaultValue";
+        }
 
-		public ClassWithConstructorParametersOnlyOneConstructor()
-		{
-			_stringVal = "defaultValue";
-		}
+        public ClassWithConstructorParametersOnlyOneConstructor(string value)
+        {
+            stringVal = value;
 
-		public ClassWithConstructorParametersOnlyOneConstructor(string value)
-		{
-			_stringVal = value;
+        }
+        public string stringVal
+        {
+            get;
 
-		}
-	}
+        }
+    }
 }
-

@@ -1,33 +1,80 @@
+using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
-
-
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromise<PromisedT> : Promise<PromisedT>, ICommandPromise<PromisedT>
     {
-        [Inject] private IPoolBinder _poolBinder;
+        protected IBaseCommand _command;
 
-        private List<ResolveHandler<object>> convertResolveHandlers;
-        protected IBaseCommand command;
 
+        private List<ResolveHandler<object>> _convertResolveHandlers;
+
+        public IPoolBinder PoolBinder;
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
 
-        public CommandPromise() : base()
+        private  void ExecuteInternal(PromisedT value)
         {
+            var command = _command;
+            if (command is IAsyncCommand<PromisedT> asyncCommand)
+            {
+                IPromise<PromisedT> resultPromise;
+                try
+                {
+                    resultPromise = asyncCommand.OnExecuteAsync(value);
+                }
+                catch (Exception e)
+                {
+                    Catch(e);
+                    Release();
+                    throw e;
+                }
+
+                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
+                resultPromise
+                    .Progress(WrapProgress)
+                    .Then(Resolve, Reject);
+            }
+            else if (command is ICommand<PromisedT> promiseCommand)
+            {
+                PromisedT newValue;
+                try
+                {
+                    newValue = promiseCommand.OnExecute(value);
+                }
+                catch (Exception e)
+                {
+                    Catch(e);
+                    Release();
+                    throw e;
+                }
+
+                Resolve(newValue);
+
+                float progress = SliceLength * SequenceID;
+                if (progress > 0)
+                {
+                    ReportProgress(progress);
+                }
+
+                Release();
+            }
+        }
+
+        public IBaseCommand Test_GetCommand()
+        {
+            return _command;
         }
 
         #region IPromiseCommand Implementation
-
         public void Execute(PromisedT value)
         {
-            ExecuteInternal(value, this);
+            ExecuteInternal(value);
         }
 
         protected virtual void ExecuteWarp(object value)
@@ -38,40 +85,36 @@ namespace Cr7Sund.Framework.Impl
 
         public void Progress(float progress)
         {
-            command.OnProgress(progress);
+            _command.OnProgress(progress);
         }
 
         public virtual void Catch(Exception e)
         {
-            if (command is IAsyncCommand<PromisedT> asyncCommand)
+            if (_command is IAsyncCommand<PromisedT> asyncCommand)
             {
                 var rejectPromise = asyncCommand.OnCatchAsync(e);
-                if (rejectPromise == null)
+                if (rejectPromise != null)
                 {
                     rejectPromise
-                        .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
-                        .Then(
-                            (chainValue) => this.Resolve(chainValue),
-                            ex => this.Reject(ex)
-                        );
+                        .Progress(WrapProgress)
+                        .Then(Resolve, Reject);
 
                     return;
                 }
             }
-
-            command.OnCatch(e);
+            _command.OnCatch(e);
         }
 
         public virtual ICommandPromise<PromisedT> Then<T>() where T : ICommand<PromisedT>, new()
         {
             var resultPromise = new CommandPromise<PromisedT>();
 
-            return this.Then(resultPromise, new T());
+            return Then(resultPromise, new T());
         }
 
         public ICommandPromise<PromisedT> Then(ICommandPromise<PromisedT> resultPromise, ICommand<PromisedT> command)
         {
-            ((CommandPromise<PromisedT>)resultPromise).command = command;
+            ((CommandPromise<PromisedT>)resultPromise)._command = command;
 
             ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
             ProgressHandlers(resultPromise, resultPromise.Progress);
@@ -82,14 +125,14 @@ namespace Cr7Sund.Framework.Impl
         public ICommandPromise<ConvertedT> Then<T, ConvertedT>() where T : ICommand<PromisedT, ConvertedT>, new()
         {
             var resultPromise = new CommandPromise<PromisedT, ConvertedT>();
-            return this.Then(resultPromise, new T());
+            return Then(resultPromise, new T());
         }
 
         public ICommandPromise<ConvertedT> Then<ConvertedT>(ICommandPromise<ConvertedT> resultPromise,
             ICommand<PromisedT, ConvertedT> command)
         {
             var specificPromise = (CommandPromise<ConvertedT>)resultPromise;
-            specificPromise.command = command;
+            specificPromise._command = command;
 
             AddConvertResolveHandler(specificPromise.ExecuteWarp, resultPromise);
             AddRejectHandler(resultPromise.Reject, resultPromise);
@@ -102,7 +145,7 @@ namespace Cr7Sund.Framework.Impl
         {
             FulfillPromise(promises, commands);
 
-            return Then(value => All<PromisedT>(promises)) as ICommandPromise<IEnumerable<PromisedT>>;
+            return Then(_ => All<PromisedT>(promises)) as ICommandPromise<IEnumerable<PromisedT>>;
         }
 
         public ICommandPromise<PromisedT> ThenFirst(IEnumerable<ICommandPromise<PromisedT>> promises,
@@ -113,7 +156,7 @@ namespace Cr7Sund.Framework.Impl
 
             var fns = new Func<IPromise<PromisedT>>[commandPromises.Count()];
             commandPromises.Each((promise, index) => { fns[index] = () => promise; });
-            return Then(value => First<PromisedT>(fns)) as ICommandPromise<PromisedT>;
+            return Then(_ => First<PromisedT>(fns)) as ICommandPromise<PromisedT>;
         }
 
         public ICommandPromise<PromisedT> ThenRace(IEnumerable<ICommandPromise<PromisedT>> promises,
@@ -121,7 +164,7 @@ namespace Cr7Sund.Framework.Impl
         {
             FulfillPromise(promises, commands);
 
-            return Then(value => Race<PromisedT>(promises)) as ICommandPromise<PromisedT>;
+            return Then(_ => Race<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
 
         public ICommandPromise<PromisedT> ThenAny(IEnumerable<ICommandPromise<PromisedT>> promises,
@@ -129,7 +172,7 @@ namespace Cr7Sund.Framework.Impl
         {
             FulfillPromise(promises, commands);
 
-            return Then(value => Any<PromisedT>(promises)) as ICommandPromise<PromisedT>;
+            return Then(_ => Any<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
 
         private void FulfillPromise(IEnumerable<ICommandPromise<PromisedT>> promises,
@@ -140,11 +183,26 @@ namespace Cr7Sund.Framework.Impl
 
             promises.Each((promise, index) => { Then(promise, commandArray[index]); });
         }
+        public override void Reject(Exception ex)
+        {
+            base.Reject(ex);
+            Release();
+        }
 
+        public override void Resolve(PromisedT value)
+        {
+            base.Resolve(value);
+            Release();
+        }
+        
+        protected void WrapProgress(float progress)
+        {
+            ReportProgress((progress + SequenceID) * SliceLength);
+        }
+        
         #endregion
 
         #region IPromise Implementation
-
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
@@ -157,26 +215,23 @@ namespace Cr7Sund.Framework.Impl
 
         private void AddConvertResolveHandler(Action<object> onResolved, IRejectable rejectable)
         {
-            if (convertResolveHandlers == null)
-            {
-                convertResolveHandlers = new List<ResolveHandler<object>>();
-            }
+            _convertResolveHandlers ??= new List<ResolveHandler<object>>();
 
-            convertResolveHandlers.Add(new ResolveHandler<object>()
+            _convertResolveHandlers.Add(new ResolveHandler<object>
             {
-                callback = onResolved,
-                rejectable = rejectable
+                Callback = onResolved,
+                Rejectable = rejectable
             });
         }
 
         protected override void InvokeResolveHandlers(PromisedT value)
         {
-            if (convertResolveHandlers != null)
+            if (_convertResolveHandlers != null)
             {
-                for (int i = 0; i < convertResolveHandlers.Count; i++)
+                for (int i = 0; i < _convertResolveHandlers.Count; i++)
                 {
-                    var handler = convertResolveHandlers[i];
-                    InvokeHandler(handler.callback, handler.rejectable, value);
+                    var handler = _convertResolveHandlers[i];
+                    InvokeHandler(handler.Callback, handler.Rejectable, value);
                 }
             }
 
@@ -186,13 +241,11 @@ namespace Cr7Sund.Framework.Impl
         protected override void ClearHandlers()
         {
             base.ClearHandlers();
-            this.convertResolveHandlers = null;
+            _convertResolveHandlers = null;
         }
-
         #endregion
 
         #region IPoolable Implementation
-
         public void Retain()
         {
             IsRetain = true;
@@ -202,145 +255,71 @@ namespace Cr7Sund.Framework.Impl
         {
             IsRetain = false;
 
-            this.CurState = PromiseState.Pending;
-            this.resolveValue = default(PromisedT);
-            this.Name = string.Empty;
+            CurState = PromiseState.Pending;
+            _resolveValue = default;
+            Name = string.Empty;
 
-            command = null;
-            convertResolveHandlers = null;
+            _command = null;
+            _convertResolveHandlers = null;
         }
 
         public virtual void Release()
         {
             if (!IsRetain) return;
-            command?.Release();
-            _poolBinder?.Get<CommandPromise<PromisedT>>().ReturnInstance(this);
+            PoolBinder?.Get<CommandPromise<PromisedT>>().ReturnInstance(this);
         }
-
         #endregion
-
-        private static void ExecuteInternal(PromisedT value, CommandPromise<PromisedT> promise)
-        {
-            var command = promise.command;
-            if (command is IAsyncCommand<PromisedT> asyncCommand)
-            {
-                IPromise<PromisedT> resultPromise = null;
-                try
-                {
-                    resultPromise = asyncCommand.OnExecuteAsync(value);
-                }
-                catch (Exception e)
-                {
-                    promise.Catch(e);
-                    promise.Release();
-                    throw e;
-                }
-
-                AssertUtil.NotNull(resultPromise);
-                resultPromise
-                    .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
-                    .Then(
-                        (chainValue) =>
-                        {
-                            promise.Resolve(chainValue);
-                            promise.Release();
-                        },
-                        ex =>
-                        {
-                            promise.Reject(ex);
-                            promise.Release();
-                        }
-                    );
-            }
-            else if (command is ICommand<PromisedT> promiseCommand)
-            {
-                PromisedT newValue = default(PromisedT);
-                try
-                {
-                    newValue = promiseCommand.OnExecute(value);
-                }
-                catch (Exception e)
-                {
-                    promise.Catch(e);
-                    promise.Release();
-                    throw e;
-                }
-
-                promise.Resolve(newValue);
-
-                float progress = promise.SliceLength * promise.SequenceID;
-                if (progress > 0)
-                {
-                    promise.ReportProgress(progress);
-                }
-
-                promise.Release();
-            }
-        }
-
-        public IBaseCommand Test_GetCommand() => command;
     }
 
 
     public class CommandPromise<PromisedT, ConvertedT> : CommandPromise<ConvertedT>
     {
-        private static void ExecuteInternal(PromisedT value, CommandPromise<PromisedT, ConvertedT> promise)
+        private void ExecuteInternal(PromisedT value)
         {
-            var command = promise.command;
+            var command = _command;
 
             if (command is IPromiseAsyncCommand<PromisedT, ConvertedT> asyncCommand)
             {
-                IPromise<ConvertedT> resultPromise = null;
+                IPromise<ConvertedT> resultPromise;
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync(value);
                 }
                 catch (Exception e)
                 {
-                    promise.Catch(e);
-                    promise.Release();
+                    Catch(e);
+                    Release();
                     throw e;
                 }
 
                 AssertUtil.NotNull(resultPromise);
                 resultPromise
-                    .Progress(progress => promise.ReportProgress((progress + promise.SequenceID) * promise.SliceLength))
-                    .Then(
-                        (chainValue) =>
-                        {
-                            promise.Resolve(chainValue);
-                            promise.Release();
-                        },
-                        ex =>
-                        {
-                            promise.Reject(ex);
-                            promise.Release();
-                        }
-                    );
+                    .Progress(WrapProgress)
+                    .Then(Resolve,Reject);
             }
             else if (command is ICommand<PromisedT, ConvertedT> promiseCommand)
             {
-                ConvertedT newValue = default(ConvertedT);
+                ConvertedT newValue;
                 try
                 {
                     newValue = promiseCommand.OnExecute(value);
                 }
                 catch (Exception e)
                 {
-                    promise.Catch(e);
-                    promise.Release();
+                    Catch(e);
+                    Release();
                     throw e;
                 }
 
-                promise.Resolve(newValue);
+                Resolve(newValue);
 
-                float progress = promise.SliceLength * promise.SequenceID;
+                float progress = SliceLength * SequenceID;
                 if (progress > 0)
                 {
-                    promise.ReportProgress(progress);
+                    ReportProgress(progress);
                 }
 
-                promise.Release();
+                Release();
             }
         }
 
@@ -348,28 +327,23 @@ namespace Cr7Sund.Framework.Impl
         {
             AssertUtil.IsInstanceOf<PromisedT>(value);
 
-            ExecuteInternal((PromisedT)value, this);
+            ExecuteInternal((PromisedT)value);
         }
 
         public override void Catch(Exception e)
         {
-            if (command is IPromiseAsyncCommand<PromisedT, ConvertedT> asyncCommand)
+            if (_command is IPromiseAsyncCommand<PromisedT, ConvertedT> asyncCommand)
             {
                 var rejectPromise = asyncCommand.OnCatchAsync(e);
-                if (rejectPromise == null)
+                if (rejectPromise != null)
                 {
                     rejectPromise
-                        .Progress(progress => this.ReportProgress((progress + this.SequenceID) * this.SliceLength))
-                        .Then(
-                            (chainValue) => this.Resolve(chainValue),
-                            ex => this.Reject(ex)
-                        );
-
+                        .Progress(WrapProgress)
+                        .Then(Resolve, Reject);
                     return;
                 }
             }
-
-            command.OnCatch(e);
+            _command.OnCatch(e);
         }
     }
 }

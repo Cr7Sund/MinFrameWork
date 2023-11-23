@@ -1,14 +1,13 @@
-using System;
-using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
-
+using System;
 namespace Cr7Sund.Framework.Tests
 {
     public class TestCrossContextSubclass : CrossContext
     {
 
         public TestCrossContextSubclass(object view, bool autoStartup) : base(view, autoStartup)
-        { }
+        {
+        }
 
         public override void OnRemove()
         {
@@ -18,7 +17,7 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    class TestPassedException : Exception
+    internal class TestPassedException : Exception
     {
         public TestPassedException(string str) : base(str) { }
     }

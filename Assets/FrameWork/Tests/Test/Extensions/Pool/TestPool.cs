@@ -1,14 +1,13 @@
-using System;
-using NUnit.Framework;
-using System.Collections;
-using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Api;
-
+using Cr7Sund.Framework.Impl;
+using NUnit.Framework;
+using System;
+using System.Collections;
 namespace Cr7Sund.Framework.Tests
 {
     public class TestPool
     {
-        Pool<ClassToBeInjected> pool;
+        private Pool<ClassToBeInjected> pool;
 
 
         [SetUp]
@@ -57,7 +56,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestAddList()
         {
             pool.SetSize(4);
-            ClassToBeInjected[] list = new ClassToBeInjected[pool.Count];
+            var list = new ClassToBeInjected[pool.Count];
             for (int a = 0; a < pool.Count; a++)
             {
                 list[a] = new ClassToBeInjected();
@@ -78,7 +77,7 @@ namespace Cr7Sund.Framework.Tests
             for (int a = pool.Count; a > 0; a--)
             {
                 Assert.AreEqual(a, pool.Available);
-                ClassToBeInjected instance = pool.GetInstance();
+                var instance = pool.GetInstance();
                 Assert.IsNotNull(instance);
                 Assert.IsInstanceOf<ClassToBeInjected>(instance);
                 Assert.AreEqual(a - 1, pool.Available);
@@ -89,7 +88,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestReturnInstance()
         {
             pool.SetSize(4);
-            Stack stack = new Stack(pool.Count);
+            var stack = new Stack(pool.Count);
             for (int a = 0; a < pool.Count; a++)
             {
                 pool.Add(new ClassToBeInjected());
@@ -139,11 +138,11 @@ namespace Cr7Sund.Framework.Tests
                 pool.GetInstance();
             }
 
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 pool.GetInstance();
             };
-            PoolException ex = Assert.Throws<PoolException>(testDelegate);
+            var ex = Assert.Throws<PoolException>(testDelegate);
             Assert.AreEqual(PoolExceptionType.OVERFLOW, ex.type);
         }
 
@@ -163,7 +162,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.GetInstance();
             }
 
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 object shouldBeNull = pool.GetInstance();
                 Assert.IsNull(shouldBeNull);
@@ -177,11 +176,11 @@ namespace Cr7Sund.Framework.Tests
             pool.SetSize(4);
             pool.Add(new ClassToBeInjected());
 
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 pool.Add(new InjectableDerivedClass());
             };
-            PoolException ex = Assert.Throws<PoolException>(testDelegate);
+            var ex = Assert.Throws<PoolException>(testDelegate);
             Assert.AreEqual(PoolExceptionType.TYPE_MISMATCH, ex.type);
         }
 
@@ -197,7 +196,7 @@ namespace Cr7Sund.Framework.Tests
             for (int a = pool.Count; a > 0; a--)
             {
                 Assert.AreEqual(a, pool.Available);
-                ClassToBeInjected instance = pool.GetInstance();
+                var instance = pool.GetInstance();
                 pool.Remove(instance);
             }
 
@@ -213,7 +212,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.Add(new ClassToBeInjected());
             }
 
-            ClassToBeInjected[] removalList = new ClassToBeInjected[3];
+            var removalList = new ClassToBeInjected[3];
             for (int a = 0; a < pool.Count - 1; a++)
             {
                 removalList[a] = new ClassToBeInjected();
@@ -231,7 +230,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.Add(new ClassToBeInjected());
             }
 
-            ClassToBeInjected[] removalList = new ClassToBeInjected[3];
+            var removalList = new ClassToBeInjected[3];
             for (int a = 0; a < pool.Count - 1; a++)
             {
                 removalList[a] = pool.GetInstance();
@@ -245,22 +244,22 @@ namespace Cr7Sund.Framework.Tests
         {
             pool.SetSize(4);
             pool.Add(new ClassToBeInjected());
-            TestDelegate testDelegate = delegate ()
+            TestDelegate testDelegate = delegate
             {
                 pool.Remove(new InjectableDerivedClass());
             };
-            PoolException ex = Assert.Throws<PoolException>(testDelegate);
+            var ex = Assert.Throws<PoolException>(testDelegate);
             Assert.AreEqual(PoolExceptionType.TYPE_MISMATCH, ex.type);
         }
 
         [Test]
         public void TestReleaseOfPoolable()
         {
-            Pool<PooledInstance> anotherPool = new Pool<PooledInstance>();
+            var anotherPool = new Pool<PooledInstance>();
 
             anotherPool.SetSize(4);
             anotherPool.Add(new PooledInstance());
-            PooledInstance instance = anotherPool.GetInstance();
+            var instance = anotherPool.GetInstance();
             instance.someValue = 42;
             Assert.AreEqual(42, instance.someValue);
             anotherPool.ReturnInstance(instance);
@@ -273,31 +272,31 @@ namespace Cr7Sund.Framework.Tests
         {
             pool.InstanceProvider = new TestInstanceProvider();
 
-            ClassToBeInjected instance1 = pool.GetInstance();
+            var instance1 = pool.GetInstance();
             Assert.IsNotNull(instance1);
             Assert.AreEqual(1, pool.InstanceCount); //First call creates one instance
-            Assert.AreEqual(0, pool.Available);     //Nothing Available
+            Assert.AreEqual(0, pool.Available); //Nothing Available
 
-            ClassToBeInjected instance2 = pool.GetInstance();
+            var instance2 = pool.GetInstance();
             Assert.IsNotNull(instance2);
             Assert.AreNotSame(instance1, instance2);
             Assert.AreEqual(2, pool.InstanceCount); //Second call doubles. We have 2
-            Assert.AreEqual(0, pool.Available);     //Nothing Available
+            Assert.AreEqual(0, pool.Available); //Nothing Available
 
-            ClassToBeInjected instance3 = pool.GetInstance();
+            var instance3 = pool.GetInstance();
             Assert.IsNotNull(instance3);
             Assert.AreEqual(4, pool.InstanceCount); //Third call doubles. We have 4
-            Assert.AreEqual(1, pool.Available);     //One allocated. One Available.
+            Assert.AreEqual(1, pool.Available); //One allocated. One Available.
 
-            ClassToBeInjected instance4 = pool.GetInstance();
+            var instance4 = pool.GetInstance();
             Assert.IsNotNull(instance4);
             Assert.AreEqual(4, pool.InstanceCount); //Fourth call. No doubling since one was Available.
             Assert.AreEqual(0, pool.Available);
 
-            ClassToBeInjected instance5 = pool.GetInstance();
+            var instance5 = pool.GetInstance();
             Assert.IsNotNull(instance5);
             Assert.AreEqual(8, pool.InstanceCount); //Fifth call. Double to 8.
-            Assert.AreEqual(3, pool.Available);     //Three left unallocated.
+            Assert.AreEqual(3, pool.Available); //Three left unallocated.
         }
 
         [Test]
@@ -308,12 +307,12 @@ namespace Cr7Sund.Framework.Tests
 
             int testCount = 10;
 
-            Stack stack = new Stack();
+            var stack = new Stack();
 
             //Calls should simply increment. There will never be unallocated
             for (int a = 0; a < testCount; a++)
             {
-                ClassToBeInjected instance = pool.GetInstance();
+                var instance = pool.GetInstance();
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(a + 1, pool.InstanceCount);
                 Assert.AreEqual(0, pool.Available);
@@ -323,7 +322,7 @@ namespace Cr7Sund.Framework.Tests
             //Now return the instances
             for (int a = 0; a < testCount; a++)
             {
-                ClassToBeInjected instance = stack.Pop() as ClassToBeInjected;
+                var instance = stack.Pop() as ClassToBeInjected;
                 pool.ReturnInstance(instance);
 
                 Assert.AreEqual(a + 1, pool.Available, "This one");
@@ -332,11 +331,14 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    class PooledInstance : IPoolable
+    internal class PooledInstance : IPoolable
     {
-        public int someValue = 0;
+        public int someValue;
 
-        public bool IsRetain { get; private set; }
+        public bool IsRetain
+        {
+            get;
+        }
 
         public void Restore()
         {
@@ -350,15 +352,14 @@ namespace Cr7Sund.Framework.Tests
         public void Release()
         {
         }
-
     }
 
-    class TestInstanceProvider : IInstanceProvider
+    internal class TestInstanceProvider : IInstanceProvider
     {
         public T GetInstance<T>()
         {
             object instance = Activator.CreateInstance(typeof(T));
-            T retv = (T)instance;
+            var retv = (T)instance;
             return retv;
         }
 
@@ -368,4 +369,3 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 }
-

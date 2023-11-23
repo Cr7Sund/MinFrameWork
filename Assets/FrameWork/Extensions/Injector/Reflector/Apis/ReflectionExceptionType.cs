@@ -11,4 +11,3 @@ namespace Cr7Sund.Framework.Api
         CANNOT_POST_CONSTRUCTS
     }
 }
-

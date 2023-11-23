@@ -14,32 +14,30 @@
  * it to the Pool.
  */
 
-using System;
-
 namespace Cr7Sund.Framework.Api
 {
     public interface IPoolable
     {
         /// <summary>
-        /// Clean up this instance for reuse.
+        ///     Is this instance retained?
+        /// </summary>
+        /// <value><c>true</c> if retained; otherwise, <c>false</c>.</value>
+        bool IsRetain { get; }
+        /// <summary>
+        ///     Clean up this instance for reuse.
         /// </summary>
         /// Restore methods should clean up the instance sufficiently to remove prior state.
         void Restore();
 
         /// <summary>
-        /// Keep this instance from being returned to the pool 
+        ///     Keep this instance from being returned to the pool
         /// </summary>
         void Retain();
 
         /// <summary>
-        /// Release this instance back to the pool.
+        ///     Release this instance back to the pool.
         /// </summary>
         /// Release methods should clean up the instance sufficiently to remove prior state.
         void Release();
-        /// <summary>
-        /// Is this instance retained?
-        /// </summary>
-        /// <value><c>true</c> if retained; otherwise, <c>false</c>.</value>
-        bool IsRetain { get; }
     }
 }

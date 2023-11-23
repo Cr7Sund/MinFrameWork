@@ -1,9 +1,8 @@
+using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
-
 namespace Cr7Sund.Framework.Impl
 {
     public abstract class BasePool : IBasePool
@@ -24,16 +23,28 @@ namespace Cr7Sund.Framework.Impl
         public IInstanceProvider InstanceProvider { get; set; }
 
         public virtual int Available { get; }
-        public int InstanceCount => _instanceCount;
+        public int InstanceCount
+        {
+            get
+            {
+                return _instanceCount;
+            }
+        }
 
         public PoolOverflowBehavior OverflowBehavior { get; set; }
         public PoolInflationType inflationType { get; set; }
 
-        public int Count => _size;
+        public int Count
+        {
+            get
+            {
+                return _size;
+            }
+        }
 
         public void SetSize(int size)
         {
-            this._size = size;
+            _size = size;
         }
 
 
@@ -51,8 +62,8 @@ namespace Cr7Sund.Framework.Impl
             {
                 //Illegal overflow. Report and return null
                 AssertUtil.IsFalse(InstanceCount > 0 && OverflowBehavior == PoolOverflowBehavior.EXCEPTION,
-                                 new PoolException("A pool has overflowed its limit.\n\t", PoolExceptionType.OVERFLOW)
-                    );
+                    new PoolException("A pool has overflowed its limit.\n\t", PoolExceptionType.OVERFLOW)
+                );
 
                 instancesToCreate = Count;
             }
@@ -71,11 +82,9 @@ namespace Cr7Sund.Framework.Impl
 
             return instancesToCreate;
         }
-
         #endregion
 
-        #region  IPoolable Implementation
-
+        #region IPoolable Implementation
         public bool IsRetain { get; private set; }
 
         public void Restore()
@@ -93,17 +102,11 @@ namespace Cr7Sund.Framework.Impl
         {
             IsRetain = false;
         }
-
         #endregion
-
     }
 
     public class Pool : BasePool, IPool
     {
-        private HashSet<object> instancesInUse { get; set; }
-        public override int Available => instancesAvailable.Count;
-        public object Value => throw new System.NotImplementedException();
-        public Type poolType { get; set; }
 
         /// Stack of instances still in the Pool.
         protected Stack instancesAvailable;
@@ -114,6 +117,25 @@ namespace Cr7Sund.Framework.Impl
             instancesInUse = new HashSet<object>();
             instancesAvailable = new Stack();
         }
+        private HashSet<object> instancesInUse
+        {
+            get;
+        }
+        public override int Available
+        {
+            get
+            {
+                return instancesAvailable.Count;
+            }
+        }
+        public object Value
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public Type poolType { get; set; }
 
         public override void Clean()
         {
@@ -122,11 +144,10 @@ namespace Cr7Sund.Framework.Impl
             base.Clean();
         }
 
-        #region  IPool Implementation
-
+        #region IPool Implementation
         public object GetInstance()
         {
-            var instance = GetInstanceInternal();
+            object instance = GetInstanceInternal();
             if (instance is IPoolable)
             {
                 (instance as IPoolable).Retain();
@@ -151,7 +172,7 @@ namespace Cr7Sund.Framework.Impl
         {
             AssertUtil.IsInstanceOf(poolType, value,
                 new PoolException(
-                    "Attempt to remove a instance from a pool that is of the wrong Type:\n\t\tPool type: " + poolType.ToString() + "\n\t\tInstance type: " + value.GetType().ToString(),
+                    "Attempt to remove a instance from a pool that is of the wrong Type:\n\t\tPool type: " + poolType + "\n\t\tInstance type: " + value.GetType(),
                     PoolExceptionType.TYPE_MISMATCH));
             if (instancesInUse.Contains(value))
             {
@@ -167,7 +188,7 @@ namespace Cr7Sund.Framework.Impl
         {
             if (instancesAvailable.Count > 0)
             {
-                var retVal = instancesAvailable.Pop();
+                object retVal = instancesAvailable.Pop();
                 instancesInUse.Add(retVal);
 
                 return retVal;
@@ -181,7 +202,7 @@ namespace Cr7Sund.Framework.Impl
 
             for (int i = 0; i < instancesToCreate; i++)
             {
-                var newInstance = GetNewInstance();
+                object newInstance = GetNewInstance();
                 Add(newInstance);
             }
 
@@ -192,16 +213,13 @@ namespace Cr7Sund.Framework.Impl
         {
             return InstanceProvider.GetInstance(poolType);
         }
-
-
         #endregion
 
 
         #region IManagedList Implementation
-
         public IManagedList Add(object value)
         {
-            AssertUtil.IsInstanceOf(poolType, value, new PoolException( "Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + poolType.ToString() + "\n\t\tMismatch type: " + value.GetType().ToString(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(poolType, value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + poolType + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
             _instanceCount++;
             instancesAvailable.Push(value);
             return this;
@@ -211,7 +229,7 @@ namespace Cr7Sund.Framework.Impl
         {
             for (int i = 0; i < list.Length; i++)
             {
-                this.Add(list[i]);
+                Add(list[i]);
             }
 
             return this;
@@ -228,7 +246,7 @@ namespace Cr7Sund.Framework.Impl
         {
             for (int i = 0; i < list.Length; i++)
             {
-                this.Remove(list[i]);
+                Remove(list[i]);
             }
 
             return this;
@@ -238,12 +256,7 @@ namespace Cr7Sund.Framework.Impl
         {
             return instancesInUse.Contains(o);
         }
-
-
         #endregion
-
-
-
     }
 
 

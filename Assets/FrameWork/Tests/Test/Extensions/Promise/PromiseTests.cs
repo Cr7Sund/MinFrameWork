@@ -1,10 +1,9 @@
+using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
+using NUnit.Framework;
 using System;
 using System.Linq;
-using Cr7Sund.Framework.Api;
-using NUnit.Framework;
-using Cr7Sund.Framework.Util;
-
 namespace Cr7Sund.Framework.PromiseTest
 {
     public class PromiseTests
@@ -15,12 +14,12 @@ namespace Cr7Sund.Framework.PromiseTest
             const int promisedValue = 5;
             var promise = Promise<int>.Resolved(promisedValue);
 
-            var completed = 0;
+            int completed = 0;
             promise.Then(v =>
-                {
-                    Assert.AreEqual(promisedValue, v);
-                    ++completed;
-                });
+            {
+                Assert.AreEqual(promisedValue, v);
+                ++completed;
+            });
 
             Assert.AreEqual(1, completed);
         }
@@ -31,7 +30,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var ex = new Exception();
             var promise = Promise<int>.Rejected(ex);
 
-            var errors = 0;
+            int errors = 0;
             promise.Catch(e =>
             {
                 Assert.AreEqual(ex, e);
@@ -48,7 +47,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Reject(new Exception());
 
-            var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => promise.Reject(new Exception()));
+            var promiseException = Assert.Throws<PromiseException>(() => promise.Reject(new Exception()));
             Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
         }
 
@@ -59,7 +58,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Resolve(5);
 
-            var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => promise.Reject(new Exception()));
+            var promiseException = Assert.Throws<PromiseException>(() => promise.Reject(new Exception()));
             Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
         }
 
@@ -70,7 +69,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Reject(new Exception());
 
-            var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => promise.Resolve(5));
+            var promiseException = Assert.Throws<PromiseException>(() => promise.Resolve(5));
             Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
         }
 
@@ -79,7 +78,7 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
 
-            var completed = 0;
+            int completed = 0;
             const int promisedValue = 15;
 
             promise.Then(v =>
@@ -100,7 +99,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Resolve(5);
 
-            var promiseException = (PromiseException)Assert.Throws<PromiseException>(() => promise.Resolve(5));
+            var promiseException = Assert.Throws<PromiseException>(() => promise.Resolve(5));
             Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
         }
 
@@ -109,7 +108,7 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
 
-            var completed = 0;
+            int completed = 0;
 
             promise.Then(v => Assert.AreEqual(1, ++completed));
             promise.Then(v => Assert.AreEqual(2, ++completed));
@@ -125,7 +124,7 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
 
-            var completed = 0;
+            int completed = 0;
             const int promisedValue = -10;
 
             promise.Resolve(promisedValue);
@@ -145,7 +144,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
 
             var ex = new Exception();
-            var completed = 0;
+            int completed = 0;
             promise.Catch(e =>
             {
                 Assert.AreEqual(ex, e);
@@ -163,7 +162,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
 
             var ex = new Exception();
-            var completed = 0;
+            int completed = 0;
 
             promise.Catch(e =>
             {
@@ -189,7 +188,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var ex = new Exception();
             promise.Reject(ex);
 
-            var completed = 0;
+            int completed = 0;
             promise.Catch(e =>
             {
                 Assert.AreEqual(ex, e);
@@ -240,7 +239,7 @@ namespace Cr7Sund.Framework.PromiseTest
                     Assert.AreEqual(9001, result);
                     completed = true;
                 })
-            ;
+                ;
 
             Assert.AreEqual(true, completed);
         }
@@ -262,7 +261,7 @@ namespace Cr7Sund.Framework.PromiseTest
                     Assert.AreEqual("Third chained promise", ex.Message);
                     completed = true;
                 })
-            ;
+                ;
 
             Assert.AreEqual(true, completed);
         }
@@ -271,19 +270,23 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chain_multiple_promises_using_then_first()
         {
             var promise = Promise<int>.Resolved(20);
-            var chainedPromise1 = new Promise<int>(); chainedPromise1.Then((v) => v += 1);
-            var chainedPromise2 = new Promise<int>(); chainedPromise2.Then((v) => v += 2);
-            var chainedPromise3 = new Promise<int>(); chainedPromise3.Then((v) => v += 3);
+            var chainedPromise1 = new Promise<int>();
+            chainedPromise1.Then(v => v += 1);
+            var chainedPromise2 = new Promise<int>();
+            chainedPromise2.Then(v => v += 2);
+            var chainedPromise3 = new Promise<int>();
+            chainedPromise3.Then(v => v += 3);
 
             bool isFail = false;
             bool isSuccessful = false;
 
             promise
-                .ThenFirst(new Func<IPromise<int>>[]{
+                .ThenFirst(new Func<IPromise<int>>[]
+                {
                     () =>
-                        {
-                            return Promise<int>.Rejected(new Exception());
-                        },
+                    {
+                        return Promise<int>.Rejected(new Exception());
+                    },
                     () => chainedPromise1, () => chainedPromise2,
                     () => chainedPromise3
                 })
@@ -292,7 +295,7 @@ namespace Cr7Sund.Framework.PromiseTest
                     Assert.AreEqual(10, result);
                     isSuccessful = true;
                 })
-                .Catch((ex) =>
+                .Catch(ex =>
                 {
                     isFail = true;
                 });
@@ -311,18 +314,22 @@ namespace Cr7Sund.Framework.PromiseTest
         public void chain_multiple_promises_rejected_using_then_first()
         {
             var promise = Promise<int>.Resolved(20);
-            var chainedPromise1 = new Promise<int>(); chainedPromise1.Then((v) => v += 1);
-            var chainedPromise2 = new Promise<int>(); chainedPromise2.Then((v) => v += 2);
-            var chainedPromise3 = new Promise<int>(); chainedPromise3.Then((v) => v += 13);
+            var chainedPromise1 = new Promise<int>();
+            chainedPromise1.Then(v => v += 1);
+            var chainedPromise2 = new Promise<int>();
+            chainedPromise2.Then(v => v += 2);
+            var chainedPromise3 = new Promise<int>();
+            chainedPromise3.Then(v => v += 13);
 
             bool isFail = false;
             bool isSuccessful = false;
             promise
-                .ThenFirst(new Func<IPromise<int>>[]{
+                .ThenFirst(new Func<IPromise<int>>[]
+                {
                     () =>
-                        {
-                            return Promise<int>.Rejected(new Exception());
-                        },
+                    {
+                        return Promise<int>.Rejected(new Exception());
+                    },
                     () => chainedPromise1, () => chainedPromise2,
                     () => chainedPromise3
                 })
@@ -330,7 +337,7 @@ namespace Cr7Sund.Framework.PromiseTest
                 {
                     isSuccessful = true;
                 })
-                .Catch((ex) =>
+                .Catch(ex =>
                 {
                     isFail = true;
                 });
@@ -353,16 +360,15 @@ namespace Cr7Sund.Framework.PromiseTest
             const int chainedResult1 = 10;
             const int chainedResult2 = 15;
 
-            var completed = 0;
+            int completed = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 promise
-                    .ThenAll(i => EnumerableExt.FromItems(chainedPromise1, chainedPromise2)
-                        .Cast<IPromise<int>>())
+                    .ThenAll(i => EnumerableExt.FromItems(chainedPromise1, chainedPromise2))
                     .Then(result =>
                     {
-                        var items = result.ToArray();
+                        int[] items = result.ToArray();
                         Assert.AreEqual(2, items.Length);
                         Assert.AreEqual(chainedResult1, items[0]);
                         Assert.AreEqual(chainedResult2, items[1]);
@@ -396,16 +402,15 @@ namespace Cr7Sund.Framework.PromiseTest
             const int chainedResult1 = 10;
             const int chainedResult2 = 15;
 
-            var completed = 0;
+            int completed = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 promise
-                    .ThenAll(i => EnumerableExt.FromItems(chainedPromise1, chainedPromise2)
-                        .Cast<IPromise<int>>())
+                    .ThenAll(i => EnumerableExt.FromItems(chainedPromise1, chainedPromise2))
                     .Then(result =>
                     {
-                        var items = result.ToArray();
+                        int[] items = result.ToArray();
                         Assert.AreEqual(2, items.Length);
                         Assert.AreEqual(chainedResult1, items[0]);
                         Assert.AreEqual(chainedResult2, items[1]);
@@ -436,13 +441,12 @@ namespace Cr7Sund.Framework.PromiseTest
             var chainedPromise1 = new Promise();
             var chainedPromise2 = new Promise();
 
-            var completed = 0;
+            int completed = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 promise
-                    .ThenAll(i => EnumerableExt.FromItems(chainedPromise1, chainedPromise2)
-                        .Cast<IPromise>())
+                    .ThenAll(i => EnumerableExt.FromItems(chainedPromise1, chainedPromise2))
                     .Then(() => ++completed);
 
                 Assert.AreEqual(0, completed);
@@ -471,13 +475,13 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = Promise<int>.All(EnumerableExt.FromItems<IPromise<int>>(promise1, promise2));
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
                     ++completed;
 
-                    var values = v.ToArray();
+                    int[] values = v.ToArray();
                     Assert.AreEqual(2, values.Length);
                     Assert.AreEqual(1, values[0]);
                     Assert.AreEqual(2, values[1]);
@@ -500,7 +504,7 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = PromiseHelpers.All(promise1, promise2);
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
@@ -528,7 +532,7 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = PromiseHelpers.All(promise1, promise2, promise3);
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
@@ -559,7 +563,7 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = PromiseHelpers.All(promise1, promise2, promise3, promise4);
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
@@ -592,7 +596,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
                 all.Then(v => throw new Exception("Shouldn't happen"));
 
-                var errors = 0;
+                int errors = 0;
                 all.Catch(e => ++errors);
 
                 promise1.Reject(new Exception("Error!"));
@@ -614,7 +618,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
                 all.Then(v => throw new Exception("Shouldn't happen"));
 
-                var errors = 0;
+                int errors = 0;
                 all.Catch(e => ++errors);
 
                 promise1.Reject(new Exception("Error!"));
@@ -636,7 +640,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
                 all.Then(v => throw new Exception("Shouldn't happen"));
 
-                var errors = 0;
+                int errors = 0;
                 all.Catch(e => ++errors);
 
                 promise1.Resolve(2);
@@ -658,7 +662,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
                 all.Then(v => throw new Exception("Shouldn't happen"));
 
-                var errors = 0;
+                int errors = 0;
                 all.Catch(e => ++errors);
 
                 promise1.Resolve(2);
@@ -680,7 +684,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
                 all.Then(v => throw new Exception("Shouldn't happen"));
 
-                var errors = 0;
+                int errors = 0;
                 all.Catch(e => { ++errors; });
 
                 promise1.Reject(new Exception("Error!"));
@@ -702,7 +706,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
                 all.Then(v => throw new Exception("Shouldn't happen"));
 
-                var errors = 0;
+                int errors = 0;
                 all.Catch(e => ++errors);
 
                 promise1.Reject(new Exception("Error!"));
@@ -719,7 +723,7 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = Promise<int>.All(Enumerable.Empty<IPromise<int>>());
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
@@ -742,7 +746,7 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = Promise<int>.All(EnumerableExt.FromItems(promise1, promise2));
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
@@ -765,7 +769,7 @@ namespace Cr7Sund.Framework.PromiseTest
             {
                 var all = PromiseHelpers.All(promise1, promise2);
 
-                var completed = 0;
+                int completed = 0;
 
                 all.Then(v =>
                 {
@@ -785,7 +789,7 @@ namespace Cr7Sund.Framework.PromiseTest
             bool resolved = false;
             bool rejected = false;
             Exception caughtException = null;
-            Exception exception = new Exception();
+            var exception = new Exception();
 
             var promiseA = new Promise<int>();
             var promise = Promise<int>
@@ -809,8 +813,8 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
 
-            var promisedValue = 15;
-            var completed = 0;
+            int promisedValue = 15;
+            int completed = 0;
 
             promise
                 .Then(v => v.ToString())
@@ -832,7 +836,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
 
             var ex = new Exception();
-            var errors = 0;
+            int errors = 0;
 
             promise
                 .Then(v => v.ToString())
@@ -854,7 +858,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
 
             const int promisedValue = 15;
-            var errors = 0;
+            int errors = 0;
             var ex = new Exception();
 
             promise
@@ -879,7 +883,7 @@ namespace Cr7Sund.Framework.PromiseTest
 
             const int promisedValue = 15;
             const string chainedPromiseValue = "blah";
-            var completed = 0;
+            int completed = 0;
 
             promise
                 .Then<string>(v => chainedPromise)
@@ -903,7 +907,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var chainedPromise = new Promise();
 
             const int promisedValue = 15;
-            var completed = 0;
+            int completed = 0;
 
             promise
                 .Then(v => (IPromise)chainedPromise)
@@ -921,7 +925,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
 
             var ex = new Exception();
-            var errors = 0;
+            int errors = 0;
 
             promise
                 .Then(v => throw ex)
@@ -944,7 +948,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var chainedPromise = new Promise<string>();
 
             var ex = new Exception();
-            var errors = 0;
+            int errors = 0;
 
             promise
                 .Then<string>(v => chainedPromise)
@@ -966,7 +970,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
-            var resolved = 0;
+            int resolved = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -986,7 +990,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
-            var resolved = 0;
+            int resolved = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -1006,7 +1010,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
-            var resolved = 0;
+            int resolved = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -1027,11 +1031,14 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
-            var resolved = 0;
+            int resolved = 0;
 
             var promise = Promise.Resolved();
-            promise.ThenAny(() => new[] { promise1, promise2 })
-                    .Then(i => resolved = i);
+            promise.ThenAny(() => new[]
+                {
+                    promise1, promise2
+                })
+                .Then(i => resolved = i);
 
             promise2.Resolve(12);
             promise1.Resolve(122);
@@ -1122,7 +1129,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
-            var resolved = 0;
+            int resolved = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -1142,7 +1149,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
-            var resolved = 0;
+            int resolved = 0;
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -1210,9 +1217,12 @@ namespace Cr7Sund.Framework.PromiseTest
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 promise
-                .Then(() => { })
-                .ThenRace(() => new[] { promise1, promise2 })
-                .Catch(e => ex = e);
+                    .Then(() => { })
+                    .ThenRace(() => new[]
+                    {
+                        promise1, promise2
+                    })
+                    .Catch(e => ex = e);
 
                 var expected = new Exception();
                 promise2.Reject(expected);
@@ -1226,7 +1236,7 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>((resolve, reject) => resolve(5));
 
-            var completed = 0;
+            int completed = 0;
             promise.Then(v =>
             {
                 Assert.AreEqual(5, v);
@@ -1245,7 +1255,7 @@ namespace Cr7Sund.Framework.PromiseTest
                 reject(ex);
             });
 
-            var completed = 0;
+            int completed = 0;
             promise.Catch(e =>
             {
                 Assert.AreEqual(ex, e);
@@ -1261,7 +1271,7 @@ namespace Cr7Sund.Framework.PromiseTest
             var ex = new Exception();
             var promise = new Promise<int>((resolve, reject) => throw ex);
 
-            var completed = 0;
+            int completed = 0;
             promise.Catch(e =>
             {
                 Assert.AreEqual(ex, e);
@@ -1276,14 +1286,14 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
             var ex = new Exception();
-            var eventRaised = 0;
+            int eventRaised = 0;
 
             EventHandler<ExceptionEventArgs> handler = (s, e) =>
-                {
-                    Assert.AreEqual(ex, e.Exception);
+            {
+                Assert.AreEqual(ex, e.Exception);
 
-                    ++eventRaised;
-                };
+                ++eventRaised;
+            };
 
             Promise.UnhandledException += handler;
 
@@ -1308,7 +1318,7 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
             var ex = new Exception();
-            var eventRaised = 0;
+            int eventRaised = 0;
 
             EventHandler<ExceptionEventArgs> handler = (s, e) =>
             {
@@ -1339,7 +1349,7 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
             var ex = new Exception();
-            var eventRaised = 0;
+            int eventRaised = 0;
 
             EventHandler<ExceptionEventArgs> handler = (s, e) => ++eventRaised;
 
@@ -1370,7 +1380,7 @@ namespace Cr7Sund.Framework.PromiseTest
         public void can_handle_Done_onResolved()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
             const int expectedValue = 5;
 
             promise.Done(value =>
@@ -1389,8 +1399,8 @@ namespace Cr7Sund.Framework.PromiseTest
         public void can_handle_Done_onResolved_with_onReject()
         {
             var promise = new Promise<int>();
-            var callback = 0;
-            var errorCallback = 0;
+            int callback = 0;
+            int errorCallback = 0;
             const int expectedValue = 5;
 
             promise.Done(
@@ -1449,8 +1459,8 @@ namespace Cr7Sund.Framework.PromiseTest
         public void exception_during_Then_onResolved_triggers_error_handler()
         {
             var promise = new Promise<int>();
-            var callback = 0;
-            var errorCallback = 0;
+            int callback = 0;
+            int errorCallback = 0;
             var expectedException = new Exception();
 
             promise
@@ -1485,7 +1495,7 @@ namespace Cr7Sund.Framework.PromiseTest
         public void finally_is_called_after_resolve()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
 
             promise.Finally(() => ++callback);
 
@@ -1498,7 +1508,7 @@ namespace Cr7Sund.Framework.PromiseTest
         public void finally_is_called_after_reject()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
 
             promise.Finally(() => ++callback);
 
@@ -1512,12 +1522,12 @@ namespace Cr7Sund.Framework.PromiseTest
         public void resolved_chain_continues_after_finally()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
             const int expectedValue = 42;
 
             promise
                 .Finally(() => ++callback)
-                .Then((x) =>
+                .Then(x =>
                 {
                     Assert.AreEqual(expectedValue, x);
                     ++callback;
@@ -1533,7 +1543,7 @@ namespace Cr7Sund.Framework.PromiseTest
         public void rejected_chain_rejects_after_finally()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
 
             promise
                 .Finally(() => ++callback)
@@ -1548,14 +1558,14 @@ namespace Cr7Sund.Framework.PromiseTest
         public void rejected_chain_continues_after_ContinueWith_returning_non_value_promise()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
 
             promise.ContinueWith(() =>
-            {
-                ++callback;
-                return Promise.Resolved();
-            })
-            .Then(() => ++callback);
+                {
+                    ++callback;
+                    return Promise.Resolved();
+                })
+                .Then(() => ++callback);
 
             promise.Reject(new Exception());
 
@@ -1566,18 +1576,18 @@ namespace Cr7Sund.Framework.PromiseTest
         public void rejected_chain_continues_after_ContinueWith_returning_value_promise()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
             const int expectedValue = 42;
             promise.ContinueWith(() =>
-            {
-                ++callback;
-                return Promise<int>.Resolved(expectedValue);
-            })
-            .Then(x =>
-            {
-                Assert.AreEqual(expectedValue, x);
-                ++callback;
-            });
+                {
+                    ++callback;
+                    return Promise<int>.Resolved(expectedValue);
+                })
+                .Then(x =>
+                {
+                    Assert.AreEqual(expectedValue, x);
+                    ++callback;
+                });
 
             promise.Reject(new Exception());
 
@@ -1589,18 +1599,18 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promise = new Promise<int>();
             const int expectedValue = 5;
-            var callback = 0;
+            int callback = 0;
 
             promise.ContinueWith(() =>
-            {
-                ++callback;
-                return Promise<int>.Resolved(expectedValue);
-            })
-            .Then(x =>
-            {
-                Assert.AreEqual(expectedValue, x);
-                ++callback;
-            });
+                {
+                    ++callback;
+                    return Promise<int>.Resolved(expectedValue);
+                })
+                .Then(x =>
+                {
+                    Assert.AreEqual(expectedValue, x);
+                    ++callback;
+                });
 
             promise.Resolve(0);
 
@@ -1612,7 +1622,7 @@ namespace Cr7Sund.Framework.PromiseTest
         public void can_chain_promise_after_finally()
         {
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
 
             promise
                 .Finally(() => ++callback)
@@ -1630,19 +1640,19 @@ namespace Cr7Sund.Framework.PromiseTest
             //NOTE: Also tests that the new exception is passed thru promise chain
 
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
             var expectedException = new Exception("Expected");
 
             promise.Finally(() =>
-            {
-                ++callback;
-                throw expectedException;
-            })
-            .Catch(ex =>
-            {
-                Assert.AreEqual(expectedException, ex);
-                ++callback;
-            });
+                {
+                    ++callback;
+                    throw expectedException;
+                })
+                .Catch(ex =>
+                {
+                    Assert.AreEqual(expectedException, ex);
+                    ++callback;
+                });
 
             promise.Reject(new Exception());
 
@@ -1655,19 +1665,19 @@ namespace Cr7Sund.Framework.PromiseTest
             //NOTE: Also tests that the new exception is passed thru promise chain
 
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
             var expectedException = new Exception("Expected");
 
             promise.ContinueWith(() =>
-            {
-                ++callback;
-                throw expectedException;
-            })
-            .Catch(ex =>
-            {
-                Assert.AreEqual(expectedException, ex);
-                ++callback;
-            });
+                {
+                    ++callback;
+                    throw expectedException;
+                })
+                .Catch(ex =>
+                {
+                    Assert.AreEqual(expectedException, ex);
+                    ++callback;
+                });
 
             promise.Reject(new Exception());
 
@@ -1680,19 +1690,19 @@ namespace Cr7Sund.Framework.PromiseTest
             // NOTE: Also tests that the new exception is passed through promise chain
 
             var promise = new Promise<int>();
-            var callback = 0;
+            int callback = 0;
             var expectedException = new Exception("Expected");
 
             promise.ContinueWith(new Func<IPromise<int>>(() =>
-            {
-                ++callback;
-                throw expectedException;
-            }))
-            .Catch(ex =>
-            {
-                Assert.AreEqual(expectedException, ex);
-                ++callback;
-            });
+                {
+                    ++callback;
+                    throw expectedException;
+                }))
+                .Catch(ex =>
+                {
+                    Assert.AreEqual(expectedException, ex);
+                    ++callback;
+                });
 
             promise.Reject(new Exception());
 

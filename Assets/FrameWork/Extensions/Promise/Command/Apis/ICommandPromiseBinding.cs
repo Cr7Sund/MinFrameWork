@@ -1,10 +1,9 @@
-using System.Collections.Generic;
-
 namespace Cr7Sund.Framework.Api
 {
     public interface ICommandPromiseBinding<PromisedT> : IBinding
     {
         bool UsePooling { get; }
+        ICommandPromise<PromisedT> FirstPromise { get; }
         ICommandPromiseBinding<PromisedT> AsPool();
 
         ICommandPromiseBinding<PromisedT> Then<T>() where T : class, ICommand<PromisedT>, new();

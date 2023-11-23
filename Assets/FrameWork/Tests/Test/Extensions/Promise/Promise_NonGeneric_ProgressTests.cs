@@ -1,9 +1,8 @@
-using System;
 using Cr7Sund.Framework.Api;
-using NUnit.Framework;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
-
+using NUnit.Framework;
+using System;
 namespace Cr7Sund.Framework.PromiseTest
 {
     public class Promise_NonGeneric_ProgressTests
@@ -12,33 +11,33 @@ namespace Cr7Sund.Framework.PromiseTest
         public void can_report_simple_progress()
         {
             const float expectedStep = 0.25f;
-            var currentProgress = 0f;
+            float currentProgress = 0f;
             var promise = new Promise();
 
             promise.Progress(v =>
             {
-                Util.AssertUtil.InRange(expectedStep - (v - currentProgress), -Math.E, Math.E);
+                AssertUtil.InRange(expectedStep - (v - currentProgress), -Math.E, Math.E);
                 currentProgress = v;
             });
 
-            for (var progress = 0.25f; progress < 1f; progress += 0.25f)
+            for (float progress = 0.25f; progress < 1f; progress += 0.25f)
                 promise.ReportProgress(progress);
             promise.ReportProgress(1f);
 
-            NUnit.Framework.Assert.AreEqual(1f, currentProgress);
+            Assert.AreEqual(1f, currentProgress);
         }
 
         [Test]
         public void can_handle_onProgress()
         {
             var promise = new Promise();
-            var progress = 0f;
+            float progress = 0f;
 
             promise.Then(null, null, v => progress = v);
 
             promise.ReportProgress(1f);
 
-            NUnit.Framework.Assert.AreEqual(1f, progress);
+            Assert.AreEqual(1f, progress);
         }
 
         [Test]
@@ -46,8 +45,8 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promiseA = new Promise();
             var promiseB = new Promise();
-            var progressA = 0f;
-            var progressB = 0f;
+            float progressA = 0f;
+            float progressB = 0f;
 
             promiseA
                 .Then(() => promiseB, null, v => progressA = v)
@@ -59,8 +58,8 @@ namespace Cr7Sund.Framework.PromiseTest
             promiseB.ReportProgress(2f);
             promiseB.Resolve();
 
-            NUnit.Framework.Assert.AreEqual(1f, progressA);
-            NUnit.Framework.Assert.AreEqual(2f, progressB);
+            Assert.AreEqual(1f, progressA);
+            Assert.AreEqual(2f, progressB);
         }
 
         [Test]
@@ -70,27 +69,29 @@ namespace Cr7Sund.Framework.PromiseTest
             var promiseB = new Promise();
             var promiseC = new Promise();
 
-            var expectedProgress = new[] { 0.1f, 0.2f, 0.6f, 1f };
-            var currentProgress = 0f;
+            float[] expectedProgress =
+            {
+                0.1f, 0.2f,
+                0.6f, 1f
+            };
+            float currentProgress = 0f;
             int currentStep = 0;
 
-            promiseC.
-                Progress(v =>
+            promiseC.Progress(v =>
                 {
-                    Util.AssertUtil.InRange(currentStep, 0, expectedProgress.Length - 1);
-                    NUnit.Framework.Assert.AreEqual(v, expectedProgress[currentStep]);
+                    AssertUtil.InRange(currentStep, 0, expectedProgress.Length - 1);
+                    Assert.AreEqual(v, expectedProgress[currentStep]);
                     currentProgress = v;
                     ++currentStep;
                 })
-            ;
+                ;
 
-            promiseA.
-                Progress(v => promiseC.ReportProgress(v * 0.2f))
+            promiseA.Progress(v => promiseC.ReportProgress(v * 0.2f))
                 .Then(() => promiseB)
                 .Progress(v => promiseC.ReportProgress(0.2f + 0.8f * v))
                 .Then(() => promiseC.Resolve())
                 .Catch(ex => promiseC.Reject(ex))
-            ;
+                ;
 
             promiseA.ReportProgress(0.5f);
             promiseA.ReportProgress(1f);
@@ -99,8 +100,8 @@ namespace Cr7Sund.Framework.PromiseTest
             promiseB.ReportProgress(1f);
             promiseB.Resolve();
 
-            NUnit.Framework.Assert.AreEqual(expectedProgress.Length, currentStep);
-            NUnit.Framework.Assert.AreEqual(1f, currentProgress);
+            Assert.AreEqual(expectedProgress.Length, currentStep);
+            Assert.AreEqual(1f, currentProgress);
         }
 
 
@@ -109,8 +110,8 @@ namespace Cr7Sund.Framework.PromiseTest
         {
             var promiseA = new Promise();
             var promiseB = new Promise();
-            var progressA = 0f;
-            var progressB = 0f;
+            float progressA = 0f;
+            float progressB = 0f;
 
             promiseA
                 .Progress(v => progressA = v)
@@ -123,8 +124,8 @@ namespace Cr7Sund.Framework.PromiseTest
             promiseB.ReportProgress(2f);
             promiseB.Resolve();
 
-            NUnit.Framework.Assert.AreEqual(1f, progressA);
-            NUnit.Framework.Assert.AreEqual(2f, progressB);
+            Assert.AreEqual(1f, progressA);
+            Assert.AreEqual(2f, progressB);
         }
 
         [Test]
@@ -133,8 +134,8 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise();
             promise.Resolve();
 
-            var promiseException = (PromiseException)NUnit.Framework.Assert.Throws<PromiseException>(() => promise.ReportProgress(1f));
-            NUnit.Framework.Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<PromiseException>(() => promise.ReportProgress(1f));
+            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
 
         }
 
@@ -144,8 +145,8 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise();
             promise.Reject(new Exception());
 
-            var promiseException = (PromiseException)NUnit.Framework.Assert.Throws<PromiseException>(() => promise.ReportProgress(1f));
-            NUnit.Framework.Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<PromiseException>(() => promise.ReportProgress(1f));
+            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
         }
 
         [Test]
@@ -157,13 +158,17 @@ namespace Cr7Sund.Framework.PromiseTest
             var promiseD = new Promise();
 
             int currentStep = 0;
-            var expectedProgress = new[] { 0.25f, 0.50f, 0.75f, 1f };
+            float[] expectedProgress =
+            {
+                0.25f, 0.50f,
+                0.75f, 1f
+            };
 
             Promise.All(promiseA, promiseB, promiseC, promiseD)
                 .Progress(progress =>
                 {
-                    Util.AssertUtil.InRange(currentStep, 0, expectedProgress.Length - 1);
-                    NUnit.Framework.Assert.AreEqual(expectedProgress[currentStep], progress);
+                    AssertUtil.InRange(currentStep, 0, expectedProgress.Length - 1);
+                    Assert.AreEqual(expectedProgress[currentStep], progress);
                     ++currentStep;
                 });
 
@@ -172,8 +177,8 @@ namespace Cr7Sund.Framework.PromiseTest
             promiseB.ReportProgress(1f);
             promiseD.ReportProgress(1f);
 
-            NUnit.Framework.Assert.AreEqual(expectedProgress.Length, currentStep);
-            NUnit.Framework.Assert.AreEqual(expectedProgress.Length, currentStep);
+            Assert.AreEqual(expectedProgress.Length, currentStep);
+            Assert.AreEqual(expectedProgress.Length, currentStep);
         }
 
         [Test]
@@ -186,7 +191,7 @@ namespace Cr7Sund.Framework.PromiseTest
             Promise.Race(promiseA, promiseB)
                 .Progress(progress =>
                 {
-                    NUnit.Framework.Assert.AreEqual(progress, 0.5f);
+                    Assert.AreEqual(progress, 0.5f);
                     ++reportCount;
                 });
 
@@ -197,7 +202,7 @@ namespace Cr7Sund.Framework.PromiseTest
             promiseB.ReportProgress(0.4f);
             promiseB.ReportProgress(0.5f);
 
-            NUnit.Framework.Assert.AreEqual(6, reportCount);
+            Assert.AreEqual(6, reportCount);
         }
 
         [Test]
@@ -211,12 +216,12 @@ namespace Cr7Sund.Framework.PromiseTest
                 .Progress(progress =>
                 {
                     ++reportedCount;
-                    NUnit.Framework.Assert.AreEqual(0.75f, progress);
+                    Assert.AreEqual(0.75f, progress);
                 });
 
             promiseA.ReportProgress(0.5f);
 
-            NUnit.Framework.Assert.AreEqual(1, reportedCount);
+            Assert.AreEqual(1, reportedCount);
         }
 
         [Test]
@@ -227,17 +232,24 @@ namespace Cr7Sund.Framework.PromiseTest
             var promiseC = Promise.Resolved();
             var promiseD = new Promise();
             int currentReport = 0;
-            var expectedProgress = new[] { 0.125f, 0.25f, 0.25f, 0.3125f, 0.375f, 0.4375f, 0.5f, 0.75f, 0.875f, 1f };
+            float[] expectedProgress =
+            {
+                0.125f, 0.25f,
+                0.25f, 0.3125f,
+                0.375f, 0.4375f,
+                0.5f, 0.75f,
+                0.875f, 1f
+            };
 
             Promise
                 .Sequence(() => promiseA, () => promiseB, () => promiseC, () => promiseD)
                 .Progress(v =>
                 {
-                    NUnit.Framework.Assert.AreEqual(expectedProgress[currentReport], v);
+                    Assert.AreEqual(expectedProgress[currentReport], v);
                     ++currentReport;
                 })
                 .Done()
-            ;
+                ;
 
             promiseA.ReportProgress(0.5f);
             promiseA.ReportProgress(1f);
@@ -252,7 +264,7 @@ namespace Cr7Sund.Framework.PromiseTest
             promiseD.ReportProgress(1f);
             promiseD.Resolve();
 
-            NUnit.Framework.Assert.AreEqual(expectedProgress.Length, currentReport);
+            Assert.AreEqual(expectedProgress.Length, currentReport);
         }
     }
 }

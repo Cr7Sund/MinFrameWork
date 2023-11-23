@@ -1,5 +1,4 @@
 using Cr7Sund.Framework.Api;
-
 namespace Cr7Sund.Framework.Impl
 {
     public class Context : Binder, IContext
@@ -27,7 +26,7 @@ namespace Cr7Sund.Framework.Impl
             }
             SetContextView(view);
             AddCoreComponents();
-            this.autoStartup = (flags & ContextStartupFlags.MANUAL_LAUNCH) != ContextStartupFlags.MANUAL_LAUNCH;
+            autoStartup = (flags & ContextStartupFlags.MANUAL_LAUNCH) != ContextStartupFlags.MANUAL_LAUNCH;
             if ((flags & ContextStartupFlags.MANUAL_MAPPING) != ContextStartupFlags.MANUAL_MAPPING)
             {
                 Start();
@@ -35,25 +34,31 @@ namespace Cr7Sund.Framework.Impl
         }
 
         public Context(object view) : this(view, ContextStartupFlags.AUTOMATIC)
-        { }
-        public Context(object view, bool autoMapping) : this(view, (autoMapping) ? ContextStartupFlags.MANUAL_MAPPING : ContextStartupFlags.MANUAL_LAUNCH | ContextStartupFlags.MANUAL_MAPPING)
-        { }
+        {
+        }
+        public Context(object view, bool autoMapping) : this(view, autoMapping ? ContextStartupFlags.MANUAL_MAPPING : ContextStartupFlags.MANUAL_LAUNCH | ContextStartupFlags.MANUAL_MAPPING)
+        {
+        }
 
         /// Override to add components. Or just extend MVCSContext.
         protected virtual void AddCoreComponents()
-        { }
+        {
+        }
 
         /// Override to instantiate components. Or just extend MVCSContext
         protected virtual void InstantiateCoreComponents()
-        { }
+        {
+        }
 
         /// Override to map project-specific bindings
         protected virtual void MapBindings()
-        { }
+        {
+        }
 
         /// Override to do things after binding but before app launch
         protected virtual void PostBindings()
-        { }
+        {
+        }
 
         /// Set the object that represents the top of the Context hierarchy.
         /// In MVCSContext, this would be a GameObject.
@@ -64,15 +69,15 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
-        #region  IContext Implementation
-
+        #region IContext Implementation
         public virtual IContext AddContext(IContext context)
         {
             return this;
         }
 
         public virtual void AddView(object view)
-        { }
+        {
+        }
 
         public object GetContextView()
         {
@@ -95,7 +100,8 @@ namespace Cr7Sund.Framework.Impl
         }
 
         public virtual void RemoveView(object view)
-        { }
+        {
+        }
 
         public IContext Start()
         {
@@ -111,8 +117,8 @@ namespace Cr7Sund.Framework.Impl
         }
 
         public virtual void Launch()
-        { }
-
+        {
+        }
         #endregion
     }
 }

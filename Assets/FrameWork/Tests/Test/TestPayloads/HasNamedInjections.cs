@@ -1,5 +1,3 @@
-using System;
-
 namespace Cr7Sund.Framework.Tests
 {
     public class HasNamedInjections
@@ -9,10 +7,5 @@ namespace Cr7Sund.Framework.Tests
 
         [Inject(SomeEnum.TWO)]
         public InjectableSuperClass injectionTwo;
-
-
-        public HasNamedInjections()
-        { }
     }
 }
-

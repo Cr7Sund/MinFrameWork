@@ -1,5 +1,3 @@
-using System;
-
 namespace Cr7Sund.Framework.Api
 {
     public interface ICommandPromiseBinder<PromisedT>
