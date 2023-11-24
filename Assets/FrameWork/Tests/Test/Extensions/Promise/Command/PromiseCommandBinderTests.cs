@@ -3,6 +3,7 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
     public class PromiseCommandBinderTests
@@ -289,9 +290,9 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        public void command_all_simple_command_chain_all_result()
+        public void react_any_promise_multiple_times()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .ThenAny<
                     SimpleAsyncCommandOneGeneric,
                     SimpleAsyncCommandSecondGeneric>()
@@ -304,11 +305,58 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             SimplePromise.simulatePromiseOne.Reject(new Exception());
 
             Assert.AreEqual(22, SimplePromise.result);
-            
-            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
-            Assert.AreEqual(22, SimplePromise.result);
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 2);
+            Assert.AreEqual(26, SimplePromise.result);
         }
 
+        [Test]
+        public void react_any_promise_as_pool()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+                .ThenAny<
+                    SimpleAsyncCommandOneGeneric,
+                    SimpleAsyncCommandSecondGeneric>()
+                .Then<SimpleCommandOneGeneric>();
+
+            var promisePool = poolBinder.GetOrCreate<CommandPromise<int>>();
+            Assert.AreEqual(0, promisePool.Available);
+            Assert.AreEqual(4, promisePool.InstanceCount);
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+            SimplePromise.simulatePromiseOne.Reject(new Exception());
+            Assert.AreEqual(4, promisePool.Available);
+        }
+
+        [Test]
+        public void release_any_promise_as_pool_after_resolved()
+        {
+           var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+                .ThenAny<
+                    SimpleAsyncCommandOneGeneric,
+                    SimpleAsyncCommandSecondGeneric>()
+                .Then<SimpleCommandOneGeneric>();
+
+           object[] objects = binding.Value as object[];
+           List<ICommandPromise<int>> testGetPromiseList = ((CommandPromiseBinding<int>)binding).Test_GetPromiseList();
+           var promistList = new List<ICommandPromise<int>>(testGetPromiseList);
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            foreach (var item in objects)
+            {
+                var commandPromise = (CommandPromise<int>)item;
+                Assert.AreEqual(false, commandPromise.IsRetain);
+            }
+
+            foreach (var commandPromise in promistList)
+            {
+                Assert.AreEqual(false, commandPromise.IsRetain);
+            }
+        }
+        
         [Test]
         public void get_same_command_from_commandBinder()
         {
@@ -335,11 +383,14 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandOneGeneric>();
 
             object[] objects = binding.Value as object[];
-            var commandPromise = (CommandPromise<int>)objects[1];
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
 
-            Assert.AreEqual(false, commandPromise.IsRetain);
+            foreach (var item in objects)
+            {
+                var commandPromise = (CommandPromise<int>)item;
+                Assert.AreEqual(false, commandPromise.IsRetain);
+            }
         }
 
         [Test]

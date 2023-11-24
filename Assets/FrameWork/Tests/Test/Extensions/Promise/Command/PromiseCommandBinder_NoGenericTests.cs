@@ -169,17 +169,16 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_same_promise_multiple_times()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
-                .Then<SimpleCommandTwo>()
-                .Then<SimpleCommandOne>()
-                .Then<SimpleCommandTwo>();
-
-            _commandPromiseBinder.ReactTo(SomeEnum.ONE);
-            Assert.AreEqual(16 * 3, SimplePromise.result);
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
+                .Then<SimpleCommandOne>();
 
             SimplePromise.result = 0;
-            _commandPromiseBinder.ReactTo(SomeEnum.ONE);
-            Assert.AreEqual(16 * 3, SimplePromise.result);
+            for (int i = 0; i < 5; i++)
+            {
+                var startValue = SimplePromise.result;
+                _commandPromiseBinder.ReactTo(SomeEnum.ONE);
+                Assert.AreEqual((startValue + 1) * 2, SimplePromise.result);
+            }
         }
 
         [Test]

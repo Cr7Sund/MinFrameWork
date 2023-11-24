@@ -70,16 +70,37 @@ namespace Cr7Sund.Framework.Tests
         [Performance]
         public void ChainBinderCommand_Pool()
         {
- 
             Measure.Method(() =>
                 {
                     var binder = new CommandPromiseBinder();
                     injectionBinder.Injector.Inject(binder);
                     
-                    binder.Bind(SomeEnum.TWO).AsPool()
+                    binder.Bind(SomeEnum.TWO).AsPool().AsOnce()
                         .Then<SimpleCommandOne>()
                         .Then<SimpleCommandTwo>();
 
+                    binder.ReactTo(SomeEnum.TWO);
+                })
+                .WarmupCount(PromiseSpeedTest.warmupCount)
+                .MeasurementCount(PromiseSpeedTest.executeCount)
+                .IterationsPerMeasurement(PromiseSpeedTest.iterationCount)
+                .GC()
+                .Run();
+        }
+
+        [Test]
+        [Performance]
+        public void ReactBinderCommand()
+        {
+            var binder = new CommandPromiseBinder();
+            injectionBinder.Injector.Inject(binder);
+                    
+            binder.Bind(SomeEnum.TWO)
+                .Then<SimpleCommandOne>()
+                .Then<SimpleCommandTwo>();
+            
+            Measure.Method(() =>
+                {
                     binder.ReactTo(SomeEnum.TWO);
                 })
                 .WarmupCount(PromiseSpeedTest.warmupCount)

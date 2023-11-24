@@ -112,9 +112,9 @@ namespace Cr7Sund.Framework.Impl
                 );
         }
 
-        public virtual IDisposable Done()
+        public virtual void Done()
         {
-           return Catch(ex => Promise.PropagateUnhandledException(this, ex));
+            Catch(ex => Promise.PropagateUnhandledException(this, ex));
         }
 
         public IPromise Catch(Action<Exception> onRejected)

@@ -199,9 +199,11 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region IPromise Implementation
-        public override IDisposable Done()
+        public override void Done()
         {
-            return Then(ReleaseHandler, ErrorHandler);
+            base.ClearHandlers();
+            _convertResolveHandlers?.Clear();
+            Then(ReleaseHandler, ErrorHandler);
         }
 
         public override void Dispose()

@@ -11,7 +11,6 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
         private ICommandPromise<PromisedT> _firstPromise;
-        private IDisposable _lastPromise;
         private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
 
         public bool UsePooling { get; private set; }
@@ -46,7 +45,7 @@ namespace Cr7Sund.Framework.Impl
         public void RestartPromise()
         {
             if (IsOnceOff) return;
-            
+
             var values = Value as object[];
             foreach (var item in values)
             {
@@ -80,9 +79,8 @@ namespace Cr7Sund.Framework.Impl
 
             BindingStatus = CommandBindingStatus.Running;
 
-            _lastPromise?.Dispose();
-            var lastpromise = values[^1] as IBasePromise;
-            _lastPromise = lastpromise.Done();
+            var lastPromise = values[^1] as IBasePromise;
+            lastPromise.Done();
 
             _firstPromise.Resolve(value);
         }
@@ -91,10 +89,13 @@ namespace Cr7Sund.Framework.Impl
         {
             base.Dispose();
             _promiseList.Clear();
-            _lastPromise?.Dispose();
             _firstPromise?.Dispose();
             _firstPromise = null;
-            _lastPromise = null;
+        }
+
+        public List<ICommandPromise<PromisedT>> Test_GetPromiseList()
+        {
+            return _promiseList;
         }
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.Then<T>()
@@ -382,7 +383,6 @@ namespace Cr7Sund.Framework.Impl
         {
             BindingStatus = CommandBindingStatus.Default;
             ResolveRelease();
-
         }
 
         private void ResolveRelease()

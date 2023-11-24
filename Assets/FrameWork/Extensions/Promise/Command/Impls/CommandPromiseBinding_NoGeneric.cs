@@ -13,10 +13,9 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private IPoolBinder _poolBinder;
         private List<ICommandPromise> _promiseList = new List<ICommandPromise>();
         private ICommandPromise _firstPromise;
-        private IDisposable _lastPromise;
 
         public bool UsePooling { get; private set; }
-        public bool IsOnceeOff { get; private set; }
+        public bool IsOnceOff { get; private set; }
         public CommandBindingStatus BindingStatus { get; private set; }
 
 
@@ -37,13 +36,13 @@ namespace Cr7Sund.Framework.Impl
 
         public ICommandPromiseBinding AsOnce()
         {
-            IsOnceeOff = true;
+            IsOnceOff = true;
             return this;
         }
 
         public void RestartPromise()
         {
-            if (IsOnceeOff) return;
+            if (IsOnceOff) return;
             
             var values = Value as object[];
             foreach (var item in values)
@@ -77,10 +76,9 @@ namespace Cr7Sund.Framework.Impl
 
             BindingStatus = CommandBindingStatus.Running;
 
-            _lastPromise?.Dispose();
 
-            var lastpromise = values[^1] as IBasePromise;
-            _lastPromise = lastpromise.Done();
+            var lastPromise = values[^1] as IBasePromise;
+            lastPromise.Done();
 
             _firstPromise.Resolve();
         }
@@ -212,14 +210,14 @@ namespace Cr7Sund.Framework.Impl
                 var pool = _poolBinder.GetOrCreate<CommandPromise>();
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
-                result.IsOnceOff = IsOnceeOff;
+                result.IsOnceOff = IsOnceOff;
                 result.ReleaseHandler = HandleResolve;
                 result.ErrorHandler = HandleRejected;
             }
             else
             {
                 result = new CommandPromise();
-                result.IsOnceOff = IsOnceeOff;
+                result.IsOnceOff = IsOnceOff;
                 result.ReleaseHandler = HandleResolve;
                 result.ErrorHandler = HandleRejected;
             }
@@ -287,7 +285,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void ResolveRelease()
         {
-            if (UsePooling && IsOnceeOff)
+            if (UsePooling && IsOnceOff)
             {
                 ReleasePromise();
                 Dispose();

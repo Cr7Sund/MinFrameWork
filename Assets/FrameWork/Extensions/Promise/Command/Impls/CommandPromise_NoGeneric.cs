@@ -22,9 +22,10 @@ namespace Cr7Sund.Framework.Impl
 
 
         #region IPromise Implementation
-        public override IDisposable Done()
+        public override void Done()
         {
-           return Then(ReleaseHandler, ErrorHandler);
+            base.ClearHandlers();
+            Then(ReleaseHandler, ErrorHandler);
         }
 
         public override void Dispose()
@@ -45,7 +46,7 @@ namespace Cr7Sund.Framework.Impl
         {
             return new CommandPromise<T>();
         }
-
+        
         protected override Promise GetRawPromise()
         {
             return new CommandPromise();

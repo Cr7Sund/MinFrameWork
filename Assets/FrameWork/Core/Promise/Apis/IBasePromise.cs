@@ -6,7 +6,7 @@ namespace Cr7Sund.Framework.Api
         /// <summary>
         ///     Complete the promise. Adds a default error handler.
         /// </summary>
-        IDisposable Done();
+        void Done();
     }
     
     public enum PromiseState
