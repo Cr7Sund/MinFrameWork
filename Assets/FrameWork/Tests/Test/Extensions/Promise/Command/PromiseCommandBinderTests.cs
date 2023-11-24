@@ -41,11 +41,39 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
-            var binding = promiseBinding.Then<SimpleCommandTwoGeneric>()
-                    .Then<SimpleCommandOneGeneric>()
-                    .Then<SimpleCommandTwoGeneric>()
+            promiseBinding.Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleCommandOneGeneric>()
+                .Then<SimpleCommandTwoGeneric>()
                 ;
 
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+
+            Assert.AreEqual(16 * 3, SimplePromise.result);
+        }
+
+        [Test]
+        public void command_binder_simple_asOnce()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleCommandOneGeneric>()
+                .Then<SimpleCommandTwoGeneric>()
+                ;
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+
+            Assert.AreEqual(16 * 3, SimplePromise.result);
+        }
+
+        [Test]
+        public void command_binder_simple_asOnce_asPool()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce().AsPool()
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleCommandOneGeneric>()
+                .Then<SimpleCommandTwoGeneric>()
+                ;
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
 
@@ -69,6 +97,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, SimplePromise.result);
         }
+
 
         [Test]
         public void command_with_multiple_async_operation()
@@ -279,7 +308,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void release_promise_after_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -295,7 +324,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -311,7 +340,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<ExceptionCommandGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -322,6 +351,96 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
             Assert.AreEqual(4, promisePool.Available);
+        }
+
+        [Test]
+        public void react_same_promise_multiple_times()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleCommandOneGeneric>()
+                .Then<SimpleCommandTwoGeneric>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+            Assert.AreEqual(16 * 3, SimplePromise.result);
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
+            Assert.AreEqual(22 * 3, SimplePromise.result);
+        }
+
+        [Test]
+        public void react_exception_multiple_times_but_asOnce()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleCommandOneGeneric>()
+                .Then<SimpleCommandTwoGeneric>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+
+            var ex = Assert.Throws<PromiseException>(() =>
+            {
+                _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
+                Assert.AreEqual(22 * 3, SimplePromise.result);
+            });
+            Assert.AreEqual(PromiseExceptionType.CAN_NOT_REACT_RELEASED, ex.Type);
+        }
+
+        [Test]
+        public void react_exception_in_running_promise()
+        {
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
+
+            promiseBinding
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleAsyncCommandOneGeneric>()
+                .Then<SimpleCommandOneGeneric>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+
+            var ex = Assert.Throws<PromiseException>(() =>
+                          _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0));
+            Assert.AreEqual(PromiseExceptionType.CAN_NOT_REACT_RUNNING, ex.Type);
+        }
+
+        [Test]
+        public void stop_first_start_new_stop_async_operation()
+        {
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
+            
+            promiseBinding
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleAsyncCommandOneGeneric>()
+                .Then<SimpleCommandOneGeneric>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+
+            promiseBinding.RestartPromise();
+            // SimplePromise.simulatePromiseOne.Dispose();
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+            SimplePromise.simulatePromiseOne.Resolve(0);
+
+            Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, SimplePromise.result);
+        }
+        
+        [Test]
+        public void exception_in_bind_duplicate()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+                .Then<SimpleCommandTwoGeneric>()
+                .Then<SimpleCommandOneGeneric>()
+                .Then<SimpleCommandTwoGeneric>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+            Assert.AreEqual(16 * 3, SimplePromise.result);
+
+            TestDelegate testDelegate = delegate
+            {
+                _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+                    .Then<SimpleCommandTwoGeneric>();
+            };
+            var ex = Assert.Throws<BinderException>(testDelegate);
+            Assert.That(ex.Type == BinderExceptionType.CONFLICT_IN_BINDER);
         }
     }
 }

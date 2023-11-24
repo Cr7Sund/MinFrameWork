@@ -89,15 +89,15 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         ///     Error handlers.
         /// </summary>
-        private List<RejectHandler> _rejectHandlers;
+        protected List<RejectHandler> _rejectHandlers;
         /// <summary>
         ///     Completed handlers that accept no value.
         /// </summary>
-        private List<ResolveHandler> _resolveHandlers;
+        protected List<ResolveHandler> _resolveHandlers;
         /// <summary>
         ///     Progress handlers.
         /// </summary>
-        private List<ProgressHandler> _progressHandlers;
+        protected List<ProgressHandler> _progressHandlers;
         #endregion
 
         #region Properties
@@ -117,6 +117,12 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
+        public virtual void Dispose()
+        {
+            ClearHandlers();
+            Name = string.Empty;
+        }
+        
         internal static int NextId()
         {
             return ++_nextPromiseId;
@@ -645,11 +651,11 @@ namespace Cr7Sund.Framework.Impl
             ClearHandlers();
         }
 
-        private void ClearHandlers()
+        protected virtual void ClearHandlers()
         {
-            _rejectHandlers = null;
-            _resolveHandlers = null;
-            _progressHandlers = null;
+            _rejectHandlers?.Clear();
+            _resolveHandlers?.Clear();
+            _progressHandlers?.Clear();
         }
 
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)

@@ -28,6 +28,8 @@ namespace Cr7Sund.Framework.Api
 
         /// Remove a set of values from this List.
         IManagedList Remove(object[] list);
+        /// Remove all values from this List.
+        IManagedList Clear();
         bool Contains(object o);
     }
 

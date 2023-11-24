@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Api
 {
-    public interface ICommandPromise : IPromise, ISequence, IPoolable
+    public interface ICommandPromise : IPromise, ISequence, IPoolable, IResetable
     {
         ICommandPromise Then<T>() where T : ICommand, new();
         ICommandPromise Then(ICommandPromise resultPromise, ICommand command);

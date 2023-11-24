@@ -112,12 +112,12 @@ namespace Cr7Sund.Framework.Impl
         protected Stack instancesAvailable;
 
 
-        public Pool()
+        public Pool() : base()
         {
-            instancesInUse = new HashSet<object>();
+            InstancesInUse = new HashSet<object>();
             instancesAvailable = new Stack();
         }
-        private HashSet<object> instancesInUse
+        private HashSet<object> InstancesInUse
         {
             get;
         }
@@ -140,7 +140,7 @@ namespace Cr7Sund.Framework.Impl
         public override void Clean()
         {
             instancesAvailable.Clear();
-            instancesInUse.Clear();
+            InstancesInUse.Clear();
             base.Clean();
         }
 
@@ -157,13 +157,13 @@ namespace Cr7Sund.Framework.Impl
 
         public void ReturnInstance(object value)
         {
-            if (instancesInUse.Contains(value))
+            if (InstancesInUse.Contains(value))
             {
                 if (value is IPoolable)
                 {
                     (value as IPoolable).Restore();
                 }
-                instancesInUse.Remove(value);
+                InstancesInUse.Remove(value);
                 instancesAvailable.Push(value);
             }
         }
@@ -174,9 +174,9 @@ namespace Cr7Sund.Framework.Impl
                 new PoolException(
                     "Attempt to remove a instance from a pool that is of the wrong Type:\n\t\tPool type: " + poolType + "\n\t\tInstance type: " + value.GetType(),
                     PoolExceptionType.TYPE_MISMATCH));
-            if (instancesInUse.Contains(value))
+            if (InstancesInUse.Contains(value))
             {
-                instancesInUse.Remove(value);
+                InstancesInUse.Remove(value);
             }
             else
             {
@@ -189,7 +189,7 @@ namespace Cr7Sund.Framework.Impl
             if (instancesAvailable.Count > 0)
             {
                 object retVal = instancesAvailable.Pop();
-                instancesInUse.Add(retVal);
+                InstancesInUse.Add(retVal);
 
                 return retVal;
             }
@@ -252,9 +252,17 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
+        public IManagedList Clear()
+        {
+            InstancesInUse.Clear();
+            instancesAvailable.Clear();
+            _instanceCount = 0;
+            return this;
+        }
+
         public bool Contains(object o)
         {
-            return instancesInUse.Contains(o);
+            return InstancesInUse.Contains(o);
         }
         #endregion
     }

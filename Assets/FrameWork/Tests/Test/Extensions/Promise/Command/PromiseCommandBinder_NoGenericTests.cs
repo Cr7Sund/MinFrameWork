@@ -101,7 +101,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void release_promise_after_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
@@ -117,7 +117,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();

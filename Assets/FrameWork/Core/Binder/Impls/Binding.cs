@@ -111,7 +111,7 @@ namespace Cr7Sund.Framework.Impl
             }
 
             _key.Add(key);
-  
+
             return this;
         }
 
@@ -156,6 +156,12 @@ namespace Cr7Sund.Framework.Impl
         {
             _isWeak = true;
             return this;
+        }
+
+        public virtual void Dispose()
+        {
+            _key.Clear();
+            _value.Clear();
         }
         #endregion
     }

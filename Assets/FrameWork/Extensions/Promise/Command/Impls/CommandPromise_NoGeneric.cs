@@ -7,18 +7,29 @@ namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromise : Promise, ICommandPromise
     {
-        private IBaseCommand _command;
 
         public IPoolBinder PoolBinder;
+        public Action ReleaseHandler;
+
+        private IBaseCommand _command;
+
+        private IDisposable _executeAsyncPromise;
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
+        public bool IsOneOff { get; set; }
 
 
-
-        
         #region IPromise Implementation
+        public override void Dispose()
+        {
+            base.Dispose();
+            _command = null;
+            _executeAsyncPromise?.Dispose();
+            _executeAsyncPromise = null;
+        }
+        
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
@@ -39,18 +50,22 @@ namespace Cr7Sund.Framework.Impl
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync();
+                    _executeAsyncPromise = resultPromise;
                 }
                 catch (Exception e)
                 {
                     Catch(e);
-                    Release();
+                    NotifyRelease();
                     throw e;
                 }
 
-                AssertUtil.NotNull(resultPromise);
+                bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
+                AssertUtil.IsFalse(hasMatchingItem);
+                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
+
                 resultPromise
                     .Progress(WrapProgress)
-                    .Then(Resolve, Reject);
+                    .Then(WrapResolveAsync, WrapRejectAsync);
             }
             else if (_command is ICommand command)
             {
@@ -61,7 +76,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    Release();
+                    NotifyRelease();
                     throw e;
                 }
 
@@ -105,48 +120,63 @@ namespace Cr7Sund.Framework.Impl
 
         public ICommandPromise ThenAll(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
-            FulfillPromise(promises, commands);
+            RegisterPromiseArray(promises, commands);
 
             return Then(() => AllInternal(promises)) as ICommandPromise;
         }
 
         public ICommandPromise ThenRace(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
-            FulfillPromise(promises, commands);
+            RegisterPromiseArray(promises, commands);
 
             return Then(() => RaceInternal(promises)) as ICommandPromise;
         }
 
         public ICommandPromise ThenAny(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
-            FulfillPromise(promises, commands);
+            RegisterPromiseArray(promises, commands);
 
             return Then(() => AnyInternal(promises)) as ICommandPromise;
         }
-        
+
         public override void Reject(Exception ex)
         {
             base.Reject(ex);
-            Release();
+            NotifyRelease();
         }
 
         public override void Resolve()
         {
             base.Resolve();
-            Release();
+            NotifyRelease();
         }
-        
+
         public IBaseCommand Test_GetCommand()
         {
             return _command;
         }
-        
+
         private void WrapProgress(float progress)
         {
             ReportProgress((progress + SequenceID) * SliceLength);
         }
+        protected void WrapResolveAsync()
+        {
+            Resolve();
+            _executeAsyncPromise?.Dispose();
+            _executeAsyncPromise = null;
+        }
+
+        protected void WrapRejectAsync(Exception ex)
+        {
+            base.Reject(ex);
+            NotifyRelease();
+
+            _executeAsyncPromise?.Dispose();
+            _executeAsyncPromise = null;
+        }
         
-        private void FulfillPromise(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
+        private void RegisterPromiseArray(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             var commandPromises = promises as ICommandPromise[] ?? promises.ToArray();
             var commandArray = commands.ToArray();
@@ -170,15 +200,27 @@ namespace Cr7Sund.Framework.Impl
             IsRetain = false;
 
             CurState = PromiseState.Pending;
-            Name = string.Empty;
 
-            _command = null;
+            Dispose();
         }
 
         public virtual void Release()
         {
             var pool = PoolBinder?.Get<CommandPromise>();
             pool?.ReturnInstance(this);
+        }
+
+        private void NotifyRelease()
+        {
+            ReleaseHandler?.Invoke();
+        }
+        #endregion
+
+        #region IResetable Implementation
+        public void Reset()
+        {
+            CurState = PromiseState.Pending;
+            _executeAsyncPromise?.Dispose();
         }
         #endregion
     }

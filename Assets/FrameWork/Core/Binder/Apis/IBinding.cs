@@ -23,10 +23,11 @@
  * <br />
  * Note that SemiBindings maintain lists, so RemoveKey, RemoveValue and RemoveName delete an entry from those lists.
  */
+using System;
 
 namespace Cr7Sund.Framework.Api
 {
-    public interface IBinding
+    public interface IBinding : IDisposable
     {
 
         ///<summary> Get the binding's key </summary>

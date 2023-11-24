@@ -6,7 +6,7 @@ namespace Cr7Sund.Framework.Api
     ///     Implements a C# promise.
     ///     https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public interface IPromise<PromisedT> : IPendingPromise<PromisedT>
+    public interface IPromise<PromisedT> : IPendingPromise<PromisedT>, IDisposable
     {
         /// <summary>
         ///     Set the name of the promise, useful for debugging.

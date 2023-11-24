@@ -174,7 +174,7 @@ namespace Cr7Sund.Framework.Tests
         public override int OnExecute(IEnumerable<int> values)
         {
             int first = values.First();
-            SimplePromise.result = (first + 1) * 2;
+            SimplePromise.result = (first + 1) * 20;
             return SimplePromise.result;
         }
     }

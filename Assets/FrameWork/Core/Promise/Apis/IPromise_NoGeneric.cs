@@ -6,7 +6,7 @@ namespace Cr7Sund.Framework.Api
     ///     Implements a non-generic C# promise, this is a promise that simply resolves without delivering a value.
     ///     https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public interface IPromise : IPendingPromise
+    public interface IPromise : IPendingPromise,IDisposable
     {
         /// <summary>
         ///     Set the name of the promise, useful for debugging.

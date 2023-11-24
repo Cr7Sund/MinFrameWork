@@ -13,8 +13,12 @@ namespace Cr7Sund.Framework.Api
         EMPTY_PROMISE_TOREACT,
         // This version of the function must supply an onResolved.
         // Otherwise there is now way to get the converted value to pass to the resulting promise.
-        NO_ONResolved,
+        NO_UNRESOLVED,
         // forbid conversion in fist chain
         CONVERT_FIRST,
+        // can not react an released binding , try to do not using at once
+        CAN_NOT_REACT_RELEASED,
+        // can not react an running binding since using at once, try to use ForceStop
+        CAN_NOT_REACT_RUNNING,
     }
 }

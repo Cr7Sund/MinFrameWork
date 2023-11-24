@@ -329,6 +329,20 @@ namespace Cr7Sund.Framework.Tests
                 Assert.AreEqual(testCount, pool.InstanceCount, "Or this one");
             }
         }
+
+        [Test]
+        public void TestPoolClear()
+        {
+            var anotherPool = new Pool<PooledInstance>();
+
+            anotherPool.SetSize(4);
+            anotherPool.Add(new PooledInstance());
+            var instance = anotherPool.GetInstance();
+            instance.someValue = 42;
+            Assert.AreEqual(42, instance.someValue);
+            anotherPool.Clear();
+            Assert.AreEqual(0, instance.someValue);
+        }
     }
 
     internal class PooledInstance : IPoolable

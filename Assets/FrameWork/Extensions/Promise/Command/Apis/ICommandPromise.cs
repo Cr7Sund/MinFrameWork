@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Cr7Sund.Framework.Api
 {
 
-    public interface ICommandPromise<PromisedT> : IPromise<PromisedT>, ISequence, IPoolable
+    public interface ICommandPromise<PromisedT> : IPromise<PromisedT>, ISequence, IPoolable,IResetable
     {
         /// <summary>
         ///     chaining a new command provided by type

@@ -17,15 +17,15 @@ namespace Cr7Sund.Framework.Impl
         /// <summary>
         ///     Error handlers.
         /// </summary>
-        private List<RejectHandler> _rejectHandlers;
+        protected List<RejectHandler> _rejectHandlers;
         /// <summary>
         ///     Completed handlers that accept no value.
         /// </summary>
-        private List<ResolveHandler<PromisedT>> _resolveHandlers;
+        protected List<ResolveHandler<PromisedT>> _resolveHandlers;
         /// <summary>
         ///     Progress handlers.
         /// </summary>
-        private List<ProgressHandler> _progressHandlers;
+        protected List<ProgressHandler> _progressHandlers;
 
         /// <summary>
         ///     The value when the promises is resolved.
@@ -84,6 +84,13 @@ namespace Cr7Sund.Framework.Impl
         {
             Name = name;
             return this;
+        }
+
+        public virtual void Dispose()
+        {
+            ClearHandlers();
+            Name = string.Empty;
+            _resolveValue = default;
         }
         #endregion
 
@@ -334,7 +341,7 @@ namespace Cr7Sund.Framework.Impl
         {
 
             AssertUtil.NotNull(onResolved, new PromiseException(
-                "onResolved must be supplied", PromiseExceptionType.NO_ONResolved));
+                "onResolved must be supplied", PromiseExceptionType.NO_UNRESOLVED));
 
             if (CurState == PromiseState.Resolved)
             {
@@ -541,7 +548,7 @@ namespace Cr7Sund.Framework.Impl
             InvokeProgressHandlers(progress);
         }
 
-        public virtual  void Reject(Exception ex)
+        public virtual void Reject(Exception ex)
         {
             AssertUtil.NotNull(ex);
             AssertUtil.AreEqual(PromiseState.Pending, CurState,
@@ -670,9 +677,9 @@ namespace Cr7Sund.Framework.Impl
 
         protected virtual void ClearHandlers()
         {
-            _rejectHandlers.Clear();
-            _resolveHandlers.Clear();
-            _progressHandlers.Clear();
+            _rejectHandlers?.Clear();
+            _resolveHandlers?.Clear();
+            _progressHandlers?.Clear();
         }
 
         protected void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)

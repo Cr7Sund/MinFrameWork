@@ -2,9 +2,22 @@ namespace Cr7Sund.Framework.Api
 {
     public interface ICommandPromiseBinding<PromisedT> : IBinding
     {
-        bool UsePooling { get; }
+        /// Indicate the promise binding status
+        CommandBindingStatus BindingStatus { get; }
+        // the fist promise to start
         ICommandPromise<PromisedT> FirstPromise { get; }
+
+        /// reset promise status 
+        /// to start new promise 
+        void RestartPromise();
+        /// release instance and release promise to pool 
+        /// to start new promise 
+        void RunPromise();
+        /// Declares that the promise command instantiated by pool.
         ICommandPromiseBinding<PromisedT> AsPool();
+        /// Declares that the Binding is a one-off. As soon as it's satisfied, it will be unmapped.
+        ICommandPromiseBinding<PromisedT> AsOnce();
+
 
         ICommandPromiseBinding<PromisedT> Then<T>() where T : class, ICommand<PromisedT>, new();
         ICommandPromiseBinding<PromisedT> Then<T, ConvertedT>() where T : class, ICommand<ConvertedT>, new();
@@ -41,5 +54,12 @@ namespace Cr7Sund.Framework.Api
             where T1 : class, ICommand<PromisedT>, new()
             where T2 : class, ICommand<PromisedT>, new()
             where T3 : class, ICommand<PromisedT>, new();
+    }
+
+    public enum CommandBindingStatus
+    {
+        Default,
+        Released,
+        Running,
     }
 }

@@ -10,8 +10,13 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
         private ICommandPromise<PromisedT> _firstPromise;
-
+        private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
+        private int _curCount = 0;
+        
         public bool UsePooling { get; private set; }
+        public bool IsOneOff { get; private set; }
+        public CommandBindingStatus BindingStatus { get; private set; }
+
         public ICommandPromise<PromisedT> FirstPromise => _firstPromise;
 
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
@@ -31,6 +36,43 @@ namespace Cr7Sund.Framework.Impl
         {
             UsePooling = true;
             return this;
+        }
+
+        public ICommandPromiseBinding<PromisedT> AsOnce()
+        {
+            IsOneOff = true;
+            return this;
+        }
+
+
+        public void RestartPromise()
+        {
+            var values = Value as object[];
+            foreach (var item in values)
+            {
+                var poolable = item as IResetable;
+                poolable.Reset();
+            }
+
+            foreach (var item in _promiseList)
+            {
+                item.Reset();
+            }
+
+            BindingStatus = CommandBindingStatus.Default;
+        }
+
+
+        public void RunPromise()
+        {
+            BindingStatus = CommandBindingStatus.Running;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _promiseList.Clear();
+            _firstPromise = null;
         }
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.Then<T>()
@@ -219,10 +261,13 @@ namespace Cr7Sund.Framework.Impl
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T>>();
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
+                result.IsOneOff = IsOneOff;
+                result.ReleaseHandler = ResolveRelease;
             }
             else
             {
                 result = new CommandPromise<T>();
+                result.IsOneOff = IsOneOff;
             }
 
 
@@ -238,16 +283,18 @@ namespace Cr7Sund.Framework.Impl
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>();
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
+                result.IsOneOff = IsOneOff;
+                result.ReleaseHandler = ResolveRelease;
             }
             else
             {
                 result = new CommandPromise<T1, T2>();
+                result.IsOneOff = IsOneOff;
             }
-
 
             return result;
         }
-        
+
         private ICommandPromise<PromisedT>[] InstantiateArrayPromise(ICommand<PromisedT>[] commands)
         {
             var promiseArray = new ICommandPromise<PromisedT>[commands.Count()];
@@ -299,26 +346,36 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
-        private int _curCount = 0;
+
+        private void ResolveRelease()
+        {
+            int promiseLength = _value.Count + _promiseList.Count; // error
+            _curCount++;
+            if (promiseLength == _curCount)
+            {
+                BindingStatus = CommandBindingStatus.Default;
+
+                if (UsePooling && IsOneOff)
+                {
+                    ReleasePromise();
+                    Dispose();
+                    BindingStatus = CommandBindingStatus.Released;
+                }
+            }
+        }
 
         private void ReleasePromise()
         {
-            int promiseLength = _value.Count + _promiseList.Count;
-            _curCount++;
-            if (_curCount == promiseLength)
+            var values = Value as object[];
+            foreach (var item in values)
             {
-                var values = Value as object[];
-                foreach (var item in values)
-                {
-                    var poolable = item as IPoolable;
-                    poolable.Release();
-                }
+                var poolable = item as IPoolable;
+                poolable.Release();
+            }
 
-                foreach (var item in _promiseList)
-                {
-                    item.Release();
-                }
+            foreach (var item in _promiseList)
+            {
+                item.Release();
             }
         }
         #endregion

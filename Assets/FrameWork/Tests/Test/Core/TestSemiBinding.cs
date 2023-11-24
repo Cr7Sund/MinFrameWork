@@ -178,5 +178,26 @@ namespace Cr7Sund.Framework.Tests
             Assert.AreEqual(o1, afterValue);
             Assert.AreEqual(43, afterValue.intValue);
         }
+
+        [Test]
+        public void TestClearSemiBinding()
+        {
+            semibinding.Constraint = BindingConstraintType.MANY;
+
+            var o = new ClassWithConstructorParameters(42, "abc");
+            var o1 = new ClassWithConstructorParameters(43, "def");
+            var o2 = new ClassWithConstructorParameters(44, "ghi");
+            var list = new ClassWithConstructorParameters[3]
+            {
+                o, o1,
+                o2
+            };
+            semibinding.Add(list);
+
+
+            semibinding.Clear();
+
+            Assert.IsNull(semibinding.Value);
+        }
     }
 }

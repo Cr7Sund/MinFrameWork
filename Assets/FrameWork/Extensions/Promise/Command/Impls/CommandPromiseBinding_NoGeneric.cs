@@ -1,26 +1,32 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
 using System.Collections.Generic;
 using System.Linq;
+using Cr7Sund.Framework.Api;
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromiseBinding : Binding, ICommandPromiseBinding
     {
         [Inject] private ICommandBinder _commandBinder;
+
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
-
+        private List<ICommandPromise> _promiseList = new List<ICommandPromise>();
+        private int _curCount = 0;
         private ICommandPromise _firstPromise;
-
-        public bool UsePooling { get; private set; }
+        
+        
         public ICommandPromise FirstPromise => _firstPromise;
+        public bool UsePooling { get; private set; }
+        public bool IsOneOff { get; private set; }
+        public CommandBindingStatus BindingStatus { get; private set; }
 
+        
+        
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             ValueConstraint = BindingConstraintType.MANY;
             KeyConstraint = BindingConstraintType.ONE;
         }
-
+        
 
         #region IPromiseCommandBinding Implementation
         public ICommandPromiseBinding AsPool()
@@ -28,7 +34,42 @@ namespace Cr7Sund.Framework.Impl
             UsePooling = true;
             return this;
         }
+        
+        public ICommandPromiseBinding AsOnce()
+        {
+            IsOneOff = true;
+            return this;
+        }
 
+        public void RestartPromise()
+        {
+            var values = Value as object[];
+            foreach (var item in values)
+            {
+                var poolable = item as IResetable;
+                poolable.Reset();
+            }
+
+            foreach (var item in _promiseList)
+            {
+                item.Reset();
+            }
+
+            BindingStatus = CommandBindingStatus.Default;
+        }
+
+        public void RunPromise()
+        {
+            BindingStatus = CommandBindingStatus.Running;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _promiseList.Clear();
+            _firstPromise = null;
+        }
+        
         private new ICommandPromiseBinding To(object value)
         {
             return base.To(value) as ICommandPromiseBinding;
@@ -46,7 +87,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenAny(params ICommand[] commands)
         {
-            ICommandPromise[] promiseArray = InstantiateNoValuePromise(commands);
+            ICommandPromise[] promiseArray = InstantiateArrayPromise(commands);
 
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
@@ -54,21 +95,21 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenAny<T1, T2>()
         {
-            InstantiateNoValuePromise<T1, T2>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2>(out var commands, out var promiseArray);
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
         }
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenAny<T1, T2, T3>()
         {
-            InstantiateNoValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2, T3>(out var commands, out var promiseArray);
             var nextPromise = ThenAny(promiseArray, commands);
             return To(nextPromise);
         }
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenRace(params ICommand[] commands)
         {
-            var promiseArray = InstantiateNoValuePromise(commands);
+            var promiseArray = InstantiateArrayPromise(commands);
 
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
@@ -76,7 +117,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenRace<T1, T2>()
         {
-            InstantiateNoValuePromise<T1, T2>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2>(out var commands, out var promiseArray);
 
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
@@ -84,7 +125,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding ICommandPromiseBinding.ThenRace<T1, T2, T3>()
         {
-            InstantiateNoValuePromise<T1, T2, T3>(out var commands, out var promiseArray);
+            InstantiateArrayPromise<T1, T2, T3>(out var commands, out var promiseArray);
 
             var nextPromise = ThenRace(promiseArray, commands);
             return To(nextPromise);
@@ -127,23 +168,6 @@ namespace Cr7Sund.Framework.Impl
             return _firstPromise;
         }
 
-        private CommandPromise InstantiatePromise()
-        {
-            CommandPromise result;
-
-            if (UsePooling)
-            {
-                var pool = _poolBinder.GetOrCreate<CommandPromise>();
-                result = pool.GetInstance();
-                result.PoolBinder = _poolBinder;
-            }
-            else
-            {
-                result = new CommandPromise();
-            }
-
-            return result;
-        }
 
         private T InstantiateCommand<T>() where T : class, IBaseCommand
         {
@@ -157,8 +181,28 @@ namespace Cr7Sund.Framework.Impl
             return result;
         }
 
+        private CommandPromise InstantiatePromise()
+        {
+            CommandPromise result;
 
-        private void InstantiateNoValuePromise<T1, T2>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
+            if (UsePooling)
+            {
+                var pool = _poolBinder.GetOrCreate<CommandPromise>();
+                result = pool.GetInstance();
+                result.PoolBinder = _poolBinder;
+                result.IsOneOff = IsOneOff;
+                result.ReleaseHandler = ResolveRelease;
+            }
+            else
+            {
+                result = new CommandPromise();
+                result.IsOneOff = IsOneOff;
+            }
+
+            return result;
+        }
+
+        private void InstantiateArrayPromise<T1, T2>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
             where T1 : class, ICommand, new()
             where T2 : class, ICommand, new()
         {
@@ -174,7 +218,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        private void InstantiateNoValuePromise<T1, T2, T3>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
+        private void InstantiateArrayPromise<T1, T2, T3>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
             where T1 : class, ICommand, new()
             where T2 : class, ICommand, new()
             where T3 : class, ICommand, new()
@@ -192,7 +236,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        private ICommandPromise[] InstantiateNoValuePromise(ICommand[] commands)
+        private ICommandPromise[] InstantiateArrayPromise(ICommand[] commands)
         {
             var promiseArray = new ICommandPromise[commands.Count()];
             for (int i = 0; i < promiseArray.Length; i++)
@@ -201,6 +245,38 @@ namespace Cr7Sund.Framework.Impl
             }
 
             return promiseArray;
+        }
+      
+        private void ResolveRelease()
+        {
+            int promiseLength = _value.Count + _promiseList.Count; // error
+            _curCount++;
+            if (promiseLength == _curCount)
+            {
+                BindingStatus = CommandBindingStatus.Default;
+
+                if (UsePooling && IsOneOff)
+                {
+                    ReleasePromise();
+                    Dispose();
+                    BindingStatus = CommandBindingStatus.Released;
+                }
+            }
+        }
+
+        private void ReleasePromise()
+        {
+            var values = Value as object[];
+            foreach (var item in values)
+            {
+                var poolable = item as IPoolable;
+                poolable.Release();
+            }
+
+            foreach (var item in _promiseList)
+            {
+                item.Release();
+            }
         }
         #endregion
     }

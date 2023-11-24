@@ -10,7 +10,7 @@ namespace Cr7Sund.Framework.Impl
         /// Stack of instances still in the Pool.
         private readonly Stack<T> _instancesAvailable;
 
-        public Pool()
+        public Pool() : base()
         {
             InstancesInUse = new HashSet<T>();
             _instancesAvailable = new Stack<T>();
@@ -152,6 +152,30 @@ namespace Cr7Sund.Framework.Impl
                 Remove(list[i]);
             }
 
+            return this;
+        }
+
+        public IManagedList Clear()
+        {
+            foreach (var item in InstancesInUse)    
+            {
+                if (item is IPoolable poolable)
+                {
+                    poolable.Restore();
+                }
+            }
+            
+            foreach (var item in _instancesAvailable)    
+            {
+                if (item is IPoolable poolable)
+                {
+                    poolable.Restore();
+                }
+            }
+            
+            InstancesInUse.Clear();
+            _instancesAvailable.Clear();
+            _instanceCount = 0;
             return this;
         }
 

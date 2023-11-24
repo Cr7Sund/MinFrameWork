@@ -112,6 +112,12 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
+        public IManagedList Clear()
+        {
+            _objectValue = null;
+            return this;
+        }
+
         public bool Contains(object o)
         {
             return _objectValue.Contains(o);

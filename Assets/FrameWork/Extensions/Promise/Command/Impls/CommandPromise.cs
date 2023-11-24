@@ -7,17 +7,28 @@ namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromise<PromisedT> : Promise<PromisedT>, ICommandPromise<PromisedT>
     {
-        protected IBaseCommand _command;
+        public IPoolBinder PoolBinder;
+        public Action ReleaseHandler;
 
+        protected IBaseCommand _command;
+        // there are two choice to handle async promise
+        // store the curRunning promise to release automatically
+        // and force stop by other api
+        // Advantage:
+        // automatically stop the promise
+        // avoid last unfinished promise callback to cause unexpected result
+
+        // 2. manually handle dispose
+        // don't contain and don't care the life time
+        protected IDisposable _executeAsyncPromise;
 
         private List<ResolveHandler<object>> _convertResolveHandlers;
 
-        public IPoolBinder PoolBinder;
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
-
+        public bool IsOneOff { get; set; }
 
 
         #region IPromiseCommand Implementation
@@ -92,7 +103,7 @@ namespace Cr7Sund.Framework.Impl
         public ICommandPromise<IEnumerable<PromisedT>> ThenAll(IEnumerable<ICommandPromise<PromisedT>> promises,
             IEnumerable<ICommand<PromisedT>> commands)
         {
-            FulfillPromise(promises, commands);
+            RegisterPromiseArray(promises, commands);
 
             return Then(_ => All<PromisedT>(promises)) as ICommandPromise<IEnumerable<PromisedT>>;
         }
@@ -101,7 +112,7 @@ namespace Cr7Sund.Framework.Impl
             IEnumerable<ICommand<PromisedT>> commands)
         {
             var commandPromises = promises as ICommandPromise<PromisedT>[] ?? promises.ToArray();
-            FulfillPromise(commandPromises, commands);
+            RegisterPromiseArray(commandPromises, commands);
 
             var fns = new Func<IPromise<PromisedT>>[commandPromises.Count()];
             commandPromises.Each((promise, index) => { fns[index] = () => promise; });
@@ -111,7 +122,7 @@ namespace Cr7Sund.Framework.Impl
         public ICommandPromise<PromisedT> ThenRace(IEnumerable<ICommandPromise<PromisedT>> promises,
             IEnumerable<ICommand<PromisedT>> commands)
         {
-            FulfillPromise(promises, commands);
+            RegisterPromiseArray(promises, commands);
 
             return Then(_ => Race<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
@@ -119,7 +130,7 @@ namespace Cr7Sund.Framework.Impl
         public ICommandPromise<PromisedT> ThenAny(IEnumerable<ICommandPromise<PromisedT>> promises,
             IEnumerable<ICommand<PromisedT>> commands)
         {
-            FulfillPromise(promises, commands);
+            RegisterPromiseArray(promises, commands);
 
             return Then(_ => Any<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
@@ -133,21 +144,37 @@ namespace Cr7Sund.Framework.Impl
         public override void Reject(Exception ex)
         {
             base.Reject(ex);
-            Release();
+            NotifyRelease();
         }
 
         public override void Resolve(PromisedT value)
         {
             base.Resolve(value);
-            Release();
+            NotifyRelease();
         }
-        
+
         protected void WrapProgress(float progress)
         {
             ReportProgress((progress + SequenceID) * SliceLength);
         }
-        
-        private void FulfillPromise(IEnumerable<ICommandPromise<PromisedT>> promises,
+
+        protected void WrapResolveAsync(PromisedT value)
+        {
+            Resolve(value);
+            _executeAsyncPromise?.Dispose();
+            _executeAsyncPromise = null;
+        }
+
+        protected void WrapRejectAsync(Exception ex)
+        {
+            base.Reject(ex);
+            NotifyRelease();
+
+            _executeAsyncPromise?.Dispose();
+            _executeAsyncPromise = null;
+        }
+
+        private void RegisterPromiseArray(IEnumerable<ICommandPromise<PromisedT>> promises,
             IEnumerable<ICommand<PromisedT>> commands)
         {
             AssertUtil.AreEqual(commands.Count(), promises.Count());
@@ -155,9 +182,8 @@ namespace Cr7Sund.Framework.Impl
 
             promises.Each((promise, index) => { Then(promise, commandArray[index]); });
         }
-
-                
-        private  void ExecuteInternal(PromisedT value)
+        
+        private void ExecuteInternal(PromisedT value)
         {
             var command = _command;
             if (command is IAsyncCommand<PromisedT> asyncCommand)
@@ -166,18 +192,23 @@ namespace Cr7Sund.Framework.Impl
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync(value);
+                    _executeAsyncPromise = resultPromise;
                 }
                 catch (Exception e)
                 {
                     Catch(e);
-                    Release();
+                    NotifyRelease();
                     throw e;
                 }
 
+
+                bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
+                AssertUtil.IsFalse(hasMatchingItem);
                 AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
                 resultPromise
                     .Progress(WrapProgress)
-                    .Then(Resolve, Reject);
+                    .Then(WrapResolveAsync, WrapRejectAsync);
+
             }
             else if (command is ICommand<PromisedT> promiseCommand)
             {
@@ -189,7 +220,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    Release();
+                    NotifyRelease();
                     throw e;
                 }
 
@@ -202,10 +233,17 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
         }
-
         #endregion
 
         #region IPromise Implementation
+        public override void Dispose()
+        {
+            base.Dispose();
+            _command = null;
+            _executeAsyncPromise?.Dispose();
+            _executeAsyncPromise = null;
+        }
+
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
@@ -215,6 +253,16 @@ namespace Cr7Sund.Framework.Impl
         {
             return new CommandPromise();
         }
+
+        protected override void ClearHandlers()
+        {
+            if (IsOneOff)
+            {
+                base.ClearHandlers();
+                _convertResolveHandlers?.Clear();
+            }
+        }
+
 
         private void AddConvertResolveHandler(Action<object> onResolved, IRejectable rejectable)
         {
@@ -240,12 +288,6 @@ namespace Cr7Sund.Framework.Impl
 
             base.InvokeResolveHandlers(value);
         }
-
-        protected override void ClearHandlers()
-        {
-            base.ClearHandlers();
-            _convertResolveHandlers.Clear();
-        }
         #endregion
 
         #region IPoolable Implementation
@@ -259,11 +301,8 @@ namespace Cr7Sund.Framework.Impl
             IsRetain = false;
 
             CurState = PromiseState.Pending;
-            _resolveValue = default;
-            Name = string.Empty;
 
-            _command = null;
-            _convertResolveHandlers?.Clear();
+            Dispose();
         }
 
         public virtual void Release()
@@ -271,7 +310,23 @@ namespace Cr7Sund.Framework.Impl
             var pool = PoolBinder?.Get<CommandPromise<PromisedT>>();
             pool?.ReturnInstance(this);
         }
+
+        protected void NotifyRelease()
+        {
+            ReleaseHandler?.Invoke();
+        }
         #endregion
+
+        #region IResetable Implementation
+        public void Reset()
+        {
+            CurState = PromiseState.Pending;
+            _resolveValue = default;
+            _executeAsyncPromise?.Dispose();
+        }
+        #endregion
+
+
     }
 
 
@@ -284,21 +339,26 @@ namespace Cr7Sund.Framework.Impl
             if (command is IPromiseAsyncCommand<PromisedT, ConvertedT> asyncCommand)
             {
                 IPromise<ConvertedT> resultPromise;
+
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync(value);
+                    _executeAsyncPromise = resultPromise;
                 }
                 catch (Exception e)
                 {
                     Catch(e);
-                    Release();
+                    NotifyRelease();
                     throw e;
                 }
 
-                AssertUtil.NotNull(resultPromise);
+                bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
+                AssertUtil.IsFalse(hasMatchingItem);
+                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
+
                 resultPromise
                     .Progress(WrapProgress)
-                    .Then(Resolve,Reject);
+                    .Then(WrapResolveAsync, WrapRejectAsync);
             }
             else if (command is ICommand<PromisedT, ConvertedT> promiseCommand)
             {
@@ -310,7 +370,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    Release();
+                    NotifyRelease();
                     throw e;
                 }
 

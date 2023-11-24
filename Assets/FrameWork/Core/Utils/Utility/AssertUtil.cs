@@ -205,6 +205,23 @@ namespace Cr7Sund.Framework.Util
                 throw e;
             }
         }
+
+        public static void AreNotEqual(object expected, object actual)
+        {
+            if (expected.Equals(actual))
+            {
+                throw new AssertionException($"Expected {expected}  but it's {actual}");
+            }
+        }
+
+
+        public static void AreNotEqual(object expected, object actual, Exception e)
+        {
+            if (expected.Equals(actual))
+            {
+                throw e;
+            }
+        }
         #endregion
     }
 }
