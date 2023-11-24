@@ -6,7 +6,7 @@ namespace Cr7Sund.Framework.Api
     ///     Implements a C# promise.
     ///     https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public interface IPromise<PromisedT> : IPendingPromise<PromisedT>, IDisposable
+    public interface IPromise<PromisedT> : IPendingPromise<PromisedT>, IBasePromise
     {
         /// <summary>
         ///     Set the name of the promise, useful for debugging.
@@ -27,10 +27,6 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         void Done(Action<PromisedT> onResolved);
 
-        /// <summary>
-        ///     Complete the promise. Adds a default error handler.
-        /// </summary>
-        void Done();
 
         /// <summary>
         ///     Handle errors for the promise.
@@ -193,12 +189,4 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         IPromise<PromisedT> Progress(Action<float> onProgress);
     }
-
-    public enum PromiseState
-    {
-        Pending, // The promise is in-flight.
-        Rejected, // The promise has been rejected.
-        Resolved // The promise has been resolved.
-    }
-
 }

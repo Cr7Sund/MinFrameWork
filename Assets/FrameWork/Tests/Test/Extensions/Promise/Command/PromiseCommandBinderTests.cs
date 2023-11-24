@@ -289,6 +289,27 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
+        public void command_all_simple_command_chain_all_result()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+                .ThenAny<
+                    SimpleAsyncCommandOneGeneric,
+                    SimpleAsyncCommandSecondGeneric>()
+                .Then<SimpleCommandOneGeneric>();
+
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
+            SimplePromise.simulatePromiseSecond.Resolve(3);
+
+            SimplePromise.simulatePromiseOne.Reject(new Exception());
+
+            Assert.AreEqual(22, SimplePromise.result);
+            
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
+            Assert.AreEqual(22, SimplePromise.result);
+        }
+
+        [Test]
         public void get_same_command_from_commandBinder()
         {
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
@@ -399,7 +420,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
 
             var ex = Assert.Throws<PromiseException>(() =>
-                          _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0));
+                _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0));
             Assert.AreEqual(PromiseExceptionType.CAN_NOT_REACT_RUNNING, ex.Type);
         }
 
@@ -407,7 +428,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void stop_first_start_new_stop_async_operation()
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
-            
+
             promiseBinding
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleAsyncCommandOneGeneric>()
@@ -422,7 +443,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, SimplePromise.result);
         }
-        
+
         [Test]
         public void exception_in_bind_duplicate()
         {

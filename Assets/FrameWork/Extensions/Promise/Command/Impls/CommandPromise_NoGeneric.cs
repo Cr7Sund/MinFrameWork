@@ -10,6 +10,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IPoolBinder PoolBinder;
         public Action ReleaseHandler;
+        public Action<Exception> ErrorHandler;
 
         private IBaseCommand _command;
 
@@ -17,10 +18,15 @@ namespace Cr7Sund.Framework.Impl
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
-        public bool IsOneOff { get; set; }
+        public bool IsOnceOff { get; set; }
 
 
         #region IPromise Implementation
+        public override IDisposable Done()
+        {
+           return Then(ReleaseHandler, ErrorHandler);
+        }
+
         public override void Dispose()
         {
             base.Dispose();
@@ -29,7 +35,7 @@ namespace Cr7Sund.Framework.Impl
 
         protected override void ClearHandlers()
         {
-            if (IsOneOff)
+            if (IsOnceOff)
             {
                 base.ClearHandlers();
             }
@@ -59,7 +65,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    NotifyRelease();
+
                     throw e;
                 }
 
@@ -80,7 +86,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    NotifyRelease();
+
                     throw e;
                 }
 
@@ -143,18 +149,6 @@ namespace Cr7Sund.Framework.Impl
             return Then(() => AnyInternal(promises)) as ICommandPromise;
         }
 
-        public override void Reject(Exception ex)
-        {
-            base.Reject(ex);
-            NotifyRelease();
-        }
-
-        public override void Resolve()
-        {
-            base.Resolve();
-            NotifyRelease();
-        }
-
         public IBaseCommand Test_GetCommand()
         {
             return _command;
@@ -164,7 +158,7 @@ namespace Cr7Sund.Framework.Impl
         {
             ReportProgress((progress + SequenceID) * SliceLength);
         }
-        
+
         private void RegisterPromiseArray(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
             var commandPromises = promises as ICommandPromise[] ?? promises.ToArray();
@@ -197,11 +191,6 @@ namespace Cr7Sund.Framework.Impl
         {
             var pool = PoolBinder?.Get<CommandPromise>();
             pool?.ReturnInstance(this);
-        }
-
-        private void NotifyRelease()
-        {
-            ReleaseHandler?.Invoke();
         }
         #endregion
 

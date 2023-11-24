@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Framework.Api;
+using System;
+using Cr7Sund.Framework.Util;
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromiseBinding : Binding, ICommandPromiseBinding
@@ -10,23 +12,21 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
         private List<ICommandPromise> _promiseList = new List<ICommandPromise>();
-        private int _curCount = 0;
         private ICommandPromise _firstPromise;
-        
-        
-        public ICommandPromise FirstPromise => _firstPromise;
+        private IDisposable _lastPromise;
+
         public bool UsePooling { get; private set; }
-        public bool IsOneOff { get; private set; }
+        public bool IsOnceeOff { get; private set; }
         public CommandBindingStatus BindingStatus { get; private set; }
 
-        
-        
+
+
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             ValueConstraint = BindingConstraintType.MANY;
             KeyConstraint = BindingConstraintType.ONE;
         }
-        
+
 
         #region IPromiseCommandBinding Implementation
         public ICommandPromiseBinding AsPool()
@@ -34,15 +34,17 @@ namespace Cr7Sund.Framework.Impl
             UsePooling = true;
             return this;
         }
-        
+
         public ICommandPromiseBinding AsOnce()
         {
-            IsOneOff = true;
+            IsOnceeOff = true;
             return this;
         }
 
         public void RestartPromise()
         {
+            if (IsOnceeOff) return;
+            
             var values = Value as object[];
             foreach (var item in values)
             {
@@ -60,7 +62,27 @@ namespace Cr7Sund.Framework.Impl
 
         public void RunPromise()
         {
+            object[] values = Value as object[];
+            AssertUtil.Greater(values.Length, 0, new PromiseException(
+                "can not react a empty promise command", PromiseExceptionType.EMPTY_PROMISE_TOREACT));
+
+            float sliceLength = 1 / values.Length;
+            for (int i = 0; i < values.Length; i++)
+            {
+                var command = values[i] as ISequence;
+
+                command.SliceLength = sliceLength;
+                command.SequenceID = i;
+            }
+
             BindingStatus = CommandBindingStatus.Running;
+
+            _lastPromise?.Dispose();
+
+            var lastpromise = values[^1] as IBasePromise;
+            _lastPromise = lastpromise.Done();
+
+            _firstPromise.Resolve();
         }
 
         public override void Dispose()
@@ -69,7 +91,7 @@ namespace Cr7Sund.Framework.Impl
             _promiseList.Clear();
             _firstPromise = null;
         }
-        
+
         private new ICommandPromiseBinding To(object value)
         {
             return base.To(value) as ICommandPromiseBinding;
@@ -190,13 +212,16 @@ namespace Cr7Sund.Framework.Impl
                 var pool = _poolBinder.GetOrCreate<CommandPromise>();
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
-                result.IsOneOff = IsOneOff;
-                result.ReleaseHandler = ResolveRelease;
+                result.IsOnceOff = IsOnceeOff;
+                result.ReleaseHandler = HandleResolve;
+                result.ErrorHandler = HandleRejected;
             }
             else
             {
                 result = new CommandPromise();
-                result.IsOneOff = IsOneOff;
+                result.IsOnceOff = IsOnceeOff;
+                result.ReleaseHandler = HandleResolve;
+                result.ErrorHandler = HandleRejected;
             }
 
             return result;
@@ -246,21 +271,28 @@ namespace Cr7Sund.Framework.Impl
 
             return promiseArray;
         }
-      
+
+        private void HandleResolve()
+        {
+            BindingStatus = CommandBindingStatus.Default;
+
+            ResolveRelease();
+        }
+
+        private void HandleRejected(Exception e)
+        {
+            BindingStatus = CommandBindingStatus.Default;
+
+            ResolveRelease();
+        }
+
         private void ResolveRelease()
         {
-            int promiseLength = _value.Count + _promiseList.Count; // error
-            _curCount++;
-            if (promiseLength == _curCount)
+            if (UsePooling && IsOnceeOff)
             {
-                BindingStatus = CommandBindingStatus.Default;
-
-                if (UsePooling && IsOneOff)
-                {
-                    ReleasePromise();
-                    Dispose();
-                    BindingStatus = CommandBindingStatus.Released;
-                }
+                ReleasePromise();
+                Dispose();
+                BindingStatus = CommandBindingStatus.Released;
             }
         }
 

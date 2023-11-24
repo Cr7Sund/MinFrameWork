@@ -1,3 +1,4 @@
+using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
 using System.Collections.Generic;
@@ -10,14 +11,12 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
         private ICommandPromise<PromisedT> _firstPromise;
+        private IDisposable _lastPromise;
         private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
-        private int _curCount = 0;
-        
-        public bool UsePooling { get; private set; }
-        public bool IsOneOff { get; private set; }
-        public CommandBindingStatus BindingStatus { get; private set; }
 
-        public ICommandPromise<PromisedT> FirstPromise => _firstPromise;
+        public bool UsePooling { get; private set; }
+        public bool IsOnceOff { get; private set; }
+        public CommandBindingStatus BindingStatus { get; private set; }
 
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
@@ -40,13 +39,14 @@ namespace Cr7Sund.Framework.Impl
 
         public ICommandPromiseBinding<PromisedT> AsOnce()
         {
-            IsOneOff = true;
+            IsOnceOff = true;
             return this;
         }
 
-
         public void RestartPromise()
         {
+            if (IsOnceOff) return;
+            
             var values = Value as object[];
             foreach (var item in values)
             {
@@ -63,16 +63,38 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
-        public void RunPromise()
+        public void RunPromise(PromisedT value)
         {
+            object[] values = Value as object[];
+            AssertUtil.Greater(values.Length, 0, new PromiseException(
+                "can not react a empty promise command", PromiseExceptionType.EMPTY_PROMISE_TOREACT));
+
+            float sliceLength = 1 / values.Length;
+            for (int i = 0; i < values.Length; i++)
+            {
+                var command = values[i] as ISequence;
+
+                command.SliceLength = sliceLength;
+                command.SequenceID = i;
+            }
+
             BindingStatus = CommandBindingStatus.Running;
+
+            _lastPromise?.Dispose();
+            var lastpromise = values[^1] as IBasePromise;
+            _lastPromise = lastpromise.Done();
+
+            _firstPromise.Resolve(value);
         }
 
         public override void Dispose()
         {
             base.Dispose();
             _promiseList.Clear();
+            _lastPromise?.Dispose();
+            _firstPromise?.Dispose();
             _firstPromise = null;
+            _lastPromise = null;
         }
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.Then<T>()
@@ -261,13 +283,16 @@ namespace Cr7Sund.Framework.Impl
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T>>();
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
-                result.IsOneOff = IsOneOff;
-                result.ReleaseHandler = ResolveRelease;
+                result.IsOnceOff = IsOnceOff;
+                result.ReleaseHandler = HandleResolve;
+                result.ErrorHandler = HandleRejected;
             }
             else
             {
                 result = new CommandPromise<T>();
-                result.IsOneOff = IsOneOff;
+                result.IsOnceOff = IsOnceOff;
+                result.ReleaseHandler = HandleResolve;
+                result.ErrorHandler = HandleRejected;
             }
 
 
@@ -283,13 +308,13 @@ namespace Cr7Sund.Framework.Impl
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>();
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
-                result.IsOneOff = IsOneOff;
-                result.ReleaseHandler = ResolveRelease;
+                result.IsOnceOff = IsOnceOff;
+                result.ReleaseHandler = HandleResolve;
             }
             else
             {
                 result = new CommandPromise<T1, T2>();
-                result.IsOneOff = IsOneOff;
+                result.IsOnceOff = IsOnceOff;
             }
 
             return result;
@@ -347,20 +372,27 @@ namespace Cr7Sund.Framework.Impl
         }
 
 
+        private void HandleResolve<T>(T value)
+        {
+            BindingStatus = CommandBindingStatus.Default;
+            ResolveRelease();
+        }
+
+        private void HandleRejected(Exception e)
+        {
+            BindingStatus = CommandBindingStatus.Default;
+            ResolveRelease();
+
+        }
+
         private void ResolveRelease()
         {
-            int promiseLength = _value.Count + _promiseList.Count; // error
-            _curCount++;
-            if (promiseLength == _curCount)
-            {
-                BindingStatus = CommandBindingStatus.Default;
 
-                if (UsePooling && IsOneOff)
-                {
-                    ReleasePromise();
-                    Dispose();
-                    BindingStatus = CommandBindingStatus.Released;
-                }
+            if (UsePooling && IsOnceOff)
+            {
+                ReleasePromise();
+                Dispose();
+                BindingStatus = CommandBindingStatus.Released;
             }
         }
 

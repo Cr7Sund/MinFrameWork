@@ -6,7 +6,7 @@ namespace Cr7Sund.Framework.Api
     ///     Implements a non-generic C# promise, this is a promise that simply resolves without delivering a value.
     ///     https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public interface IPromise : IPendingPromise,IDisposable
+    public interface IPromise : IPendingPromise, IBasePromise
     {
         /// <summary>
         ///     Set the name of the promise, useful for debugging.
@@ -26,10 +26,7 @@ namespace Cr7Sund.Framework.Api
         ///     Adds a default error handler.
         /// </summary>
         void Done(Action onResolved);
-        /// <summary>
-        ///     Complete the promise. Adds a default error handler.
-        /// </summary>
-        void Done();
+
         /// <summary>
         ///     Handle errors for the promise.
         /// </summary>

@@ -121,6 +121,7 @@ namespace Cr7Sund.Framework.Impl
         {
             ClearHandlers();
             Name = string.Empty;
+            CurState = PromiseState.Pending;
         }
         
         internal static int NextId()
@@ -146,9 +147,9 @@ namespace Cr7Sund.Framework.Impl
                 );
         }
 
-        public void Done()
+        public virtual IDisposable Done()
         {
-            Catch(ex => PropagateUnhandledException(this, ex));
+           return Catch(ex => PropagateUnhandledException(this, ex));
         }
 
         public IPromise Catch(Action<Exception> onRejected)

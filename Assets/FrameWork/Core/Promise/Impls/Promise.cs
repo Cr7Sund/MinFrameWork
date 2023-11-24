@@ -91,6 +91,7 @@ namespace Cr7Sund.Framework.Impl
             ClearHandlers();
             Name = string.Empty;
             _resolveValue = default;
+            CurState = PromiseState.Pending;
         }
         #endregion
 
@@ -111,9 +112,9 @@ namespace Cr7Sund.Framework.Impl
                 );
         }
 
-        public void Done()
+        public virtual IDisposable Done()
         {
-            Catch(ex => Promise.PropagateUnhandledException(this, ex));
+           return Catch(ex => Promise.PropagateUnhandledException(this, ex));
         }
 
         public IPromise Catch(Action<Exception> onRejected)
@@ -515,7 +516,7 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region IPendingPromise
-        public virtual void Resolve(PromisedT value)
+        public void Resolve(PromisedT value)
         {
             AssertUtil.AreEqual(PromiseState.Pending, CurState,
                 new PromiseException(
@@ -535,7 +536,7 @@ namespace Cr7Sund.Framework.Impl
             InvokeResolveHandlers(value);
         }
 
-        public virtual void ReportProgress(float progress)
+        public void ReportProgress(float progress)
         {
             AssertUtil.AreEqual(PromiseState.Pending, CurState,
                 new PromiseException(
@@ -548,7 +549,7 @@ namespace Cr7Sund.Framework.Impl
             InvokeProgressHandlers(progress);
         }
 
-        public virtual void Reject(Exception ex)
+        public void Reject(Exception ex)
         {
             AssertUtil.NotNull(ex);
             AssertUtil.AreEqual(PromiseState.Pending, CurState,

@@ -43,7 +43,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_all_resolve_as_Once()
         {
             var promise = new CommandPromise<int>();
-            promise.IsOneOff = true;
+            promise.IsOnceOff = true;
             var donePromise = promise.Then<SimpleCommandTwoGeneric>().Then<SimpleCommandOneGeneric>().Then(value => value - 200);
             promise.Resolve(0);
             Assert.AreEqual(((0 + 2) * 3 + 1) * 2 - 200, ((Promise<int>)donePromise).Test_GetResolveValue());
@@ -67,7 +67,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void command_with_async_operation_asOnce()
         {
             var promise = new CommandPromise<int>();
-            promise.IsOneOff = true;
+            promise.IsOnceOff = true;
             
             var donePromise1 = promise.Then<SimpleCommandTwoGeneric>();
             var donePromise2 = donePromise1.Then<SimpleAsyncCommandOneGeneric>().Then<SimpleCommandOneGeneric>();

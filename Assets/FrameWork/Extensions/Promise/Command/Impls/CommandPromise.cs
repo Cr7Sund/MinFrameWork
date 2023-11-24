@@ -8,7 +8,8 @@ namespace Cr7Sund.Framework.Impl
     public class CommandPromise<PromisedT> : Promise<PromisedT>, ICommandPromise<PromisedT>
     {
         public IPoolBinder PoolBinder;
-        public Action ReleaseHandler;
+        public Action<PromisedT> ReleaseHandler;
+        public Action<Exception> ErrorHandler;
 
         protected IBaseCommand _command;
 
@@ -18,7 +19,7 @@ namespace Cr7Sund.Framework.Impl
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
-        public bool IsOneOff { get; set; }
+        public bool IsOnceOff { get; set; }
 
 
         #region IPromiseCommand Implementation
@@ -131,18 +132,6 @@ namespace Cr7Sund.Framework.Impl
             return _command;
         }
 
-        public override void Reject(Exception ex)
-        {
-            base.Reject(ex);
-            NotifyRelease();
-        }
-
-        public override void Resolve(PromisedT value)
-        {
-            base.Resolve(value);
-            NotifyRelease();
-        }
-
         protected void WrapProgress(float progress)
         {
             ReportProgress((progress + SequenceID) * SliceLength);
@@ -171,7 +160,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    NotifyRelease();
+
                     throw e;
                 }
 
@@ -194,7 +183,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    NotifyRelease();
+
                     throw e;
                 }
 
@@ -210,6 +199,11 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region IPromise Implementation
+        public override IDisposable Done()
+        {
+            return Then(ReleaseHandler, ErrorHandler);
+        }
+
         public override void Dispose()
         {
             base.Dispose();
@@ -228,7 +222,7 @@ namespace Cr7Sund.Framework.Impl
 
         protected override void ClearHandlers()
         {
-            if (IsOneOff)
+            if (IsOnceOff)
             {
                 base.ClearHandlers();
                 _convertResolveHandlers?.Clear();
@@ -282,11 +276,6 @@ namespace Cr7Sund.Framework.Impl
             var pool = PoolBinder?.Get<CommandPromise<PromisedT>>();
             pool?.ReturnInstance(this);
         }
-
-        protected void NotifyRelease()
-        {
-            ReleaseHandler?.Invoke();
-        }
         #endregion
 
         #region IResetable Implementation
@@ -318,7 +307,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    NotifyRelease();
+
                     throw e;
                 }
 
@@ -340,7 +329,7 @@ namespace Cr7Sund.Framework.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-                    NotifyRelease();
+
                     throw e;
                 }
 
