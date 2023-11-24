@@ -11,16 +11,6 @@ namespace Cr7Sund.Framework.Impl
         public Action ReleaseHandler;
 
         protected IBaseCommand _command;
-        // there are two choice to handle async promise
-        // store the curRunning promise to release automatically
-        // and force stop by other api
-        // Advantage:
-        // automatically stop the promise
-        // avoid last unfinished promise callback to cause unexpected result
-
-        // 2. manually handle dispose
-        // don't contain and don't care the life time
-        protected IDisposable _executeAsyncPromise;
 
         private List<ResolveHandler<object>> _convertResolveHandlers;
 
@@ -158,21 +148,6 @@ namespace Cr7Sund.Framework.Impl
             ReportProgress((progress + SequenceID) * SliceLength);
         }
 
-        protected void WrapResolveAsync(PromisedT value)
-        {
-            Resolve(value);
-            _executeAsyncPromise?.Dispose();
-            _executeAsyncPromise = null;
-        }
-
-        protected void WrapRejectAsync(Exception ex)
-        {
-            base.Reject(ex);
-            NotifyRelease();
-
-            _executeAsyncPromise?.Dispose();
-            _executeAsyncPromise = null;
-        }
 
         private void RegisterPromiseArray(IEnumerable<ICommandPromise<PromisedT>> promises,
             IEnumerable<ICommand<PromisedT>> commands)
@@ -182,7 +157,7 @@ namespace Cr7Sund.Framework.Impl
 
             promises.Each((promise, index) => { Then(promise, commandArray[index]); });
         }
-        
+
         private void ExecuteInternal(PromisedT value)
         {
             var command = _command;
@@ -192,7 +167,6 @@ namespace Cr7Sund.Framework.Impl
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync(value);
-                    _executeAsyncPromise = resultPromise;
                 }
                 catch (Exception e)
                 {
@@ -207,7 +181,7 @@ namespace Cr7Sund.Framework.Impl
                 AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
                 resultPromise
                     .Progress(WrapProgress)
-                    .Then(WrapResolveAsync, WrapRejectAsync);
+                    .Then(Resolve, Reject);
 
             }
             else if (command is ICommand<PromisedT> promiseCommand)
@@ -240,8 +214,6 @@ namespace Cr7Sund.Framework.Impl
         {
             base.Dispose();
             _command = null;
-            _executeAsyncPromise?.Dispose();
-            _executeAsyncPromise = null;
         }
 
         protected override Promise<T> GetRawPromise<T>()
@@ -322,7 +294,6 @@ namespace Cr7Sund.Framework.Impl
         {
             CurState = PromiseState.Pending;
             _resolveValue = default;
-            _executeAsyncPromise?.Dispose();
         }
         #endregion
 
@@ -343,7 +314,6 @@ namespace Cr7Sund.Framework.Impl
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync(value);
-                    _executeAsyncPromise = resultPromise;
                 }
                 catch (Exception e)
                 {
@@ -358,7 +328,7 @@ namespace Cr7Sund.Framework.Impl
 
                 resultPromise
                     .Progress(WrapProgress)
-                    .Then(WrapResolveAsync, WrapRejectAsync);
+                    .Then(Resolve, Reject);
             }
             else if (command is ICommand<PromisedT, ConvertedT> promiseCommand)
             {

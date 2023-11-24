@@ -92,12 +92,20 @@ namespace Cr7Sund.Framework.Tests
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
-            return SimplePromise.simulatePromiseOne.Then(value =>
+            // you need to pass the value which is from the prev promise 
+            var promise = DonwloadAsync().Then(value =>
             {
                 SimplePromise.result = (value + aggValue + 3) * 5;
                 return (value + aggValue + 3) * 5;
             });
 
+            return promise;
+        }
+        private static IPromise<int> DonwloadAsync()
+        {
+            SimplePromise.simulatePromiseOne?.Dispose();
+
+            return SimplePromise.simulatePromiseOne;
         }
         public override void OnCatch(Exception e)
         {

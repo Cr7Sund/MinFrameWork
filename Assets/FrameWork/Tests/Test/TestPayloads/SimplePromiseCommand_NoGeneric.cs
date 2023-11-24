@@ -79,11 +79,15 @@ namespace Cr7Sund.Framework.Tests
 
         public override IPromise OnExecuteAsync()
         {
-
-            SimplePromise.simulatePromise.Then(() =>
+            return DownloadAsync().Then(() =>
             {
                 SimplePromise.result = (SimplePromise.result + 3) * 5;
             });
+            // return SimplePromise.simulatePromise;
+        }
+        private static IPromise DownloadAsync()
+        {
+            SimplePromise.simulatePromise?.Dispose();
             return SimplePromise.simulatePromise;
         }
 

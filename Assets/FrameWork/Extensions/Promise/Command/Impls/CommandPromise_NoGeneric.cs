@@ -13,7 +13,6 @@ namespace Cr7Sund.Framework.Impl
 
         private IBaseCommand _command;
 
-        private IDisposable _executeAsyncPromise;
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
@@ -26,10 +25,16 @@ namespace Cr7Sund.Framework.Impl
         {
             base.Dispose();
             _command = null;
-            _executeAsyncPromise?.Dispose();
-            _executeAsyncPromise = null;
         }
-        
+
+        protected override void ClearHandlers()
+        {
+            if (IsOneOff)
+            {
+                base.ClearHandlers();
+            }
+        }
+
         protected override Promise<T> GetRawPromise<T>()
         {
             return new CommandPromise<T>();
@@ -50,7 +55,6 @@ namespace Cr7Sund.Framework.Impl
                 try
                 {
                     resultPromise = asyncCommand.OnExecuteAsync();
-                    _executeAsyncPromise = resultPromise;
                 }
                 catch (Exception e)
                 {
@@ -65,7 +69,7 @@ namespace Cr7Sund.Framework.Impl
 
                 resultPromise
                     .Progress(WrapProgress)
-                    .Then(WrapResolveAsync, WrapRejectAsync);
+                    .Then(Resolve, Reject);
             }
             else if (_command is ICommand command)
             {
@@ -160,21 +164,6 @@ namespace Cr7Sund.Framework.Impl
         {
             ReportProgress((progress + SequenceID) * SliceLength);
         }
-        protected void WrapResolveAsync()
-        {
-            Resolve();
-            _executeAsyncPromise?.Dispose();
-            _executeAsyncPromise = null;
-        }
-
-        protected void WrapRejectAsync(Exception ex)
-        {
-            base.Reject(ex);
-            NotifyRelease();
-
-            _executeAsyncPromise?.Dispose();
-            _executeAsyncPromise = null;
-        }
         
         private void RegisterPromiseArray(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands)
         {
@@ -220,7 +209,7 @@ namespace Cr7Sund.Framework.Impl
         public void Reset()
         {
             CurState = PromiseState.Pending;
-            _executeAsyncPromise?.Dispose();
+
         }
         #endregion
     }

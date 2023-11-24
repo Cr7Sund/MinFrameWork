@@ -36,7 +36,7 @@ namespace Cr7Sund.Framework.Impl
                 command.SequenceID = i;
             }
 
-            // var lastCommand = values[^1] as ICommandPromise<PromisedT>;
+            // var lastCommand = values[^1] as ICommandPromise;
             // lastCommand.Catch((ex) => UnityEngine.Debug.Log(ex));
 
             ICommandPromise firstCommand = binding.FirstPromise;
