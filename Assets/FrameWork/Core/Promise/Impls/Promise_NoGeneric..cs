@@ -43,15 +43,15 @@ namespace Cr7Sund.Framework.Impl
         /// </summary>
         public static bool EnablePromiseTracking = false;
 
-        private static EventHandler<ExceptionEventArgs> _unhandleException;
+        private static EventHandler<ExceptionEventArgs> _unhandledException;
         /// <summary>
         ///     Event raised for unhandled errors.
         ///     For this to work you have to complete your promises with a call to Done().
         /// </summary>
         public static event EventHandler<ExceptionEventArgs> UnhandledException
         {
-            add { _unhandleException += value; }
-            remove { _unhandleException -= value; }
+            add { _unhandledException += value; }
+            remove { _unhandledException -= value; }
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Cr7Sund.Framework.Impl
             Name = string.Empty;
             CurState = PromiseState.Pending;
         }
-        
+
         internal static int NextId()
         {
             return ++_nextPromiseId;
@@ -149,7 +149,7 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual IDisposable Done()
         {
-           return Catch(ex => PropagateUnhandledException(this, ex));
+            return Catch(ex => PropagateUnhandledException(this, ex));
         }
 
         public IPromise Catch(Action<Exception> onRejected)
@@ -486,7 +486,7 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region IPendingPromise
-        public virtual void Resolve()
+        public void Resolve()
         {
             if (CurState != PromiseState.Pending)
             {
@@ -525,7 +525,7 @@ namespace Cr7Sund.Framework.Impl
             InvokeProgressHandlers(progress);
         }
 
-        public virtual void Reject(Exception ex)
+        public void Reject(Exception ex)
         {
             AssertUtil.NotNull(ex);
             if (CurState != PromiseState.Pending)
@@ -727,9 +727,9 @@ namespace Cr7Sund.Framework.Impl
         // Raises the UnhandledException event.
         internal static void PropagateUnhandledException(object sender, Exception ex)
         {
-            if (_unhandleException != null)
+            if (_unhandledException != null)
             {
-                _unhandleException(sender, new ExceptionEventArgs(ex));
+                _unhandledException(sender, new ExceptionEventArgs(ex));
             }
         }
 

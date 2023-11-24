@@ -282,7 +282,6 @@ namespace Cr7Sund.Framework.Impl
         private void HandleRejected(Exception e)
         {
             BindingStatus = CommandBindingStatus.Default;
-
             ResolveRelease();
         }
 
