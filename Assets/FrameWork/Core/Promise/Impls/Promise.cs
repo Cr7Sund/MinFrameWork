@@ -9,6 +9,7 @@ namespace Cr7Sund.Framework.Impl
     {
 
         #region Fields
+
         /// <summary>
         ///     The exception when the promise is rejected.
         /// </summary>
@@ -44,12 +45,20 @@ namespace Cr7Sund.Framework.Impl
 
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
+
+        public Action<PromisedT> ResolveHandler { get; private set; }
+        public Action<Exception> RejectHandler { get; private set; }
+        public Action<float> ProgressHandler { get; private set; }
         #endregion
 
         public Promise()
         {
             CurState = PromiseState.Pending;
             Id = Promise.NextId();
+            ResolveHandler = Resolve;
+            RejectHandler = Reject;
+            ProgressHandler = ReportProgress;
+            
             if (Promise.EnablePromiseTracking)
             {
                 Promise.PendingPromises.Add(this);
@@ -60,7 +69,7 @@ namespace Cr7Sund.Framework.Impl
         {
             try
             {
-                resolver(Resolve, Reject);
+                resolver(ResolveHandler, RejectHandler);
             }
             catch (Exception ex)
             {
@@ -68,7 +77,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        protected Promise(PromiseState initialState)
+        protected Promise(PromiseState initialState):this()
         {
             CurState = initialState;
             Id = Promise.NextId();
@@ -162,7 +171,6 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise<PromisedT>();
             resultPromise.WithName(Name);
 
-            void ResolveHandler(PromisedT v) => resultPromise.Resolve(v);
 
             void RejectHandler(Exception ex)
             {
@@ -176,10 +184,8 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            void ProgressHandler(float v) => resultPromise.ReportProgress(v);
-
-            ActionHandlers(resultPromise, ResolveHandler, RejectHandler);
-            ProgressHandlers(resultPromise, ProgressHandler);
+            ActionHandlers(resultPromise, resultPromise.ResolveHandler, RejectHandler);
+            ProgressHandlers(resultPromise, resultPromise.ProgressHandler);
 
             return resultPromise;
         }
@@ -209,7 +215,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            var resultPromise = GetRawPromise();
+            Promise resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
             Action<PromisedT> resolveHandler;
@@ -223,7 +229,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                resolveHandler = resultPromise.ResolveWrap;
+                resolveHandler = _ => resultPromise.Resolve();
             }
 
             Action<Exception> rejectHandler;
@@ -238,7 +244,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                rejectHandler = resultPromise.Reject;
+                rejectHandler = resultPromise.RejectHandler;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -285,15 +291,12 @@ namespace Cr7Sund.Framework.Impl
                 {
                     onResolved(v)
                         .Progress(progress => resultPromise.ReportProgress(progress))
-                        .Then(
-                            () => resultPromise.Resolve(),
-                            ex => resultPromise.Reject(ex)
-                        );
+                        .Then(resultPromise.ResolveHandler, resultPromise.RejectHandler);
                 };
             }
             else
             {
-                resolveHandler = resultPromise.ResolveWrap;
+                resolveHandler = _ => resultPromise.Resolve();
             }
 
             Action<Exception> rejectHandler;
@@ -308,7 +311,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                rejectHandler = resultPromise.Reject;
+                rejectHandler = resultPromise.RejectHandler;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -362,10 +365,10 @@ namespace Cr7Sund.Framework.Impl
             void ResolveHandler(PromisedT v)
             {
                 onResolved(v)
-                    .Progress(progress => resultPromise.ReportProgress(progress))
+                    .Progress(resultPromise.ProgressHandler)
                     .Then(
-                        // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
-                        chainedValue => resultPromise.Resolve(chainedValue), ex => resultPromise.Reject(ex));
+                       // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
+                       resultPromise.ResolveHandler, resultPromise.RejectHandler);
             }
 
             Action<Exception> rejectHandler;
@@ -377,8 +380,8 @@ namespace Cr7Sund.Framework.Impl
                     {
                         onRejected(ex)
                             .Then(
-                                chainedValue => resultPromise.Resolve(chainedValue),
-                                callbackEx => resultPromise.Reject(callbackEx)
+                                resultPromise.ResolveHandler,
+                                resultPromise.RejectHandler
                             );
                     }
                     catch (Exception callbackEx)
@@ -389,7 +392,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                rejectHandler = resultPromise.Reject;
+                rejectHandler = resultPromise.RejectHandler;
             }
 
             ActionHandlers(resultPromise, ResolveHandler, rejectHandler);
@@ -461,7 +464,7 @@ namespace Cr7Sund.Framework.Impl
             var promise = GetRawPromise<PromisedT>();
             promise.WithName(Name);
 
-            Then(promise.Resolve);
+            Then(promise.ResolveHandler);
             Catch(e =>
             {
                 // Something different from continue with
@@ -700,6 +703,7 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region Extension Method
+
         #region public extension method
         // Convert an exception directly into a rejected promise.
         public static IPromise<PromisedT> Rejected(Exception ex)
@@ -904,6 +908,7 @@ namespace Cr7Sund.Framework.Impl
                         progress[index] = 1f;
                         resultPromise.ReportProgress(1f);
 
+                        // PLAN  test this
                         if (resultPromise.CurState == PromiseState.Pending)
                         {
                             // return first fulfill promise
@@ -1017,20 +1022,20 @@ namespace Cr7Sund.Framework.Impl
                                 float sliceLength = 1f / count;
                                 promise.ReportProgress(sliceLength * (v + itemSequence));
                             })
-                            .Then(newPromise.Resolve)
+                            .Then(newPromise.ResolveHandler)
                             .Catch(_ =>
                             {
                                 float sliceLength = 1f / count;
                                 promise.ReportProgress(sliceLength * itemSequence);
 
                                 fn()
-                                    .Then(value => newPromise.Resolve(value))
-                                    .Catch(newPromise.Reject);
+                                    .Then(newPromise.ResolveHandler)
+                                    .Catch(newPromise.RejectHandler);
                             })
                             ;
                         return newPromise;
                     })
-                .Then(value => promise.Resolve(value))
+                .Then(promise.ResolveHandler)
                 .Catch(ex =>
                 {
                     promise.ReportProgress(1f);

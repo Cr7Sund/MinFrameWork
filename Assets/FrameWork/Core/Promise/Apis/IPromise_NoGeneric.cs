@@ -8,6 +8,8 @@ namespace Cr7Sund.Framework.Api
     /// </summary>
     public interface IPromise : IPendingPromise, IBasePromise
     {
+        Action ResolveHandler { get; }
+
         /// <summary>
         ///     Set the name of the promise, useful for debugging.
         /// </summary>

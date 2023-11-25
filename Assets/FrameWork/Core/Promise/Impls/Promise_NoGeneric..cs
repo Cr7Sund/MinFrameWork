@@ -8,35 +8,27 @@ namespace Cr7Sund.Framework.Impl
     public class Promise : IPromise
     {
 
-
-        public Promise()
-        {
-            CurState = PromiseState.Pending;
-            Id = NextId();
-            if (EnablePromiseTracking)
-            {
-                PendingPromises.Add(this);
-            }
-        }
-
-        public Promise(Action<Action, Action<Exception>> resolver) : this()
-        {
-            try
-            {
-                resolver(Resolve, Reject);
-            }
-            catch (Exception ex)
-            {
-                Reject(ex);
-            }
-        }
-
-        private Promise(PromiseState initialState)
-        {
-            CurState = initialState;
-            Id = NextId();
-        }
         #region Fields
+
+
+        /// <summary>
+        ///     The exception when the promise is rejected.
+        /// </summary>
+        private Exception _rejectionException;
+
+        /// <summary>
+        ///     Error handlers.
+        /// </summary>
+        protected List<RejectHandler> _rejectHandlers;
+        /// <summary>
+        ///     Completed handlers that accept no value.
+        /// </summary>
+        protected List<ResolveHandler> _resolveHandlers;
+        /// <summary>
+        ///     Progress handlers.
+        /// </summary>
+        protected List<ProgressHandler> _progressHandlers;
+
         #region Static Fields
         /// <summary>
         ///     Set to true to enable tracking of promises.
@@ -81,34 +73,55 @@ namespace Cr7Sund.Framework.Impl
         private static readonly Promise ResolvedPromise = new Promise(PromiseState.Resolved);
         #endregion
 
-        /// <summary>
-        ///     The exception when the promise is rejected.
-        /// </summary>
-        private Exception _rejectionException;
 
-        /// <summary>
-        ///     Error handlers.
-        /// </summary>
-        protected List<RejectHandler> _rejectHandlers;
-        /// <summary>
-        ///     Completed handlers that accept no value.
-        /// </summary>
-        protected List<ResolveHandler> _resolveHandlers;
-        /// <summary>
-        ///     Progress handlers.
-        /// </summary>
-        protected List<ProgressHandler> _progressHandlers;
         #endregion
 
         #region Properties
-        public int Id
-        {
-            get;
-        }
+        public int Id{get;}
+        public Action ResolveHandler { get; }
+        public Action<Exception> RejectHandler { get; }
+        public Action<float> ProgressHandler { get; }
 
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
+   
+        private Action<Exception> _exceptionResolveHandler { get; }
+
         #endregion
+
+
+        public Promise()
+        {
+            CurState = PromiseState.Pending;
+            Id = NextId();
+            ResolveHandler = Resolve;
+            RejectHandler = Reject;
+            ProgressHandler = ReportProgress;
+            _exceptionResolveHandler = _ => Resolve();
+
+            if (EnablePromiseTracking)
+            {
+                PendingPromises.Add(this);
+            }
+        }
+
+        public Promise(Action<Action, Action<Exception>> resolver) : this()
+        {
+            try
+            {
+                resolver(ResolveHandler, RejectHandler);
+            }
+            catch (Exception ex)
+            {
+                Reject(ex);
+            }
+        }
+
+        private Promise(PromiseState initialState) : this()
+        {
+            CurState = initialState;
+            Id = NextId();
+        }
 
         #region IPromiseInfo Implementation
         public IPromise WithName(object name)
@@ -164,7 +177,6 @@ namespace Cr7Sund.Framework.Impl
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
-            void ResolveHandler() => resultPromise.Resolve();
 
             void RejectHandler(Exception ex)
             {
@@ -179,10 +191,8 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            void ProgressHandler(float v) => resultPromise.ReportProgress(v);
-
-            ActionHandlers(resultPromise, ResolveHandler, RejectHandler);
-            ProgressHandlers(this, ProgressHandler);
+            ActionHandlers(resultPromise, resultPromise.ResolveHandler, RejectHandler);
+            ProgressHandlers(this, resultPromise.ProgressHandler);
 
             return resultPromise;
         }
@@ -226,7 +236,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                resolveHandler = resultPromise.Resolve;
+                resolveHandler = resultPromise.ResolveHandler;
             }
 
             Action<Exception> rejectHandler;
@@ -241,7 +251,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                rejectHandler = resultPromise.Reject;
+                rejectHandler = resultPromise.RejectHandler;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -289,14 +299,14 @@ namespace Cr7Sund.Framework.Impl
                     onResolved()
                         .Progress(progress => resultPromise.ReportProgress(progress))
                         .Then(
-                            () => resultPromise.Resolve(),
-                            ex => resultPromise.Reject(ex)
+                            resultPromise.ResolveHandler,
+                            resultPromise.RejectHandler
                         );
                 };
             }
             else
             {
-                resolveHandler = resultPromise.Resolve;
+                resolveHandler = resultPromise.ResolveHandler;
             }
 
             Action<Exception> rejectHandler;
@@ -311,7 +321,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                rejectHandler = resultPromise.Reject;
+                rejectHandler = resultPromise.RejectHandler;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -351,8 +361,8 @@ namespace Cr7Sund.Framework.Impl
             resultPromise.WithName(Name);
 
             void ResolveHandler() => onResolved()
-                .Progress(progress => resultPromise.ReportProgress(progress))
-                .Then(chainValue => resultPromise.Resolve(chainValue), ex => resultPromise.Reject(ex));
+                .Progress(resultPromise.ProgressHandler)
+                .Then(resultPromise.ResolveHandler, resultPromise.RejectHandler);
 
             void RejectHandler(Exception ex)
             {
@@ -364,7 +374,7 @@ namespace Cr7Sund.Framework.Impl
 
                 try
                 {
-                    onRejected(ex).Then(chainValue => resultPromise.Resolve(chainValue), callbackEx => resultPromise.Reject(callbackEx));
+                    onRejected(ex).Then(resultPromise.ResolveHandler, resultPromise.RejectHandler);
                 }
                 catch (Exception callbackEx)
                 {
@@ -436,7 +446,7 @@ namespace Cr7Sund.Framework.Impl
             var promise = GetRawPromise();
             promise.WithName(Name);
 
-            Then(promise.Resolve);
+            Then(promise.ResolveHandler);
             Catch(e =>
             {
                 // Things different from continue with
@@ -460,18 +470,18 @@ namespace Cr7Sund.Framework.Impl
             var promise = GetRawPromise();
             promise.WithName(Name);
 
-            Then(promise.Resolve);
-            Catch(_ => promise.Resolve());
+            Then(promise.ResolveHandler);
+            Catch(promise._exceptionResolveHandler);
             return promise.Then(onComplete);
         }
 
         public IPromise<ConvertedT> ContinueWith<ConvertedT>(Func<IPromise<ConvertedT>> onComplete)
         {
-            var promise = GetRawPromise();
+            Promise promise = GetRawPromise();
             promise.WithName(Name);
 
-            Then(promise.Resolve);
-            Catch(_ => promise.Resolve());
+            Then(promise.ResolveHandler);
+            Catch(promise._exceptionResolveHandler);
             return promise.Then(onComplete);
         }
 
@@ -503,11 +513,6 @@ namespace Cr7Sund.Framework.Impl
             }
 
             InvokeResolveHandlers();
-        }
-
-        public void ResolveWrap<ConvertedT>(ConvertedT param)
-        {
-            Resolve();
         }
 
         public void ReportProgress(float progress)
@@ -938,8 +943,8 @@ namespace Cr7Sund.Framework.Impl
                             });
                     }
                 )
-                .Then(resultPromise.Resolve)
-                .Catch(resultPromise.Reject);
+                .Then(resultPromise.ResolveHandler)
+                .Catch(resultPromise.RejectHandler);
 
             return resultPromise;
         }
@@ -1038,6 +1043,7 @@ namespace Cr7Sund.Framework.Impl
                         })
                         .Then(() =>
                         {
+                            //PLAN test it
                             if (resultPromise.CurState == PromiseState.Pending)
                             {
                                 resultPromise.Resolve();

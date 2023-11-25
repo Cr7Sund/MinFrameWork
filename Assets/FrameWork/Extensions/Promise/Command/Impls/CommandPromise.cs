@@ -20,7 +20,19 @@ namespace Cr7Sund.Framework.Impl
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
         public bool IsOnceOff { get; set; }
+        public Action<PromisedT> ExecuteHandler { get; private set; }
+        public Action<object> ExecuteWrapHandler { get; private set; }
+        public Action<float> SequenceProgressHandler { get; private set; }
+        public Action<float> CommandProgressHandler { get; private set; }
 
+
+        public CommandPromise() : base()
+        {
+            ExecuteHandler = Execute;
+            ExecuteWrapHandler = ExecuteWarp;
+            SequenceProgressHandler = SequenceProgress;
+            CommandProgressHandler = Progress;
+        }
 
         #region IPromiseCommand Implementation
         public void Execute(PromisedT value)
@@ -47,8 +59,8 @@ namespace Cr7Sund.Framework.Impl
                 if (rejectPromise != null)
                 {
                     rejectPromise
-                        .Progress(WrapProgress)
-                        .Then(Resolve, Reject);
+                        .Progress(SequenceProgressHandler)
+                        .Then(ResolveHandler, RejectHandler);
 
                     return;
                 }
@@ -67,8 +79,8 @@ namespace Cr7Sund.Framework.Impl
         {
             ((CommandPromise<PromisedT>)resultPromise)._command = command;
 
-            ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
-            ProgressHandlers(resultPromise, resultPromise.Progress);
+            ActionHandlers(resultPromise, resultPromise.ExecuteHandler, resultPromise.RejectHandler);
+            ProgressHandlers(resultPromise, resultPromise.CommandProgressHandler);
 
             return resultPromise;
         }
@@ -85,9 +97,9 @@ namespace Cr7Sund.Framework.Impl
             var specificPromise = (CommandPromise<ConvertedT>)resultPromise;
             specificPromise._command = command;
 
-            AddConvertResolveHandler(specificPromise.ExecuteWarp, resultPromise);
-            AddRejectHandler(resultPromise.Reject, resultPromise);
-            ProgressHandlers(resultPromise, resultPromise.Progress);
+            AddConvertResolveHandler(specificPromise.ExecuteWrapHandler, resultPromise);
+            AddRejectHandler(resultPromise.RejectHandler, resultPromise);
+            ProgressHandlers(resultPromise, resultPromise.ProgressHandler);
             return resultPromise;
         }
 
@@ -132,7 +144,7 @@ namespace Cr7Sund.Framework.Impl
             return _command;
         }
 
-        protected void WrapProgress(float progress)
+        protected void SequenceProgress(float progress)
         {
             ReportProgress((progress + SequenceID) * SliceLength);
         }
@@ -169,8 +181,8 @@ namespace Cr7Sund.Framework.Impl
                 AssertUtil.IsFalse(hasMatchingItem);
                 AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
                 resultPromise
-                    .Progress(WrapProgress)
-                    .Then(Resolve, Reject);
+                    .Progress(SequenceProgressHandler)
+                    .Then(ResolveHandler, RejectHandler);
 
             }
             else if (command is ICommand<PromisedT> promiseCommand)
@@ -318,8 +330,8 @@ namespace Cr7Sund.Framework.Impl
                 AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
 
                 resultPromise
-                    .Progress(WrapProgress)
-                    .Then(Resolve, Reject);
+                    .Progress(SequenceProgressHandler)
+                    .Then(ResolveHandler, RejectHandler);
             }
             else if (command is ICommand<PromisedT, ConvertedT> promiseCommand)
             {
@@ -360,8 +372,8 @@ namespace Cr7Sund.Framework.Impl
                 if (rejectPromise != null)
                 {
                     rejectPromise
-                        .Progress(WrapProgress)
-                        .Then(Resolve, Reject);
+                        .Progress(SequenceProgressHandler)
+                        .Then(ResolveHandler, RejectHandler);
                     return;
                 }
             }

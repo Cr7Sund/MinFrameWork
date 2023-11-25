@@ -5,6 +5,11 @@ namespace Cr7Sund.Framework.Api
 
     public interface ICommandPromise<PromisedT> : IPromise<PromisedT>, ISequence, IPoolable,IResetable
     {
+        Action<PromisedT> ExecuteHandler { get; }
+        Action<float> SequenceProgressHandler { get; }
+        Action<float> CommandProgressHandler { get; }
+
+
         /// <summary>
         ///     chaining a new command provided by type
         /// </summary>

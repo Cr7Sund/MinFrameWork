@@ -3,6 +3,9 @@ namespace Cr7Sund.Framework.Api
 {
     public interface IBasePromise : IDisposable
     {
+        Action<Exception> RejectHandler { get; }
+        Action<float> ProgressHandler { get; }
+        
         /// <summary>
         ///     Complete the promise. Adds a default error handler.
         /// </summary>

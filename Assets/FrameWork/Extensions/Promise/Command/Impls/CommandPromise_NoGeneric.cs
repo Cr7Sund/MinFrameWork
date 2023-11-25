@@ -19,7 +19,18 @@ namespace Cr7Sund.Framework.Impl
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
         public bool IsOnceOff { get; set; }
+        public Action ExecuteHandler { get; private set; }
+        public Action<float> SequenceProgressHandler { get; private set; }
+        public Action<float> CommandProgressHandler { get; private set; }
 
+
+
+        public CommandPromise() : base()
+        {
+            ExecuteHandler = Execute;
+            SequenceProgressHandler = SequenceProgress;
+            CommandProgressHandler = Progress;
+        }
 
         #region IPromise Implementation
         public override void Done()
@@ -46,7 +57,7 @@ namespace Cr7Sund.Framework.Impl
         {
             return new CommandPromise<T>();
         }
-        
+
         protected override Promise GetRawPromise()
         {
             return new CommandPromise();
@@ -75,8 +86,8 @@ namespace Cr7Sund.Framework.Impl
                 AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
 
                 resultPromise
-                    .Progress(WrapProgress)
-                    .Then(Resolve, Reject);
+                    .Progress(SequenceProgressHandler)
+                    .Then(ResolveHandler, RejectHandler);
             }
             else if (_command is ICommand command)
             {
@@ -123,8 +134,8 @@ namespace Cr7Sund.Framework.Impl
         {
             ((CommandPromise)resultPromise)._command = command;
 
-            ActionHandlers(resultPromise, resultPromise.Execute, resultPromise.Reject);
-            ProgressHandlers(resultPromise, resultPromise.Progress);
+            ActionHandlers(resultPromise, resultPromise.ExecuteHandler, resultPromise.RejectHandler);
+            ProgressHandlers(resultPromise, resultPromise.CommandProgressHandler);
 
             return resultPromise;
         }
@@ -155,7 +166,7 @@ namespace Cr7Sund.Framework.Impl
             return _command;
         }
 
-        private void WrapProgress(float progress)
+        private void SequenceProgress(float progress)
         {
             ReportProgress((progress + SequenceID) * SliceLength);
         }

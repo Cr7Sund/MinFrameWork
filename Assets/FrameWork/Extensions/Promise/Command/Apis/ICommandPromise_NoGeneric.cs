@@ -4,6 +4,10 @@ namespace Cr7Sund.Framework.Api
 {
     public interface ICommandPromise : IPromise, ISequence, IPoolable, IResetable
     {
+        Action ExecuteHandler { get; }
+        Action<float> SequenceProgressHandler { get; }
+        Action<float> CommandProgressHandler { get; }
+
         ICommandPromise Then<T>() where T : ICommand, new();
         ICommandPromise Then(ICommandPromise resultPromise, ICommand command);
         ICommandPromise ThenAll(IEnumerable<ICommandPromise> promises, IEnumerable<ICommand> commands);
