@@ -11,9 +11,8 @@ namespace Cr7Sund.Framework.Api
         /// release instance and release promise to pool 
         /// to start new promise 
         void RunPromise(PromisedT value);
-        /// Declares that the promise command instantiated by pool.
-        ICommandPromiseBinding<PromisedT> AsPool();
         /// Declares that the Binding is a one-off. As soon as it's satisfied, it will be unmapped.
+        /// he promise command instantiated by pool.
         ICommandPromiseBinding<PromisedT> AsOnce();
 
 

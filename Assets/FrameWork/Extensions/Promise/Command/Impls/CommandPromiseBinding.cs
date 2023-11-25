@@ -13,7 +13,6 @@ namespace Cr7Sund.Framework.Impl
         private ICommandPromise<PromisedT> _firstPromise;
         private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
 
-        public bool UsePooling { get; private set; }
         public bool IsOnceOff { get; private set; }
         public CommandBindingStatus BindingStatus { get; private set; }
 
@@ -28,12 +27,6 @@ namespace Cr7Sund.Framework.Impl
         public new ICommandPromiseBinding<PromisedT> To(object value)
         {
             return base.To(value) as ICommandPromiseBinding<PromisedT>;
-        }
-
-        public ICommandPromiseBinding<PromisedT> AsPool()
-        {
-            UsePooling = true;
-            return this;
         }
 
         public ICommandPromiseBinding<PromisedT> AsOnce()
@@ -279,7 +272,7 @@ namespace Cr7Sund.Framework.Impl
         {
             CommandPromise<T> result;
 
-            if (UsePooling)
+            if (IsOnceOff)
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T>>();
                 result = pool.GetInstance();
@@ -304,7 +297,7 @@ namespace Cr7Sund.Framework.Impl
         {
             CommandPromise<T1, T2> result;
 
-            if (UsePooling)
+            if (IsOnceOff)
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>();
                 result = pool.GetInstance();
@@ -387,8 +380,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void ResolveRelease()
         {
-
-            if (UsePooling && IsOnceOff)
+            if (IsOnceOff)
             {
                 ReleasePromise();
                 Dispose();

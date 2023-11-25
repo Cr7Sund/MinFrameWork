@@ -75,7 +75,7 @@ namespace Cr7Sund.Framework.Tests
                     var binder = new CommandPromiseBinder();
                     injectionBinder.Injector.Inject(binder);
                     
-                    binder.Bind(SomeEnum.TWO).AsPool().AsOnce()
+                    binder.Bind(SomeEnum.TWO).AsOnce()
                         .Then<SimpleCommandOne>()
                         .Then<SimpleCommandTwo>();
 

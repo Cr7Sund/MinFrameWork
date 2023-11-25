@@ -86,7 +86,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void get_same_instance_from_commandBinder()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
@@ -103,7 +103,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void release_promise_after_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
@@ -119,7 +119,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void get_same_command_from_commandBinder()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
@@ -137,7 +137,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
@@ -153,7 +153,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOne>()
                 .Then<ExceptionCommand>()
                 .Then<SimpleCommandOne>();
@@ -184,7 +184,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_exception_multiple_times_but_asOnce()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>();
@@ -202,7 +202,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_exception_in_running_promise()
         {
-            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
             promiseBinding
                 .Then<SimpleCommandTwo>()
@@ -219,7 +219,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void stop_first_start_new_stop_async_operation()
         {
-            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
             promiseBinding
                 .Then<SimpleCommandTwo>()
@@ -240,7 +240,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void exception_in_bind_duplicate()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>();
@@ -250,7 +250,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             TestDelegate testDelegate = delegate
             {
-                _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+                _commandPromiseBinder.Bind(SomeEnum.ONE)
                     .Then<SimpleCommandTwo>();
             };
             var ex = Assert.Throws<BinderException>(testDelegate);

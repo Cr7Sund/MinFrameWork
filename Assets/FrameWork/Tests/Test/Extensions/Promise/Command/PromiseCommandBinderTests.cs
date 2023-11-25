@@ -70,7 +70,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_binder_simple_asOnce_asPool()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce().AsPool()
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
@@ -313,7 +313,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_any_promise_as_pool()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .ThenAny<
                     SimpleAsyncCommandOneGeneric,
                     SimpleAsyncCommandSecondGeneric>()
@@ -332,7 +332,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void release_any_promise_as_pool_after_resolved()
         {
-           var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+           var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .ThenAny<
                     SimpleAsyncCommandOneGeneric,
                     SimpleAsyncCommandSecondGeneric>()
@@ -340,7 +340,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
            object[] objects = binding.Value as object[];
            List<ICommandPromise<int>> testGetPromiseList = ((CommandPromiseBinding<int>)binding).Test_GetPromiseList();
-           var promistList = new List<ICommandPromise<int>>(testGetPromiseList);
+           var promiseList = new List<ICommandPromise<int>>(testGetPromiseList);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
             SimplePromise.simulatePromiseSecond.Resolve(3);
@@ -351,7 +351,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 Assert.AreEqual(false, commandPromise.IsRetain);
             }
 
-            foreach (var commandPromise in promistList)
+            foreach (var commandPromise in promiseList)
             {
                 Assert.AreEqual(false, commandPromise.IsRetain);
             }
@@ -360,7 +360,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void get_same_command_from_commandBinder()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -377,7 +377,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void release_promise_after_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -396,7 +396,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_resolved()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -412,7 +412,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
-            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<ExceptionCommandGeneric>()
                 .Then<SimpleCommandOneGeneric>();
@@ -428,7 +428,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_same_promise_multiple_times()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>();
@@ -443,7 +443,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_exception_multiple_times_but_asOnce()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool().AsOnce()
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>();
@@ -461,7 +461,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void react_exception_in_running_promise()
         {
-            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
             promiseBinding
                 .Then<SimpleCommandTwoGeneric>()
@@ -478,7 +478,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void stop_first_start_new_stop_async_operation()
         {
-            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool();
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
 
             promiseBinding
                 .Then<SimpleCommandTwoGeneric>()
@@ -498,7 +498,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void exception_in_bind_duplicate()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>();
@@ -508,7 +508,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             TestDelegate testDelegate = delegate
             {
-                _commandPromiseBinder.Bind(SomeEnum.ONE).AsPool()
+                _commandPromiseBinder.Bind(SomeEnum.ONE)
                     .Then<SimpleCommandTwoGeneric>();
             };
             var ex = Assert.Throws<BinderException>(testDelegate);

@@ -4,10 +4,9 @@ namespace Cr7Sund.Framework.Api
     {
         /// Indicate the promise binding status
         CommandBindingStatus BindingStatus { get; }
-        
-        /// Declares that the promise command instantiated by pool.
-        ICommandPromiseBinding AsPool();
+
         /// Declares that the Binding is a one-off. As soon as it's satisfied, it will be unmapped.
+        /// the promise command instantiated by pool.
         ICommandPromiseBinding AsOnce();
         /// reset promise status 
         /// to start new promise 

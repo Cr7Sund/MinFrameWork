@@ -20,7 +20,7 @@ namespace TestMono
         {
             SetUp();
         }
-        
+
         private float ReturnsFloat()
         {
             throw new NotImplementedException();
@@ -62,14 +62,25 @@ namespace TestMono
 
         private void TestPromiseCommand()
         {
-            var binder = new CommandPromiseBinder();
-            injectionBinder.Injector.Inject(binder);
+            for (int a = 0; a < Count; a++)
+            {
+                var binder = new CommandPromiseBinder();
+                injectionBinder.Injector.Inject(binder);
 
-            binder.Bind("TOW").AsPool()
-                .Then<SimpleCommandOne>()
-                .Then<SimpleCommandTwo>();
+                binder.Bind("TOW")
+                    .Then<SimpleCommandOne>()
+                    .Then<SimpleCommandTwo>();
 
-            binder.ReactTo("TOW");
+                binder.ReactTo("TOW");
+            }
+            // var binder = new CommandPromiseBinder();
+            // injectionBinder.Injector.Inject(binder);
+            //
+            // binder.Bind("TOW").AsPool()
+            //     .Then<SimpleCommandOne>()
+            //     .Then<SimpleCommandTwo>();
+            //
+            // binder.ReactTo("TOW");
         }
 
         private void TestDelegatePromise()
