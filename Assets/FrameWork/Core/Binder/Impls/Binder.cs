@@ -8,10 +8,11 @@ namespace Cr7Sund.Framework.Impl
 
         /// A handler for resolving the nature of a binding during chained commands
         public delegate void BindingResolver(IBinding binding, object oldName = null);
-        protected Dictionary<object, Dictionary<object, IBinding>> _bindings; // object is implicitly equal to type
+        protected Dictionary<object, List<IBinding>> _bindings; // object is implicitly equal to type
+
         public Binder()
         {
-            _bindings = new Dictionary<object, Dictionary<object, IBinding>>();
+            _bindings = new Dictionary<object, List<IBinding>>();
         }
 
         #region IBinder implementation
@@ -69,12 +70,17 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding GetBinding(object key, object name)
         {
-            if (_bindings.TryGetValue(key, out var dict))
+            if (_bindings.TryGetValue(key, out var list))
             {
                 name = name == null ? BindingConst.NULLOIDNAME : name;
-                if (dict.ContainsKey(name))
+
+                for (int i = 0; i < list.Count; i++)
                 {
-                    return dict[name];
+                    IBinding item = list[i];
+                    if (item.Name.Equals(name))
+                    {
+                        return item;
+                    }
                 }
             }
 
@@ -102,13 +108,18 @@ namespace Cr7Sund.Framework.Impl
 
         public void Unbind(object key, object name)
         {
-            if (_bindings.TryGetValue(key, out var dict))
+            if (_bindings.TryGetValue(key, out var list))
             {
                 name = name == null ? BindingConst.NULLOIDNAME : name;
 
-                if (dict.ContainsKey(name))
+                for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    dict.Remove(name);
+                    IBinding item = list[i];
+                    if (item.Name.Equals(name))
+                    {
+                        list.RemoveAt(i);
+                        break;
+                    }
                 }
             }
         }
@@ -120,20 +131,26 @@ namespace Cr7Sund.Framework.Impl
                 return;
             }
             object key = binding.Key;
-            Dictionary<object, IBinding> dict;
-            if (_bindings.ContainsKey(key))
+            if (_bindings.TryGetValue(key, out var dict))
             {
-                dict = _bindings[key];
-                if (dict.ContainsKey(binding.Name))
+                for (int i = dict.Count - 1; i >= 0; i--)
                 {
-                    var useBinding = dict[binding.Name];
+                    UpdateBindingAndCleanup(binding, value, dict, i);
+                }
+            }
+
+            void UpdateBindingAndCleanup(IBinding binding, object value, List<IBinding> dict, int i)
+            {
+                IBinding useBinding = dict[i];
+                if (useBinding.Name.Equals(binding.Name))
+                {
                     useBinding.RemoveValue(value);
 
                     //If result is empty, clean it out
                     object[] values = useBinding.Value as object[];
                     if (values == null || values.Length == 0)
                     {
-                        dict.Remove(useBinding.Name);
+                        dict.RemoveAt(i);
                     }
                 }
             }
@@ -142,48 +159,80 @@ namespace Cr7Sund.Framework.Impl
         public virtual void ResolveBinding(IBinding binding, object key, object oldName = null)
         {
             object bindingName = binding.Name;
+            object removeName = oldName == null ? BindingConst.NULLOIDNAME : oldName;
 
-            if (_bindings.TryGetValue(key, out var dict))
+            if (_bindings.TryGetValue(key, out var list))
             {
-                if (dict.TryGetValue(bindingName, out var existingBinding))
+                RemoveConflictingBinding(binding, bindingName, list);
+            }
+            else
+            {
+                list = new List<IBinding>();
+                _bindings[key] = list;
+            }
+
+            RemoveBindingByOldName(binding, removeName, list);
+            AddBindingIfNotExists(binding, list, bindingName);
+
+            void RemoveConflictingBinding(IBinding binding, object bindingName, List<IBinding> list)
+            {
+                for (int i = list.Count - 1; i >= 0; i--)
                 {
+                    IBinding existingBinding = list[i];
+                    if (existingBinding.Name != bindingName) continue;
                     if (existingBinding != binding)
                     {
                         if (existingBinding.IsWeak)
                         {
-                            dict.Remove(bindingName);
+                            list.RemoveAt(i);
                         }
                         else
                         {
                             throw new BinderException("Binder cannot register a new Bindings when the binder is in a conflicted state.\nConflicts: ", BinderExceptionType.CONFLICT_IN_BINDER);
                         }
+                        break;
                     }
-
                 }
             }
-            else
+
+            void RemoveBindingByOldName(IBinding binding, object removeName, List<IBinding> list)
             {
-                dict = new Dictionary<object, IBinding>();
-                _bindings[key] = dict;
+                //Remove nulled bindings
+                // e.g. when we toname to change the binding name but the binderDict still exist the oldName
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    IBinding existingBinding = list[i];
+                    if (existingBinding.Name.Equals(removeName) && existingBinding == binding)
+                    {
+                        list.RemoveAt(i);
+                        break;
+                    }
+                }
             }
 
-            //Remove nulled bindings
-            // e.g. when we toname to change the binding name but the binderDict still exist the oldName
-            object removeName = oldName == null ? BindingConst.NULLOIDNAME : oldName;
-            if (dict.ContainsKey(removeName) && dict[removeName] == binding)
+            void AddBindingIfNotExists(IBinding binding, List<IBinding> list, object bindingName)
             {
-                dict.Remove(removeName);
-            }
-
-            if (!dict.ContainsKey(bindingName))
-            {
-                dict.Add(bindingName, binding);
+                bool shouldAdd = true;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    IBinding existingBinding = list[i];
+                    if (existingBinding.Name.Equals(bindingName))
+                    {
+                        shouldAdd = false;
+                        break;
+                    }
+                }
+                if (shouldAdd)
+                {
+                    list.Add(binding);
+                }
             }
         }
 
         public virtual void OnRemove()
         {
         }
+
         #endregion
     }
 }

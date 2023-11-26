@@ -113,21 +113,24 @@ namespace Cr7Sund.Framework.Impl
             var list = new List<Type>();
             foreach (var pair in _bindings)
             {
-                foreach (var bPair in pair.Value)
+                foreach (IBinding binding in pair.Value)
                 {
-                    var binding = bPair.Value;
-
-                    if (binding.Value is Type t)
-                    {
-                        if (!set.Contains(t))
-                        {
-                            list.Add(t);
-                            set.Add(t);
-                        }
-                    }
+                    AddUniqueTypeToSets(set, list, binding);
                 }
             }
             return Reflect(list);
+
+            void AddUniqueTypeToSets(HashSet<Type> set, List<Type> list, IBinding binding)
+            {
+                if (binding.Value is Type t)
+                {
+                    if (!set.Contains(t))
+                    {
+                        list.Add(t);
+                        set.Add(t);
+                    }
+                }
+            }
         }
 
         public int Reflect(List<Type> list)
