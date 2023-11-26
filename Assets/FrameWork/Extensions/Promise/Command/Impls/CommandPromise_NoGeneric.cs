@@ -13,24 +13,48 @@ namespace Cr7Sund.Framework.Impl
         public Action<Exception> ErrorHandler;
 
         private IBaseCommand _command;
-
+        private Action _executeHandler;
+        private Action<float> _sequenceProgressHandler;
+        private Action<float> _commandProgressHandler;
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
         public bool IsOnceOff { get; set; }
-        public Action ExecuteHandler { get; private set; }
-        public Action<float> SequenceProgressHandler { get; private set; }
-        public Action<float> CommandProgressHandler { get; private set; }
-
-
-
-        public CommandPromise() : base()
+        public Action ExecuteHandler
         {
-            ExecuteHandler = Execute;
-            SequenceProgressHandler = SequenceProgress;
-            CommandProgressHandler = Progress;
+            get
+            {
+                if (_executeHandler == null)
+                {
+                    _executeHandler = Execute;
+                }
+                return _executeHandler;
+            }
         }
+        public Action<float> SequenceProgressHandler
+        {
+            get
+            {
+                if (_sequenceProgressHandler == null)
+                {
+                    _sequenceProgressHandler = SequenceProgress;
+                }
+                return _sequenceProgressHandler;
+            }
+        }
+        public Action<float> CommandProgressHandler
+        {
+            get
+            {
+                if (_commandProgressHandler == null)
+                {
+                    _commandProgressHandler = Progress;
+                }
+                return _commandProgressHandler;
+            }
+        }
+
 
         #region IPromise Implementation
         public override void Done()

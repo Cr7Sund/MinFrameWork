@@ -67,7 +67,7 @@ namespace TestMono
                 var binder = new CommandPromiseBinder();
                 injectionBinder.Injector.Inject(binder);
 
-                binder.Bind("TOW")
+                binder.Bind("TOW").AsOnce()
                     .Then<SimpleCommandOne>()
                     .Then<SimpleCommandTwo>();
 

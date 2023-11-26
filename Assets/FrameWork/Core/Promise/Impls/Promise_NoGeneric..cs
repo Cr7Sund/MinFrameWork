@@ -29,6 +29,12 @@ namespace Cr7Sund.Framework.Impl
         /// </summary>
         protected List<ProgressHandler> _progressHandlers;
 
+        private Action _resolveHandler;
+        private Action<Exception> _rejectHandler;
+        private Action<float> _progressHandler;
+        private Action<Exception> _exceptionResolveHandler;
+
+
         #region Static Fields
         /// <summary>
         ///     Set to true to enable tracking of promises.
@@ -77,15 +83,54 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region Properties
-        public int Id{get;}
-        public Action ResolveHandler { get; }
-        public Action<Exception> RejectHandler { get; }
-        public Action<float> ProgressHandler { get; }
-
+        public int Id { get; }
+        public Action ResolveHandler
+        {
+            get
+            {
+                if (_resolveHandler == null)
+                {
+                    _resolveHandler = Resolve;
+                }
+                return _resolveHandler;
+            }
+        }
+        public Action<Exception> RejectHandler
+        {
+            get
+            {
+                if (_rejectHandler == null)
+                {
+                    _rejectHandler = Reject;
+                }
+                return _rejectHandler;
+            }
+        }
+        public Action<float> ProgressHandler
+        {
+            get
+            {
+                if (_progressHandler == null)
+                {
+                    _progressHandler = ReportProgress;
+                }
+                return _progressHandler;
+            }
+        }
+        public Action<Exception> ExceptionResolveHandler
+        {
+            get
+            {
+                if (_exceptionResolveHandler == null)
+                {
+                    _exceptionResolveHandler = Reject;
+                }
+                return _exceptionResolveHandler;
+            }
+        }
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
-   
-        private Action<Exception> _exceptionResolveHandler { get; }
+
 
         #endregion
 
@@ -94,10 +139,7 @@ namespace Cr7Sund.Framework.Impl
         {
             CurState = PromiseState.Pending;
             Id = NextId();
-            ResolveHandler = Resolve;
-            RejectHandler = Reject;
-            ProgressHandler = ReportProgress;
-            _exceptionResolveHandler = _ => Resolve();
+
 
             if (EnablePromiseTracking)
             {
@@ -471,7 +513,7 @@ namespace Cr7Sund.Framework.Impl
             promise.WithName(Name);
 
             Then(promise.ResolveHandler);
-            Catch(promise._exceptionResolveHandler);
+            Catch(promise.ExceptionResolveHandler);
             return promise.Then(onComplete);
         }
 
@@ -481,7 +523,7 @@ namespace Cr7Sund.Framework.Impl
             promise.WithName(Name);
 
             Then(promise.ResolveHandler);
-            Catch(promise._exceptionResolveHandler);
+            Catch(promise.ExceptionResolveHandler);
             return promise.Then(onComplete);
         }
 

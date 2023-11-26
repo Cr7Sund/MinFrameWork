@@ -14,7 +14,6 @@ namespace Cr7Sund.Framework.Impl
         ///     The exception when the promise is rejected.
         /// </summary>
         private Exception _rejectionException;
-
         /// <summary>
         ///     Error handlers.
         /// </summary>
@@ -27,11 +26,14 @@ namespace Cr7Sund.Framework.Impl
         ///     Progress handlers.
         /// </summary>
         protected List<ProgressHandler> _progressHandlers;
-
         /// <summary>
         ///     The value when the promises is resolved.
         /// </summary>
         protected PromisedT _resolveValue;
+
+        private Action<PromisedT> _resolveHandler;
+        private Action<Exception> _rejectHandler;
+        private Action<float> _progressHandler;
 
 
         private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
@@ -46,19 +48,49 @@ namespace Cr7Sund.Framework.Impl
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
 
-        public Action<PromisedT> ResolveHandler { get; private set; }
-        public Action<Exception> RejectHandler { get; private set; }
-        public Action<float> ProgressHandler { get; private set; }
+
+        public Action<PromisedT> ResolveHandler
+        {
+            get
+            {
+                if (_resolveHandler == null)
+                {
+                    _resolveHandler = Resolve;
+                }
+                return _resolveHandler;
+            }
+        }
+        public Action<Exception> RejectHandler
+        {
+            get
+            {
+                if (_rejectHandler == null)
+                {
+                    _rejectHandler = Reject;
+                }
+                return _rejectHandler;
+            }
+        }
+        public Action<float> ProgressHandler
+        {
+            get
+            {
+                if (_progressHandler == null)
+                {
+                    _progressHandler = ReportProgress;
+                }
+                return _progressHandler;
+            }
+        }
+
         #endregion
 
         public Promise()
         {
             CurState = PromiseState.Pending;
             Id = Promise.NextId();
-            ResolveHandler = Resolve;
-            RejectHandler = Reject;
-            ProgressHandler = ReportProgress;
-            
+
+
             if (Promise.EnablePromiseTracking)
             {
                 Promise.PendingPromises.Add(this);
@@ -77,7 +109,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        protected Promise(PromiseState initialState):this()
+        protected Promise(PromiseState initialState) : this()
         {
             CurState = initialState;
             Id = Promise.NextId();
