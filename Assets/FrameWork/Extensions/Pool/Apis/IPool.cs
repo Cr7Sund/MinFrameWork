@@ -48,11 +48,6 @@ namespace Cr7Sund.Framework.Api
 
 
         /// <summary>
-        ///     Returns the total number of instances currently managed by this pool.
-        /// </summary>
-        int InstanceCount { get; }
-
-        /// <summary>
         ///     Gets or sets the overflow behavior of this pool.
         /// </summary>
         /// <value>A PoolOverflowBehavior value.</value>
@@ -113,7 +108,7 @@ namespace Cr7Sund.Framework.Api
         ///     The object Type of the first object added to the pool.
         ///     Pool objects must be of the same concrete type. This property enforces that requirement.
         /// </summary>
-        Type poolType { get; set; }
+        Type PoolType { get; set; }
 
         /// <summary>
         ///     Gets an instance from the pool if one is available.

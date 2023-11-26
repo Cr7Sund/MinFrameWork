@@ -23,7 +23,7 @@ namespace Cr7Sund.Framework.Tests
             Assert.AreEqual(0, pool.Count);
 
             pool.SetSize(100);
-            Assert.AreEqual(100, pool.Count);
+            Assert.AreEqual(0, pool.Count);
 
             pool.OverflowBehavior = PoolOverflowBehavior.EXCEPTION;
             Assert.AreEqual(PoolOverflowBehavior.EXCEPTION, pool.OverflowBehavior);
@@ -127,7 +127,8 @@ namespace Cr7Sund.Framework.Tests
         public void TestPoolOverflowException()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            pool.InstanceProvider = new TestInstanceProvider();
+            for (int a = 0; a < 4; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
@@ -151,7 +152,8 @@ namespace Cr7Sund.Framework.Tests
         {
             pool.SetSize(4);
             pool.OverflowBehavior = PoolOverflowBehavior.IGNORE;
-            for (int a = 0; a < pool.Count; a++)
+            pool.InstanceProvider = new TestInstanceProvider();
+            for (int a = 0; a < 4; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
@@ -207,7 +209,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestRemoveList1()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < 4; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
@@ -225,7 +227,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestRemoveList2()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < 4; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
@@ -274,28 +276,28 @@ namespace Cr7Sund.Framework.Tests
 
             var instance1 = pool.GetInstance();
             Assert.IsNotNull(instance1);
-            Assert.AreEqual(1, pool.InstanceCount); //First call creates one instance
+            Assert.AreEqual(1, pool.Count); //First call creates one instance
             Assert.AreEqual(0, pool.Available); //Nothing Available
 
             var instance2 = pool.GetInstance();
             Assert.IsNotNull(instance2);
             Assert.AreNotSame(instance1, instance2);
-            Assert.AreEqual(2, pool.InstanceCount); //Second call doubles. We have 2
+            Assert.AreEqual(2, pool.Count); //Second call doubles. We have 2
             Assert.AreEqual(0, pool.Available); //Nothing Available
 
             var instance3 = pool.GetInstance();
             Assert.IsNotNull(instance3);
-            Assert.AreEqual(4, pool.InstanceCount); //Third call doubles. We have 4
+            Assert.AreEqual(4, pool.Count); //Third call doubles. We have 4
             Assert.AreEqual(1, pool.Available); //One allocated. One Available.
 
             var instance4 = pool.GetInstance();
             Assert.IsNotNull(instance4);
-            Assert.AreEqual(4, pool.InstanceCount); //Fourth call. No doubling since one was Available.
+            Assert.AreEqual(4, pool.Count); //Fourth call. No doubling since one was Available.
             Assert.AreEqual(0, pool.Available);
 
             var instance5 = pool.GetInstance();
             Assert.IsNotNull(instance5);
-            Assert.AreEqual(8, pool.InstanceCount); //Fifth call. Double to 8.
+            Assert.AreEqual(8, pool.Count); //Fifth call. Double to 8.
             Assert.AreEqual(3, pool.Available); //Three left unallocated.
         }
 
@@ -314,7 +316,7 @@ namespace Cr7Sund.Framework.Tests
             {
                 var instance = pool.GetInstance();
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(a + 1, pool.InstanceCount);
+                Assert.AreEqual(a + 1, pool.Count);
                 Assert.AreEqual(0, pool.Available);
                 stack.Push(instance);
             }
@@ -326,7 +328,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.ReturnInstance(instance);
 
                 Assert.AreEqual(a + 1, pool.Available, "This one");
-                Assert.AreEqual(testCount, pool.InstanceCount, "Or this one");
+                Assert.AreEqual(testCount, pool.Count, "Or this one");
             }
         }
 

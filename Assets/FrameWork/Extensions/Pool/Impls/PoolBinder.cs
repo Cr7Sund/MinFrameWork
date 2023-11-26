@@ -45,7 +45,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 binding = GetRawBinding();
                 retVal = new Pool();
-                retVal.poolType = type;
+                retVal.PoolType = type;
                 retVal.InstanceProvider = _poolInstanceProvider;
                 binding.Bind(type).To(retVal);
             }

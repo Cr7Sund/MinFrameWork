@@ -139,7 +139,7 @@ namespace Cr7Sund.Framework.Tests
             semibinding.Remove(o1);
 
             object[] after = semibinding.Value as object[];
-            Assert.AreEqual(2, after.Length);
+            Assert.AreEqual(2, semibinding.Count);
             var afterValue = after[1] as ClassWithConstructorParameters;
             Assert.AreEqual(o2, afterValue);
             Assert.AreEqual(44, afterValue.intValue);
@@ -173,7 +173,7 @@ namespace Cr7Sund.Framework.Tests
             semibinding.Remove(removalList);
 
             object[] after = semibinding.Value as object[];
-            Assert.AreEqual(1, after.Length);
+            Assert.AreEqual(1, semibinding.Count);
             var afterValue = after[0] as ClassWithConstructorParameters;
             Assert.AreEqual(o1, afterValue);
             Assert.AreEqual(43, afterValue.intValue);

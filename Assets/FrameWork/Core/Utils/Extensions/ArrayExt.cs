@@ -4,20 +4,21 @@ namespace Cr7Sund.Framework.Util
     public static class ArrayExt
     {
         public const int UNMATCHINDEX = -1;
-        public static T[] SpliceValueAt<T>(this T[] instance, int splicePos)
+        public static void SpliceValueAt<T>(this T[] instance, int index, ref int size)
         {
-            var newList = new T[instance.Length - 1];
-            int mod = 0;
-            for (int i = 0; i < instance.Length; i++)
+            if (index >= instance.Length)
             {
-                if (i == splicePos)
-                {
-                    mod = -1;
-                    continue;
-                }
-                newList[i + mod] = instance[i];
+                throw new IndexOutOfRangeException();
             }
-            return newList.Length == 0 ? null : newList;
+            size--;
+            if (index < size)
+            {
+                Array.Copy(instance, index + 1, instance, index, size - index);
+            }
+            if (!typeof(T).IsValueType)
+            {
+                instance[size] = default!;
+            }
         }
 
         public static bool Contains<T>(this T[] instance, T o)

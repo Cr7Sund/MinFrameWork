@@ -142,9 +142,9 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
 
-            var promisePool = poolBinder.GetOrCreate<CommandPromise>();
+            IPool<CommandPromise> promisePool = poolBinder.GetOrCreate<CommandPromise>();
             Assert.AreEqual(0, promisePool.Available);
-            Assert.AreEqual(4, promisePool.InstanceCount);
+            Assert.AreEqual(4, promisePool.Count);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
             Assert.AreEqual(4, promisePool.Available);
@@ -160,7 +160,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             var promisePool = poolBinder.GetOrCreate<CommandPromise>();
             Assert.AreEqual(0, promisePool.Available);
-            Assert.AreEqual(4, promisePool.InstanceCount);
+            Assert.AreEqual(4, promisePool.Count);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
             Assert.AreEqual(4, promisePool.Available);

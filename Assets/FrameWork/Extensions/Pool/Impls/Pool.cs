@@ -92,10 +92,25 @@ namespace Cr7Sund.Framework.Impl
 
                 return retVal;
             }
+            else
+            {
+                CreateInstancesIfNeeded();
+                if (_instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION)
+                {
+                    return null;
+                }
 
+                var retVal = _instancesAvailable.Pop();
+                InstancesInUse.Add(retVal);
+                return retVal;
+            }
+        }
+
+        private void CreateInstancesIfNeeded()
+        {
             int instancesToCreate = NewInstanceToCreate();
-            if (_instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) { return null; }
 
+            if (instancesToCreate == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) return;
             AssertUtil.Greater(instancesToCreate, 0, new PoolException("Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE));
             AssertUtil.NotNull(InstanceProvider, new PoolException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER));
 
@@ -104,8 +119,6 @@ namespace Cr7Sund.Framework.Impl
                 var newInstance = GetNewInstance();
                 Add(newInstance);
             }
-
-            return GetInstanceInternal();
         }
 
         private T GetNewInstance()
@@ -157,22 +170,22 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Clear()
         {
-            foreach (var item in InstancesInUse)    
+            foreach (var item in InstancesInUse)
             {
                 if (item is IPoolable poolable)
                 {
                     poolable.Restore();
                 }
             }
-            
-            foreach (var item in _instancesAvailable)    
+
+            foreach (var item in _instancesAvailable)
             {
                 if (item is IPoolable poolable)
                 {
                     poolable.Restore();
                 }
             }
-            
+
             InstancesInUse.Clear();
             _instancesAvailable.Clear();
             _instanceCount = 0;

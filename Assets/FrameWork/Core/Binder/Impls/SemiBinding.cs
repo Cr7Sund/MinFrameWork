@@ -6,6 +6,7 @@ namespace Cr7Sund.Framework.Impl
     public class SemiBinding : ISemiBinding
     {
         protected object[] _objectValue;
+        private int _size = 0;
         public SemiBinding()
         {
             Constraint = BindingConstraintType.ONE;
@@ -27,13 +28,8 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        public int Count
-        {
-            get
-            {
-                return _objectValue?.Length ?? 0;
-            }
-        }
+        public int Count => _size;
+
 
         public object this[int index]
         {
@@ -73,6 +69,7 @@ namespace Cr7Sund.Framework.Impl
 
             _objectValue[_objectValue.Length - 1] = o;
 
+            _size++;
             return this;
         }
 
@@ -96,7 +93,7 @@ namespace Cr7Sund.Framework.Impl
             int matchIndex = Array.IndexOf(_objectValue, o);
             if (matchIndex != ArrayExt.UNMATCHINDEX)
             {
-                _objectValue = _objectValue.SpliceValueAt(matchIndex);
+                _objectValue.SpliceValueAt(matchIndex, ref _size);
             }
 
             return this;
@@ -114,6 +111,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Clear()
         {
+            _size = 0;
             _objectValue = null;
             return this;
         }
@@ -124,6 +122,4 @@ namespace Cr7Sund.Framework.Impl
         }
         #endregion
     }
-
-
 }
