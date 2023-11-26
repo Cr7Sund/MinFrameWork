@@ -123,7 +123,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 if (_exceptionResolveHandler == null)
                 {
-                    _exceptionResolveHandler = Reject;
+                    _exceptionResolveHandler = _ => Resolve();
                 }
                 return _exceptionResolveHandler;
             }
