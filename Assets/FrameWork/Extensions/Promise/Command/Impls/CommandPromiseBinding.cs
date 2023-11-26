@@ -12,12 +12,30 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private IPoolBinder _poolBinder;
         private ICommandPromise<PromisedT> _firstPromise;
         private List<ICommandPromise<PromisedT>> _promiseList = new List<ICommandPromise<PromisedT>>();
+        private Action<PromisedT> _releaseHandler;
+        private Action<Exception> _errorHandler;
 
         public bool IsOnceOff { get; private set; }
         public CommandBindingStatus BindingStatus { get; private set; }
+        public List<ICommandPromise<PromisedT>> PromiseList
+        {
+            get
+            {
+                if (_promiseList == null)
+                {
+                    _promiseList = new List<ICommandPromise<PromisedT>>();
+                }
+                return _promiseList;
+            }
+        }
+
+
 
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
+            _releaseHandler = HandleResolve;
+            _errorHandler = HandleRejected;
+
             ValueConstraint = BindingConstraintType.MANY;
             KeyConstraint = BindingConstraintType.ONE;
         }
@@ -46,7 +64,7 @@ namespace Cr7Sund.Framework.Impl
                 poolable.Reset();
             }
 
-            foreach (var item in _promiseList)
+            foreach (var item in PromiseList)
             {
                 item.Reset();
             }
@@ -81,19 +99,19 @@ namespace Cr7Sund.Framework.Impl
         public override void Dispose()
         {
             base.Dispose();
-            _promiseList.Clear();
+            PromiseList.Clear();
             _firstPromise?.Dispose();
             _firstPromise = null;
         }
 
         public List<ICommandPromise<PromisedT>> Test_GetPromiseList()
         {
-            return _promiseList;
+            return PromiseList;
         }
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.Then<T>()
         {
-            var nextPromise = InstantiatePromise<PromisedT>();
+            var nextPromise = InstantiatePromise();
             var nextCommand = InstantiateCommand<T>();
 
             Then(nextPromise, nextCommand);
@@ -103,7 +121,7 @@ namespace Cr7Sund.Framework.Impl
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.Then<T, ConvertedT>()
         {
-            var nextPromise = InstantiatePromise<ConvertedT>();
+            var nextPromise = InstantiateConvertPromise<ConvertedT>();
             var nextCommand = InstantiateCommand<T>();
 
             Then(nextPromise, nextCommand);
@@ -252,7 +270,7 @@ namespace Cr7Sund.Framework.Impl
             AssertUtil.IsTrue(typeof(T) == typeof(PromisedT), new PromiseException
                 ("can convert type in first promise", PromiseExceptionType.CONVERT_FIRST));
 
-            _firstPromise = InstantiatePromise<PromisedT>();
+            _firstPromise = InstantiatePromise();
             To(_firstPromise);
             return _firstPromise as ICommandPromise<T>;
         }
@@ -268,7 +286,33 @@ namespace Cr7Sund.Framework.Impl
             return result;
         }
 
-        private ICommandPromise<T> InstantiatePromise<T>()
+        private ICommandPromise<PromisedT> InstantiatePromise()
+        {
+            CommandPromise<PromisedT> result;
+
+            if (IsOnceOff)
+            {
+                var pool = _poolBinder.GetOrCreate<CommandPromise<PromisedT>>();
+                result = pool.GetInstance();
+                result.PoolBinder = _poolBinder;
+                result.IsOnceOff = IsOnceOff;
+                result.ReleaseHandler = _releaseHandler;
+                result.ErrorHandler = _errorHandler;
+            }
+            else
+            {
+                result = new CommandPromise<PromisedT>
+                {
+                    IsOnceOff = IsOnceOff,
+                    ReleaseHandler = _releaseHandler,
+                    ErrorHandler = _errorHandler
+                };
+            }
+
+            return result;
+        }
+
+        private ICommandPromise<T> InstantiateConvertPromise<T>()
         {
             CommandPromise<T> result;
 
@@ -279,16 +323,17 @@ namespace Cr7Sund.Framework.Impl
                 result.PoolBinder = _poolBinder;
                 result.IsOnceOff = IsOnceOff;
                 result.ReleaseHandler = HandleResolve;
-                result.ErrorHandler = HandleRejected;
+                result.ErrorHandler = _errorHandler;
             }
             else
             {
-                result = new CommandPromise<T>();
-                result.IsOnceOff = IsOnceOff;
-                result.ReleaseHandler = HandleResolve;
-                result.ErrorHandler = HandleRejected;
+                result = new CommandPromise<T>
+                {
+                    IsOnceOff = IsOnceOff,
+                    ReleaseHandler = HandleResolve,
+                    ErrorHandler = _errorHandler
+                };
             }
-
 
             return result;
         }
@@ -319,8 +364,8 @@ namespace Cr7Sund.Framework.Impl
             var promiseArray = new ICommandPromise<PromisedT>[commands.Count()];
             for (int i = 0; i < promiseArray.Length; i++)
             {
-                promiseArray[i] = InstantiatePromise<PromisedT>();
-                _promiseList.Add(promiseArray[i]);
+                promiseArray[i] = InstantiatePromise();
+                PromiseList.Add(promiseArray[i]);
             }
 
             return promiseArray;
@@ -339,9 +384,9 @@ namespace Cr7Sund.Framework.Impl
             promiseArray = new ICommandPromise<PromisedT>[commands.Count];
             for (int i = 0; i < promiseArray.Length; i++)
             {
-                promiseArray[i] = InstantiatePromise<PromisedT>();
-                _promiseList.Add(promiseArray[i]);
-                _promiseList.Add(promiseArray[i]);
+                promiseArray[i] = InstantiatePromise();
+                PromiseList.Add(promiseArray[i]);
+                PromiseList.Add(promiseArray[i]);
             }
         }
 
@@ -360,8 +405,8 @@ namespace Cr7Sund.Framework.Impl
             promiseArray = new ICommandPromise<PromisedT>[commands.Count];
             for (int i = 0; i < promiseArray.Length; i++)
             {
-                promiseArray[i] = InstantiatePromise<PromisedT>();
-                _promiseList.Add(promiseArray[i]);
+                promiseArray[i] = InstantiatePromise();
+                PromiseList.Add(promiseArray[i]);
             }
         }
 
@@ -397,7 +442,7 @@ namespace Cr7Sund.Framework.Impl
                 poolable.Release();
             }
 
-            foreach (var item in _promiseList)
+            foreach (var item in PromiseList)
             {
                 item.Release();
             }

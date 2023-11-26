@@ -11,16 +11,32 @@ namespace Cr7Sund.Framework.Impl
 
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
-        private List<ICommandPromise> _promiseList = new List<ICommandPromise>();
+        private List<ICommandPromise> _promiseList;
         private ICommandPromise _firstPromise;
+        private Action _releaseHandler;
+        private Action<Exception> _errorHandler;
 
         public bool IsOnceOff { get; private set; }
         public CommandBindingStatus BindingStatus { get; private set; }
+        public List<ICommandPromise> PromiseList
+        {
+            get
+            {
+                if (_promiseList == null)
+                {
+                    _promiseList = new List<ICommandPromise>();
+                }
+                return _promiseList;
+            }
+        }
 
 
 
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
+            _releaseHandler = HandleResolve;
+            _errorHandler = HandleRejected;
+
             ValueConstraint = BindingConstraintType.MANY;
             KeyConstraint = BindingConstraintType.ONE;
         }
@@ -45,7 +61,7 @@ namespace Cr7Sund.Framework.Impl
                 poolable.Reset();
             }
 
-            foreach (var item in _promiseList)
+            foreach (var item in PromiseList)
             {
                 item.Reset();
             }
@@ -80,7 +96,7 @@ namespace Cr7Sund.Framework.Impl
         public override void Dispose()
         {
             base.Dispose();
-            _promiseList.Clear();
+            PromiseList.Clear();
             _firstPromise = null;
         }
 
@@ -205,15 +221,15 @@ namespace Cr7Sund.Framework.Impl
                 result = pool.GetInstance();
                 result.PoolBinder = _poolBinder;
                 result.IsOnceOff = IsOnceOff;
-                result.ReleaseHandler = HandleResolve;
-                result.ErrorHandler = HandleRejected;
+                result.ReleaseHandler = _releaseHandler;
+                result.ErrorHandler = _errorHandler;
             }
             else
             {
                 result = new CommandPromise();
                 result.IsOnceOff = IsOnceOff;
-                result.ReleaseHandler = HandleResolve;
-                result.ErrorHandler = HandleRejected;
+                result.ReleaseHandler = _releaseHandler;
+                result.ErrorHandler = _errorHandler;
             }
 
             return result;
@@ -296,7 +312,7 @@ namespace Cr7Sund.Framework.Impl
                 poolable.Release();
             }
 
-            foreach (var item in _promiseList)
+            foreach (var item in PromiseList)
             {
                 item.Release();
             }
