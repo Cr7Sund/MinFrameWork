@@ -928,8 +928,8 @@ namespace Cr7Sund.Framework.Impl
                             // return first fulfill promise
                             resultPromise.Resolve();
                         }
-                    })
-                    .Catch(_ =>
+                    },
+                    _ =>
                     {
                         --remainingCount;
                         if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
@@ -937,8 +937,7 @@ namespace Cr7Sund.Framework.Impl
                             // This will happen if all of the promises are rejected.
                             resultPromise.Reject(groupException);
                         }
-                    })
-                    .Done();
+                    });
             });
 
             return resultPromise;
@@ -1032,8 +1031,8 @@ namespace Cr7Sund.Framework.Impl
                             }
                         }
                         return resultPromise;
-                    })
-                    .Catch(ex =>
+                    },
+                    ex =>
                     {
                         if (resultPromise.CurState == PromiseState.Pending)
                         {
@@ -1090,8 +1089,8 @@ namespace Cr7Sund.Framework.Impl
                             {
                                 resultPromise.Resolve();
                             }
-                        })
-                        .Catch(ex =>
+                        },
+                        ex =>
                         {
                             if (resultPromise.CurState == PromiseState.Pending)
                             {

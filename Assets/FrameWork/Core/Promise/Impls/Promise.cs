@@ -876,16 +876,15 @@ namespace Cr7Sund.Framework.Impl
                             // This will never happen if any of the promises errored.
                             resultPromise.Resolve(results);
                         }
-                    })
-                    .Catch(ex =>
+                    },
+                    ex =>
                     {
                         if (resultPromise.CurState == PromiseState.Pending)
                         {
                             // If a promise errored and the result promise is still pending, reject it.
                             resultPromise.Reject(ex);
                         }
-                    })
-                    .Done();
+                    });
             });
 
             return resultPromise;
@@ -935,30 +934,29 @@ namespace Cr7Sund.Framework.Impl
                             resultPromise.ReportProgress(progress.Average());
                         }
                     })
-                    .Then(result =>
-                    {
-                        progress[index] = 1f;
-                        resultPromise.ReportProgress(1f);
-
-                        // PLAN  test this
-                        if (resultPromise.CurState == PromiseState.Pending)
+                    .Then(
+                        result =>
                         {
-                            // return first fulfill promise
-                            resultPromise.Resolve(result);
-                        }
-                    })
-                    .Catch(ex =>
-                    {
-                        --remainingCount;
-                        groupException.Exceptions[index] = ex;
+                            progress[index] = 1f;
+                            resultPromise.ReportProgress(1f);
 
-                        if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                            if (resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // return first fulfill promise
+                                resultPromise.Resolve(result);
+                            }
+                        },
+                        ex =>
                         {
-                            // This will happen if all of the promises are rejected.
-                            resultPromise.Reject(groupException);
-                        }
-                    })
-                    .Done();
+                            --remainingCount;
+                            groupException.Exceptions[index] = ex;
+
+                            if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // This will happen if all of the promises are rejected.
+                                resultPromise.Reject(groupException);
+                            }
+                        });
             });
 
             return resultPromise;
@@ -1006,8 +1004,8 @@ namespace Cr7Sund.Framework.Impl
                             {
                                 resultPromise.Resolve(result);
                             }
-                        })
-                        .Catch(ex =>
+                        },
+                        ex =>
                         {
                             if (resultPromise.CurState == PromiseState.Pending)
                             {
@@ -1054,8 +1052,8 @@ namespace Cr7Sund.Framework.Impl
                                 float sliceLength = 1f / count;
                                 promise.ReportProgress(sliceLength * (v + itemSequence));
                             })
-                            .Then(newPromise.ResolveHandler)
-                            .Catch(_ =>
+                            .Then(newPromise.ResolveHandler,
+                            _ =>
                             {
                                 float sliceLength = 1f / count;
                                 promise.ReportProgress(sliceLength * itemSequence);
@@ -1063,8 +1061,7 @@ namespace Cr7Sund.Framework.Impl
                                 fn()
                                     .Then(newPromise.ResolveHandler)
                                     .Catch(newPromise.RejectHandler);
-                            })
-                            ;
+                            });
                         return newPromise;
                     })
                 .Then(promise.ResolveHandler)
