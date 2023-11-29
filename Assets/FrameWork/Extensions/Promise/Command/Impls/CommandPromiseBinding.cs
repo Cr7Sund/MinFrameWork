@@ -29,8 +29,6 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-
-
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             _releaseHandler = HandleResolve;
@@ -55,18 +53,21 @@ namespace Cr7Sund.Framework.Impl
 
         public void RestartPromise()
         {
-            if (IsOnceOff) return;
-
             var values = Value as object[];
-            foreach (var item in values)
+            for (int i = 0; i < values.Length; i++)
             {
+                object item = values[i];
                 var poolable = item as IResetable;
                 poolable.Reset();
             }
 
-            foreach (var item in PromiseList)
+            if (_promiseList != null)
             {
-                item.Reset();
+                for (int i = 0; i < _promiseList.Count; i++)
+                {
+                    ICommandPromise<PromisedT> item = _promiseList[i];
+                    item.Reset();
+                }
             }
 
             BindingStatus = CommandBindingStatus.Default;
@@ -90,17 +91,21 @@ namespace Cr7Sund.Framework.Impl
 
             BindingStatus = CommandBindingStatus.Running;
 
-            var lastPromise = values[^1] as IBasePromise;
-            lastPromise.Done();
+            if (IsOnceOff)
+            {
+                var lastPromise = values[^1] as IBasePromise;
+                lastPromise.Done();
+            }
 
             _firstPromise.Resolve(value);
         }
 
         public override void Dispose()
         {
+            ReleasePromise();
+
             base.Dispose();
-            PromiseList.Clear();
-            _firstPromise?.Dispose();
+            _promiseList?.Clear();
             _firstPromise = null;
         }
 
@@ -294,19 +299,13 @@ namespace Cr7Sund.Framework.Impl
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<PromisedT>>();
                 result = pool.GetInstance();
-                result.PoolBinder = _poolBinder;
-                result.IsOnceOff = IsOnceOff;
+                InitPromise(result);
                 result.ReleaseHandler = _releaseHandler;
-                result.ErrorHandler = _errorHandler;
             }
             else
             {
-                result = new CommandPromise<PromisedT>
-                {
-                    IsOnceOff = IsOnceOff,
-                    ReleaseHandler = _releaseHandler,
-                    ErrorHandler = _errorHandler
-                };
+                result = new CommandPromise<PromisedT>();
+                InitPromise(result);
             }
 
             return result;
@@ -320,19 +319,13 @@ namespace Cr7Sund.Framework.Impl
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T>>();
                 result = pool.GetInstance();
-                result.PoolBinder = _poolBinder;
-                result.IsOnceOff = IsOnceOff;
+                InitPromise<T>(result);
                 result.ReleaseHandler = HandleResolve;
-                result.ErrorHandler = _errorHandler;
             }
             else
             {
-                result = new CommandPromise<T>
-                {
-                    IsOnceOff = IsOnceOff,
-                    ReleaseHandler = HandleResolve,
-                    ErrorHandler = _errorHandler
-                };
+                result = new CommandPromise<T>();
+                InitPromise<T>(result);
             }
 
             return result;
@@ -346,17 +339,27 @@ namespace Cr7Sund.Framework.Impl
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>();
                 result = pool.GetInstance();
-                result.PoolBinder = _poolBinder;
-                result.IsOnceOff = IsOnceOff;
+                InitPromise<T2>(result);
                 result.ReleaseHandler = HandleResolve;
             }
             else
             {
                 result = new CommandPromise<T1, T2>();
-                result.IsOnceOff = IsOnceOff;
+                InitPromise<T2>(result);
             }
 
             return result;
+        }
+
+        private void InitPromise<T>(CommandPromise<T> result)
+        {
+
+            result.IsOnceOff = IsOnceOff;
+            if (IsOnceOff)
+            {
+                result.ErrorHandler = _errorHandler;
+                result.PoolBinder = _poolBinder;
+            }
         }
 
         private ICommandPromise<PromisedT>[] InstantiateArrayPromise(ICommand<PromisedT>[] commands)
@@ -385,7 +388,6 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
-                PromiseList.Add(promiseArray[i]);
                 PromiseList.Add(promiseArray[i]);
             }
         }
@@ -427,7 +429,6 @@ namespace Cr7Sund.Framework.Impl
         {
             if (IsOnceOff)
             {
-                ReleasePromise();
                 Dispose();
                 BindingStatus = CommandBindingStatus.Released;
             }
@@ -435,18 +436,27 @@ namespace Cr7Sund.Framework.Impl
 
         private void ReleasePromise()
         {
-            var values = Value as object[];
-            foreach (var item in values)
+            if (Value != null)
             {
-                var poolable = item as IPoolable;
-                poolable.Release();
-            }
+                var values = Value as object[];
 
-            foreach (var item in PromiseList)
+                for (int i = 0; i < values.Length; i++)
+                {
+                    object item = values[i];
+                    var poolable = item as IPoolable;
+                    poolable.Release();
+                }
+            }
+            if (_promiseList != null)
             {
-                item.Release();
+                for (int i = 0; i < _promiseList.Count; i++)
+                {
+                    ICommandPromise<PromisedT> item = _promiseList[i];
+                    item.Release();
+                }
             }
         }
+
         #endregion
     }
 }

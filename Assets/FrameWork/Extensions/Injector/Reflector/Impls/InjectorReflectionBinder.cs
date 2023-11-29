@@ -66,8 +66,9 @@ namespace Cr7Sund.Framework.Impl
                                           BindingFlags.NonPublic |
                                           BindingFlags.Instance |
                                           BindingFlags.InvokeMethod);
-            foreach (var method in methods)
+            for (int i = 0; i < methods.Length; i++)
             {
+                MethodInfo method = methods[i];
                 object[] tagged = method.GetCustomAttributes(typeof(PostConstruct), true);
                 if (tagged.Length > 0)
                 {
@@ -88,8 +89,9 @@ namespace Cr7Sund.Framework.Impl
             var pairs = new List<Tuple<Type, object, FieldInfo>>();
 
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var field in fields)
+            for (int i = 0; i < fields.Length; i++)
             {
+                FieldInfo field = fields[i];
                 object[] injections = field.GetCustomAttributes(typeof(Inject), true);
 
                 if (injections.Length > 0)

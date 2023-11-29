@@ -1,7 +1,5 @@
-#region
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-                                    #endregion
 namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromiseBinder : Binder, ICommandPromiseBinder
@@ -14,10 +12,12 @@ namespace Cr7Sund.Framework.Impl
         {
             ICommandPromiseBinding binding = GetBinding(trigger);
 
-            AssertUtil.AreNotEqual(CommandBindingStatus.Running, binding.BindingStatus, new PromiseException(
-                "can not react again when running", PromiseExceptionType.CAN_NOT_REACT_RUNNING));
-            AssertUtil.AreNotEqual(CommandBindingStatus.Released, binding.BindingStatus, new PromiseException(
-                "can not react again since using at once", PromiseExceptionType.CAN_NOT_REACT_RELEASED));
+            // AssertUtil.AreNotEqual(CommandBindingStatus.Running, binding.BindingStatus, new PromiseException(
+            //     "can not react again when running", PromiseExceptionType.CAN_NOT_REACT_RUNNING));
+            // AssertUtil.AreNotEqual(CommandBindingStatus.Released, binding.BindingStatus, new PromiseException(
+            //     "can not react again since using at once", PromiseExceptionType.CAN_NOT_REACT_RELEASED));
+
+
             binding.RestartPromise();
             binding.RunPromise();
         }

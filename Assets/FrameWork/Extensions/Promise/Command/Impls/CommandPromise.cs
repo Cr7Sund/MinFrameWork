@@ -18,7 +18,8 @@ namespace Cr7Sund.Framework.Impl
         private Action<PromisedT> _executeHandler;
         private Action<float> _sequenceProgressHandler;
         private Action<float> _commandProgressHandler;
-        
+        private List<IBasePromise> _promisePoolList;
+
 
         public float SliceLength { get; set; }
         public int SequenceID { get; set; }
@@ -68,6 +69,7 @@ namespace Cr7Sund.Framework.Impl
                 return _commandProgressHandler;
             }
         }
+
 
 
         #region IPromiseCommand Implementation
@@ -249,36 +251,84 @@ namespace Cr7Sund.Framework.Impl
         #region IPromise Implementation
         public override void Done()
         {
-            base.ClearHandlers();
-            _convertResolveHandlers?.Clear();
-            Then(ReleaseHandler, ErrorHandler);
+            ClearHandlers();
+
+            var resultPromise = GetRawPromise();
+            ActionHandlers(resultPromise, ReleaseHandler, ErrorHandler);
         }
 
         public override void Dispose()
         {
-            base.Dispose();
-            _command = null;
+            Release();
         }
 
         protected override Promise<T> GetRawPromise<T>()
         {
-            return new CommandPromise<T>();
+            CommandPromise<T> resultPromise;
+            if (IsOnceOff)
+            {
+                resultPromise = CreateValuePoolPromise<T>();
+
+                _promisePoolList ??= new List<IBasePromise>();
+                _promisePoolList.Add(resultPromise);
+            }
+            else
+            {
+                resultPromise = new CommandPromise<T>();
+                InitValuePromise(resultPromise);
+            }
+            return resultPromise;
         }
 
         protected override Promise GetRawPromise()
         {
-            return new CommandPromise();
-        }
-
-        protected override void ClearHandlers()
-        {
+            CommandPromise resultPromise;
             if (IsOnceOff)
             {
-                base.ClearHandlers();
-                _convertResolveHandlers?.Clear();
+                resultPromise = CreateNoValuePromise();
+                _promisePoolList ??= new List<IBasePromise>();
+                _promisePoolList.Add(resultPromise);
+            }
+            else
+            {
+                resultPromise = new CommandPromise();
+                InitNoValuePromise(resultPromise);
+            }
+            return resultPromise;
+        }
+
+        private CommandPromise CreateNoValuePromise()
+        {
+            IPool<CommandPromise> pool = PoolBinder.GetOrCreate<CommandPromise>();
+            CommandPromise resultPromise = pool.GetInstance();
+            InitNoValuePromise(resultPromise);
+            return resultPromise;
+        }
+
+        private CommandPromise<T> CreateValuePoolPromise<T>()
+        {
+            CommandPromise<T> resultPromise = PoolBinder.GetOrCreate<CommandPromise<T>>().GetInstance();
+            InitValuePromise(resultPromise);
+            return resultPromise;
+        }
+
+        private void InitValuePromise<T>(CommandPromise<T> resultPromise)
+        {
+            resultPromise.IsOnceOff = IsOnceOff;
+            if (IsOnceOff)
+            {
+                resultPromise.PoolBinder = PoolBinder;
             }
         }
 
+        private void InitNoValuePromise(CommandPromise resultPromise)
+        {
+            resultPromise.IsOnceOff = IsOnceOff;
+            if (IsOnceOff)
+            {
+                resultPromise.PoolBinder = PoolBinder;
+            }
+        }
 
         private void AddConvertResolveHandler(Action<object> onResolved, IRejectable rejectable)
         {
@@ -304,6 +354,15 @@ namespace Cr7Sund.Framework.Impl
 
             base.InvokeResolveHandlers(value);
         }
+
+        protected override void ClearHandlers()
+        {
+            if (IsOnceOff)
+            {
+                base.ClearHandlers();
+                _convertResolveHandlers?.Clear();
+            }
+        }
         #endregion
 
         #region IPoolable Implementation
@@ -316,15 +375,26 @@ namespace Cr7Sund.Framework.Impl
         {
             IsRetain = false;
 
-            CurState = PromiseState.Pending;
-
-            Dispose();
+            base.Dispose();
+            _command = null;
+            ReleasePoolPromises();
         }
 
         public virtual void Release()
         {
-            var pool = PoolBinder?.Get<CommandPromise<PromisedT>>();
+            var pool = PoolBinder.Get<CommandPromise<PromisedT>>();
             pool?.ReturnInstance(this);
+        }
+
+        private void ReleasePoolPromises()
+        {
+            if (_promisePoolList == null) return;
+            for (int i = 0; i < _promisePoolList.Count; i++)
+            {
+                IBasePromise item = _promisePoolList[i];
+                item.Dispose();
+            }
+            _promisePoolList.Clear();
         }
         #endregion
 

@@ -20,7 +20,7 @@ namespace Cr7Sund.Framework.Impl
         {
             get
             {
-                if (Constraint.Equals(BindingConstraintType.ONE))
+                if (Constraint == BindingConstraintType.ONE)
                 {
                     return _objectValue?[0];
                 }

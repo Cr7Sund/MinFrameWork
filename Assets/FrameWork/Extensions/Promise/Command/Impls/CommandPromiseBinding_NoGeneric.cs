@@ -30,8 +30,6 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-
-
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             _releaseHandler = HandleResolve;
@@ -43,7 +41,6 @@ namespace Cr7Sund.Framework.Impl
 
 
         #region IPromiseCommandBinding Implementation
-
         public ICommandPromiseBinding AsOnce()
         {
             IsOnceOff = true;
@@ -52,18 +49,21 @@ namespace Cr7Sund.Framework.Impl
 
         public void RestartPromise()
         {
-            if (IsOnceOff) return;
-
             var values = Value as object[];
-            foreach (var item in values)
+            for (int i = 0; i < values.Length; i++)
             {
+                object item = values[i];
                 var poolable = item as IResetable;
                 poolable.Reset();
             }
 
-            foreach (var item in PromiseList)
+            if (_promiseList != null)
             {
-                item.Reset();
+                for (int i = 0; i < _promiseList.Count; i++)
+                {
+                    ICommandPromise item = _promiseList[i];
+                    item.Reset();
+                }
             }
 
             BindingStatus = CommandBindingStatus.Default;
@@ -86,17 +86,21 @@ namespace Cr7Sund.Framework.Impl
 
             BindingStatus = CommandBindingStatus.Running;
 
-
-            var lastPromise = values[^1] as IBasePromise;
-            lastPromise.Done();
+            if (IsOnceOff)
+            {
+                var lastPromise = values[^1] as IBasePromise;
+                lastPromise.Done();
+            }
 
             _firstPromise.Resolve();
         }
 
         public override void Dispose()
         {
+            ReleasePromise();
+
             base.Dispose();
-            PromiseList.Clear();
+            _promiseList?.Clear();
             _firstPromise = null;
         }
 
@@ -219,20 +223,27 @@ namespace Cr7Sund.Framework.Impl
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise>();
                 result = pool.GetInstance();
-                result.PoolBinder = _poolBinder;
-                result.IsOnceOff = IsOnceOff;
-                result.ReleaseHandler = _releaseHandler;
-                result.ErrorHandler = _errorHandler;
+                InitPromise(result);
             }
             else
             {
                 result = new CommandPromise();
-                result.IsOnceOff = IsOnceOff;
-                result.ReleaseHandler = _releaseHandler;
-                result.ErrorHandler = _errorHandler;
+                InitPromise(result);
             }
 
             return result;
+        }
+
+        private void InitPromise(CommandPromise result)
+        {
+            result.IsOnceOff = IsOnceOff;
+            if (IsOnceOff)
+            {
+                result.ReleaseHandler = _releaseHandler;
+                result.ErrorHandler = _errorHandler;
+                result.PoolBinder = _poolBinder;
+            }
+
         }
 
         private void InstantiateArrayPromise<T1, T2>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
@@ -248,6 +259,7 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
+                PromiseList.Add(promiseArray[i]);
             }
         }
 
@@ -266,6 +278,7 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
+                PromiseList.Add(promiseArray[i]);
             }
         }
 
@@ -275,6 +288,7 @@ namespace Cr7Sund.Framework.Impl
             for (int i = 0; i < promiseArray.Length; i++)
             {
                 promiseArray[i] = InstantiatePromise();
+                PromiseList.Add(promiseArray[i]);
             }
 
             return promiseArray;
@@ -283,7 +297,6 @@ namespace Cr7Sund.Framework.Impl
         private void HandleResolve()
         {
             BindingStatus = CommandBindingStatus.Default;
-
             ResolveRelease();
         }
 
@@ -297,7 +310,6 @@ namespace Cr7Sund.Framework.Impl
         {
             if (IsOnceOff)
             {
-                ReleasePromise();
                 Dispose();
                 BindingStatus = CommandBindingStatus.Released;
             }
@@ -305,16 +317,25 @@ namespace Cr7Sund.Framework.Impl
 
         private void ReleasePromise()
         {
-            var values = Value as object[];
-            foreach (var item in values)
+            if (Value != null)
             {
-                var poolable = item as IPoolable;
-                poolable.Release();
+                var values = Value as object[];
+
+                for (int i = 0; i < values.Length; i++)
+                {
+                    object item = values[i];
+                    var poolable = item as IPoolable;
+                    poolable.Release();
+                }
             }
 
-            foreach (var item in PromiseList)
+            if (_promiseList != null)
             {
-                item.Release();
+                for (int i = 0; i < _promiseList.Count; i++)
+                {
+                    ICommandPromise item = _promiseList[i];
+                    item.Release();
+                }
             }
         }
         #endregion
