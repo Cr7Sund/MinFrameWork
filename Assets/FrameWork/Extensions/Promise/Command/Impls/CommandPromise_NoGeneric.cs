@@ -62,7 +62,10 @@ namespace Cr7Sund.Framework.Impl
         public override void Done()
         {
             ClearHandlers();
+            var isOnceOff = IsOnceOff;
+            IsOnceOff = true;
             var resultPromise = GetRawPromise();
+            IsOnceOff = IsOnceOff;
             ActionHandlers(resultPromise, ReleaseHandler, ErrorHandler);
         }
 
@@ -118,6 +121,7 @@ namespace Cr7Sund.Framework.Impl
         {
             IPool<CommandPromise> pool = PoolBinder.GetOrCreate<CommandPromise>();
             CommandPromise resultPromise = pool.GetInstance();
+            resultPromise.Reset();
             InitNoValuePromise(resultPromise);
             return resultPromise;
         }
@@ -125,6 +129,7 @@ namespace Cr7Sund.Framework.Impl
         private CommandPromise<T> CreateValuePoolPromise<T>()
         {
             CommandPromise<T> resultPromise = PoolBinder.GetOrCreate<CommandPromise<T>>().GetInstance();
+            resultPromise.Reset();
             InitValuePromise(resultPromise);
             return resultPromise;
         }
@@ -132,19 +137,13 @@ namespace Cr7Sund.Framework.Impl
         private void InitValuePromise<T>(CommandPromise<T> resultPromise)
         {
             resultPromise.IsOnceOff = IsOnceOff;
-            if (IsOnceOff)
-            {
-                resultPromise.PoolBinder = PoolBinder;
-            }
+            resultPromise.PoolBinder = PoolBinder;
         }
 
         private void InitNoValuePromise(CommandPromise resultPromise)
         {
             resultPromise.IsOnceOff = IsOnceOff;
-            if (IsOnceOff)
-            {
-                resultPromise.PoolBinder = PoolBinder;
-            }
+            resultPromise.PoolBinder = PoolBinder;
         }
 
         #endregion
@@ -286,8 +285,15 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Release()
         {
-            var pool = PoolBinder?.Get<CommandPromise>();
-            pool.ReturnInstance(this);
+            if (IsOnceOff)
+            {
+                var pool = PoolBinder?.Get<CommandPromise>();
+                pool.ReturnInstance(this);
+            }
+            else
+            {
+                ReleasePoolPromises();
+            }
         }
 
         private void ReleasePoolPromises()
@@ -300,7 +306,7 @@ namespace Cr7Sund.Framework.Impl
             }
             _promisePoolList.Clear();
         }
-     
+
         #endregion
 
         #region IResetable Implementation

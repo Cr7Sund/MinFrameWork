@@ -86,11 +86,9 @@ namespace Cr7Sund.Framework.Impl
 
             BindingStatus = CommandBindingStatus.Running;
 
-            if (IsOnceOff)
-            {
-                var lastPromise = values[^1] as IBasePromise;
-                lastPromise.Done();
-            }
+
+            var lastPromise = values[^1] as IBasePromise;
+            lastPromise.Done();
 
             _firstPromise.Resolve();
         }
@@ -237,13 +235,10 @@ namespace Cr7Sund.Framework.Impl
         private void InitPromise(CommandPromise result)
         {
             result.IsOnceOff = IsOnceOff;
-            if (IsOnceOff)
-            {
-                result.ReleaseHandler = _releaseHandler;
-                result.ErrorHandler = _errorHandler;
-                result.PoolBinder = _poolBinder;
-            }
-
+            result.ReleaseHandler = _releaseHandler;
+            result.ErrorHandler = _errorHandler;
+            result.PoolBinder = _poolBinder;
+            result.Reset();
         }
 
         private void InstantiateArrayPromise<T1, T2>(out List<ICommand> commands, out ICommandPromise[] promiseArray)
@@ -312,6 +307,10 @@ namespace Cr7Sund.Framework.Impl
             {
                 Dispose();
                 BindingStatus = CommandBindingStatus.Released;
+            }
+            else
+            {
+                ReleasePromise();
             }
         }
 

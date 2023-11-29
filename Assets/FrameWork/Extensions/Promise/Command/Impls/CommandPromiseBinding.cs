@@ -91,11 +91,9 @@ namespace Cr7Sund.Framework.Impl
 
             BindingStatus = CommandBindingStatus.Running;
 
-            if (IsOnceOff)
-            {
-                var lastPromise = values[^1] as IBasePromise;
-                lastPromise.Done();
-            }
+
+            var lastPromise = values[^1] as IBasePromise;
+            lastPromise.Done();
 
             _firstPromise.Resolve(value);
         }
@@ -305,6 +303,7 @@ namespace Cr7Sund.Framework.Impl
             else
             {
                 result = new CommandPromise<PromisedT>();
+                result.ReleaseHandler = _releaseHandler;
                 InitPromise(result);
             }
 
@@ -325,6 +324,7 @@ namespace Cr7Sund.Framework.Impl
             else
             {
                 result = new CommandPromise<T>();
+                result.ReleaseHandler = HandleResolve;
                 InitPromise<T>(result);
             }
 
@@ -346,6 +346,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 result = new CommandPromise<T1, T2>();
                 InitPromise<T2>(result);
+                result.ReleaseHandler = HandleResolve;
             }
 
             return result;
@@ -353,13 +354,10 @@ namespace Cr7Sund.Framework.Impl
 
         private void InitPromise<T>(CommandPromise<T> result)
         {
-
             result.IsOnceOff = IsOnceOff;
-            if (IsOnceOff)
-            {
-                result.ErrorHandler = _errorHandler;
-                result.PoolBinder = _poolBinder;
-            }
+            result.PoolBinder = _poolBinder;
+            result.ErrorHandler = _errorHandler;
+            result.Reset();
         }
 
         private ICommandPromise<PromisedT>[] InstantiateArrayPromise(ICommand<PromisedT>[] commands)
@@ -431,6 +429,10 @@ namespace Cr7Sund.Framework.Impl
             {
                 Dispose();
                 BindingStatus = CommandBindingStatus.Released;
+            }
+            else
+            {
+                ReleasePromise();
             }
         }
 

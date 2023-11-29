@@ -53,6 +53,19 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
+        public void command_binder_release_done()
+        {
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
+
+            promiseBinding.Then<SimpleCommandTwo>()
+            .Then<SimpleCommandOne>()
+            .Then<SimpleCommandTwo>();
+
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE);
+        }
+
+        [Test]
         public void command_binder_with_async_operation()
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
@@ -147,7 +160,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(4, promisePool.Count);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
-            Assert.AreEqual(4, promisePool.Available);
+            Assert.AreEqual(8, promisePool.Available);
+            Assert.AreEqual(8, promisePool.Count);
         }
 
         [Test]
@@ -163,7 +177,9 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(4, promisePool.Count);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
-            Assert.AreEqual(4, promisePool.Available);
+            binding.Dispose();
+            Assert.AreEqual(8, promisePool.Available);
+            Assert.AreEqual(8, promisePool.Count);
         }
 
         [Test]
@@ -217,20 +233,38 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
+        public void react_multiple_bindings()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
+                .Then<SimpleCommandTwo>()
+                .Then<SimpleCommandOne>()
+                .Then<SimpleCommandTwo>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE);
+
+            _commandPromiseBinder.Bind(SomeEnum.TWO).AsOnce()
+                  .Then<SimpleCommandTwo>()
+                  .Then<SimpleCommandOne>()
+                  .Then<SimpleCommandTwo>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.TWO);
+        }
+
+
+        [Test]
         public void stop_first_start_new_stop_async_operation()
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
-
             promiseBinding
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleAsyncCommandOne>()
                 .Then<SimpleCommandOne>();
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
-
-            promiseBinding.RestartPromise();
             SimplePromise.result = 0;
 
+            promiseBinding.RestartPromise();
+            
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
             SimplePromise.simulatePromise.Resolve();
 

@@ -60,43 +60,38 @@ namespace TestMono
             promise = new Promise();
         }
 
+        #region Usual Case - react often
         private void TestPromiseCommand()
         {
+            var binder = new CommandPromiseBinder();
+            injectionBinder.Injector.Inject(binder);
+
             for (int a = 0; a < Count; a++)
             {
-                var binder = new CommandPromiseBinder();
-                injectionBinder.Injector.Inject(binder);
-
-                binder.Bind("TOW").AsOnce()
+                binder.Bind(a.ToString()).AsOnce()
                     .Then<SimpleCommandOne>()
                     .Then<SimpleCommandTwo>();
 
-                binder.ReactTo("TOW");
+                binder.ReactTo(a.ToString());
             }
-            // var binder = new CommandPromiseBinder();
-            // injectionBinder.Injector.Inject(binder);
-            //
-            // binder.Bind("TOW").AsPool()
-            //     .Then<SimpleCommandOne>()
-            //     .Then<SimpleCommandTwo>();
-            //
-            // binder.ReactTo("TOW");
         }
 
         private void TestDelegatePromise()
         {
+            var binder = new CommandPromiseBinder();
+            injectionBinder.Injector.Inject(binder);
+
+            binder.Bind("TOW")
+                .Then<SimpleCommandOne>()
+                .Then<SimpleCommandTwo>();
+
             for (int a = 0; a < Count; a++)
             {
-                var binder = new CommandPromiseBinder();
-                injectionBinder.Injector.Inject(binder);
-
-                binder.Bind("TOW")
-                    .Then<SimpleCommandOne>()
-                    .Then<SimpleCommandTwo>();
-
                 binder.ReactTo("TOW");
             }
         }
+
+        #endregion
     }
 
     public class TestSimpleCommandOne : Command
