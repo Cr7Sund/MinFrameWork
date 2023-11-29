@@ -9,8 +9,6 @@ namespace Cr7Sund.Framework.Impl
     {
 
         #region Fields
-
-
         /// <summary>
         ///     The exception when the promise is rejected.
         /// </summary>
@@ -78,8 +76,6 @@ namespace Cr7Sund.Framework.Impl
         /// </summary>
         private static readonly Promise ResolvedPromise = new Promise(PromiseState.Resolved);
         #endregion
-
-
         #endregion
 
         #region Properties
@@ -130,8 +126,6 @@ namespace Cr7Sund.Framework.Impl
         }
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
-
-
         #endregion
 
 
@@ -919,25 +913,25 @@ namespace Cr7Sund.Framework.Impl
                         }
                     })
                     .Then(() =>
-                    {
-                        progress[index] = 1f;
-                        resultPromise.ReportProgress(1f);
+                        {
+                            progress[index] = 1f;
+                            resultPromise.ReportProgress(1f);
 
-                        if (resultPromise.CurState == PromiseState.Pending)
+                            if (resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // return first fulfill promise
+                                resultPromise.Resolve();
+                            }
+                        },
+                        _ =>
                         {
-                            // return first fulfill promise
-                            resultPromise.Resolve();
-                        }
-                    },
-                    _ =>
-                    {
-                        --remainingCount;
-                        if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
-                        {
-                            // This will happen if all of the promises are rejected.
-                            resultPromise.Reject(groupException);
-                        }
-                    });
+                            --remainingCount;
+                            if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // This will happen if all of the promises are rejected.
+                                resultPromise.Reject(groupException);
+                            }
+                        });
             });
 
             return resultPromise;
@@ -1018,29 +1012,29 @@ namespace Cr7Sund.Framework.Impl
                         }
                     })
                     .Then(() =>
-                    {
-                        progress[index] = 1f;
+                        {
+                            progress[index] = 1f;
 
-                        remainingCount--;
-                        if (remainingCount == 0)
-                        {
-                            if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                            remainingCount--;
+                            if (remainingCount == 0)
                             {
-                                // This will never happen if any of the promises has en error occurred 
-                                resultPromise.Resolve();
+                                if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                                {
+                                    // This will never happen if any of the promises has en error occurred 
+                                    resultPromise.Resolve();
+                                }
                             }
-                        }
-                        return resultPromise;
-                    },
-                    ex =>
-                    {
-                        if (resultPromise.CurState == PromiseState.Pending)
+                            return resultPromise;
+                        },
+                        ex =>
                         {
-                            // If a promise has en error occurred 
-                            // and the result promise is still pending, first reject it.
-                            resultPromise.Reject(ex);
-                        }
-                    });
+                            if (resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // If a promise has en error occurred 
+                                // and the result promise is still pending, first reject it.
+                                resultPromise.Reject(ex);
+                            }
+                        });
             });
 
             return resultPromise;
@@ -1083,21 +1077,21 @@ namespace Cr7Sund.Framework.Impl
                             resultPromise.ReportProgress(progress.Max());
                         })
                         .Then(() =>
-                        {
-                            //PLAN test it
-                            if (resultPromise.CurState == PromiseState.Pending)
                             {
-                                resultPromise.Resolve();
-                            }
-                        },
-                        ex =>
-                        {
-                            if (resultPromise.CurState == PromiseState.Pending)
+                                //PLAN test it
+                                if (resultPromise.CurState == PromiseState.Pending)
+                                {
+                                    resultPromise.Resolve();
+                                }
+                            },
+                            ex =>
                             {
-                                // If a promise errored and the result promise is still pending, reject it.
-                                resultPromise.Reject(ex);
-                            }
-                        });
+                                if (resultPromise.CurState == PromiseState.Pending)
+                                {
+                                    // If a promise errored and the result promise is still pending, reject it.
+                                    resultPromise.Reject(ex);
+                                }
+                            });
                 }
             );
 

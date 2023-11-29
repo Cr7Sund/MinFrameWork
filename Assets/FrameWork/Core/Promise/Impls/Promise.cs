@@ -9,7 +9,6 @@ namespace Cr7Sund.Framework.Impl
     {
 
         #region Fields
-
         /// <summary>
         ///     The exception when the promise is rejected.
         /// </summary>
@@ -82,7 +81,6 @@ namespace Cr7Sund.Framework.Impl
                 return _progressHandler;
             }
         }
-
         #endregion
 
         public Promise()
@@ -399,8 +397,8 @@ namespace Cr7Sund.Framework.Impl
                 onResolved(v)
                     .Progress(resultPromise.ProgressHandler)
                     .Then(
-                       // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
-                       resultPromise.ResolveHandler, resultPromise.RejectHandler);
+                        // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
+                        resultPromise.ResolveHandler, resultPromise.RejectHandler);
             }
 
             Action<Exception> rejectHandler;
@@ -735,7 +733,6 @@ namespace Cr7Sund.Framework.Impl
         #endregion
 
         #region Extension Method
-
         #region public extension method
         // Convert an exception directly into a rejected promise.
         public static IPromise<PromisedT> Rejected(Exception ex)
@@ -866,25 +863,25 @@ namespace Cr7Sund.Framework.Impl
                         }
                     })
                     .Then(result =>
-                    {
-                        progress[index] = 1f;
-                        results[index] = result;
+                        {
+                            progress[index] = 1f;
+                            results[index] = result;
 
-                        --remainingCount;
-                        if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                            --remainingCount;
+                            if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // This will never happen if any of the promises errored.
+                                resultPromise.Resolve(results);
+                            }
+                        },
+                        ex =>
                         {
-                            // This will never happen if any of the promises errored.
-                            resultPromise.Resolve(results);
-                        }
-                    },
-                    ex =>
-                    {
-                        if (resultPromise.CurState == PromiseState.Pending)
-                        {
-                            // If a promise errored and the result promise is still pending, reject it.
-                            resultPromise.Reject(ex);
-                        }
-                    });
+                            if (resultPromise.CurState == PromiseState.Pending)
+                            {
+                                // If a promise errored and the result promise is still pending, reject it.
+                                resultPromise.Reject(ex);
+                            }
+                        });
             });
 
             return resultPromise;
@@ -999,20 +996,20 @@ namespace Cr7Sund.Framework.Impl
                             resultPromise.ReportProgress(progress.Max());
                         })
                         .Then(result =>
-                        {
-                            if (resultPromise.CurState == PromiseState.Pending)
                             {
-                                resultPromise.Resolve(result);
-                            }
-                        },
-                        ex =>
-                        {
-                            if (resultPromise.CurState == PromiseState.Pending)
+                                if (resultPromise.CurState == PromiseState.Pending)
+                                {
+                                    resultPromise.Resolve(result);
+                                }
+                            },
+                            ex =>
                             {
-                                // If a promise errored and the result promise is still pending, reject it.
-                                resultPromise.Reject(ex);
-                            }
-                        });
+                                if (resultPromise.CurState == PromiseState.Pending)
+                                {
+                                    // If a promise errored and the result promise is still pending, reject it.
+                                    resultPromise.Reject(ex);
+                                }
+                            });
                 }
             );
 
@@ -1053,15 +1050,15 @@ namespace Cr7Sund.Framework.Impl
                                 promise.ReportProgress(sliceLength * (v + itemSequence));
                             })
                             .Then(newPromise.ResolveHandler,
-                            _ =>
-                            {
-                                float sliceLength = 1f / count;
-                                promise.ReportProgress(sliceLength * itemSequence);
+                                _ =>
+                                {
+                                    float sliceLength = 1f / count;
+                                    promise.ReportProgress(sliceLength * itemSequence);
 
-                                fn()
-                                    .Then(newPromise.ResolveHandler)
-                                    .Catch(newPromise.RejectHandler);
-                            });
+                                    fn()
+                                        .Then(newPromise.ResolveHandler)
+                                        .Catch(newPromise.RejectHandler);
+                                });
                         return newPromise;
                     })
                 .Then(promise.ResolveHandler)
