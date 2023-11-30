@@ -20,12 +20,14 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder = new InjectionBinder();
             poolBinder = new PoolBinder();
             commandBinder = new CommandBinder();
-
+            
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(commandBinder);
 
             _commandPromiseBinder = new CommandPromiseBinder<int>();
+            ((CommandPromiseBinder<int>)_commandPromiseBinder).UsePooling = false;
+
             injectionBinder.Injector.Inject(_commandPromiseBinder);
 
             SimplePromise.simulatePromiseOne = new Promise<int>();
@@ -372,7 +374,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                      SimpleAsyncCommandSecondGeneric>()
                  .Then<SimpleCommandOneGeneric>();
 
-            ISemiBinding objects = binding.Value ;
+            ISemiBinding objects = binding.Value;
             List<ICommandPromise<int>> testGetPromiseList = ((CommandPromiseBinding<int>)binding).Test_GetPromiseList();
             var promiseList = new List<ICommandPromise<int>>(testGetPromiseList);
 
@@ -400,7 +402,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
 
-            var objects = binding.Value ;
+            var objects = binding.Value;
 
             var itemB = ((CommandPromise<int>)objects[3]).Test_GetCommand();
             var itemA = ((CommandPromise<int>)objects[1]).Test_GetCommand();
@@ -417,7 +419,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
 
-            var objects = binding.Value ;
+            var objects = binding.Value;
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
 
@@ -487,6 +489,46 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             }
         }
 
+        [Test]
+        public void pooling_binding_multiple_times()
+        {
+            SimplePromise.result = 0;
+            ((CommandPromiseBinder<int>)_commandPromiseBinder).UsePooling = true;
+            for (int i = 0; i < 5; i++)
+            {
+                _commandPromiseBinder.Bind(SomeEnum.ONE)
+                    .Then<SimpleCommandOneGeneric>().AsOnce();
+                _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+                Assert.AreEqual((0 + 1) * 2, SimplePromise.result);
+
+                _commandPromiseBinder.Unbind(SomeEnum.ONE);
+                var bindingPool = poolBinder.GetOrCreate<CommandPromiseBinding<int>>();
+                Assert.AreEqual(1, bindingPool.Available);
+                Assert.AreEqual(1, bindingPool.Count);
+            }
+        }
+
+        [Test]
+        public void pooling_binding_release()
+        {
+            SimplePromise.result = 0;
+            ((CommandPromiseBinder<int>)_commandPromiseBinder).UsePooling = true;
+            for (int i = 0; i < 5; i++)
+            {
+                _commandPromiseBinder.Bind(i)
+                    .Then<SimpleCommandOneGeneric>().AsOnce();
+                _commandPromiseBinder.ReactTo(i, 0);
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                _commandPromiseBinder.Unbind(i);
+            }
+
+            var bindingPool = poolBinder.GetOrCreate<CommandPromiseBinding<int>>();
+            Assert.AreEqual(8, bindingPool.Available);
+            Assert.AreEqual(8, bindingPool.Count);
+        }
 
 
         [Test]
@@ -502,7 +544,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
 
             promiseBinding.RestartPromise();
-            
+
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
             SimplePromise.simulatePromiseOne.Resolve(0);
 

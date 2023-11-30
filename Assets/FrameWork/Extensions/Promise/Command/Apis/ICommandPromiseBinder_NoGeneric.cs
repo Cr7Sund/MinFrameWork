@@ -1,12 +1,12 @@
 namespace Cr7Sund.Framework.Api
 {
-    public interface ICommandPromiseBinder
+    public interface ICommandPromiseBinder : IBinder
     {
         void ReactTo(object trigger);
 
-        ICommandPromiseBinding Bind(object trigger);
-        ICommandPromiseBinding GetBinding(object key);
-        ICommandPromiseBinding GetBinding(object key, object name);
+        new ICommandPromiseBinding Bind(object trigger);
+        new ICommandPromiseBinding GetBinding(object key);
+        new ICommandPromiseBinding GetBinding(object key, object name);
     }
 
 

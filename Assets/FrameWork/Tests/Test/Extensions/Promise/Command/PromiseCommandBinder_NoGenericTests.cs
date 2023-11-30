@@ -23,6 +23,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder.Bind<ICommandBinder>().To(new CommandBinder());
 
             _commandPromiseBinder = new CommandPromiseBinder();
+            ((CommandPromiseBinder)_commandPromiseBinder).UsePooling = false;
+
             injectionBinder.Injector.Inject(_commandPromiseBinder);
 
             SimplePromise.simulatePromiseOne = new Promise<int>();
@@ -270,6 +272,48 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                   .Then<SimpleCommandTwo>();
 
             _commandPromiseBinder.ReactTo(SomeEnum.TWO);
+        }
+
+        [Test]
+        public void pooling_binding_multiple_times()
+        {
+            ((CommandPromiseBinder)_commandPromiseBinder).UsePooling = true;
+            for (int i = 0; i < 5; i++)
+            {
+                SimplePromise.result = 0;
+
+                _commandPromiseBinder.Bind(SomeEnum.ONE)
+                    .Then<SimpleCommandOne>().AsOnce();
+                _commandPromiseBinder.ReactTo(SomeEnum.ONE);
+                Assert.AreEqual((0 + 1) * 2, SimplePromise.result);
+
+                _commandPromiseBinder.Unbind(SomeEnum.ONE);
+                var bindingPool = poolBinder.GetOrCreate<CommandPromiseBinding>();
+                Assert.AreEqual(1, bindingPool.Available);
+                Assert.AreEqual(1, bindingPool.Count);
+            }
+        }
+
+        [Test]
+        public void pooling_binding_release()
+        {
+            SimplePromise.result = 0;
+            ((CommandPromiseBinder)_commandPromiseBinder).UsePooling = true;
+            for (int i = 0; i < 5; i++)
+            {
+                _commandPromiseBinder.Bind(i)
+                    .Then<SimpleCommandOne>().AsOnce();
+                _commandPromiseBinder.ReactTo(i);
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                _commandPromiseBinder.Unbind(i);
+            }
+
+            var bindingPool = poolBinder.GetOrCreate<CommandPromiseBinding>();
+            Assert.AreEqual(8, bindingPool.Available);
+            Assert.AreEqual(8, bindingPool.Count);
         }
 
 

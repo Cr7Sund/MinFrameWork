@@ -41,6 +41,11 @@ namespace Cr7Sund.Framework.Impl
             _value.InflationType = PoolInflationType.DOUBLE;
         }
 
+        public CommandPromiseBinding() : this(null)
+        {
+
+        }
+
 
         #region IPromiseCommandBinding Implementation
         public ICommandPromiseBinding AsOnce()
@@ -100,6 +105,8 @@ namespace Cr7Sund.Framework.Impl
             base.Dispose();
             _promiseList?.Clear();
             _firstPromise = null;
+
+            BindingStatus = CommandBindingStatus.Default;
         }
 
         private new ICommandPromiseBinding To(object value)

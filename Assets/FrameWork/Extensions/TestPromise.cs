@@ -64,6 +64,7 @@ namespace TestMono
         private void TestPromiseCommand()
         {
             var binder = new CommandPromiseBinder();
+            binder.UsePooling = true;
             injectionBinder.Injector.Inject(binder);
 
             for (int a = 0; a < Count; a++)
@@ -73,6 +74,8 @@ namespace TestMono
                     .Then<SimpleCommandTwo>();
 
                 binder.ReactTo(a);
+
+                binder.Unbind(a);
             }
         }
 

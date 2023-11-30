@@ -29,6 +29,7 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
+
         public CommandPromiseBinding(Binder.BindingResolver resolver) : base(resolver)
         {
             _releaseHandler = HandleResolve;
@@ -40,6 +41,10 @@ namespace Cr7Sund.Framework.Impl
             _value.InflationType = PoolInflationType.DOUBLE;
         }
 
+        public CommandPromiseBinding() : this(null)
+        {
+
+        }
 
         #region IPromiseCommandBinding<PromisedT> Implementation
         public new ICommandPromiseBinding<PromisedT> To(object value)
@@ -105,6 +110,8 @@ namespace Cr7Sund.Framework.Impl
             base.Dispose();
             _promiseList?.Clear();
             _firstPromise = null;
+
+            BindingStatus = CommandBindingStatus.Default;
         }
 
         public List<ICommandPromise<PromisedT>> Test_GetPromiseList()
