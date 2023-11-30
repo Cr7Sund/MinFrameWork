@@ -14,7 +14,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void ValidBindingType(Type objType)
         {
-            if (KeyConstraint.Equals(BindingConstraintType.ONE))
+            if (KeyConstraint == BindingConstraintType.ONE)
             {
                 var keyType = Key as Type;
                 if (keyType.IsAssignableFrom(objType) == false)

@@ -31,7 +31,7 @@ namespace Cr7Sund.Framework.Impl
                     throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
                 }
             }
-            
+
             IBinding binding;
             binding = GetRawBinding();
             binding.Bind(key);
@@ -46,7 +46,7 @@ namespace Cr7Sund.Framework.Impl
         protected virtual void Resolver(IBinding binding, object oldName = null)
         {
             object key = binding.Key;
-            if (binding.KeyConstraint.Equals(BindingConstraintType.ONE))
+            if (binding.KeyConstraint == BindingConstraintType.ONE)
             {
                 ResolveBinding(binding, key);
             }
