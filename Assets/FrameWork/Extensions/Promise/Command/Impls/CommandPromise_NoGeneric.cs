@@ -61,12 +61,12 @@ namespace Cr7Sund.Framework.Impl
         #region IPromise Implementation
         public override void Done()
         {
-            ClearHandlers();
-            var isOnceOff = IsOnceOff;
-            IsOnceOff = true;
-            var resultPromise = GetRawPromise();
-            IsOnceOff = IsOnceOff;
-            ActionHandlers(resultPromise, ReleaseHandler, ErrorHandler);
+            if ((!IsOnceOff && _resolveHandlers == null)
+               || IsOnceOff)
+            {
+                var resultPromise = GetRawPromise();
+                ActionHandlers(resultPromise, ReleaseHandler, ErrorHandler);
+            }
         }
 
         public override void Dispose()
@@ -119,7 +119,7 @@ namespace Cr7Sund.Framework.Impl
 
         private CommandPromise CreateNoValuePromise()
         {
-            IPool<CommandPromise> pool = PoolBinder.GetOrCreate<CommandPromise>();
+            IPool<CommandPromise> pool = PoolBinder.GetOrCreate<CommandPromise>(CommandPromiseBinding.MaxPoolCount);
             CommandPromise resultPromise = pool.GetInstance();
             resultPromise.Reset();
             InitNoValuePromise(resultPromise);
@@ -128,7 +128,7 @@ namespace Cr7Sund.Framework.Impl
 
         private CommandPromise<T> CreateValuePoolPromise<T>()
         {
-            CommandPromise<T> resultPromise = PoolBinder.GetOrCreate<CommandPromise<T>>().GetInstance();
+            CommandPromise<T> resultPromise = PoolBinder.GetOrCreate<CommandPromise<T>>(CommandPromiseBinding.MaxPoolCount).GetInstance();
             resultPromise.Reset();
             InitValuePromise(resultPromise);
             return resultPromise;
