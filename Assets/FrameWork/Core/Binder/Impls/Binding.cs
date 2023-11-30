@@ -165,8 +165,8 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void Dispose()
         {
-            _key.Clear();
-            _value.Clear();
+            _key.Dispose();
+            _value.Dispose();
         }
         #endregion
     }

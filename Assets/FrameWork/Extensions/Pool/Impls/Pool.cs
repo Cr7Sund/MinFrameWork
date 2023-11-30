@@ -171,7 +171,7 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-        public IManagedList Clear()
+        public void Dispose()
         {
             foreach (var item in InstancesInUse)
             {
@@ -192,7 +192,6 @@ namespace Cr7Sund.Framework.Impl
             InstancesInUse.Clear();
             _instancesAvailable.Clear();
             ClearInstances();
-            return this;
         }
 
         public bool Contains(object value)

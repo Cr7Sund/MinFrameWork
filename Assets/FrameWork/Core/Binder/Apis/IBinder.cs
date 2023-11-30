@@ -14,10 +14,10 @@
  *
  * @see Cr7Sund.Framework.Api.IBinding
  */
-
+using System;
 namespace Cr7Sund.Framework.Api
 {
-    public interface IBinder
+    public interface IBinder : IDisposable
     {
         /// <summary>
         ///     Bind a Binding Key to a class or interface generic

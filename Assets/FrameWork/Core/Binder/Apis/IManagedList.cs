@@ -4,10 +4,10 @@
  * A common interface for the constituents parts of a Binding, which at present
  * are either a SemiBinding or a Pool. A ManagedList can have objects added or removed.
  */
-
+using System;
 namespace Cr7Sund.Framework.Api
 {
-    public interface IManagedList
+    public interface IManagedList : IDisposable
     {
 
         // Length of values
@@ -23,8 +23,7 @@ namespace Cr7Sund.Framework.Api
 
         /// Remove a set of values from this List.
         IManagedList Remove(object[] list);
-        /// Remove all values from this List.
-        IManagedList Clear();
+
         bool Contains(object o);
     }
 

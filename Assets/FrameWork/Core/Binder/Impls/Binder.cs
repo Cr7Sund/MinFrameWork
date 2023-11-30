@@ -6,12 +6,10 @@ namespace Cr7Sund.Framework.Impl
     public class Binder : IBinder
     {
 
-
         /// A handler for resolving the nature of a binding during chained commands
         public delegate void BindingResolver(IBinding binding, object oldName = null);
         protected Dictionary<object, List<IBinding>> _bindings; // object is implicitly equal to type
         protected BindingResolver _bindingResolverHandler;
-
 
 
         public Binder()
@@ -124,6 +122,7 @@ namespace Cr7Sund.Framework.Impl
                     if (item.Name.Equals(name))
                     {
                         list.RemoveAt(i);
+                        OnUnbind(item);
                         break;
                     }
                 }
@@ -233,6 +232,14 @@ namespace Cr7Sund.Framework.Impl
         {
         }
 
+        protected virtual void OnUnbind(IBinding binding)
+        {
+        }
+
+        public void Dispose()
+        {
+
+        }
         #endregion
     }
 }

@@ -211,7 +211,7 @@ namespace Cr7Sund.Framework.Tests
             semibinding.Add(list);
 
 
-            semibinding.Clear();
+            semibinding.Dispose();
 
             Assert.IsNull(semibinding.SingleValue);
         }

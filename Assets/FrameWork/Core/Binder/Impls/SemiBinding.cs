@@ -62,13 +62,13 @@ namespace Cr7Sund.Framework.Impl
             InflationType = PoolInflationType.INCREMENT;
             MaxSize = MaxLength;
             UniqueValue = true;
-
             _objectValue = _emptyArray;
         }
 
         #region IManagedList implementation
         public IManagedList Add(object o)
         {
+
             if (Constraint == BindingConstraintType.ONE)
             {
                 if (_objectValue.Length == 0)
@@ -133,12 +133,11 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-        public IManagedList Clear()
+        public void Dispose()
         {
             _size = 0;
             _capacity = 0;
-            _objectValue = null;
-            return this;
+            _objectValue = _emptyArray;
         }
 
         public bool Contains(object o)

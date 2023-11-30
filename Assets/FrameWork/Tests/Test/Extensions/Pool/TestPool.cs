@@ -343,7 +343,7 @@ namespace Cr7Sund.Framework.Tests
             var instance = anotherPool.GetInstance();
             instance.someValue = 42;
             Assert.AreEqual(42, instance.someValue);
-            anotherPool.Clear();
+            anotherPool.Dispose();
             Assert.AreEqual(0, instance.someValue);
         }
     }
