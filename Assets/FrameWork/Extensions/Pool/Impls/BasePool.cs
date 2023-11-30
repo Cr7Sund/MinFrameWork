@@ -5,16 +5,18 @@ namespace Cr7Sund.Framework.Impl
 {
     public abstract class BasePool : IBasePool
     {
+        public const int Default_POOL_MAX_COUNT = 24;
+
         protected int _instanceCount;
         protected int _initSize;
 
         public BasePool()
         {
-
             _initSize = 0;
+            MaxCount = Default_POOL_MAX_COUNT;
 
             OverflowBehavior = PoolOverflowBehavior.EXCEPTION;
-            inflationType = PoolInflationType.DOUBLE;
+            InflationType = PoolInflationType.DOUBLE;
         }
 
         #region IPool Implementation
@@ -23,9 +25,10 @@ namespace Cr7Sund.Framework.Impl
         public virtual int Available { get; }
 
         public PoolOverflowBehavior OverflowBehavior { get; set; }
-        public PoolInflationType inflationType { get; set; }
+        public PoolInflationType InflationType { get; set; }
 
         public int Count => _instanceCount;
+        public int MaxCount { get; set; }
 
         public void SetSize(int size)
         {
@@ -57,7 +60,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                if (Count == 0 || inflationType == PoolInflationType.INCREMENT)
+                if (Count == 0 || InflationType == PoolInflationType.INCREMENT)
                 {
                     // 1 or 4 
                     instancesToCreate = 1;
@@ -69,6 +72,23 @@ namespace Cr7Sund.Framework.Impl
             }
 
             return instancesToCreate;
+        }
+
+
+        protected void IncreaseInstance()
+        {
+            AssertUtil.LessOrEqual(_instanceCount, MaxCount, PoolExceptionType.OVERFLOW);
+            _instanceCount++;
+        }
+
+        protected void DecreaseInstance()
+        {
+            _instanceCount--;
+        }
+
+        protected void ClearInstances()
+        {
+            _instanceCount = 0;
         }
 
         #endregion

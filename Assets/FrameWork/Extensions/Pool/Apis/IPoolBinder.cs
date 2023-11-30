@@ -15,6 +15,12 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         IPool<T> GetOrCreate<T>() where T : class, new();
 
+        /// <summary>
+        ///     Get a value pool based on the provided Type
+        ///     if not exist will return a new create value instead
+        /// </summary>
+        IPool<T> GetOrCreate<T>(int maxPoolCount) where T : class, new();
+
         /// Get a no value pool based on the provided Type
         /// </summary>
         IPool Get(Type type);

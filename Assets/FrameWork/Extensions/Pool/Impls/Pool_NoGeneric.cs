@@ -138,10 +138,11 @@ namespace Cr7Sund.Framework.Impl
         public IManagedList Add(object value)
         {
             AssertUtil.IsInstanceOf(PoolType, value, PoolExceptionType.TYPE_MISMATCH);
-            _instanceCount++;
+            IncreaseInstance();
             _instancesAvailable.Push(value);
             return this;
         }
+
 
         public IManagedList Add(object[] list)
         {
@@ -155,10 +156,12 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Remove(object value)
         {
-            _instanceCount--;
+            DecreaseInstance();
             RemoveInstance(value);
             return this;
         }
+
+
 
         public IManagedList Remove(object[] list)
         {
@@ -174,7 +177,7 @@ namespace Cr7Sund.Framework.Impl
         {
             InstancesInUse.Clear();
             _instancesAvailable.Clear();
-            _instanceCount = 0;
+            ClearInstances();
             return this;
         }
 

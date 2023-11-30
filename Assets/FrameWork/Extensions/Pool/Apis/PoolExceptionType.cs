@@ -5,6 +5,8 @@ namespace Cr7Sund.Framework.Api
 
         /// POOL HAS OVERFLOWED ITS LIMIT
         OVERFLOW,
+        /// the instantiated instance has reach the limit
+        REACH_MAX_LIMIT,
 
         /// ATTEMPT TO ADD AN INSTANCE OF DIFFERENT TYPE TO A POOL
         TYPE_MISMATCH,

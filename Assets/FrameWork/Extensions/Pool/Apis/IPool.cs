@@ -31,52 +31,6 @@
 using System;
 namespace Cr7Sund.Framework.Api
 {
-    public interface IBasePool : IPoolable
-    {
-        /// <summary>
-        ///     A class that provides instances to the pool when it needs them.
-        ///     This can be the InjectionBinder, or any class you write that satisfies the IInstanceProvider
-        ///     interface.
-        ///     <summary>
-        ///     </summary>
-        IInstanceProvider InstanceProvider { get; set; }
-
-        /// <summary>
-        ///     Returns the count of non-committed instances
-        /// </summary>
-        int Available { get; }
-
-
-        /// <summary>
-        ///     Gets or sets the overflow behavior of this pool.
-        /// </summary>
-        /// <value>A PoolOverflowBehavior value.</value>
-        PoolOverflowBehavior OverflowBehavior { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the type of inflation for infinite-sized pools.
-        /// </summary>
-        /// By default, a pool doubles its InstanceCount.
-        /// <value>A PoolInflationType value.</value>
-        PoolInflationType inflationType { get; set; }
-
-
-        /// <summary>
-        ///     Remove all instance references from the Pool.
-        /// </summary>
-        void Clean();
-
-        /// <summary>
-        ///     sets the size of the pool.
-        /// </summary>
-        /// <value>
-        ///     The pool size. '0' is a special value indicating infinite size. Infinite pools expand as necessary to
-        ///     accommodate requirement.
-        /// </value>
-        void SetSize(int size);
-    }
-
-
     public interface IPool<T> : IBasePool, IManagedList
     {
         /// <summary>
@@ -125,25 +79,4 @@ namespace Cr7Sund.Framework.Api
     }
 
 
-    public enum PoolOverflowBehavior
-    {
-        /// Requesting more than the fixed size will throw an exception.
-        EXCEPTION,
-
-        /// Requesting more than the fixed size will throw a warning.
-        WARNING,
-
-        /// Requesting more than the fixed size will return null and not throw an error.
-        IGNORE
-    }
-
-
-    public enum PoolInflationType
-    {
-        /// When a dynamic pool inflates, add one to the pool.
-        INCREMENT,
-
-        /// When a dynamic pool inflates, double the size of the pool
-        DOUBLE
-    }
 }

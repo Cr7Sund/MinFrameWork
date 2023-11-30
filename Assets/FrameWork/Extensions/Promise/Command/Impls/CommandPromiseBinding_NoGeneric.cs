@@ -7,6 +7,10 @@ namespace Cr7Sund.Framework.Impl
 {
     public class CommandPromiseBinding : Binding, ICommandPromiseBinding
     {
+        public const int MaxPoolCount = 16;
+
+
+
         [Inject] private ICommandBinder _commandBinder;
 
         [Inject] private IInjectionBinder _injectionBinder;
@@ -219,7 +223,7 @@ namespace Cr7Sund.Framework.Impl
 
             if (IsOnceOff)
             {
-                var pool = _poolBinder.GetOrCreate<CommandPromise>();
+                IPool<CommandPromise> pool = _poolBinder.GetOrCreate<CommandPromise>(CommandPromiseBinding.MaxPoolCount);
                 result = pool.GetInstance();
                 InitPromise(result);
             }

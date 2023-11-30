@@ -138,7 +138,7 @@ namespace Cr7Sund.Framework.Impl
         {
             AssertUtil.IsInstanceOf(typeof(T), value, PoolExceptionType.TYPE_MISMATCH);
 
-            _instanceCount++;
+            IncreaseInstance();
             _instancesAvailable.Push((T)value);
             return this;
         }
@@ -157,7 +157,7 @@ namespace Cr7Sund.Framework.Impl
         {
             AssertUtil.IsInstanceOf(typeof(T), value, PoolExceptionType.TYPE_MISMATCH);
 
-            _instanceCount--;
+            DecreaseInstance();
             RemoveInstance((T)value);
             return this;
         }
@@ -192,7 +192,7 @@ namespace Cr7Sund.Framework.Impl
 
             InstancesInUse.Clear();
             _instancesAvailable.Clear();
-            _instanceCount = 0;
+            ClearInstances();
             return this;
         }
 

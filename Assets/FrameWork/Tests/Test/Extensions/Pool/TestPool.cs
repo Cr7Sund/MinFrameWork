@@ -35,11 +35,11 @@ namespace Cr7Sund.Framework.Tests
             pool.OverflowBehavior = PoolOverflowBehavior.IGNORE;
             Assert.AreEqual(PoolOverflowBehavior.IGNORE, pool.OverflowBehavior);
 
-            pool.inflationType = PoolInflationType.DOUBLE;
-            Assert.AreEqual(PoolInflationType.DOUBLE, pool.inflationType);
+            pool.InflationType = PoolInflationType.DOUBLE;
+            Assert.AreEqual(PoolInflationType.DOUBLE, pool.InflationType);
 
-            pool.inflationType = PoolInflationType.INCREMENT;
-            Assert.AreEqual(PoolInflationType.INCREMENT, pool.inflationType);
+            pool.InflationType = PoolInflationType.INCREMENT;
+            Assert.AreEqual(PoolInflationType.INCREMENT, pool.InflationType);
         }
 
         [Test]
@@ -306,7 +306,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestAutoInflationIncrement()
         {
             pool.InstanceProvider = new TestInstanceProvider();
-            pool.inflationType = PoolInflationType.INCREMENT;
+            pool.InflationType = PoolInflationType.INCREMENT;
 
             int testCount = 10;
 

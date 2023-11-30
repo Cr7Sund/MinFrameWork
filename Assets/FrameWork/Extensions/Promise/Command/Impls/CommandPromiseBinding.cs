@@ -295,7 +295,7 @@ namespace Cr7Sund.Framework.Impl
 
             if (IsOnceOff)
             {
-                var pool = _poolBinder.GetOrCreate<CommandPromise<PromisedT>>();
+                var pool = _poolBinder.GetOrCreate<CommandPromise<PromisedT>>(CommandPromiseBinding.MaxPoolCount);
                 result = pool.GetInstance();
                 InitPromise(result);
                 result.ReleaseHandler = _releaseHandler;
@@ -316,7 +316,7 @@ namespace Cr7Sund.Framework.Impl
 
             if (IsOnceOff)
             {
-                var pool = _poolBinder.GetOrCreate<CommandPromise<T>>();
+                var pool = _poolBinder.GetOrCreate<CommandPromise<T>>(CommandPromiseBinding.MaxPoolCount);
                 result = pool.GetInstance();
                 InitPromise<T>(result);
                 result.ReleaseHandler = HandleResolve;
@@ -337,7 +337,7 @@ namespace Cr7Sund.Framework.Impl
 
             if (IsOnceOff)
             {
-                var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>();
+                var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>(CommandPromiseBinding.MaxPoolCount);
                 result = pool.GetInstance();
                 InitPromise<T2>(result);
                 result.ReleaseHandler = HandleResolve;

@@ -54,6 +54,27 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
+        public void command_binder_simple_check_pool()
+        {
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
+                .Then<SimpleCommandTwo>();
+
+            var promisePool = poolBinder.GetOrCreate<CommandPromise<int>>();
+            var promiseNoValuePool = poolBinder.GetOrCreate<CommandPromise>();
+            Assert.AreEqual(0, promisePool.Available);
+            Assert.AreEqual(0, promisePool.Count);
+            Assert.AreEqual(0, promiseNoValuePool.Available);
+            Assert.AreEqual(0, promiseNoValuePool.Count);
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE);
+
+            Assert.AreEqual(0, promisePool.Available);
+            Assert.AreEqual(0, promiseNoValuePool.Available);
+            Assert.AreEqual(0, promisePool.Count);
+            Assert.AreEqual(0, promiseNoValuePool.Count);
+        }
+
+        [Test]
         public void command_binder_release_done()
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);

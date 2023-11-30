@@ -19,14 +19,22 @@ namespace Cr7Sund.Framework.Impl
 
         public IPool<T> GetOrCreate<T>() where T : class, new()
         {
+            return GetOrCreate<T>(Pool.Default_POOL_MAX_COUNT);
+        }
+
+        public IPool<T> GetOrCreate<T>(int maxPoolCount) where T : class, new()
+        {
             var type = typeof(T);
             var binding = GetBinding(type);
             IPool<T> retVal = null;
             if (binding == null)
             {
                 binding = GetRawBinding();
-                retVal = new Pool<T>();
-                retVal.InstanceProvider = _poolInstanceProvider;
+                retVal = new Pool<T>
+                {
+                    InstanceProvider = _poolInstanceProvider,
+                    MaxCount = maxPoolCount
+                };
                 binding.Bind(type).To(retVal);
             }
             else
