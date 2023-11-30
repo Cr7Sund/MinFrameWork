@@ -145,8 +145,8 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
             promise.Resolve(17);
 
-            var promiseException = Assert.Throws<PromiseException>(() => promise.ReportProgress(1f));
-            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<Util.MyException>(() => promise.ReportProgress(1f));
+            Assert.AreEqual(PromiseExceptionType.Valid_PROGRESS_STATE, promiseException.Type);
         }
 
         [Test]
@@ -155,8 +155,8 @@ namespace Cr7Sund.Framework.PromiseTest
             var promise = new Promise<int>();
             promise.Reject(new Exception());
 
-            var promiseException = Assert.Throws<PromiseException>(() => promise.ReportProgress(1f));
-            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<Util.MyException>(() => promise.ReportProgress(1f));
+            Assert.AreEqual(PromiseExceptionType.Valid_PROGRESS_STATE, promiseException.Type);
         }
 
         [Test]

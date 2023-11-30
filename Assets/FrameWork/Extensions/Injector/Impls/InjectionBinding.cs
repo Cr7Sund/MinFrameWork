@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 namespace Cr7Sund.Framework.Impl
 {
@@ -18,7 +19,7 @@ namespace Cr7Sund.Framework.Impl
                 var keyType = Key as Type;
                 if (keyType.IsAssignableFrom(objType) == false)
                 {
-                    throw new InjectionException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                    throw new Util.MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
                 }
             }
             else
@@ -29,7 +30,7 @@ namespace Cr7Sund.Framework.Impl
                     var keyType = keys[i] as Type;
                     if (keyType.IsAssignableFrom(objType) == false)
                     {
-                        throw new InjectionException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                        throw new Util.MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
                     }
                 }
 

@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Reflection;
 namespace Cr7Sund.Framework.Impl
@@ -26,9 +27,8 @@ namespace Cr7Sund.Framework.Impl
 
         public object Instantiate(IInjectionBinding binding)
         {
-            failIf(Binder == null, "Attempt to instantiate from Injector without a Binder", InjectionExceptionType.NO_BINDER);
-            failIf(Factory == null, "Attempt to inject into Injector without a Factory", InjectionExceptionType.NO_FACTORY);
-
+            failIf(Binder == null, InjectionExceptionType.NO_BINDER_INSTANTIATE);
+            failIf(Factory == null, InjectionExceptionType.NO_FACTORY_INSTANTIATE);
 
             object retVal = null;
             Type reflectionType = null;
@@ -47,16 +47,14 @@ namespace Cr7Sund.Framework.Impl
             {
                 var reflection = Reflector.Get(reflectionType);
                 // Actually we dont support construct inject
-                failIf(reflection == null, "Attempt to perform constructor injection without a reflection", InjectionExceptionType.NULL_REFLECTION, reflectionType, null);
-                failIf(reflection.Constructor == null, "Attempt to construction inject a null constructor", InjectionExceptionType.NULL_CONSTRUCTOR, reflectionType, null);
-                failIf(reflection.ConstructorParameterCount > 0, "Attempt to construction inject a constructor-with parameters", InjectionExceptionType.NONEMPTY_CONSTRUCTOR, reflectionType, null);
-
-                failIf(reflection.ConstructorParameterCount > 0, "Attempt to inject a class with an only parameters constructor", InjectionExceptionType.NONEMPTY_CONSTRUCTOR);
+                failIf(reflection == null, InjectionExceptionType.NULL_REFLECTION_INSTANTIATE, reflectionType, null);
+                failIf(reflection.Constructor == null, InjectionExceptionType.NULL_CONSTRUCTOR, reflectionType, null);
+                failIf(reflection.ConstructorParameterCount > 0, InjectionExceptionType.NONEMPTY_CONSTRUCTOR, reflectionType, null);
 
                 if (binding.Type == InjectionBindingType.POOL)
                 {
                     var pool = PoolBinder.GetOrCreate(reflectionType);
-                    failIf(pool == null, "Attempt to instantiate a class with a null pool", InjectionExceptionType.NONEMPTY_CONSTRUCTOR);
+                    failIf(pool == null, InjectionExceptionType.NOPOOL_CONSTRUCT);
                     retVal = pool.GetInstance();
                 }
                 else // handle other case
@@ -80,7 +78,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            failIf(retVal == null, "the instantiate result is null", InjectionExceptionType.NULL_INSTANTIATE, binding.Key as Type, null);
+            failIf(retVal == null, InjectionExceptionType.NULL_INSTANTIATE_RESULT, binding.Key as Type, null);
 
             return retVal;
         }
@@ -89,9 +87,9 @@ namespace Cr7Sund.Framework.Impl
         {
             var t = target.GetType();
 
-            failIf(Binder == null, "Attempt to inject into Injector without a Binder", InjectionExceptionType.NO_BINDER, t, target);
-            failIf(Reflector == null, "Attempt to inject without a reflector", InjectionExceptionType.NO_REFLECTOR, t, target);
-            failIf(target == null, "Attempt to inject into null instance", InjectionExceptionType.NULL_TARGET, t, target);
+            failIf(Binder == null, InjectionExceptionType.NO_BINDER_INJECT, t, target);
+            failIf(Reflector == null, InjectionExceptionType.NO_REFLECTOR, t, target);
+            failIf(target == null, InjectionExceptionType.NULL_TARGET_INJECT, t, target);
 
             //Some things can't be injected into. Bail out.
             if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))
@@ -120,9 +118,9 @@ namespace Cr7Sund.Framework.Impl
 
         public void Uninject(object target)
         {
-            failIf(Binder == null, "Attempt to inject into Injector without a Binder", InjectionExceptionType.NO_BINDER);
-            failIf(Reflector == null, "Attempt to inject without a reflector", InjectionExceptionType.NO_REFLECTOR);
-            failIf(target == null, "Attempt to inject into null instance", InjectionExceptionType.NULL_TARGET);
+            failIf(Binder == null, InjectionExceptionType.NO_BINDER_UnINJECT);
+            failIf(Reflector == null, InjectionExceptionType.NO_REFLECTOR_UNINJECT);
+            failIf(target == null, InjectionExceptionType.NULL_TARGET_UNINJECT);
 
             var t = target.GetType();
             if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))
@@ -148,8 +146,8 @@ namespace Cr7Sund.Framework.Impl
         //After injection, call any methods labelled with the [PostConstruct] tag
         private void PostInject(object target, IReflectedClass reflection)
         {
-            failIf(target == null, "Attempt to PostConstruct a null target", InjectionExceptionType.NULL_TARGET);
-            failIf(reflection == null, "Attempt to PostConstruct without a reflection", InjectionExceptionType.NULL_REFLECTION);
+            failIf(target == null, InjectionExceptionType.NULL_TARGET_POSTINJECT);
+            failIf(reflection == null, InjectionExceptionType.NULL_REFLECTION_POSTINJECT);
 
             if (reflection.PostConstructor != null)
                 reflection.PostConstructor.Invoke(target, null);
@@ -157,8 +155,8 @@ namespace Cr7Sund.Framework.Impl
 
         private void PerformFieldInjection(object target, IReflectedClass reflection)
         {
-            failIf(target == null, "Attempt to inject into a null object", InjectionExceptionType.NULL_TARGET);
-            failIf(reflection == null, "Attempt to inject without a reflection", InjectionExceptionType.NULL_REFLECTION);
+            failIf(target == null, InjectionExceptionType.NULL_TARGET_FIELDINJECT);
+            failIf(reflection == null, InjectionExceptionType.NULL_REFLECTION_FIELDINJECT);
 
             for (int i = 0; i < reflection.Fields.Length; i++)
             {
@@ -171,38 +169,38 @@ namespace Cr7Sund.Framework.Impl
         //Inject the value into the target at the specified injection point
         private void InjectValueIntoPoint(object value, object target, FieldInfo point)
         {
-            failIf(target == null, "Attempt to inject into a null target", InjectionExceptionType.NULL_TARGET);
-            failIf(point == null, "Attempt to inject into a null point", InjectionExceptionType.NULL_INJECTION_POINT);
-            failIf(value == null, "Attempt to inject null into a target object", InjectionExceptionType.NULL_VALUE_INJECTION);
+            failIf(point == null, InjectionExceptionType.NULL_INJECTION_POINT);
+            failIf(value == null, InjectionExceptionType.NULL_VALUE_INJECTION);
 
             point.SetValue(target, value);
         }
 
-        private void failIf(bool condition, string message, InjectionExceptionType type)
+        private void failIf(bool condition, InjectionExceptionType type)
         {
-            failIf(condition, message, type, null, null, null);
+            failIf(condition, type, null, null, null);
         }
 
-        private void failIf(bool condition, string message, InjectionExceptionType type, Type t, object name)
+        private void failIf(bool condition, InjectionExceptionType type, Type t, object name)
         {
-            failIf(condition, message, type, t, name, null);
+            failIf(condition, type, t, name, null);
         }
 
-        private void failIf(bool condition, string message, InjectionExceptionType type, Type t, object name, object target)
+        private void failIf(bool condition, InjectionExceptionType type, Type t, object name, object target)
         {
             if (condition)
             {
+                string message = $"ErrorCode: {type}";
                 message += "\n\t\ttarget: " + target;
                 message += "\n\t\ttype: " + t;
                 message += "\n\t\tname: " + name;
-                throw new InjectionException(message, type);
+                throw new Util.MyException(message, type);
             }
         }
 
         private object GetValueInjection(Type t, object name, object target)
         {
             var binding = Binder.GetBinding(t, name);
-            failIf(binding == null, "Attempt to Instantiate a null binding.", InjectionExceptionType.NULL_BINDING, t, name, target);
+            failIf(binding == null, InjectionExceptionType.NULL_BINDING_GET_INJECT, t, name, target);
             object bindingValue = binding.Value;
 
             object retVal = null;

@@ -2,12 +2,26 @@ namespace Cr7Sund.Framework.Api
 {
     public enum PromiseExceptionType
     {
-        Valid_STATE,
+        /// <summary>
+        /// Attempt to resolve a promise that is already in resolved_state or rejected_state
+        /// a promise can only be resolved when it is still in pending state
+        /// </summary>
+        Valid_RESOLVED_STATE,
+        /// <summary>
+        /// Attempt to rejected a promise that is already in rejected_state or resolved state
+        /// a promise can only be rejected when it is still in pending state
+        /// </summary>
+        Valid_REJECTED_STATE,
+        /// <summary>
+        /// Attempt to report progress that is already in rejected_state or resolved state
+        /// a promise can only be rejected when it is still in pending state
+        /// </summary>
+        Valid_PROGRESS_STATE,
         // No promise for race been provided , the result is undefined will be fulfilled or rejected
         EMPTY_PROMISE_RACE,
         // No promise for any been provided , the result is undefined will be fulfilled or rejected
         EMPTY_PROMISE_ANY,
-        // exception in OnExecuteAsync
+        // there is an exception happen in OnExecuteAsync
         EXCEPTION_ON_ExecuteAsync,
         // there is no promise command to bind
         EMPTY_PROMISE_TOREACT,

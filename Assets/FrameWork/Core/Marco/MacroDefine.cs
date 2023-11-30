@@ -33,11 +33,7 @@
         //No_Try_Catch
         public const string NO_TRY_CATCH = "NO_TRY_CATCH";
 
-        public const string KAILASH_ASSERT = "KAILASH_ASSERT";
-        public const string KAILASH_LOG = "KAILASH_LOG";
-
-        public const string KAILASH_TEST_INCLUDE = "KAILASH_TEST_INCLUDE";
-
+        public const string TEST_INCLUDE = "TEST_INCLUDE";
 
 
         public static bool IsEditor

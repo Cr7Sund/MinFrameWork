@@ -111,8 +111,12 @@ namespace Cr7Sund.Framework.Impl
             int instancesToCreate = NewInstanceToCreate();
 
             if (instancesToCreate == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) return;
-            AssertUtil.Greater(instancesToCreate, 0, new PoolException("Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE));
-            AssertUtil.NotNull(InstanceProvider, new PoolException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER));
+            AssertUtil.Greater(instancesToCreate, 0, PoolExceptionType.NO_INSTANCE_TO_CREATE);
+            if (InstanceProvider == null)
+            {
+                throw new MyException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);
+            }
+
 
             for (int i = 0; i < instancesToCreate; i++)
             {
@@ -132,7 +136,7 @@ namespace Cr7Sund.Framework.Impl
         #region IManagedList Implementation
         public IManagedList Add(object value)
         {
-            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T) + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(typeof(T), value, PoolExceptionType.TYPE_MISMATCH);
 
             _instanceCount++;
             _instancesAvailable.Push((T)value);
@@ -151,7 +155,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IManagedList Remove(object value)
         {
-            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T) + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(typeof(T), value, PoolExceptionType.TYPE_MISMATCH);
 
             _instanceCount--;
             RemoveInstance((T)value);
@@ -194,7 +198,7 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Contains(object value)
         {
-            AssertUtil.IsInstanceOf(typeof(T), value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + typeof(T) + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(typeof(T), value, PoolExceptionType.TYPE_MISMATCH);
 
             return InstancesInUse.Contains((T)value);
         }

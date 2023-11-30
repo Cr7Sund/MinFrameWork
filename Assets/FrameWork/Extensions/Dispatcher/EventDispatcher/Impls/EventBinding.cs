@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
@@ -52,10 +53,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void StoreMethodType(Delegate value)
         {
-            if (value == null)
-            {
-                throw new DispatcherException("EventDispatcher can't map something that isn't a delegate'", DispatcherExceptionType.ILLEGAL_CALLBACK_HANDLER);
-            }
+            AssertUtil.NotNull(value, DispatcherExceptionType.ILLEGAL_CALLBACK_HANDLER);
 
             var methodInfo = value.Method;
             int argsLen = methodInfo.GetParameters().Length;
@@ -68,7 +66,7 @@ namespace Cr7Sund.Framework.Impl
                     callbackTypes[value] = EventCallbackType.ONE_ARGUMENT;
                     break;
                 default:
-                    throw new DispatcherException("Event callbacks must have either one or no arguments", DispatcherExceptionType.ILLEGAL_CALLBACK_HANDLER);
+                    throw new MyException(DispatcherExceptionType.OUT_OF_ARGUMENT_EVENT);
             }
         }
         #endregion

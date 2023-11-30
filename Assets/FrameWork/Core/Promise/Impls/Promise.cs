@@ -373,9 +373,7 @@ namespace Cr7Sund.Framework.Impl
             Action<float> onProgress
         )
         {
-
-            AssertUtil.NotNull(onResolved, new PromiseException(
-                "onResolved must be supplied", PromiseExceptionType.NO_UNRESOLVED));
+            AssertUtil.NotNull(onResolved, PromiseExceptionType.NO_UNRESOLVED);
 
             if (CurState == PromiseState.Resolved)
             {
@@ -551,12 +549,10 @@ namespace Cr7Sund.Framework.Impl
         #region IPendingPromise
         public void Resolve(PromisedT value)
         {
-            AssertUtil.AreEqual(PromiseState.Pending, CurState,
-                new PromiseException(
-                    "Attempt to resolve a promise that is already in state: " + CurState
-                                                                              + ", a promise can only be resolved when it is still in state: "
-                                                                              + PromiseState.Pending, PromiseExceptionType.Valid_STATE
-                ));
+            if (CurState != PromiseState.Pending)
+            {
+                throw new MyException(PromiseExceptionType.Valid_RESOLVED_STATE);
+            }
 
             _resolveValue = value;
             CurState = PromiseState.Resolved;
@@ -571,13 +567,10 @@ namespace Cr7Sund.Framework.Impl
 
         public void ReportProgress(float progress)
         {
-            AssertUtil.AreEqual(PromiseState.Pending, CurState,
-                new PromiseException(
-                    "Attempt to report progress a promise that is already in state: " + CurState
-                                                                                      + ", a promise can only be resolved when it is still in state: "
-                                                                                      + PromiseState.Pending, PromiseExceptionType.Valid_STATE
-                ));
-
+            if (CurState != PromiseState.Pending)
+            {
+                throw new MyException(PromiseExceptionType.Valid_PROGRESS_STATE);
+            }
 
             InvokeProgressHandlers(progress);
         }
@@ -585,13 +578,10 @@ namespace Cr7Sund.Framework.Impl
         public void Reject(Exception ex)
         {
             AssertUtil.NotNull(ex);
-            AssertUtil.AreEqual(PromiseState.Pending, CurState,
-                new PromiseException(
-                    "Attempt to rejected a promise that is already in state: " + CurState
-                                                                               + ", a promise can only be resolved when it is still in state: "
-                                                                               + PromiseState.Pending, PromiseExceptionType.Valid_STATE
-                ));
-
+            if (CurState != PromiseState.Pending)
+            {
+                throw new MyException(PromiseExceptionType.Valid_REJECTED_STATE);
+            }
 
             _rejectionException = ex;
             CurState = PromiseState.Rejected;
@@ -906,13 +896,8 @@ namespace Cr7Sund.Framework.Impl
         protected IPromise<ConvertedT> Any<ConvertedT>(IEnumerable<IPromise<ConvertedT>> promises)
         {
             var promisesArray = promises.ToArray();
-            if (promisesArray.Length == 0)
-            {
-                throw new PromiseException(
-                    "At least 1 input promise must be provided for any",
-                    PromiseExceptionType.EMPTY_PROMISE_ANY
-                );
-            }
+            AssertUtil.Greater(promisesArray.Length, 0, 
+                 PromiseExceptionType.EMPTY_PROMISE_ANY);
 
             int remainingCount = promisesArray.Length;
             float[] progress = new float[remainingCount];
@@ -975,13 +960,8 @@ namespace Cr7Sund.Framework.Impl
         protected IPromise<ConvertedT> Race<ConvertedT>(IEnumerable<IPromise<ConvertedT>> promises)
         {
             var promisesArray = promises.ToArray();
-            if (promisesArray.Length == 0)
-            {
-                throw new PromiseException(
-                    "At least 1 input promise must be provided for Race",
-                    PromiseExceptionType.EMPTY_PROMISE_RACE
-                );
-            }
+            AssertUtil.Greater(promisesArray.Length, 0, PromiseExceptionType.EMPTY_PROMISE_RACE);
+           
             int remainingCount = promisesArray.Length;
             var resultPromise = GetRawPromise<ConvertedT>();
             float[] progress = new float[remainingCount];

@@ -42,8 +42,8 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Reject(new Exception());
 
-            var promiseException = Assert.Throws<PromiseException>(() => promise.Reject(new Exception()));
-            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<Util.MyException>(() => promise.Reject(new Exception()));
+            Assert.AreEqual(PromiseExceptionType.Valid_REJECTED_STATE, promiseException.Type);
         }
 
         [Test]
@@ -53,8 +53,8 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Resolve();
 
-            var promiseException = Assert.Throws<PromiseException>(() => promise.Reject(new Exception()));
-            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<Util.MyException>(() => promise.Reject(new Exception()));
+            Assert.AreEqual(PromiseExceptionType.Valid_REJECTED_STATE, promiseException.Type);
         }
 
         [Test]
@@ -64,8 +64,8 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Reject(new Exception());
 
-            var promiseException = Assert.Throws<PromiseException>(() => promise.Resolve());
-            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<Util.MyException>(() => promise.Resolve());
+            Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
         }
 
         [Test]
@@ -89,8 +89,8 @@ namespace Cr7Sund.Framework.PromiseTest
 
             promise.Resolve();
 
-            var promiseException = Assert.Throws<PromiseException>(() => promise.Resolve());
-            Assert.AreEqual(PromiseExceptionType.Valid_STATE, promiseException.Type);
+            var promiseException = Assert.Throws<Util.MyException>(() => promise.Resolve());
+            Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
         }
 
         [Test]

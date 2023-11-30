@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 namespace Cr7Sund.Framework.Tests
 {
@@ -121,8 +122,8 @@ namespace Cr7Sund.Framework.Tests
                 dispatcher.Dispatch(SomeEnum.ONE, PAYLOAD);
             };
 
-            var ex = Assert.Throws<EventDispatcherException>(testDelegate);
-            Assert.That(ex.Type == EventDispatcherExceptionType.TARGET_INVOCATION);
+            var ex = Assert.Throws<MyException>(testDelegate);
+            Assert.AreEqual( EventDispatcherExceptionType.TARGET_INVOCATION, ex.Type );
         }
 
         [Test]

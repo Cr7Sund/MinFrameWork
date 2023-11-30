@@ -536,10 +536,7 @@ namespace Cr7Sund.Framework.Impl
         {
             if (CurState != PromiseState.Pending)
             {
-                throw new PromiseException(
-                    "Attempt to resolve a promise that is already in state: " + CurState
-                                                                              + ", a promise can only be resolved when it is still in state: "
-                                                                              + PromiseState.Pending, PromiseExceptionType.Valid_STATE);
+                throw new MyException(PromiseExceptionType.Valid_RESOLVED_STATE);
             }
 
             CurState = PromiseState.Resolved;
@@ -555,12 +552,7 @@ namespace Cr7Sund.Framework.Impl
         {
             if (CurState != PromiseState.Pending)
             {
-                throw new PromiseException(
-                    "Attempt to report progress on a promise that is already in state: "
-                    + CurState + ", a promise can only report progress when it is still in state: "
-                    + PromiseState.Pending,
-                    PromiseExceptionType.Valid_STATE
-                );
+                throw new MyException(PromiseExceptionType.Valid_PROGRESS_STATE);
             }
 
             InvokeProgressHandlers(progress);
@@ -571,10 +563,7 @@ namespace Cr7Sund.Framework.Impl
             AssertUtil.NotNull(ex);
             if (CurState != PromiseState.Pending)
             {
-                throw new PromiseException(
-                    "Attempt to resolve a promise that is already in state: " + CurState
-                                                                              + ", a promise can only be resolved when it is still in state: "
-                                                                              + PromiseState.Pending, PromiseExceptionType.Valid_STATE);
+                throw new MyException(PromiseExceptionType.Valid_REJECTED_STATE);
             }
 
             _rejectionException = ex;
@@ -887,13 +876,8 @@ namespace Cr7Sund.Framework.Impl
         protected IPromise AnyInternal(IEnumerable<IPromise> promises)
         {
             var promisesArray = promises.ToArray();
-            if (promisesArray.Length == 0)
-            {
-                throw new PromiseException(
-                    "At least 1 input promise must be provided for any",
-                    PromiseExceptionType.EMPTY_PROMISE_ANY
-                );
-            }
+            AssertUtil.Greater(promisesArray.Length, 0,
+                 PromiseExceptionType.EMPTY_PROMISE_ANY);
 
             int remainingCount = promisesArray.Length;
             float[] progress = new float[remainingCount];
@@ -1056,13 +1040,8 @@ namespace Cr7Sund.Framework.Impl
         protected IPromise RaceInternal(IEnumerable<IPromise> promises)
         {
             var promisesArray = promises.ToArray();
-            if (promisesArray.Length == 0)
-            {
-                throw new PromiseException(
-                    "At least 1 input promise must be provided for Race",
-                    PromiseExceptionType.EMPTY_PROMISE_RACE
-                );
-            }
+            AssertUtil.Greater(promisesArray.Length, 0, PromiseExceptionType.EMPTY_PROMISE_RACE);
+
             int remainingCount = promisesArray.Length;
             var resultPromise = GetRawPromise();
             float[] progress = new float[remainingCount];

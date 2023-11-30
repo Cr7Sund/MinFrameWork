@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 namespace Cr7Sund.Framework.Tests
@@ -104,8 +105,8 @@ namespace Cr7Sund.Framework.Tests
                 new InjectionBinding(resolver).Bind<InjectableSuperClass>().ToValue(illegalValue);
             };
             var ex =
-                Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.Type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                Assert.Throws<MyException>(testDelegate);
+            Assert.AreEqual(  InjectionExceptionType.ILLEGAL_BINDING_VALUE, ex.Type);
         }
 
         [Test]
@@ -121,8 +122,8 @@ namespace Cr7Sund.Framework.Tests
                 new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<SimpleInterfaceImplementer>();
             };
             var ex =
-                Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.Type == InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                Assert.Throws<MyException>(testDelegate);
+            Assert.AreEqual( InjectionExceptionType.ILLEGAL_BINDING_VALUE, ex.Type);
         }
     }
 }

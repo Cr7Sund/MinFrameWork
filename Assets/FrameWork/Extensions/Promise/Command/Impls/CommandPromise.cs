@@ -214,10 +214,12 @@ namespace Cr7Sund.Framework.Impl
                     throw e;
                 }
 
-
-                bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
-                AssertUtil.IsFalse(hasMatchingItem);
-                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
+                if (MacroDefine.IsDebug)
+                {
+                    bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
+                    AssertUtil.IsFalse(hasMatchingItem);
+                }
+                AssertUtil.NotNull(resultPromise, PromiseExceptionType.EXCEPTION_ON_ExecuteAsync);
                 resultPromise
                     .Progress(SequenceProgressHandler)
                     .Then(ResolveHandler, RejectHandler);
@@ -436,9 +438,12 @@ namespace Cr7Sund.Framework.Impl
                     throw e;
                 }
 
-                bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
-                AssertUtil.IsFalse(hasMatchingItem);
-                AssertUtil.NotNull(resultPromise, new PromiseException("there is an exception happen in OnExecuteAsync ", PromiseExceptionType.EXCEPTION_ON_ExecuteAsync));
+                if (MacroDefine.IsDebug)
+                {
+                    bool hasMatchingItem = _resolveHandlers != null && _resolveHandlers.Any(item => item.Rejectable == this);
+                    AssertUtil.IsFalse(hasMatchingItem);
+                }
+                AssertUtil.NotNull(resultPromise, PromiseExceptionType.EXCEPTION_ON_ExecuteAsync);
 
                 resultPromise
                     .Progress(SequenceProgressHandler)

@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 namespace Cr7Sund.Framework.Tests
@@ -78,9 +79,9 @@ namespace Cr7Sund.Framework.Tests
         public void TestConflict_Binder_exception()
         {
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassOne>();
-            
 
-            var ex =Assert.Throws<BinderException>(() => { binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>();});
+
+            var ex = Assert.Throws<Util.MyException>(() => { binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>(); });
             UnityEngine.Assertions.Assert.AreEqual(BinderExceptionType.CONFLICT_IN_BINDER, ex.Type);
         }
     }

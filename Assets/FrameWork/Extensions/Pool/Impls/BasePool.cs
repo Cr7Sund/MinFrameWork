@@ -48,8 +48,7 @@ namespace Cr7Sund.Framework.Impl
                 //Illegal overflow. Report and return null
                 if (Count > 0)
                 {
-                    if (OverflowBehavior == PoolOverflowBehavior.EXCEPTION)
-                        throw new PoolException("A pool has overflowed its limit.\n\t", PoolExceptionType.OVERFLOW);
+                    AssertUtil.IsFalse(OverflowBehavior == PoolOverflowBehavior.EXCEPTION, PoolExceptionType.OVERFLOW);
                 }
                 else
                 {

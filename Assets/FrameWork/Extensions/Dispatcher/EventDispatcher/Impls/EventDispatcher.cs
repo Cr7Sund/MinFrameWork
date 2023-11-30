@@ -19,6 +19,7 @@
 * @see Cr7Sund.Framework.Api
 */
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
@@ -73,7 +74,7 @@ namespace Cr7Sund.Framework.Impl
                 object target = callback.Target;
                 string methodName = callback.Method.Name;
                 string message = "An EventCallback is attempting an illegal cast. One possible reason is not typing the payload to IEvent in your callback. Another is illegal casting of the data.\nTarget class: " + target + " method: " + methodName;
-                throw new EventDispatcherException(message, EventDispatcherExceptionType.TARGET_INVOCATION);
+                throw new MyException(message, EventDispatcherExceptionType.TARGET_INVOCATION);
             }
         }
 
@@ -90,7 +91,7 @@ namespace Cr7Sund.Framework.Impl
             IEvent retVal = null;
             if (eventType == null)
             {
-                throw new EventDispatcherException("Attempt to Dispatch to null.\ndata: " + data, EventDispatcherExceptionType.EVENT_KEY_NULL);
+                throw new MyException("Attempt to Dispatch to null.\ndata: " + data, EventDispatcherExceptionType.EVENT_KEY_NULL);
             }
             if (eventType is IEvent)
             {

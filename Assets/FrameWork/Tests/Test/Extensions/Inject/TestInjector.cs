@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 namespace Cr7Sund.Framework.Tests
@@ -116,7 +117,7 @@ namespace Cr7Sund.Framework.Tests
             {
                 binder.GetInstance<IMap>();
             };
-            var ex = Assert.Throws<InjectionException>(testDelegate);
+            var ex = Assert.Throws<MyException>(testDelegate);
             Assert.AreEqual(InjectionExceptionType.NONEMPTY_CONSTRUCTOR, ex.Type);
         }
     }

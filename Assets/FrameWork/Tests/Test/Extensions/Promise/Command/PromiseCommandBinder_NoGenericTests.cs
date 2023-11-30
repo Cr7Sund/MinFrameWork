@@ -1,6 +1,7 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
@@ -207,7 +208,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
 
-            var ex = Assert.Throws<PromiseException>(() =>
+            var ex = Assert.Throws<Util.MyException>(() =>
             {
                 _commandPromiseBinder.ReactTo(SomeEnum.ONE);
                 Assert.AreEqual(22 * 3, SimplePromise.result);
@@ -227,7 +228,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
 
-            var ex = Assert.Throws<PromiseException>(() =>
+            var ex = Assert.Throws<Util.MyException>(() =>
                 _commandPromiseBinder.ReactTo(SomeEnum.ONE));
             Assert.AreEqual(PromiseExceptionType.CAN_NOT_REACT_RUNNING, ex.Type);
         }
@@ -264,7 +265,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             SimplePromise.result = 0;
 
             promiseBinding.RestartPromise();
-            
+
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
             SimplePromise.simulatePromise.Resolve();
 
@@ -287,8 +288,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 _commandPromiseBinder.Bind(SomeEnum.ONE)
                     .Then<SimpleCommandTwo>();
             };
-            var ex = Assert.Throws<BinderException>(testDelegate);
-            Assert.That(ex.Type == BinderExceptionType.CONFLICT_IN_BINDER);
+            var ex = Assert.Throws<Util.MyException>(testDelegate);
+            Assert.AreEqual(BinderExceptionType.CONFLICT_IN_BINDER, ex.Type);
         }
     }
 }

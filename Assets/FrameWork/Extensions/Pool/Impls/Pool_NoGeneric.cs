@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -71,10 +72,9 @@ namespace Cr7Sund.Framework.Impl
 
         private void RemoveInstance(object value)
         {
-            AssertUtil.IsInstanceOf(PoolType, value,
-                new PoolException(
-                    "Attempt to remove a instance from a pool that is of the wrong Type:\n\t\tPool type: " + PoolType + "\n\t\tInstance type: " + value.GetType(),
-                    PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(PoolType, value, PoolExceptionType.TYPE_MISMATCH);
+
+
             if (InstancesInUse.Contains(value))
             {
                 InstancesInUse.Remove(value);
@@ -113,8 +113,11 @@ namespace Cr7Sund.Framework.Impl
             int instancesToCreate = NewInstanceToCreate();
 
             if (instancesToCreate == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) return;
-            AssertUtil.Greater(instancesToCreate, 0, new PoolException("Invalid Instance length to create", PoolExceptionType.NO_INSTANCE_TO_CREATE));
-            AssertUtil.NotNull(InstanceProvider, new PoolException("A Pool of type: " + PoolType + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER));
+            AssertUtil.Greater(instancesToCreate, 0, PoolExceptionType.NO_INSTANCE_TO_CREATE);
+            if (InstanceProvider == null)
+            {
+                throw new MyException("A Pool of type: " + PoolType + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);
+            }
 
             for (int i = 0; i < instancesToCreate; i++)
             {
@@ -134,7 +137,7 @@ namespace Cr7Sund.Framework.Impl
         #region IManagedList Implementation
         public IManagedList Add(object value)
         {
-            AssertUtil.IsInstanceOf(PoolType, value, new PoolException("Pool Type mismatch. Pools must consist of a common concrete type.\n\t\tPool type: " + PoolType + "\n\t\tMismatch type: " + value.GetType(), PoolExceptionType.TYPE_MISMATCH));
+            AssertUtil.IsInstanceOf(PoolType, value, PoolExceptionType.TYPE_MISMATCH);
             _instanceCount++;
             _instancesAvailable.Push(value);
             return this;

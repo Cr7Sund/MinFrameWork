@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 namespace Cr7Sund.Framework.Impl
 {
     public class Binding : IBinding
@@ -106,8 +107,10 @@ namespace Cr7Sund.Framework.Impl
         {
             if (BindingConst.FORBID_BOXING)
             {
-                if (key.GetType().IsValueType)
-                    throw new BinderException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
+                if (!key.GetType().IsValueType)
+                {
+                    throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
+                }
             }
 
             _key.Add(key);
@@ -124,8 +127,10 @@ namespace Cr7Sund.Framework.Impl
         {
             if (BindingConst.FORBID_BOXING)
             {
-                if (value.GetType().IsValueType)
-                    throw new BinderException($"{value} is not referenceType", BinderExceptionType.EXIST_BOXING);
+                if (!value.GetType().IsValueType)
+                {
+                    throw new MyException ($"{value.GetType()} is not referenceType",BinderExceptionType.EXIST_BOXING);
+                }
             }
 
             _value.Add(value);

@@ -77,8 +77,8 @@ namespace Cr7Sund.Framework.Impl
         public void RunPromise(PromisedT value)
         {
             object[] values = Value as object[];
-            AssertUtil.Greater(values.Length, 0, new PromiseException(
-                "can not react a empty promise command", PromiseExceptionType.EMPTY_PROMISE_TOREACT));
+            AssertUtil.Greater(values.Length, 0,
+               PromiseExceptionType.EMPTY_PROMISE_TOREACT);
 
             float sliceLength = 1 / values.Length;
             for (int i = 0; i < values.Length; i++)
@@ -270,8 +270,8 @@ namespace Cr7Sund.Framework.Impl
                 return prevValue;
             }
 
-            AssertUtil.IsTrue(typeof(T) == typeof(PromisedT), new PromiseException
-                ("can convert type in first promise", PromiseExceptionType.CONVERT_FIRST));
+            AssertUtil.IsTrue(typeof(T) == typeof(PromisedT),
+              PromiseExceptionType.CONVERT_FIRST);
 
             _firstPromise = InstantiatePromise();
             To(_firstPromise);

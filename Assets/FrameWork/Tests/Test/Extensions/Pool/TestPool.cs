@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 using System.Collections;
@@ -143,8 +144,8 @@ namespace Cr7Sund.Framework.Tests
             {
                 pool.GetInstance();
             };
-            var ex = Assert.Throws<PoolException>(testDelegate);
-            Assert.AreEqual(PoolExceptionType.OVERFLOW, ex.type);
+            var ex = Assert.Throws<Util.MyException>(testDelegate);
+            Assert.AreEqual(PoolExceptionType.OVERFLOW, ex.Type);
         }
 
         [Test]
@@ -182,8 +183,8 @@ namespace Cr7Sund.Framework.Tests
             {
                 pool.Add(new InjectableDerivedClass());
             };
-            var ex = Assert.Throws<PoolException>(testDelegate);
-            Assert.AreEqual(PoolExceptionType.TYPE_MISMATCH, ex.type);
+            var ex = Assert.Throws<Util.MyException>(testDelegate);
+            Assert.AreEqual(PoolExceptionType.TYPE_MISMATCH, ex.Type);
         }
 
         [Test]
@@ -250,8 +251,8 @@ namespace Cr7Sund.Framework.Tests
             {
                 pool.Remove(new InjectableDerivedClass());
             };
-            var ex = Assert.Throws<PoolException>(testDelegate);
-            Assert.AreEqual(PoolExceptionType.TYPE_MISMATCH, ex.type);
+            var ex = Assert.Throws<Util.MyException>(testDelegate);
+            Assert.AreEqual(PoolExceptionType.TYPE_MISMATCH, ex.Type);
         }
 
         [Test]

@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
 {
@@ -25,9 +26,12 @@ namespace Cr7Sund.Framework.Impl
         {
             if (BindingConst.FORBID_BOXING)
             {
-                if (key.GetType().IsValueType)
-                    throw new BinderException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
+                if (!key.GetType().IsValueType)
+                {
+                    throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
+                }
             }
+            
             IBinding binding;
             binding = GetRawBinding();
             binding.Bind(key);
@@ -182,14 +186,9 @@ namespace Cr7Sund.Framework.Impl
                     if (existingBinding.Name != bindingName) continue;
                     if (existingBinding != binding)
                     {
-                        if (existingBinding.IsWeak)
-                        {
-                            list.RemoveAt(i);
-                        }
-                        else
-                        {
-                            throw new BinderException("Binder cannot register a new Bindings when the binder is in a conflicted state.\nConflicts: ", BinderExceptionType.CONFLICT_IN_BINDER);
-                        }
+                        AssertUtil.IsTrue(existingBinding.IsWeak, BinderExceptionType.CONFLICT_IN_BINDER);
+
+                        list.RemoveAt(i);
                         break;
                     }
                 }

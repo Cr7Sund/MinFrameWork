@@ -5,7 +5,9 @@ namespace Cr7Sund.Framework.Api
         /// Injector Factory not found
         NULL_FACTORY,
 
-        /// Callback must be a Delegate with zero or one argument
-        ILLEGAL_CALLBACK_HANDLER
+        /// EventDispatcher can't map something that isn't a delegate
+        ILLEGAL_CALLBACK_HANDLER,
+        // Event callbacks must have either one or no arguments
+        OUT_OF_ARGUMENT_EVENT
     }
 }

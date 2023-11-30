@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 namespace Cr7Sund.Framework.Impl
 {
@@ -14,10 +15,7 @@ namespace Cr7Sund.Framework.Impl
             var type = binding.Type;
 
             object bindingValue = binding.Value;
-            if (bindingValue == null)
-            {
-                throw new InjectionException("InjectorFactory cannot act on null binding", InjectionExceptionType.NULL_BINDING);
-            }
+            AssertUtil.NotNull(bindingValue, InjectionExceptionType.GET_NULL_BINDING_FACTORY);
 
             switch (type)
             {
@@ -38,9 +36,9 @@ namespace Cr7Sund.Framework.Impl
         private object ValueOf(IInjectionBinding binding)
         {
             object bindingValue = binding.Value;
-
+   
             if (bindingValue.GetType().IsInstanceOfType(typeof(Type)))
-                throw new InjectionException("Inject a type into binder as value", InjectionExceptionType.NULL_VALUE_INJECTION);
+                throw new MyException("Inject a type into binder as value", InjectionExceptionType.TYPE_AS_VALUE_INJECTION);
 
             return bindingValue;
         }
@@ -49,23 +47,17 @@ namespace Cr7Sund.Framework.Impl
         {
             object bindingValue = binding.Value;
 
-            if (binding.Value != null)
-            {
-                if (bindingValue.GetType().IsInstanceOfType(typeof(Type)))
-                {
-                    object o = CreateFromValue(bindingValue, args);
-                    if (o == null)
-                    {
-                        return null;
-                    }
+            AssertUtil.NotNull(bindingValue, InjectionExceptionType.EXISTED_VALUE_INJECTION);
 
-                    binding.SetValue(o);
-                }
-                //no-op. We already have a binding value!
-            }
-            else
+            if (bindingValue.GetType().IsInstanceOfType(typeof(Type)))
             {
-                throw new InjectionException("InjectorFactory cant instantiate a binding with value", InjectionExceptionType.NULL_VALUE_INJECTION);
+                object o = CreateFromValue(bindingValue, args);
+                if (o == null)
+                {
+                    return null;
+                }
+
+                binding.SetValue(o);
             }
 
             return binding.Value;

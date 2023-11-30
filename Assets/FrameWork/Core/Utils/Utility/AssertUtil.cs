@@ -5,7 +5,7 @@
         {
             if (expected)
             {
-                throw new AssertionException(message);
+                throw new   MyException(message);
             }
         }
         
@@ -39,7 +39,7 @@ namespace Cr7Sund.Framework.Util
 
             if (comparer.Compare(low, actual) > 0 || comparer.Compare(actual, high) > 0)
             {
-                throw new AssertionException($"Assert.InRange() Failure : Actual: {actual}, High :{high} Low: {low}");
+                throw new MyException($"Assert.InRange() Failure : Actual: {actual}, High :{high} Low: {low}");
             }
         }
 
@@ -87,15 +87,23 @@ namespace Cr7Sund.Framework.Util
         {
             if (anObject == null)
             {
-                NotNull(anObject, new AssertionException($"expected value is not null, but it is null"));
+                throw new MyException($"expected value is not null, but it is null");
             }
         }
 
-        public static void NotNull(object anObject, Exception e)
+        public static void NotNull(object anObject, Enum errorCode)
         {
             if (anObject == null)
             {
-                throw e;
+                throw new MyException(errorCode);
+            }
+        }
+
+        public static void NotNull(object anObject, Exception exception)
+        {
+            if (anObject == null)
+            {
+                throw exception;
             }
         }
 
@@ -103,15 +111,15 @@ namespace Cr7Sund.Framework.Util
         {
             if (!typeof(T).IsInstanceOfType(actual))
             {
-                throw new AssertionException($"expect type{typeof(T)} but it is {actual.GetType()}");
+                throw new MyException($"expect type{typeof(T)} but it is {actual.GetType()}");
             }
         }
 
-        public static void IsInstanceOf<T>(object actual, Exception e)
+        public static void IsInstanceOf<T>(object actual, Enum errorCode)
         {
             if (!typeof(T).IsInstanceOfType(actual))
             {
-                throw e;
+                throw new MyException(errorCode);
             }
         }
 
@@ -119,40 +127,53 @@ namespace Cr7Sund.Framework.Util
         {
             if (!excepted.IsInstanceOfType(actual))
             {
-                throw new AssertionException($"type{excepted} disMatch {actual.GetType()}");
+                throw new MyException($"expected type: {excepted} disMatch actual type: {actual.GetType()}");
             }
         }
 
-        public static void IsInstanceOf(Type excepted, object actual, Exception e)
+        public static void IsInstanceOf(Type excepted, object actual, Enum errorCode)
         {
             if (!excepted.IsInstanceOfType(actual))
             {
-                throw e;
+                throw new MyException(
+                     $"ErrorCode:{errorCode}. expected type: {excepted} disMatch actual type: {actual.GetType()}",
+                     errorCode);
+            }
+        }
+
+        public static void IsAssignableFrom(Type excepted, Type actual, Enum errorCode)
+        {
+            if (!excepted.IsAssignableFrom(actual))
+            {
+                throw new MyException(
+                     $"ErrorCode:{errorCode}. expected type: {excepted} is not assign from actual type: {actual.GetType()}",
+                     errorCode);
             }
         }
 
         public static void Greater(int arg1, int arg2)
         {
             if (arg1 <= arg2)
-                throw new AssertionException($"excepted {arg1} greater than {arg2}");
+                throw new MyException($"excepted {arg1} greater than {arg2}");
         }
 
-        public static void Greater(int arg1, int arg2, Exception e)
+        public static void Greater(int arg1, int arg2, Enum errorCode)
         {
             if (arg1 <= arg2)
-                throw e;
+                throw new MyException(errorCode);
         }
+
 
         public static void LessOrEqual(int arg1, int arg2)
         {
             if (arg1 > arg2)
-                throw new AssertionException($"excepted {arg1} LessOrEqual {arg2}");
+                throw new MyException($"excepted {arg1} LessOrEqual {arg2}");
         }
 
-        public static void LessOrEqual(int arg1, int arg2, Exception e)
+        public static void LessOrEqual(int arg1, int arg2, Enum errorCode)
         {
             if (arg1 > arg2)
-                throw e;
+                throw new MyException(errorCode);
         }
 
 
@@ -160,15 +181,22 @@ namespace Cr7Sund.Framework.Util
         {
             if (expected)
             {
-                throw new AssertionException("Expected false, but it's true");
+                throw new MyException("Expected false, but it's true");
             }
         }
 
-        public static void IsFalse(bool expected, Exception e)
+        public static void IsFalse(bool expected, string message)
         {
             if (expected)
             {
-                throw e;
+                throw new MyException(message);
+            }
+        }
+        public static void IsFalse(bool expected, Enum errorCode)
+        {
+            if (expected)
+            {
+                throw new MyException(errorCode);
             }
 
         }
@@ -177,49 +205,72 @@ namespace Cr7Sund.Framework.Util
         {
             if (!expected)
             {
-                throw new AssertionException("Expected true, but it's false");
+                throw new MyException("Expected true, but it's false");
             }
         }
 
-        public static void IsTrue(bool expected, Exception e)
+        public static void IsTrue(bool expected, Enum errorCode)
         {
             if (!expected)
             {
-                throw e;
+                throw new MyException(errorCode);
             }
 
         }
 
         public static void AreEqual(object expected, object actual)
         {
-            if (!expected.Equals(actual))
+            if (!EqualWithoutBoxing(expected, actual))
             {
-                throw new AssertionException($"Expected {expected}  but it's {actual}");
+                throw new MyException($"Expected {expected}  but it's {actual}");
+            }
+        }
+        public static void AreEqual(int expected, int actual)
+        {
+            if (expected != actual)
+            {
+                throw new MyException($"Expected {expected}  but it's {actual}");
             }
         }
 
-        public static void AreEqual(object expected, object actual, Exception e)
+        public static void AreEqual(object expected, object actual, Enum errorCode)
         {
-            if (!expected.Equals(actual))
+            if (!EqualWithoutBoxing(expected, actual))
             {
-                throw e;
+                throw new MyException(errorCode);
             }
         }
 
         public static void AreNotEqual(object expected, object actual)
         {
-            if (expected.Equals(actual))
+            if (EqualWithoutBoxing(expected, actual))
             {
-                throw new AssertionException($"Expected {expected}  but it's {actual}");
+                throw new MyException($"Expected {expected}  but it's {actual}");
             }
         }
 
 
-        public static void AreNotEqual(object expected, object actual, Exception e)
+        public static void AreNotEqual(object expected, object actual, Enum errorCode)
         {
-            if (expected.Equals(actual))
+            if (EqualWithoutBoxing(expected, actual))
             {
-                throw e;
+                throw new MyException(errorCode);
+            }
+        }
+
+
+        public static bool EqualWithoutBoxing(object o1, object o2)
+        {
+            if (o1 == null && o2 == null) return true;
+            if (o1 == null || o2 == null) return false;
+
+            if (o1.GetType().IsValueType)
+            {
+                throw new System.NotImplementedException();
+            }
+            else
+            {
+                return o1.Equals(o2);
             }
         }
         #endregion

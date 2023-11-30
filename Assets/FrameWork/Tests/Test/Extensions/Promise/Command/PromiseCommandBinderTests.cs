@@ -1,6 +1,7 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -500,8 +501,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 _commandPromiseBinder.Bind(SomeEnum.ONE)
                     .Then<SimpleCommandTwoGeneric>();
             };
-            var ex = Assert.Throws<BinderException>(testDelegate);
-            Assert.That(ex.Type == BinderExceptionType.CONFLICT_IN_BINDER);
+            var ex = Assert.Throws<Util.MyException>(testDelegate);
+            Assert.AreEqual(BinderExceptionType.CONFLICT_IN_BINDER, ex.Type);
         }
     }
 }

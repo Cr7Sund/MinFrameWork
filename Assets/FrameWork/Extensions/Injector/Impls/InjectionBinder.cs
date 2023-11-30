@@ -1,4 +1,5 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
@@ -39,9 +40,10 @@ namespace Cr7Sund.Framework.Impl
         public virtual object GetInstance(Type key, object name)
         {
             var binding = GetBinding(key, name);
+
             if (binding == null)
             {
-                throw new InjectionException("InjectionBinder has no binding for:\n\tkey: " + key + "\nname: " + name, InjectionExceptionType.NULL_BINDING);
+                throw new Util.MyException("InjectionBinder has no binding for:\n\tkey: " + key + "\nname: " + name, InjectionExceptionType.NULL_BINDING_CREATE);
             }
 
             object instance = GetInjectorForBinding(binding).Instantiate(binding);
@@ -50,27 +52,15 @@ namespace Cr7Sund.Framework.Impl
 
         public void ReleaseInstance(object instance, object name = null)
         {
-            if (instance != null)
-            {
-                var binding = GetBinding(instance.GetType(), name);
-                if (binding == null)
-                {
-                    throw new InjectionException("InjectionBinder has no binding for:\n\tkey: " + instance.GetType() + "\nname: " + name, InjectionExceptionType.NULL_BINDING);
-                }
+            AssertUtil.NotNull(instance, InjectionExceptionType.RELEASE_NULL_BINDING);
 
-                GetInjectorForBinding(binding).Destroy(instance);
-            }
-            else
+            var binding = GetBinding(instance.GetType(), name);
+            if (binding == null)
             {
-                // e.g.  
-                // private void AssignNull(ref GuaranteedUniqueInstances instances)
-                // {
-                //     instances = null;
-                // }
-                // AssignNull(ref instance1);
-                // binder.ReleaseInstance(instance1, SomeEnum.ONE);
-                throw new InjectionException("try to release an null instance", InjectionExceptionType.NULL_BINDING);
+                throw new Util.MyException("InjectionBinder has no binding for:\n\tkey: " + instance.GetType() + "\nname: " + name, InjectionExceptionType.NULL_BINDING_RELEASE);
             }
+
+            GetInjectorForBinding(binding).Destroy(instance);
         }
 
         protected virtual IInjector GetInjectorForBinding(IInjectionBinding binding)

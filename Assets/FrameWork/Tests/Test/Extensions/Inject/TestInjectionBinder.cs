@@ -1,5 +1,6 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -126,8 +127,8 @@ namespace Cr7Sund.Framework.Tests
                 binder.GetInstance<InjectableSuperClass>();
             };
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
-            var ex = Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.Type == InjectionExceptionType.NULL_BINDING);
+            var ex = Assert.Throws<MyException>(testDelegate);
+            Assert.AreEqual(InjectionExceptionType.NULL_BINDING_GET_INJECT, ex.Type);
         }
 
         [Test]
@@ -156,8 +157,8 @@ namespace Cr7Sund.Framework.Tests
                 binder.GetInstance<InjectableSuperClass>();
             };
 
-            var ex = Assert.Throws<InjectionException>(testDelegate);
-            Assert.That(ex.Type == InjectionExceptionType.NULL_BINDING);
+            var ex = Assert.Throws<MyException>(testDelegate);
+            Assert.AreEqual(InjectionExceptionType.NULL_BINDING_GET_INJECT, ex.Type);
         }
 
         [Test]
@@ -221,7 +222,7 @@ namespace Cr7Sund.Framework.Tests
                 binder.ReleaseInstance(instance1, SomeEnum.ONE);
                 binder.ReleaseInstance(instance2, SomeEnum.ONE);
             };
-            Assert.Throws<InjectionException>(testDelegate);
+            Assert.Throws<MyException>(testDelegate);
             var instance3 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             var instance4 = binder.GetInstance<GuaranteedUniqueInstances>(SomeEnum.ONE);
             Assert.LessOrEqual(instance3.uid, 4); // since we dont actually return , we will expand the pool to adjust
