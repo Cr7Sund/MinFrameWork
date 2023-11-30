@@ -28,7 +28,7 @@ namespace Cr7Sund.Framework.Impl
         #region IBinder implementation
         protected override IBinding GetRawBinding()
         {
-            var binding = new CommandPromiseBinding<PromisedT>(Resolver);
+            var binding = new CommandPromiseBinding<PromisedT>(_bindingResolverHandler);
             _injectionBinder.Injector.Inject(binding);
             return binding;
         }

@@ -10,10 +10,14 @@ namespace Cr7Sund.Framework.Impl
         /// A handler for resolving the nature of a binding during chained commands
         public delegate void BindingResolver(IBinding binding, object oldName = null);
         protected Dictionary<object, List<IBinding>> _bindings; // object is implicitly equal to type
+        protected BindingResolver _bindingResolverHandler;
+
+
 
         public Binder()
         {
             _bindings = new Dictionary<object, List<IBinding>>();
+            _bindingResolverHandler = Resolver;
         }
 
         #region IBinder implementation
@@ -40,10 +44,10 @@ namespace Cr7Sund.Framework.Impl
 
         protected virtual IBinding GetRawBinding()
         {
-            return new Binding(Resolver);
+            return new Binding(_bindingResolverHandler);
         }
 
-        protected virtual void Resolver(IBinding binding, object oldName = null)
+        private void Resolver(IBinding binding, object oldName = null)
         {
             var key = binding.Key;
             if (binding.KeyConstraint == BindingConstraintType.ONE)

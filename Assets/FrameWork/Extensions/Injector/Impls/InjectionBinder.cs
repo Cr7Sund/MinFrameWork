@@ -72,7 +72,7 @@ namespace Cr7Sund.Framework.Impl
         #region IBinder implementation
         protected override IBinding GetRawBinding()
         {
-            return new InjectionBinding(Resolver);
+            return new InjectionBinding(_bindingResolverHandler);
         }
 
         public new virtual IInjectionBinding Bind<T>()

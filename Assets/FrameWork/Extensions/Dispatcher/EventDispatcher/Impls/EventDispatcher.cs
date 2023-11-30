@@ -135,7 +135,7 @@ namespace Cr7Sund.Framework.Impl
         #region IBinder Implementation
         protected override IBinding GetRawBinding()
         {
-            return new EventBinding(Resolver);
+            return new EventBinding(_bindingResolverHandler);
         }
 
         public new IEventBinding Bind(object key)

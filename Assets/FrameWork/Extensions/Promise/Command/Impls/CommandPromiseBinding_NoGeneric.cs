@@ -9,10 +9,7 @@ namespace Cr7Sund.Framework.Impl
     {
         public const int MaxPoolCount = 16;
 
-
-
         [Inject] private ICommandBinder _commandBinder;
-
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
         private List<ICommandPromise> _promiseList;
