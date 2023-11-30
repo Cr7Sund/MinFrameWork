@@ -45,18 +45,16 @@ namespace Cr7Sund.Framework.Impl
 
         protected virtual void Resolver(IBinding binding, object oldName = null)
         {
-            object key = binding.Key;
+            var key = binding.Key;
             if (binding.KeyConstraint == BindingConstraintType.ONE)
             {
-                ResolveBinding(binding, key);
+                ResolveBinding(binding, binding.Key.SingleValue);
             }
             else
             {
-                object[] keys = key as object[];
-                int aa = keys.Length;
-                for (int a = 0; a < aa; a++)
+                for (int a = 0; a < key.Count; a++)
                 {
-                    ResolveBinding(binding, keys[a]);
+                    ResolveBinding(binding, key[a]);
                 }
             }
         }
@@ -134,7 +132,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 return;
             }
-            object key = binding.Key;
+            object key = binding.Key.SingleValue;
             if (_bindings.TryGetValue(key, out var dict))
             {
                 for (int i = dict.Count - 1; i >= 0; i--)
@@ -151,8 +149,7 @@ namespace Cr7Sund.Framework.Impl
                     useBinding.RemoveValue(value);
 
                     //If result is empty, clean it out
-                    object[] values = useBinding.Value as object[];
-                    if (values == null || values.Length == 0)
+                    if (useBinding.Value.Count == 0)
                     {
                         dict.RemoveAt(i);
                     }

@@ -14,9 +14,6 @@ namespace Cr7Sund.Framework.Impl
         {
             var type = binding.Type;
 
-            object bindingValue = binding.Value;
-            AssertUtil.NotNull(bindingValue, InjectionExceptionType.GET_NULL_BINDING_FACTORY);
-
             switch (type)
             {
                 case InjectionBindingType.SINGLETON:
@@ -30,12 +27,12 @@ namespace Cr7Sund.Framework.Impl
 
         private object InstanceOf(IInjectionBinding binding, object[] args)
         {
-            return CreateFromValue(binding.Value, args);
+            return CreateFromValue(binding.Value.SingleValue, args);
         }
 
         private object ValueOf(IInjectionBinding binding)
         {
-            object bindingValue = binding.Value;
+            object bindingValue = binding.Value.SingleValue;
    
             if (bindingValue.GetType().IsInstanceOfType(typeof(Type)))
                 throw new MyException("Inject a type into binder as value", InjectionExceptionType.TYPE_AS_VALUE_INJECTION);
@@ -45,7 +42,7 @@ namespace Cr7Sund.Framework.Impl
 
         private object SingletonOf(IInjectionBinding binding, object[] args)
         {
-            object bindingValue = binding.Value;
+            object bindingValue = binding.Value.SingleValue;
 
             AssertUtil.NotNull(bindingValue, InjectionExceptionType.EXISTED_VALUE_INJECTION);
 
@@ -60,7 +57,7 @@ namespace Cr7Sund.Framework.Impl
                 binding.SetValue(o);
             }
 
-            return binding.Value;
+            return binding.Value.SingleValue;
         }
 
         /// Call the Activator to attempt instantiation the given object

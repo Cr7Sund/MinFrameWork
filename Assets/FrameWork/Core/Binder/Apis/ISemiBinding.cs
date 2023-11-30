@@ -1,3 +1,8 @@
+
+
+
+using System;
+
 /**
  * @interface Cr7Sund.Framework.Api.ISemiBinding
  *
@@ -20,8 +25,6 @@
  *
  * @see Cr7Sund.Framework.Api.BindingConstraintType
  */
-
-
 namespace Cr7Sund.Framework.Api
 {
     public interface ISemiBinding : IManagedList
@@ -34,6 +37,19 @@ namespace Cr7Sund.Framework.Api
         ///     each other.
         /// </summary>
         bool UniqueValue { get; set; }
+        /// <summary>
+        ///     Gets or sets the type of inflation for infinite-sized pools.
+        /// </summary>
+        /// By default, a pool doubles its InstanceCount.
+        /// <value>A PoolInflationType value.</value>
+        PoolInflationType InflationType { get; set; }
+
+        object SingleValue{get;}
+
+        object this[int index] { get; set; }
+
+
+        object[] Clone();
     }
 
 

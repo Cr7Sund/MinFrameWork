@@ -40,7 +40,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                retVal = binding.Value as IReflectedClass;
+                retVal = binding.Value.SingleValue as IReflectedClass;
                 ((ReflectedClass)retVal).PreGenerated = true;
             }
 

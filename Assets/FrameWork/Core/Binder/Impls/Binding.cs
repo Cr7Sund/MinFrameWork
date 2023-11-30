@@ -67,18 +67,18 @@ namespace Cr7Sund.Framework.Impl
             }
         }
 
-        public object Key
+        public ISemiBinding Key
         {
             get
             {
-                return _key.Value;
+                return _key;
             }
         }
-        public object Value
+        public ISemiBinding Value
         {
             get
             {
-                return _value.Value;
+                return _value;
             }
         }
 

@@ -230,7 +230,7 @@ namespace Cr7Sund.Framework.Impl
                 return;
             }
 
-            object[] callbacks = (binding.Value as object[]).Clone() as object[];
+            object[] callbacks = binding.Value.Clone();
             if (callbacks == null)
             {
                 InternalReleaseEvent(evt);
@@ -244,9 +244,8 @@ namespace Cr7Sund.Framework.Impl
 
                 callbacks[i] = null;
 
-                object[] curCallback = binding.Value as object[];
-                if (Array.IndexOf(curCallback, callback) == -1)
-                    continue;
+                if(!binding.Value.Contains(callback)) continue;
+
                 if (callback is EventCallback evtCallback)
                 {
                     InvokeEventCallback(evt, evtCallback);

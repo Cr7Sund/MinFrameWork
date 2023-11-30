@@ -112,12 +112,11 @@ namespace Cr7Sund.Framework.Impl
 
             if (instancesToCreate == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) return;
             AssertUtil.Greater(instancesToCreate, 0, PoolExceptionType.NO_INSTANCE_TO_CREATE);
+           
             if (InstanceProvider == null)
             {
                 throw new MyException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);
             }
-
-
             for (int i = 0; i < instancesToCreate; i++)
             {
                 var newInstance = GetNewInstance();

@@ -1,21 +1,22 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
 using System;
+using System.Runtime.CompilerServices;
 namespace Cr7Sund.Framework.Impl
 {
     public class SemiBinding : ISemiBinding
     {
         protected object[] _objectValue;
-        private int _size = 0;
-        public SemiBinding()
-        {
-            Constraint = BindingConstraintType.ONE;
-            UniqueValue = true;
-        }
+        private int _size;
+        private int _capacity;
+        private const int DefaultCapacity = 1;
+        private const int DefaultDoubleCapacity = 4;
+        private const int MaxLength = 1024;
+        private static readonly object[] _emptyArray = new object[0];
+
         public BindingConstraintType Constraint { get; set; }
         public bool UniqueValue { get; set; }
 
-        #region ISemiBinding implementation
         public virtual object Value
         {
             get
@@ -27,33 +28,55 @@ namespace Cr7Sund.Framework.Impl
                 return _objectValue;
             }
         }
-
         public int Count => _size;
-
 
         public object this[int index]
         {
             get
             {
-                if (index < 0 || index >= _objectValue.Length)
+                if (index < 0 || index >= _size)
                     throw new IndexOutOfRangeException();
                 return _objectValue[index];
             }
             set
             {
-                if (index < 0 || index >= _objectValue.Length)
+                if (index < 0 || index >= _size)
                     throw new IndexOutOfRangeException();
                 _objectValue[index] = value;
             }
         }
-        #endregion
+        public object SingleValue
+        {
+            get
+            {
+                return _objectValue == null ? null : _objectValue[0];
+            }
+        }
+        public PoolInflationType InflationType { get; set; }
+        public int MaxSize { get; set; }
+        public int Capacity => _capacity;
+
+        public SemiBinding()
+        {
+            Constraint = BindingConstraintType.ONE;
+            InflationType = PoolInflationType.INCREMENT;
+            MaxSize = MaxLength;
+            UniqueValue = true;
+
+            _objectValue = _emptyArray;
+        }
 
         #region IManagedList implementation
         public IManagedList Add(object o)
         {
-            if (_objectValue == null || Constraint == BindingConstraintType.ONE)
+            if (Constraint == BindingConstraintType.ONE)
             {
-                _objectValue = new object[1];
+                if (_objectValue.Length == 0)
+                {
+                    _objectValue = new object[1];
+                    _size = 1;
+                }
+                _objectValue[0] = o;
             }
             else
             {
@@ -62,14 +85,15 @@ namespace Cr7Sund.Framework.Impl
                     if (Contains(o)) return this;
                 }
 
-                object[] newItems = new object[_objectValue.Length + 1];
-                Array.Copy(_objectValue, newItems, _objectValue.Length);
-                _objectValue = newItems;
+                if (_size >= _objectValue.Length)
+                {
+                    AddWithResize();
+                }
+
+                _objectValue[_size++] = o;
+
             }
 
-            _objectValue[_objectValue.Length - 1] = o;
-
-            _size++;
             return this;
         }
 
@@ -112,6 +136,7 @@ namespace Cr7Sund.Framework.Impl
         public IManagedList Clear()
         {
             _size = 0;
+            _capacity = 0;
             _objectValue = null;
             return this;
         }
@@ -119,6 +144,41 @@ namespace Cr7Sund.Framework.Impl
         public bool Contains(object o)
         {
             return _objectValue.Contains(o);
+        }
+
+        private void AddWithResize()
+        {
+            _capacity = GetNewCapacity();
+
+            if (_capacity != _objectValue.Length)
+            {
+                var newItems = new object[_capacity];
+                Array.Copy(_objectValue, newItems, _size);
+                _objectValue = newItems;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int GetNewCapacity()
+        {
+            int newCapacity = _objectValue.Length == 0 ?
+                      (InflationType == PoolInflationType.DOUBLE ? DefaultDoubleCapacity : DefaultCapacity) :
+                      (InflationType == PoolInflationType.DOUBLE ? 2 * _objectValue.Length : _objectValue.Length + 1);
+
+            if (newCapacity > MaxSize) throw new MyException(BinderExceptionType.BINDING_LIMIT);
+            return newCapacity;
+        }
+
+        #endregion
+
+
+        #region ISemiBinding implementation
+
+        public object[] Clone()
+        {
+            object[] resultArray = new object[_size];
+            Array.Copy(_objectValue, resultArray, _size);
+            return resultArray;
         }
         #endregion
     }

@@ -126,7 +126,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
 
-            object[] objects = binding.Value as object[];
+            var objects = binding.Value;
 
             var itemB = ((CommandPromise)objects[3]).Test_GetCommand();
             var itemA = ((CommandPromise)objects[1]).Test_GetCommand();
@@ -143,7 +143,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
 
-            object[] objects = binding.Value as object[];
+            var objects = binding.Value;
             var commandPromise = (CommandPromise)objects[1];
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
@@ -159,7 +159,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwo>()
                 .Then<SimpleCommandOne>();
 
-            object[] objects = binding.Value as object[];
+            var objects = binding.Value;
 
             var itemB = ((CommandPromise)objects[3]).Test_GetCommand();
             var itemA = ((CommandPromise)objects[1]).Test_GetCommand();

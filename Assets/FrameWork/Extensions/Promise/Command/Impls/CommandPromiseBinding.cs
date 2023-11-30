@@ -36,6 +36,8 @@ namespace Cr7Sund.Framework.Impl
 
             ValueConstraint = BindingConstraintType.MANY;
             KeyConstraint = BindingConstraintType.ONE;
+
+            _value.InflationType = PoolInflationType.DOUBLE;
         }
 
 
@@ -53,10 +55,9 @@ namespace Cr7Sund.Framework.Impl
 
         public void RestartPromise()
         {
-            var values = Value as object[];
-            for (int i = 0; i < values.Length; i++)
+            for (int i = 0; i < Value.Count; i++)
             {
-                object item = values[i];
+                object item = Value[i];
                 var poolable = item as IResetable;
                 poolable.Reset();
             }
@@ -76,14 +77,13 @@ namespace Cr7Sund.Framework.Impl
 
         public void RunPromise(PromisedT value)
         {
-            object[] values = Value as object[];
-            AssertUtil.Greater(values.Length, 0,
+            AssertUtil.Greater(Value.Count, 0,
                PromiseExceptionType.EMPTY_PROMISE_TOREACT);
 
-            float sliceLength = 1 / values.Length;
-            for (int i = 0; i < values.Length; i++)
+            float sliceLength = 1 / Value.Count;
+            for (int i = 0; i < Value.Count; i++)
             {
-                var command = values[i] as ISequence;
+                var command = Value[i] as ISequence;
 
                 command.SliceLength = sliceLength;
                 command.SequenceID = i;
@@ -92,7 +92,7 @@ namespace Cr7Sund.Framework.Impl
             BindingStatus = CommandBindingStatus.Running;
 
 
-            var lastPromise = values[^1] as IBasePromise;
+            var lastPromise = Value[^1] as IBasePromise;
             lastPromise.Done();
 
             _firstPromise.Resolve(value);
@@ -263,10 +263,10 @@ namespace Cr7Sund.Framework.Impl
 
         private ICommandPromise<T> FindPrevChainPromise<T>()
         {
-            if (Value is object[] values)
+            if (Value.Count > 0)
             {
-                AssertUtil.IsInstanceOf<CommandPromise<T>>(values[^1]);
-                var prevValue = (CommandPromise<T>)values[^1];
+                AssertUtil.IsInstanceOf<CommandPromise<T>>(Value[^1]);
+                var prevValue = (CommandPromise<T>)Value[^1];
                 return prevValue;
             }
 
@@ -440,11 +440,9 @@ namespace Cr7Sund.Framework.Impl
         {
             if (Value != null)
             {
-                var values = Value as object[];
-
-                for (int i = 0; i < values.Length; i++)
+                for (int i = 0; i < Value.Count; i++)
                 {
-                    object item = values[i];
+                    object item = Value[i];
                     var poolable = item as IPoolable;
                     poolable.Release();
                 }

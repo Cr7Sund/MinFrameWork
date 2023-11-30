@@ -112,7 +112,7 @@ namespace Cr7Sund.Framework.Impl
 
             void AddUniqueTypeToSets(HashSet<Type> set, List<Type> list, IBinding binding)
             {
-                if (binding.Value is Type t)
+                if (binding.Value.SingleValue is Type t)
                 {
                     if (!set.Contains(t))
                     {

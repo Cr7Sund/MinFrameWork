@@ -33,7 +33,7 @@ namespace Cr7Sund.Framework.Impl
             object retVal = null;
             Type reflectionType = null;
 
-            object bindingValue = binding.Value;
+            object bindingValue = binding.Value.SingleValue;
             if (bindingValue is not Type)
             {
                 retVal = bindingValue;
@@ -78,7 +78,7 @@ namespace Cr7Sund.Framework.Impl
                 }
             }
 
-            failIf(retVal == null, InjectionExceptionType.NULL_INSTANTIATE_RESULT, binding.Key as Type, null);
+            failIf(retVal == null, InjectionExceptionType.NULL_INSTANTIATE_RESULT, binding.Key.SingleValue as Type, null);
 
             return retVal;
         }
@@ -201,7 +201,7 @@ namespace Cr7Sund.Framework.Impl
         {
             var binding = Binder.GetBinding(t, name);
             failIf(binding == null, InjectionExceptionType.NULL_BINDING_GET_INJECT, t, name, target);
-            object bindingValue = binding.Value;
+            object bindingValue = binding.Value.SingleValue;
 
             object retVal = null;
             if (binding.Type == InjectionBindingType.VALUE)
@@ -220,7 +220,7 @@ namespace Cr7Sund.Framework.Impl
             {
                 if (bindingValue is Type || bindingValue == null)
                     Instantiate(binding);
-                retVal = binding.Value;
+                retVal = binding.Value.SingleValue;
             }
             else
             {

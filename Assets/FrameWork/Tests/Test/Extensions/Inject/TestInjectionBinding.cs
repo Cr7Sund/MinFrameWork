@@ -13,7 +13,7 @@ namespace Cr7Sund.Framework.Tests
             Binder.BindingResolver resolver = delegate (IBinding binding, object oldName)
             {
                 (binding as IInjectionBinding).Type = InjectionBindingType.DEFAULT;
-                Assert.That(typeof(SimpleInterfaceImplementer) == binding.Value as Type);
+                Assert.That(typeof(SimpleInterfaceImplementer) == binding.Value.SingleValue as Type);
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.DEFAULT);
             };
             var defaultBinding = new InjectionBinding(resolver);
@@ -28,7 +28,7 @@ namespace Cr7Sund.Framework.Tests
             Binder.BindingResolver resolver = delegate (IBinding binding, object oldName)
             {
                 (binding as IInjectionBinding).Type = InjectionBindingType.SINGLETON;
-                Assert.That(instance == binding.Value);
+                Assert.That(instance == binding.Value.SingleValue);
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.SINGLETON);
             };
             var defaultBinding = new InjectionBinding(resolver);
@@ -42,7 +42,7 @@ namespace Cr7Sund.Framework.Tests
             Binder.BindingResolver resolver = delegate (IBinding binding, object oldName)
             {
                 (binding as IInjectionBinding).Type = InjectionBindingType.VALUE;
-                Assert.That(instance == binding.Value);
+                Assert.That(instance == binding.Value.SingleValue);
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.VALUE);
             };
             var defaultBinding = new InjectionBinding(resolver);
@@ -56,7 +56,7 @@ namespace Cr7Sund.Framework.Tests
 
             Binder.BindingResolver resolver = delegate (IBinding binding, object oldName)
             {
-                Assert.That(binding.Value as Type == typeof(InjectableDerivedClass));
+                Assert.That(binding.Value.SingleValue as Type == typeof(InjectableDerivedClass));
                 var correctType = a == 0 ? InjectionBindingType.DEFAULT : InjectionBindingType.SINGLETON;
                 Assert.That((binding as InjectionBinding).Type == correctType);
                 a++;
@@ -75,13 +75,13 @@ namespace Cr7Sund.Framework.Tests
                 // if (a == 2)
                 if (a == 0)
                 {
-                    Assert.AreEqual(typeof(InjectableDerivedClass), binding.Value as Type);
+                    Assert.AreEqual(typeof(InjectableDerivedClass), binding.Value.SingleValue as Type);
                     // Value Constraint is one
-                    Assert.That(binding.Value != testValue);
+                    Assert.That(binding.Value.SingleValue != testValue);
                 }
                 if (a == 1)
                 {
-                    Assert.That(binding.Value == testValue);
+                    Assert.That(binding.Value.SingleValue == testValue);
                 }
 
                 var correctType = a == 0 ? InjectionBindingType.DEFAULT : InjectionBindingType.VALUE;
@@ -106,7 +106,7 @@ namespace Cr7Sund.Framework.Tests
             };
             var ex =
                 Assert.Throws<MyException>(testDelegate);
-            Assert.AreEqual(  InjectionExceptionType.ILLEGAL_BINDING_VALUE, ex.Type);
+            Assert.AreEqual(InjectionExceptionType.ILLEGAL_BINDING_VALUE, ex.Type);
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace Cr7Sund.Framework.Tests
             };
             var ex =
                 Assert.Throws<MyException>(testDelegate);
-            Assert.AreEqual( InjectionExceptionType.ILLEGAL_BINDING_VALUE, ex.Type);
+            Assert.AreEqual(InjectionExceptionType.ILLEGAL_BINDING_VALUE, ex.Type);
         }
     }
 }

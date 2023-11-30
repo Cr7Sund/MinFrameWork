@@ -13,7 +13,7 @@ namespace Cr7Sund.Framework.Impl
                 binding = Bind<T>().To(tInstance);
             }
 
-            var bindingValue = binding.Value as T;
+            var bindingValue = binding.Value.SingleValue as T;
             return bindingValue;
         }
         
@@ -22,7 +22,7 @@ namespace Cr7Sund.Framework.Impl
             var binding = GetBinding<T>();
             if (binding != null)
             {
-                var bindingValue = binding.Value as T;
+                var bindingValue = binding.Value.SingleValue as T;
                 return bindingValue;
             }
 

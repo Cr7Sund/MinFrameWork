@@ -68,11 +68,11 @@ namespace TestMono
 
             for (int a = 0; a < Count; a++)
             {
-                binder.Bind(a.ToString()).AsOnce()
+                binder.Bind(a).AsOnce()
                     .Then<SimpleCommandOne>()
                     .Then<SimpleCommandTwo>();
 
-                binder.ReactTo(a.ToString());
+                binder.ReactTo(a);
             }
         }
 
@@ -81,13 +81,13 @@ namespace TestMono
             var binder = new CommandPromiseBinder();
             injectionBinder.Injector.Inject(binder);
 
-            binder.Bind("TOW")
+
+            binder.Bind("we")
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>();
-
             for (int a = 0; a < Count; a++)
             {
-                binder.ReactTo("TOW");
+                binder.ReactTo("we");
             }
         }
 

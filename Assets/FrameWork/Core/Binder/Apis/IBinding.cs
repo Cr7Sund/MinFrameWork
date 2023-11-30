@@ -31,9 +31,9 @@ namespace Cr7Sund.Framework.Api
     {
 
         ///<summary> Get the binding's key </summary>
-        object Key { get; }
+        ISemiBinding Key { get; }
         object Name { get; }
-        object Value { get; }
+        ISemiBinding Value { get; }
 
         BindingConstraintType KeyConstraint { get; }
 

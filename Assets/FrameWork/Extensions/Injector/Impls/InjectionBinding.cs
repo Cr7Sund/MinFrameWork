@@ -16,7 +16,7 @@ namespace Cr7Sund.Framework.Impl
         {
             if (KeyConstraint == BindingConstraintType.ONE)
             {
-                var keyType = Key as Type;
+                var keyType = Key.SingleValue as Type;
                 if (keyType.IsAssignableFrom(objType) == false)
                 {
                     throw new Util.MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
@@ -24,10 +24,9 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                object[] keys = Key as object[];
-                for (int i = 0; i < keys.Length; i++)
+                for (int i = 0; i < Key.Count; i++)
                 {
-                    var keyType = keys[i] as Type;
+                    var keyType = Key[i] as Type;
                     if (keyType.IsAssignableFrom(objType) == false)
                     {
                         throw new Util.MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);

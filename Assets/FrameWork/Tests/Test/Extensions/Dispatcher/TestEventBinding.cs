@@ -18,7 +18,7 @@ namespace Cr7Sund.Framework.Tests
             IEventBinding binding = new EventBinding();
             binding.Bind(SomeEnum.ONE).To(noArgumentCallback);
             var type = binding.TypeForCallback(noArgumentCallback);
-            object[] value = binding.Value as object[];
+            ISemiBinding value = binding.Value ;
             var extracted = value[0] as Delegate;
 
             Assert.AreEqual(EventCallbackType.NO_ARGUMENTS, type);
@@ -40,7 +40,7 @@ namespace Cr7Sund.Framework.Tests
             IEventBinding binding = new EventBinding();
             binding.Bind(SomeEnum.ONE).To(oneArgumentCallback);
             var type = binding.TypeForCallback(oneArgumentCallback);
-            object[] value = binding.Value as object[];
+            ISemiBinding value = binding.Value;
             var extracted = value[0] as Delegate;
 
             Assert.AreEqual(EventCallbackType.ONE_ARGUMENT, type);

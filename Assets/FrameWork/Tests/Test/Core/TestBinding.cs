@@ -18,14 +18,14 @@ namespace Cr7Sund.Framework.Tests
         public void TestKeyAsType()
         {
             binding.Bind<MarkerClass>();
-            Assert.That(binding.Key as Type == typeof(MarkerClass));
+            Assert.That(binding.Key.SingleValue as Type == typeof(MarkerClass));
         }
         [Test]
         public void TestKeyToAsTypes()
         {
             binding.Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
-            Assert.That(binding.Key as Type == typeof(InjectableSuperClass));
-            Assert.That((Type)binding.Value == typeof(InjectableDerivedClass));
+            Assert.That(binding.Key.SingleValue as Type == typeof(InjectableSuperClass));
+            Assert.That((Type)binding.Value.SingleValue == typeof(InjectableDerivedClass));
         }
 
         [Test]
@@ -49,12 +49,12 @@ namespace Cr7Sund.Framework.Tests
                 .To(test1).ToName("abc")
                 .To(test2).ToName("def")
                 .To(test3).ToName("ghi");
-            Assert.That(binding.Key as Type == typeof(ISimpleInterface));
+            Assert.That(binding.Key.SingleValue as Type == typeof(ISimpleInterface));
 
-            object[] values = ((Binding)binding).Value as object[];
+            ISemiBinding values = ((Binding)binding).Value ;
             Assert.IsNotNull(values);
-            Assert.That(values.Length == 3);
-            for (int a = 0; a < values.Length; a++)
+            Assert.That(values.Count == 3);
+            for (int a = 0; a < values.Count; a++)
             {
                 var value = values[a] as ISimpleInterface;
                 Assert.IsNotNull(value);

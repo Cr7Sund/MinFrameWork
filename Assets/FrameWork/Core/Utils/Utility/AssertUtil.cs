@@ -111,7 +111,7 @@ namespace Cr7Sund.Framework.Util
         {
             if (!typeof(T).IsInstanceOfType(actual))
             {
-                throw new MyException($"expect type{typeof(T)} but it is {actual.GetType()}");
+                throw new MyException($"expect type{typeof(T)} but it is {actual?.GetType()}");
             }
         }
 
@@ -127,7 +127,7 @@ namespace Cr7Sund.Framework.Util
         {
             if (!excepted.IsInstanceOfType(actual))
             {
-                throw new MyException($"expected type: {excepted} disMatch actual type: {actual.GetType()}");
+                throw new MyException($"expected type: {excepted} disMatch actual type: {actual?.GetType()}");
             }
         }
 
@@ -136,7 +136,7 @@ namespace Cr7Sund.Framework.Util
             if (!excepted.IsInstanceOfType(actual))
             {
                 throw new MyException(
-                     $"ErrorCode:{errorCode}. expected type: {excepted} disMatch actual type: {actual.GetType()}",
+                     $"ErrorCode:{errorCode}. expected type: {excepted} disMatch actual type: {actual?.GetType()}",
                      errorCode);
             }
         }
@@ -146,7 +146,7 @@ namespace Cr7Sund.Framework.Util
             if (!excepted.IsAssignableFrom(actual))
             {
                 throw new MyException(
-                     $"ErrorCode:{errorCode}. expected type: {excepted} is not assign from actual type: {actual.GetType()}",
+                     $"ErrorCode:{errorCode}. expected type: {excepted} is not assign from actual type: {actual?.GetType()}",
                      errorCode);
             }
         }

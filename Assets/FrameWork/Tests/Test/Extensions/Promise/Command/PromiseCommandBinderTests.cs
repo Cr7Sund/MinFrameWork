@@ -372,15 +372,16 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                      SimpleAsyncCommandSecondGeneric>()
                  .Then<SimpleCommandOneGeneric>();
 
-            object[] objects = binding.Value as object[];
+            ISemiBinding objects = binding.Value ;
             List<ICommandPromise<int>> testGetPromiseList = ((CommandPromiseBinding<int>)binding).Test_GetPromiseList();
             var promiseList = new List<ICommandPromise<int>>(testGetPromiseList);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
             SimplePromise.simulatePromiseSecond.Resolve(3);
 
-            foreach (var item in objects)
+            for (int i = 0; i < objects.Count; i++)
             {
+                object item = objects[i];
                 var commandPromise = (CommandPromise<int>)item;
                 Assert.AreEqual(false, commandPromise.IsRetain);
             }
@@ -399,7 +400,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
 
-            object[] objects = binding.Value as object[];
+            var objects = binding.Value ;
 
             var itemB = ((CommandPromise<int>)objects[3]).Test_GetCommand();
             var itemA = ((CommandPromise<int>)objects[1]).Test_GetCommand();
@@ -416,12 +417,13 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>();
 
-            object[] objects = binding.Value as object[];
+            var objects = binding.Value ;
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
 
-            foreach (var item in objects)
+            for (int i = 0; i < objects.Count; i++)
             {
+                object item = objects[i];
                 var commandPromise = (CommandPromise<int>)item;
                 Assert.AreEqual(false, commandPromise.IsRetain);
             }

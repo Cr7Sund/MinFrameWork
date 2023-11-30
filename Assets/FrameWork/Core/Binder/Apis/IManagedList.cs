@@ -10,11 +10,6 @@ namespace Cr7Sund.Framework.Api
     public interface IManagedList
     {
 
-        /// Retrieve the value of this List.
-        /// If the constraint is MANY, the value will be an Array.
-        /// If the constraint is POOL, this becomes a synonym for GetInstance().
-        object Value { get; }
-
         // Length of values
         int Count { get; }
         /// Add a value to this List.
@@ -33,5 +28,12 @@ namespace Cr7Sund.Framework.Api
         bool Contains(object o);
     }
 
+    public enum PoolInflationType
+    {
+        /// When a dynamic pool inflates, add one to the pool.
+        INCREMENT,
 
+        /// When a dynamic pool inflates, double the size of the pool
+        DOUBLE
+    }
 }

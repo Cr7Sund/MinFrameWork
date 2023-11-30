@@ -22,9 +22,9 @@ namespace Cr7Sund.Framework.Tests
             var binding = binder.GetBinding<InjectableSuperClass>();
 
             Assert.IsNotNull(binding);
-            Assert.AreEqual(typeof(InjectableSuperClass), binding.Key);
-            Assert.AreNotEqual(typeof(InjectableDerivedClass), binding.Key);
-            Assert.AreEqual(typeof(InjectableDerivedClass), binding.Value);
+            Assert.AreEqual(typeof(InjectableSuperClass), binding.Key.SingleValue);
+            Assert.AreNotEqual(typeof(InjectableDerivedClass), binding.Key.SingleValue);
+            Assert.AreEqual(typeof(InjectableDerivedClass), binding.Value.SingleValue);
         }
 
         [Test]
@@ -36,19 +36,19 @@ namespace Cr7Sund.Framework.Tests
 
             var binding = binder.GetBinding<InjectableSuperClass>();
             Assert.IsNotNull(binding);
-            Assert.AreEqual(binding.Key, typeof(InjectableSuperClass));
+            Assert.AreEqual(binding.Key.SingleValue, typeof(InjectableSuperClass));
 
-            var unNameValue = binding.Value as Type;
+            var unNameValue = binding.Value.SingleValue as Type;
             Assert.AreEqual(typeof(InjectableDerivedClassOne), unNameValue);
             Assert.AreNotEqual(typeof(InjectableDerivedClassTwo), unNameValue);
 
             binding = binder.GetBinding<InjectableSuperClass>("marker");
-            var nameValue = binding.Value as Type;
+            var nameValue = binding.Value.SingleValue as Type;
             Assert.AreEqual(typeof(InjectableDerivedClassTwo), nameValue);
             Assert.AreNotEqual(typeof(InjectableDerivedClassOne), nameValue);
 
             binding = binder.GetBinding<InjectableSuperClass>("strange");
-            nameValue = binding.Value as Type;
+            nameValue = binding.Value.SingleValue as Type;
             Assert.AreEqual(typeof(InjectableDerivedClassThree), nameValue);
             Assert.AreNotEqual(typeof(InjectableDerivedClassOne), nameValue);
             Assert.AreNotEqual(typeof(InjectableDerivedClassTwo), nameValue);
@@ -65,16 +65,16 @@ namespace Cr7Sund.Framework.Tests
             binding = binder.GetBinding<InjectableSuperClass>();
             Assert.IsNull(binding);
         }
-        
+
         [Test]
         public void TestOverwriteBinding()
         {
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassOne>().ToName("duplicate").Weak();
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>().ToName("duplicate");
 
-            Assert.AreEqual(typeof(InjectableDerivedClassTwo), binder.GetBinding<InjectableSuperClass>("duplicate").Value as Type);
+            Assert.AreEqual(typeof(InjectableDerivedClassTwo), binder.GetBinding<InjectableSuperClass>("duplicate").Value.SingleValue as Type);
         }
- 
+
         [Test]
         public void TestConflict_Binder_exception()
         {

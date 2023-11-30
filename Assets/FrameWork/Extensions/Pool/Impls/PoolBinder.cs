@@ -39,7 +39,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                retVal = binding.Value as IPool<T>;
+                retVal = binding.Value.SingleValue as IPool<T>;
             }
 
             return retVal;
@@ -59,7 +59,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                retVal = binding.Value as IPool;
+                retVal = binding.Value.SingleValue as IPool;
             }
 
             return retVal;
@@ -71,7 +71,7 @@ namespace Cr7Sund.Framework.Impl
             IPool retVal = null;
             if (binding != null)
             {
-                retVal = binding.Value as IPool;
+                retVal = binding.Value.SingleValue as IPool;
             }
 
             return retVal;
@@ -83,7 +83,7 @@ namespace Cr7Sund.Framework.Impl
             IPool<T> retVal = null;
             if (binding != null)
             {
-                retVal = binding.Value as IPool<T>;
+                retVal = binding.Value.SingleValue as IPool<T>;
             }
 
             return retVal;
