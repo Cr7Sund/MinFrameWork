@@ -49,7 +49,7 @@ namespace Cr7Sund.Framework.Impl
         {
             get
             {
-                return _objectValue == null ? null : _objectValue[0];
+                return _objectValue == null || _objectValue.Length == 0 ? null : _objectValue[0];
             }
         }
         public PoolInflationType InflationType { get; set; }

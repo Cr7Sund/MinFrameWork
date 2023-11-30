@@ -26,13 +26,13 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding Bind(object key)
         {
-            if (MacroDefine.IsDebug)
-            {
-                if (!key.GetType().IsValueType)
-                {
-                    throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
-                }
-            }
+            // if (MacroDefine.IsDebug)
+            // {
+            //     if (key.GetType().IsValueType)
+            //     {
+            //         throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
+            //     }
+            // }
 
             IBinding binding;
             binding = GetRawBinding();

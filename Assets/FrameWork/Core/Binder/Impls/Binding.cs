@@ -105,13 +105,13 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual IBinding Bind(object key)
         {
-            if (MacroDefine.IsDebug)
-            {
-                if (!key.GetType().IsValueType)
-                {
-                    throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
-                }
-            }
+            // if (MacroDefine.IsDebug)
+            // {
+            //     if (key.GetType().IsValueType)
+            //     {
+            //         throw new MyException($"{key} is not referenceType", BinderExceptionType.EXIST_BOXING);
+            //     }
+            // }
 
             _key.Add(key);
 
@@ -125,13 +125,13 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding To(object value)
         {
-            if (MacroDefine.IsDebug)
-            {
-                if (!value.GetType().IsValueType)
-                {
-                    throw new MyException ($"{value.GetType()} is not referenceType",BinderExceptionType.EXIST_BOXING);
-                }
-            }
+            // if (MacroDefine.IsRelease)
+            // {
+            //     if (value.GetType().IsValueType)
+            //     {
+            //         throw new MyException ($"{value.GetType()} is not referenceType",BinderExceptionType.EXIST_BOXING);
+            //     }
+            // }
 
             _value.Add(value);
             if (resolver != null)
