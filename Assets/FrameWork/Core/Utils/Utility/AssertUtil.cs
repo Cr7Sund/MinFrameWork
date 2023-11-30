@@ -91,7 +91,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void NotNull(object anObject, Enum errorCode)
+        public static void NotNull<TEnum>(object anObject, TEnum errorCode) where TEnum : Enum
         {
             if (anObject == null)
             {
@@ -115,7 +115,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsInstanceOf<T>(object actual, Enum errorCode)
+        public static void IsInstanceOf<T,TEnum>(object actual, TEnum errorCode) where TEnum : Enum
         {
             if (!typeof(T).IsInstanceOfType(actual))
             {
@@ -131,7 +131,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsInstanceOf(Type excepted, object actual, Enum errorCode)
+        public static void IsInstanceOf<TEnum>(Type excepted, object actual, TEnum errorCode) where TEnum : Enum
         {
             if (!excepted.IsInstanceOfType(actual))
             {
@@ -141,7 +141,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsAssignableFrom(Type excepted, Type actual, Enum errorCode)
+        public static void IsAssignableFrom<TEnum>(Type excepted, Type actual, TEnum errorCode) where TEnum : Enum
         {
             if (!excepted.IsAssignableFrom(actual))
             {
@@ -157,12 +157,12 @@ namespace Cr7Sund.Framework.Util
                 throw new MyException($"excepted {arg1} greater than {arg2}");
         }
 
-        public static void Greater(int arg1, int arg2, Enum errorCode)
+
+        public static void Greater<TEnum>(int arg1, int arg2, TEnum errorCode) where TEnum : Enum
         {
             if (arg1 <= arg2)
                 throw new MyException(errorCode);
         }
-
 
         public static void LessOrEqual(int arg1, int arg2)
         {
@@ -170,7 +170,7 @@ namespace Cr7Sund.Framework.Util
                 throw new MyException($"excepted {arg1} LessOrEqual {arg2}");
         }
 
-        public static void LessOrEqual(int arg1, int arg2, Enum errorCode)
+        public static void LessOrEqual<TEnum>(int arg1, int arg2, TEnum errorCode) where TEnum : Enum
         {
             if (arg1 > arg2)
                 throw new MyException(errorCode);
@@ -192,7 +192,7 @@ namespace Cr7Sund.Framework.Util
                 throw new MyException(message);
             }
         }
-        public static void IsFalse(bool expected, Enum errorCode)
+        public static void IsFalse<TEnum>(bool expected, TEnum errorCode) where TEnum : Enum
         {
             if (expected)
             {
@@ -209,7 +209,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsTrue(bool expected, Enum errorCode)
+        public static void IsTrue<TEnum>(bool expected, TEnum errorCode) where TEnum : Enum
         {
             if (!expected)
             {
@@ -233,7 +233,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void AreEqual(object expected, object actual, Enum errorCode)
+        public static void AreEqual<TEnum>(object expected, object actual, TEnum errorCode) where TEnum : Enum
         {
             if (!EqualWithoutBoxing(expected, actual))
             {
@@ -250,7 +250,7 @@ namespace Cr7Sund.Framework.Util
         }
 
 
-        public static void AreNotEqual(object expected, object actual, Enum errorCode)
+        public static void AreNotEqual<TEnum>(object expected, object actual, TEnum errorCode) where TEnum : Enum
         {
             if (EqualWithoutBoxing(expected, actual))
             {
