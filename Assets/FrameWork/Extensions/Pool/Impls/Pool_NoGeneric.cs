@@ -1,6 +1,5 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;

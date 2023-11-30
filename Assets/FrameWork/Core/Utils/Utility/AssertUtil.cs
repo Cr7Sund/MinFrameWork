@@ -13,7 +13,6 @@
  * and if you want to show your custom error message,
  * instead we recommend pass an new specific exception type to provide meaningful error messages.
  */
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Util

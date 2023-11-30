@@ -1,32 +1,38 @@
 using System;
+
 namespace Cr7Sund.Framework.Api
 {
+    /// <summary>
+    /// Represents a binder for managing pools.
+    /// </summary>
     public interface IPoolBinder : IBinder
     {
         /// <summary>
-        ///     Get a no value pool based on the provided Type
-        ///     if not exist will return a new create value instead
+        /// Get a no-value pool based on the provided type.
+        /// If not exist, it will return a newly created pool instead.
         /// </summary>
         IPool GetOrCreate(Type type);
 
         /// <summary>
-        ///     Get a value pool based on the provided Type
-        ///     if not exist will return a new create value instead
+        /// Get a value pool based on the provided type.
+        /// If not exist, it will return a newly created pool instead.
         /// </summary>
         IPool<T> GetOrCreate<T>() where T : class, new();
 
         /// <summary>
-        ///     Get a value pool based on the provided Type
-        ///     if not exist will return a new create value instead
+        /// Get a value pool based on the provided type with a specified maximum pool count.
+        /// If not exist, it will return a newly created pool instead.
         /// </summary>
         IPool<T> GetOrCreate<T>(int maxPoolCount) where T : class, new();
 
-        /// Get a no value pool based on the provided Type
+        /// <summary>
+        /// Get a no-value pool based on the provided type.
         /// </summary>
         IPool Get(Type type);
 
-
-        /// if not exist will return a new create value instead
+        /// <summary>
+        /// Get a value pool based on the provided type.
+        /// If not exist, it will return a newly created pool instead.
         /// </summary>
         IPool<T> Get<T>() where T : class, new();
     }

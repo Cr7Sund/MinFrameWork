@@ -1,94 +1,69 @@
-/**
- * @interface Cr7Sund.Framework.Api.IPool
- *
- * A mechanism for storing and reusing instances.
- *
- * you can employ Pools yourself by mapping and injecting a Pool for instances you want to reuse.
- *
- * Basic instructions for injecting a Pool for use:
- * Map IPool<SomeClass> in the InjectionBinder:
-
-        injectionBinder.Bind<IPool<MyClass>>().ToSingleton();
-
-* Then inject like so:
-
-        [Inject]
-        public IPool<MyClass> myPool { get; set; }
- *
- * A couple of caveats for working with Pools:
- * 1. A limitation of the version of .NET currently used by Unity forbids using interfaces or abstracts in generics.
- * so you cannot map and inject IPool<IMyInterface> or IPool<MyAbstractClass>. This is a little confusing in
- * Strange, since we're used to mapping injections in exactly this fashion (e.g., injectionBinder.Bind<ISomeInterface>).
- * The reason this doesn't work for Pools has to do with setting properties, rather than the binding itself.
- * But because it will bite you, we throw an Exception if you attempt to Bind or set anything but a concrete Pool type.
- *
- * 2. Pooling presupposes that when the instance is finished doing what it does it is cleaned up and
- * returned to the Pool. Use IPool.ReturnInstance() to mark an object as ready for reuse.
- * @see Cr7Sund.Framework.Api.IPoolable for more on cleaning up.
- */
-
 namespace Cr7Sund.Framework.Api
 {
+    /// <summary>
+    /// Represents the base pool interface for storing and reusing instances.
+    /// </summary>
     public interface IBasePool : IPoolable
     {
         /// <summary>
-        ///     A class that provides instances to the pool when it needs them.
-        ///     This can be the InjectionBinder, or any class you write that satisfies the IInstanceProvider
-        ///     interface.
-        ///     <summary>
-        ///     </summary>
+        /// Gets or sets the instance provider that provides instances to the pool.
+        /// </summary>
         IInstanceProvider InstanceProvider { get; set; }
 
         /// <summary>
-        ///     Returns the count of non-committed instances
+        /// Returns the count of non-committed instances.
         /// </summary>
         int Available { get; }
 
-
         /// <summary>
-        ///     Gets or sets the overflow behavior of this pool.
+        /// Gets or sets the overflow behavior of this pool.
         /// </summary>
         /// <value>A PoolOverflowBehavior value.</value>
         PoolOverflowBehavior OverflowBehavior { get; set; }
 
         /// <summary>
-        ///     Gets or sets the type of inflation for infinite-sized pools.
-        /// </summary>
+        /// Gets or sets the type of inflation for infinite-sized pools.
         /// By default, a pool doubles its InstanceCount.
+        /// </summary>
         /// <value>A PoolInflationType value.</value>
         PoolInflationType InflationType { get; set; }
 
         /// <summary>
-        ///     the max count of pool in case of pool increase too fast with not return instance
-        ///     by default is 24, my lucky number
+        /// Gets or sets the max count of the pool in case of the pool increasing too fast with not returning instances.
+        /// By default is 24, a lucky number.
         /// </summary>
         int MaxCount { get; set; }
 
         /// <summary>
-        ///     Remove all instance references from the Pool.
+        /// Remove all instance references from the Pool.
         /// </summary>
         void Clean();
 
         /// <summary>
-        ///     sets the size of the pool.
+        /// Sets the size of the pool.
         /// </summary>
-        /// <value>
-        ///     The pool size. '0' is a special value indicating infinite size. Infinite pools expand as necessary to
-        ///     accommodate requirement.
-        /// </value>
+        /// <param name="size">The pool size. '0' is a special value indicating infinite size. Infinite pools expand as necessary.</param>
         void SetSize(int size);
     }
 
+    /// <summary>
+    /// Represents the overflow behavior of a pool.
+    /// </summary>
     public enum PoolOverflowBehavior
     {
+        /// <summary>
         /// Requesting more than the fixed size will throw an exception.
+        /// </summary>
         EXCEPTION,
 
+        /// <summary>
         /// Requesting more than the fixed size will throw a warning.
+        /// </summary>
         WARNING,
 
+        /// <summary>
         /// Requesting more than the fixed size will return null and not throw an error.
+        /// </summary>
         IGNORE
     }
-
 }
