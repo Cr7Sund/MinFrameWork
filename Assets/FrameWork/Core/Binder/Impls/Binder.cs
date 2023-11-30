@@ -26,7 +26,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding Bind(object key)
         {
-            if (BindingConst.FORBID_BOXING)
+            if (MacroDefine.IsDebug)
             {
                 if (!key.GetType().IsValueType)
                 {

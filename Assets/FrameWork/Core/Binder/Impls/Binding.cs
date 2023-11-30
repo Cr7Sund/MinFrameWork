@@ -105,7 +105,7 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual IBinding Bind(object key)
         {
-            if (BindingConst.FORBID_BOXING)
+            if (MacroDefine.IsDebug)
             {
                 if (!key.GetType().IsValueType)
                 {
@@ -125,7 +125,7 @@ namespace Cr7Sund.Framework.Impl
 
         public IBinding To(object value)
         {
-            if (BindingConst.FORBID_BOXING)
+            if (MacroDefine.IsDebug)
             {
                 if (!value.GetType().IsValueType)
                 {
@@ -177,8 +177,6 @@ namespace Cr7Sund.Framework.Impl
         // the reason why not use enum is boxing operation cost
         public const string NULLOIDNAME = "NULLOIDNAME";
 
-        // if you dont want to avoid value type boxing cost
-        // can switch it to true 
-        public static bool FORBID_BOXING = false;
+
     }
 }
