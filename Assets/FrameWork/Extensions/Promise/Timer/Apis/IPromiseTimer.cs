@@ -27,6 +27,10 @@ namespace Cr7Sund.Framework.Api
         ///     Cancel a waiting promise and reject it immediately.
         /// </summary>
         bool Cancel(IPromise promise);
+
+        // TODO 
+        // Support wait for frame
+        // https://github.com/jonagill/AsyncRoutines/tree/main
     }
 
     /// <summary>
