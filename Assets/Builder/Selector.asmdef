@@ -1,0 +1,17 @@
+{
+    "name": "Selector",
+    "rootNamespace": "",
+    "references": [
+        "GUID:338fddbfc56193247a01799dcb444b49",
+        "GUID:fe13ff8c968d49d48ba40db5a43374e8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
