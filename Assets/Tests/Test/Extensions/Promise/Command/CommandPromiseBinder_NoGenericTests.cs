@@ -1,8 +1,10 @@
+using System.Text.RegularExpressions;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
 using Cr7Sund.Framework.Util;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
 
@@ -18,9 +20,11 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder = new InjectionBinder();
             poolBinder = new PoolBinder();
 
+
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(new CommandBinder());
+            injectionBinder.Bind<IInternalLog>().To<InternalLogger>();
 
             _commandPromiseBinder = new CommandPromiseBinder();
             ((CommandPromiseBinder)_commandPromiseBinder).UsePooling = false;
@@ -42,7 +46,6 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         }
 
         [Test]
-        [TestCase(SomeEnum.ONE, 16 * 3)]
         public void command_binder_simple()
         {
             var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE);
@@ -201,6 +204,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             Assert.AreEqual(0, promisePool.Available);
             Assert.AreEqual(4, promisePool.Count);
 
+            LogAssert.Expect(UnityEngine.LogType.Error, new Regex("System.NotImplementedException"));
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
             binding.Dispose();
             Assert.AreEqual(8, promisePool.Available);

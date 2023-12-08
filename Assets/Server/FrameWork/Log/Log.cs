@@ -288,7 +288,11 @@ namespace Cr7Sund
         {
             Error(null, exception);
         }
-
+        /// <summary>
+        ///     Log an error message (visible in all versions during development).
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <param name="exception"></param>
         public static void Error(string prefix, Exception exception)
         {
             if (null == exception)
@@ -301,6 +305,24 @@ namespace Cr7Sund
             Error("{0} {1}", prefix, exceptionStr);
         }
 
+        /// <summary>
+        ///     Log an error message (visible in all versions during development).
+        /// </summary>
+        /// <param name="logChannel">The log channel of the debug message.</param>
+        /// <param name="prefix"></param>
+        /// <param name="exception"></param>
+        public static void Error(LogChannel logChannel, string prefix, Exception exception)
+        {
+            if (null == exception)
+            {
+                Error("{0} Exception is null.", prefix);
+                return;
+            }
+
+            string exceptionStr = ParseException(exception);
+            string result = LogDecorator.Format(LogLevel.Error, logChannel, $"{prefix} {exceptionStr}");
+            UnityEngine.Debug.LogError(result);
+        }
         /// <summary>
         ///     Log an error message (visible in all versions during development).
         /// </summary>
@@ -371,7 +393,24 @@ namespace Cr7Sund
             string exceptionStr = ParseException(exception);
             UnityEngine.Debug.LogError(exceptionStr);
         }
+        /// <summary>
+        ///     Log a fatal error message (visible in all versions during development).
+        /// </summary>
+        /// <param name="logChannel">The log channel of the debug message.</param>
+        /// <param name="prefix"></param>
+        /// <param name="exception"></param>
+        public static void Fatal(LogChannel logChannel, string prefix, Exception exception)
+        {
+            if (null == exception)
+            {
+                Error("{0} Exception is null.", prefix);
+                return;
+            }
 
+            string exceptionStr = ParseException(exception);
+            string result = LogDecorator.Format(LogLevel.Fatal, logChannel, $"{prefix} {exceptionStr}");
+            UnityEngine.Debug.LogError(result);
+        }
         /// <summary>
         ///     Log a fatal error message (visible in all versions during development).
         /// </summary>

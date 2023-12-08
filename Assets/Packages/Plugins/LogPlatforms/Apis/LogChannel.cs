@@ -72,6 +72,11 @@ namespace Cr7Sund
         ///     Assets logs
         /// </summary>
         Assets = 1 << 15,
+        /// <summary>
+        ///     Framework logs
+        /// </summary>
+
+        Framework = 1 << 19,
 
         Undefine = 1 << 20
     }

@@ -5,6 +5,8 @@ using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
     public class CommandPromiseBinderTests
@@ -24,6 +26,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(commandBinder);
+            injectionBinder.Bind<IInternalLog>().To<InternalLogger>();
 
             _commandPromiseBinder = new CommandPromiseBinder<int>();
             ((CommandPromiseBinder<int>)_commandPromiseBinder).UsePooling = false;
@@ -221,9 +224,9 @@ namespace Cr7Sund.Framework.PromiseCommandTest
                     SimpleAsyncCommandSecondGeneric>()
                 .Then<SimpleCommandOneGeneric>();
 
-
+            LogAssert.Expect(UnityEngine.LogType.Error, new Regex("System.NotImplementedException"));
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 5);
-            SimplePromise.simulatePromiseOne.Reject(new Exception());
+            SimplePromise.simulatePromiseOne.Reject(new NotImplementedException());
             SimplePromise.simulatePromiseSecond.Resolve(3);
 
             Assert.AreEqual(18, SimplePromise.result);
@@ -456,6 +459,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
+            LogAssert.Expect(UnityEngine.LogType.Error, new Regex("System.NotImplementedException"));
+
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<ExceptionCommandGeneric>()
