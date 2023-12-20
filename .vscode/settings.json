@@ -62,6 +62,7 @@
         "NULLOIDNAME",
         "Poolable",
         "Triggerable",
-        "unhandler"
+        "unhandler",
+        "Uninject"
     ]
 }

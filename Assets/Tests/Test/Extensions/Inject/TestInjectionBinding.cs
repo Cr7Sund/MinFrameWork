@@ -32,7 +32,7 @@ namespace Cr7Sund.Framework.Tests
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.SINGLETON);
             };
             var defaultBinding = new InjectionBinding(resolver);
-            defaultBinding.Bind<ISimpleInterface>().ToValue(instance);
+            defaultBinding.Bind<ISimpleInterface>().To(instance);
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace Cr7Sund.Framework.Tests
                 Assert.That((binding as InjectionBinding).Type == InjectionBindingType.VALUE);
             };
             var defaultBinding = new InjectionBinding(resolver);
-            defaultBinding.Bind<ISimpleInterface>().ToValue(instance);
+            defaultBinding.Bind<ISimpleInterface>().To(instance);
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace Cr7Sund.Framework.Tests
 
                 a++;
             };
-            new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().ToValue(testValue);
+            new InjectionBinding(resolver).Bind<InjectableSuperClass>().To<InjectableDerivedClass>().To(testValue);
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Cr7Sund.Framework.Tests
             };
             TestDelegate testDelegate = delegate
             {
-                new InjectionBinding(resolver).Bind<InjectableSuperClass>().ToValue(illegalValue);
+                new InjectionBinding(resolver).Bind<InjectableSuperClass>().To(illegalValue);
             };
             var ex =
                 Assert.Throws<MyException>(testDelegate);

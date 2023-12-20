@@ -30,7 +30,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestPostConstruct()
         {
             binder.Bind<PostConstructClass>().To<PostConstructClass>();
-            binder.Bind<float>().ToValue((float)Math.PI);
+            binder.Bind<float>().To((float)Math.PI);
             var instance = binder.GetInstance<PostConstructClass>();
             Assert.IsNotNull(instance);
             Assert.AreEqual((float)Math.PI * 2f, instance.floatVal);
@@ -43,7 +43,7 @@ namespace Cr7Sund.Framework.Tests
             string stringVal = "Ender Wiggin";
             var instance = new ClassWithConstructorParametersOnlyOneConstructor(stringVal);
 
-            binder.Bind<ClassWithConstructorParametersOnlyOneConstructor>().ToValue(instance);
+            binder.Bind<ClassWithConstructorParametersOnlyOneConstructor>().To(instance);
             //If this class attempts to construct, with no string mapped, there'll be an error
             var instance2 = binder.GetInstance<ClassWithConstructorParametersOnlyOneConstructor>();
             Assert.AreSame(instance, instance2);
@@ -57,12 +57,12 @@ namespace Cr7Sund.Framework.Tests
             float defaultFloatValue = testValue.floatValue;
             testValue.floatValue = (float)Math.PI;
 
-            binder.Bind<int>().ToValue(20);
+            binder.Bind<int>().To(20);
             var binding = binder.Bind<InjectableSuperClass>()
                 .To<InjectableSuperClass>()
                 .ToName(SomeEnum.ONE)
                 .AsSingleton();
-            binder.Bind<InjectableSuperClass>().ToValue(testValue).ToName(SomeEnum.TWO);
+            binder.Bind<InjectableSuperClass>().To(testValue).ToName(SomeEnum.TWO);
             binder.Bind<HasNamedInjections>().To<HasNamedInjections>();
 
             var instance = binder.GetInstance<HasNamedInjections>();
@@ -78,7 +78,7 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestNamedFactories()
         {
-            binder.Bind<int>().ToValue(20);
+            binder.Bind<int>().To(20);
             binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
             binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementerTwo>().ToName(SomeEnum.TWO);
 
@@ -110,7 +110,7 @@ namespace Cr7Sund.Framework.Tests
         [Test]
         public void TestOnlyParamConstructorException()
         {
-            binder.Bind<IMapConfig>().ToValue(new MapConfig());
+            binder.Bind<IMapConfig>().To(new MapConfig());
             binder.Bind<IMap>().To<Map>().AsSingleton();
 
             TestDelegate testDelegate = () =>

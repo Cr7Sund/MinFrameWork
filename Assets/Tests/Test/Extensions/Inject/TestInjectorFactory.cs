@@ -100,7 +100,7 @@ namespace Cr7Sund.Framework.Tests
             testvalue.intValue = 42;
             var binding = new InjectionBinding(resolver).Bind<InjectableSuperClass>()
                 .To<InjectableDerivedClass>()
-                .ToValue(testvalue);
+                .To(testvalue);
             var testResult = factory.Get(binding) as InjectableDerivedClass;
             Assert.IsNotNull(testResult);
             Assert.That(testResult.intValue == testvalue.intValue);
@@ -119,7 +119,7 @@ namespace Cr7Sund.Framework.Tests
             pool.InstanceProvider = new TestInstanceProvider();
 
             IInjectionBinding binding = new InjectionBinding(resolver);
-            binding.Bind<IPool<ClassToBeInjected>>().To<Pool<ClassToBeInjected>>().ToValue(pool);
+            binding.Bind<IPool<ClassToBeInjected>>().To<Pool<ClassToBeInjected>>().To(pool);
 
             IPool<ClassToBeInjected> myPool = factory.Get(binding) as Pool<ClassToBeInjected>;
             Assert.NotNull(myPool);

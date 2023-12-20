@@ -186,7 +186,10 @@ namespace Cr7Sund.Framework.Impl
                     if (existingBinding.Name != bindingName) continue;
                     if (existingBinding != binding)
                     {
-                        AssertUtil.IsTrue(existingBinding.IsWeak, BinderExceptionType.CONFLICT_IN_BINDER);
+                        if (!existingBinding.IsWeak)
+                        {
+                            throw new MyException($"there exist same binding key: {binding.Key.SingleValue} name: {binding.Name} ", BinderExceptionType.CONFLICT_IN_BINDER);
+                        }
 
                         list.RemoveAt(i);
                         break;

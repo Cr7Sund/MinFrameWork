@@ -22,11 +22,11 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder = new InjectionBinder();
             poolBinder = new PoolBinder();
             commandBinder = new CommandBinder();
-            
+
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(commandBinder);
-            injectionBinder.Bind<IInternalLog>().To<InternalLogger>();
+            Debug.Logger = new InternalLogger();
 
             _commandPromiseBinder = new CommandPromiseBinder<int>();
             ((CommandPromiseBinder<int>)_commandPromiseBinder).UsePooling = false;
@@ -35,6 +35,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             SimplePromise.simulatePromiseOne = new Promise<int>();
             SimplePromise.simulatePromiseSecond = new Promise<int>();
+            SimplePromise.simulatePromiseFloat = new Promise<float>();
         }
 
         [TearDown]
@@ -165,6 +166,20 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
 
             Assert.AreEqual((((0 + 2) * 3 + 3) * 4.2f + 1) * 2, SimplePromise.floatResult);
+        }
+
+        [Test]
+        public void command_with_convert_continue_with_changed_type_async()
+        {
+            var promiseBinding = _commandPromiseBinder.Bind(SomeEnum.ONE)
+                .Then<SimpleCommandTwoGeneric>()
+                .ThenConvert<SimpleAsyncConvertCommand, float>()
+                .Then<AnotherCommand, float>();
+
+            _commandPromiseBinder.ReactTo(SomeEnum.ONE, 0);
+
+            SimplePromise.simulatePromiseFloat.Resolve(1);
+            Assert.AreEqual((((0 + 2) * 3 + 3 + 1) * 5f + 1) * 2, SimplePromise.floatResult);
         }
 
         [Test]

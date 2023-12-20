@@ -135,7 +135,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestInjectionProvideIntDependency()
         {
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
-            binder.Bind<int>().ToValue(42);
+            binder.Bind<int>().To(42);
             var testValue = binder.GetInstance<InjectableSuperClass>();
             Assert.IsNotNull(testValue);
             Assert.That(testValue.intValue == 42);
@@ -145,7 +145,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestRemoveDependency()
         {
             binder.Bind<InjectableSuperClass>().To<InjectableSuperClass>();
-            binder.Bind<int>().ToValue(42);
+            binder.Bind<int>().To(42);
             var testValueBeforeUnbinding = binder.GetInstance<InjectableSuperClass>();
             Assert.IsNotNull(testValueBeforeUnbinding);
             Assert.That(testValueBeforeUnbinding.intValue == 42);
@@ -238,7 +238,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestValueToSingleton()
         {
             var uniqueInstance = new GuaranteedUniqueInstances();
-            binder.Bind<GuaranteedUniqueInstances>().ToValue(uniqueInstance);
+            binder.Bind<GuaranteedUniqueInstances>().To(uniqueInstance);
             var instance1 = binder.GetInstance<GuaranteedUniqueInstances>();
             var instance2 = binder.GetInstance<GuaranteedUniqueInstances>();
             Assert.AreEqual(instance1.uid, instance2.uid);
@@ -250,7 +250,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestValueToSingletonBinding()
         {
             var instance = new InjectableSuperClass();
-            var binding = binder.Bind<InjectableSuperClass>().ToValue(instance).AsSingleton() as InjectionBinding;
+            var binding = binder.Bind<InjectableSuperClass>().To(instance).AsSingleton() as InjectionBinding;
             Assert.AreEqual(InjectionBindingType.VALUE, binding.Type);
         }
 
@@ -259,7 +259,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestSingletonToValueBinding()
         {
             var instance = new InjectableSuperClass();
-            var binding = binder.Bind<InjectableSuperClass>().AsSingleton().ToValue(instance) as InjectionBinding;
+            var binding = binder.Bind<InjectableSuperClass>().AsSingleton().To(instance) as InjectionBinding;
             Assert.AreEqual(InjectionBindingType.VALUE, binding.Type);
         }
 
@@ -284,7 +284,7 @@ namespace Cr7Sund.Framework.Tests
         {
             PostConstructSimple.PostConstructCount = 0;
             var instance = new PostConstructSimple();
-            binder.Bind<PostConstructSimple>().ToValue(instance);
+            binder.Bind<PostConstructSimple>().To(instance);
             binder.Bind<InjectsPostConstructSimple>().To<InjectsPostConstructSimple>();
 
             var instance1 = binder.GetInstance<InjectsPostConstructSimple>();
@@ -377,8 +377,8 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
             binder.Bind<ISimpleInterface>().To<PolymorphicClass>();
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
-            binder.Bind<int>().ToValue(42);
-            binder.Bind<string>().ToValue("zaphod"); //primitives won't get reflected...
+            binder.Bind<int>().To(42);
+            binder.Bind<string>().To("zaphod"); //primitives won't get reflected...
 
             var list = new List<Type>();
             list.Add(typeof(HasNamedInjections));
@@ -411,8 +411,8 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<ISimpleInterface>().To<SimpleInterfaceImplementer>().ToName(SomeEnum.ONE);
             binder.Bind<ISimpleInterface>().To<PolymorphicClass>();
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
-            binder.Bind<int>().ToValue(42);
-            binder.Bind<string>().ToValue("zaphod"); //primitives won't get reflected...
+            binder.Bind<int>().To(42);
+            binder.Bind<string>().To("zaphod"); //primitives won't get reflected...
 
             int count = binder.ReflectAll();
             Assert.AreEqual(4, count); //...so list length will not include primitives

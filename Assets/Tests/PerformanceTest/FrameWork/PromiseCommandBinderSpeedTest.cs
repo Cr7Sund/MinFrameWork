@@ -17,8 +17,7 @@ namespace Cr7Sund.Framework.Tests
             injectionBinder.Bind<ICommandBinder>().To<CommandBinder>().AsSingleton();
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
-
-
+            Debug.Logger = new InternalLogger();
         }
 
 
@@ -74,7 +73,7 @@ namespace Cr7Sund.Framework.Tests
                 {
                     var binder = new CommandPromiseBinder();
                     injectionBinder.Injector.Inject(binder);
-                    
+
                     binder.Bind(SomeEnum.TWO).AsOnce()
                         .Then<SimpleCommandOne>()
                         .Then<SimpleCommandTwo>();
@@ -94,11 +93,11 @@ namespace Cr7Sund.Framework.Tests
         {
             var binder = new CommandPromiseBinder();
             injectionBinder.Injector.Inject(binder);
-                    
+
             binder.Bind(SomeEnum.TWO)
                 .Then<SimpleCommandOne>()
                 .Then<SimpleCommandTwo>();
-            
+
             Measure.Method(() =>
                 {
                     binder.ReactTo(SomeEnum.TWO);

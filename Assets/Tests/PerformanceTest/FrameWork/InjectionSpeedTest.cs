@@ -15,7 +15,7 @@ namespace Cr7Sund.Framework.Tests
         {
             injectionBinder = new InjectionBinder();
             injectionBinder.Bind<ClassToBeInjected>().To<ClassToBeInjected>();
-            injectionBinder.Bind<int>().ToValue(42);
+            injectionBinder.Bind<int>().To(42);
             injectionBinder.Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
         }
 

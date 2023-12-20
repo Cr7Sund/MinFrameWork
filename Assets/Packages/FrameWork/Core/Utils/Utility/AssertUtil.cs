@@ -114,7 +114,7 @@ namespace Cr7Sund.Framework.Util
             }
         }
 
-        public static void IsInstanceOf<T,TEnum>(object actual, TEnum errorCode) where TEnum : Enum
+        public static void IsInstanceOf<T, TEnum>(object actual, TEnum errorCode) where TEnum : Enum
         {
             if (!typeof(T).IsInstanceOfType(actual))
             {
@@ -166,7 +166,12 @@ namespace Cr7Sund.Framework.Util
         public static void LessOrEqual(int arg1, int arg2)
         {
             if (arg1 > arg2)
-                throw new MyException($"excepted {arg1} LessOrEqual {arg2}");
+                throw new MyException($"the value is {arg1} but expected lessOrEqual {arg2}");
+        }
+        public static void LessOrEqual(uint arg1, uint arg2)
+        {
+            if (arg1 > arg2)
+                throw new MyException($"the value is {arg1} but expected lessOrEqual {arg2}");
         }
 
         public static void LessOrEqual<TEnum>(int arg1, int arg2, TEnum errorCode) where TEnum : Enum
@@ -175,6 +180,11 @@ namespace Cr7Sund.Framework.Util
                 throw new MyException(errorCode);
         }
 
+        public static void LessOrEqual<TEnum>(uint arg1, uint arg2, TEnum errorCode) where TEnum : Enum
+        {
+            if (arg1 > arg2)
+                throw new MyException(errorCode);
+        }
 
         public static void IsFalse(bool expected)
         {
@@ -225,6 +235,13 @@ namespace Cr7Sund.Framework.Util
             }
         }
         public static void AreEqual(int expected, int actual)
+        {
+            if (expected != actual)
+            {
+                throw new MyException($"Expected {expected}  but it's {actual}");
+            }
+        }
+        public static void AreEqual(uint expected, uint actual)
         {
             if (expected != actual)
             {

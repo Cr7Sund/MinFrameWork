@@ -80,10 +80,7 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                if (UniqueValue)
-                {
-                    if (Contains(o)) return this;
-                }
+                if(Contains(o)) return this;
 
                 if (_size >= _objectValue.Length)
                 {
@@ -142,7 +139,14 @@ namespace Cr7Sund.Framework.Impl
 
         public bool Contains(object o)
         {
-            return _objectValue.Contains(o);
+            if (UniqueValue)
+            {
+                return _objectValue.Contains(o);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void AddWithResize()

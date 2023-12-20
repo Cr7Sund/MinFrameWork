@@ -26,7 +26,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(commandBinder);
-            injectionBinder.Bind<IInternalLog>().To<InternalLogger>();
+            Debug.Logger = new InternalLogger();
 
             _commandPromiseBinder = new CommandPromiseBinder<int>();
             ((CommandPromiseBinder<int>)_commandPromiseBinder).UsePooling = false;
