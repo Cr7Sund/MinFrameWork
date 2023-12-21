@@ -17,13 +17,13 @@ namespace Cr7Sund.Framework.Api
         /// Get a value pool based on the provided type.
         /// If not exist, it will return a newly created pool instead.
         /// </summary>
-        IPool<T> GetOrCreate<T>() where T : class, new();
+        IPool<T> GetOrCreate<T>() where T :  new();
 
         /// <summary>
         /// Get a value pool based on the provided type with a specified maximum pool count.
         /// If not exist, it will return a newly created pool instead.
         /// </summary>
-        IPool<T> GetOrCreate<T>(int maxPoolCount) where T : class, new();
+        IPool<T> GetOrCreate<T>(int maxPoolCount) where T :  new();
 
         /// <summary>
         /// Get a no-value pool based on the provided type.
@@ -34,6 +34,7 @@ namespace Cr7Sund.Framework.Api
         /// Get a value pool based on the provided type.
         /// If not exist, it will return a newly created pool instead.
         /// </summary>
-        IPool<T> Get<T>() where T : class, new();
+        IPool<T> Get<T>() where T : new();
+
     }
 }

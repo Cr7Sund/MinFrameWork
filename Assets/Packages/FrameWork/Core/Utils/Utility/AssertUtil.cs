@@ -163,6 +163,12 @@ namespace Cr7Sund.Framework.Util
                 throw new MyException(errorCode);
         }
 
+        public static void Greater<TEnum>(uint arg1, uint arg2, TEnum errorCode) where TEnum : Enum
+        {
+            if (arg1 <= arg2)
+                throw new MyException(errorCode);
+        }
+
         public static void LessOrEqual(int arg1, int arg2)
         {
             if (arg1 > arg2)

@@ -1,5 +1,7 @@
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Performance;
 using System;
+using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
 {
     public class PoolBinder : Binder, IPoolBinder
@@ -9,19 +11,16 @@ namespace Cr7Sund.Framework.Impl
         public PoolBinder()
         {
             _poolInstanceProvider = new PoolInstanceProvider();
+            MemoryMonitor.Register(CleanUnreference);
         }
 
-        public PoolBinder(IInstanceProvider poolInstanceProvider)
-        {
-            _poolInstanceProvider = poolInstanceProvider;
-        }
 
-        public IPool<T> GetOrCreate<T>() where T : class, new()
+        public IPool<T> GetOrCreate<T>() where T : new()
         {
             return GetOrCreate<T>(Pool.Default_POOL_MAX_COUNT);
         }
 
-        public IPool<T> GetOrCreate<T>(int maxPoolCount) where T : class, new()
+        public IPool<T> GetOrCreate<T>(int maxPoolCount) where T : new()
         {
             var type = typeof(T);
             var binding = GetBinding(type);
@@ -76,7 +75,7 @@ namespace Cr7Sund.Framework.Impl
             return retVal;
         }
 
-        public IPool<T> Get<T>() where T : class, new()
+        public IPool<T> Get<T>() where T : new()
         {
             var binding = GetBinding(typeof(T));
             IPool<T> retVal = null;
@@ -87,18 +86,61 @@ namespace Cr7Sund.Framework.Impl
 
             return retVal;
         }
-    }
 
-    public class PoolInstanceProvider : IInstanceProvider
-    {
-        public T GetInstance<T>()
+
+        public override void Dispose()
         {
-            return Activator.CreateInstance<T>();
+            base.Dispose();
+            MemoryMonitor.UnRegister(CleanUnreference);
         }
 
-        public object GetInstance(Type key)
+        public void CleanUnreference()
         {
-            return Activator.CreateInstance(key);
+            var deleteList = new List<IBinding>();
+            foreach (var item in _bindings)
+            {
+                for (int i = 0; i < item.Value.Count; i++)
+                {
+                    IBinding binding = item.Value[i];
+                    CleanBinding(deleteList, binding);
+                }
+            }
+
+            foreach (var binding in deleteList)
+            {
+                Unbind(binding);
+            }
+
+            void CleanBinding(List<IBinding> deleteList, IBinding binding)
+            {
+                if (binding.Value.SingleValue is IBasePool pool)
+                {
+                    if (!pool.IsRetain)
+                    {
+                        pool.Release();
+                        deleteList.Add(binding);
+                    }
+                }
+            }
+        }
+
+        public int Test_GetPoolCount()
+        {
+            return _bindings.Count;
+        }
+    }
+
+    public static class PoolBinderExtension
+    {
+        public static T AutoCreate<T>(this IPoolBinder poolBinder) where T : new()
+        {
+            return poolBinder.GetOrCreate<T>().GetInstance();
+        }
+
+        public static void Return<T>(this IPoolBinder poolBinder, T value) where T : new()
+        {
+            var pool = poolBinder.Get<T>();
+            pool.ReturnInstance(value);
         }
     }
 }

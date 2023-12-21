@@ -1,14 +1,26 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
-using NUnit.Framework.Constraints;
 namespace Cr7Sund.Framework.Impl
 {
     public abstract class BasePool : IBasePool
     {
-        public const int Default_POOL_MAX_COUNT = 24;
+        public const int Default_POOL_MAX_COUNT = 1024;
+        private const int DefaultCapacity = 1;
+        private const int DefaultDoubleCapacity = 4;
 
         protected int _instanceCount;
         protected int _initSize;
+
+
+        public IInstanceProvider InstanceProvider { get; set; }
+        public virtual int Available { get; }
+        public PoolOverflowBehavior OverflowBehavior { get; set; }
+        public PoolInflationType InflationType { get; set; }
+        public abstract int Count { get; }
+        public int MaxCount { get; set; }
+        public int TotalLength => _instanceCount;
+        public bool IsRetain => Available < _instanceCount;
+
 
         public BasePool()
         {
@@ -20,25 +32,11 @@ namespace Cr7Sund.Framework.Impl
         }
 
         #region IPool Implementation
-        public IInstanceProvider InstanceProvider { get; set; }
 
-        public virtual int Available { get; }
-
-        public PoolOverflowBehavior OverflowBehavior { get; set; }
-        public PoolInflationType InflationType { get; set; }
-
-        public int Count => _instanceCount;
-        public int MaxCount { get; set; }
 
         public void SetSize(int size)
         {
             _initSize = size;
-        }
-
-
-        public virtual void Clean()
-        {
-            _instanceCount = 0;
         }
 
         protected int NewInstanceToCreate()
@@ -49,7 +47,7 @@ namespace Cr7Sund.Framework.Impl
             if (_initSize > 0)
             {
                 //Illegal overflow. Report and return null
-                if (Count > 0)
+                if (_instanceCount > 0)
                 {
                     AssertUtil.IsFalse(OverflowBehavior == PoolOverflowBehavior.EXCEPTION, PoolExceptionType.OVERFLOW);
                 }
@@ -60,20 +58,14 @@ namespace Cr7Sund.Framework.Impl
             }
             else
             {
-                if (Count == 0 || InflationType == PoolInflationType.INCREMENT)
-                {
-                    // 1 or 4 
-                    instancesToCreate = 1;
-                }
-                else
-                {
-                    instancesToCreate = Count;
-                }
+                instancesToCreate = _instanceCount == 0 ?
+                             (InflationType == PoolInflationType.DOUBLE ? DefaultDoubleCapacity : DefaultCapacity) :
+                             (InflationType == PoolInflationType.DOUBLE ? _instanceCount : 1);
+
             }
 
             return instancesToCreate;
         }
-
 
         protected void IncreaseInstance()
         {
@@ -86,32 +78,32 @@ namespace Cr7Sund.Framework.Impl
             _instanceCount--;
         }
 
-        protected void ClearInstances()
-        {
-            _instanceCount = 0;
-        }
 
         #endregion
 
         #region IPoolable Implementation
-        public bool IsRetain { get; private set; }
 
         public void Restore()
         {
-            Clean();
-            _initSize = 0;
+
         }
 
         public void Retain()
         {
-            IsRetain = true;
         }
 
         public void Release()
         {
-            IsRetain = false;
+
+            Dispose();
         }
         #endregion
+
+        public virtual void Dispose()
+        {
+            _initSize = 0;
+            _instanceCount = 0;
+        }
     }
 
 

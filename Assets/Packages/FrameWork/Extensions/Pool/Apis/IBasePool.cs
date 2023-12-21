@@ -1,9 +1,11 @@
+using System;
+
 namespace Cr7Sund.Framework.Api
 {
     /// <summary>
     /// Represents the base pool interface for storing and reusing instances.
     /// </summary>
-    public interface IBasePool : IPoolable
+    public interface IBasePool : IPoolable,IDisposable
     {
         /// <summary>
         /// Gets or sets the instance provider that provides instances to the pool.
@@ -14,6 +16,10 @@ namespace Cr7Sund.Framework.Api
         /// Returns the count of non-committed instances.
         /// </summary>
         int Available { get; }
+        /// <summary>
+        /// Returns the count of all created instances.
+        /// </summary>
+        int TotalLength { get; }
 
         /// <summary>
         /// Gets or sets the overflow behavior of this pool.
@@ -33,11 +39,6 @@ namespace Cr7Sund.Framework.Api
         /// By default is 24, a lucky number.
         /// </summary>
         int MaxCount { get; set; }
-
-        /// <summary>
-        /// Remove all instance references from the Pool.
-        /// </summary>
-        void Clean();
 
         /// <summary>
         /// Sets the size of the pool.

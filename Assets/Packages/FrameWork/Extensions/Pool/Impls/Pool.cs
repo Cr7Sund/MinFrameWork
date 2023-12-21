@@ -4,17 +4,13 @@ using System;
 using System.Collections.Generic;
 namespace Cr7Sund.Framework.Impl
 {
-    public class Pool<T> : BasePool, IPool<T> where T : class, new()
+    public class Pool<T> : BasePool, IPool<T> where T :  new()
     {
 
         /// Stack of instances still in the Pool.
         private readonly Stack<T> _instancesAvailable;
 
-        public Pool() : base()
-        {
-            InstancesInUse = new HashSet<T>();
-            _instancesAvailable = new Stack<T>();
-        }
+
         private HashSet<T> InstancesInUse
         {
             get;
@@ -33,13 +29,15 @@ namespace Cr7Sund.Framework.Impl
                 throw new NotImplementedException();
             }
         }
+        public override int Count => InstancesInUse.Count;
 
-        public override void Clean()
+        public Pool() : base()
         {
-            _instancesAvailable.Clear();
-            InstancesInUse.Clear();
-            base.Clean();
+            InstancesInUse = new HashSet<T>();
+            _instancesAvailable = new Stack<T>();
         }
+
+
 
         #region IPool Implementation
         public T GetInstance()
@@ -97,7 +95,7 @@ namespace Cr7Sund.Framework.Impl
                 CreateInstancesIfNeeded();
                 if (_instancesAvailable.Count == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION)
                 {
-                    return null;
+                    return default(T);
                 }
 
                 var retVal = _instancesAvailable.Pop();
@@ -171,8 +169,10 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
+
             foreach (var item in InstancesInUse)
             {
                 if (item is IPoolable poolable)
@@ -191,7 +191,6 @@ namespace Cr7Sund.Framework.Impl
 
             InstancesInUse.Clear();
             _instancesAvailable.Clear();
-            ClearInstances();
         }
 
         public bool Contains(object value)

@@ -13,11 +13,6 @@ namespace Cr7Sund.Framework.Impl
         protected Stack _instancesAvailable;
 
 
-        public Pool() : base()
-        {
-            InstancesInUse = new HashSet<object>();
-            _instancesAvailable = new Stack();
-        }
         private HashSet<object> InstancesInUse
         {
             get;
@@ -37,13 +32,15 @@ namespace Cr7Sund.Framework.Impl
             }
         }
         public Type PoolType { get; set; }
+        public override int Count => InstancesInUse.Count;
 
-        public override void Clean()
+
+        public Pool() : base()
         {
-            _instancesAvailable.Clear();
-            InstancesInUse.Clear();
-            base.Clean();
+            InstancesInUse = new HashSet<object>();
+            _instancesAvailable = new Stack();
         }
+
 
         #region IPool Implementation
         public object GetInstance()
@@ -109,7 +106,7 @@ namespace Cr7Sund.Framework.Impl
 
         private void CreateInstancesIfNeeded()
         {
-            int instancesToCreate = NewInstanceToCreate();
+            var instancesToCreate = NewInstanceToCreate();
 
             if (instancesToCreate == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) return;
             AssertUtil.Greater(instancesToCreate, 0, PoolExceptionType.NO_INSTANCE_TO_CREATE);
@@ -142,7 +139,6 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-
         public IManagedList Add(object[] list)
         {
             for (int i = 0; i < list.Length; i++)
@@ -160,8 +156,6 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-
-
         public IManagedList Remove(object[] list)
         {
             for (int i = 0; i < list.Length; i++)
@@ -172,11 +166,28 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
+
+            foreach (var item in InstancesInUse)
+            {
+                if (item is IPoolable poolable)
+                {
+                    poolable.Restore();
+                }
+            }
+
+            foreach (var item in _instancesAvailable)
+            {
+                if (item is IPoolable poolable)
+                {
+                    poolable.Restore();
+                }
+            }
+
             InstancesInUse.Clear();
             _instancesAvailable.Clear();
-            ClearInstances();
         }
 
         public bool Contains(object o)
