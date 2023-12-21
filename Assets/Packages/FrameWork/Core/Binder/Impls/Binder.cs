@@ -107,7 +107,10 @@ namespace Cr7Sund.Framework.Impl
             {
                 return;
             }
-            Unbind(binding.Key, binding.Name);
+            for (int i = 0; i < binding.Key.Count; i++)
+            {
+                Unbind(binding.Key[i], binding.Name);
+            }
         }
 
         public void Unbind(object key, object name)
@@ -121,8 +124,14 @@ namespace Cr7Sund.Framework.Impl
                     IBinding item = list[i];
                     if (item.Name.Equals(name))
                     {
-                        list.RemoveAt(i);
                         OnUnbind(item);
+
+                        list.RemoveAt(i);
+
+                        if (list.Count == 0)
+                        {
+                            _bindings.Remove(key);
+                        }
                         break;
                     }
                 }
@@ -239,7 +248,7 @@ namespace Cr7Sund.Framework.Impl
         {
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
 
         }
