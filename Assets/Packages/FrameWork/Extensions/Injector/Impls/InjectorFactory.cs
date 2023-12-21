@@ -33,7 +33,7 @@ namespace Cr7Sund.Framework.Impl
         private object ValueOf(IInjectionBinding binding)
         {
             object bindingValue = binding.Value.SingleValue;
-   
+
             if (bindingValue.GetType().IsInstanceOfType(typeof(Type)))
                 throw new MyException("Inject a type into binder as value", InjectionExceptionType.TYPE_AS_VALUE_INJECTION);
 
@@ -54,7 +54,7 @@ namespace Cr7Sund.Framework.Impl
                     return null;
                 }
 
-                binding.SetValue(o);
+               ((InjectionBinding)binding).SetValue(o);
             }
 
             return binding.Value.SingleValue;

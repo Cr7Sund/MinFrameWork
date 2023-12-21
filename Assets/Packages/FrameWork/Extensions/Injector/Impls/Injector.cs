@@ -1,5 +1,4 @@
 using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
 using System;
 using System.Reflection;
 namespace Cr7Sund.Framework.Impl
@@ -54,6 +53,7 @@ namespace Cr7Sund.Framework.Impl
                 if (binding.Type == InjectionBindingType.POOL)
                 {
                     var pool = PoolBinder.GetOrCreate(reflectionType);
+                    pool.InflationType = PoolInflationType.INCREMENT;
                     failIf(pool == null, InjectionExceptionType.NOPOOL_CONSTRUCT);
                     retVal = pool.GetInstance();
                 }

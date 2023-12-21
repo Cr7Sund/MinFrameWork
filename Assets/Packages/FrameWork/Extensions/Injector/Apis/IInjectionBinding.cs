@@ -29,7 +29,7 @@ namespace Cr7Sund.Framework.Api
         IInjectionBinding AsPool();
 
         /// <summary>  Map the binding and give access to all contexts in hierarchy </summary>
-        IInjectionBinding CrossContext();
+        IInjectionBinding AsCrossContext();
 
         /// <summary>
         ///     Boolean setter to optionally override injection. If false, the instance will not be injected after
@@ -37,21 +37,16 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         IInjectionBinding ToInject(bool value);
 
-
         new IInjectionBinding Bind<T>();
-        IInjectionBinding Bind(Type type);
+
         new IInjectionBinding To<T>();
         IInjectionBinding To(Type type);
         /// <summary>
         ///     Map the Binding to a stated instance so that every `GetInstance()` on the Binder Key returns the provided
         ///     instance. Sets type to Value
         /// </summary>
-        IInjectionBinding ToValue(object o);
-        /// <summary>
-        ///     Map the Binding to a stated instance so that every `GetInstance()` on the Binder Key returns the provided
-        ///     instance. Does not set type.
-        /// </summary>
-        IInjectionBinding SetValue(object o);
+        new IInjectionBinding To(object o);
+
         new IInjectionBinding ToName(object name);
         new IInjectionBinding Weak();
     }

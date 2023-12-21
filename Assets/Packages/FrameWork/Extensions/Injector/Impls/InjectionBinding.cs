@@ -105,7 +105,7 @@ namespace Cr7Sund.Framework.Impl
             return this;
         }
 
-        public IInjectionBinding CrossContext()
+        public IInjectionBinding AsCrossContext()
         {
             IsCrossContext = true;
             if (resolver != null)
@@ -128,12 +128,8 @@ namespace Cr7Sund.Framework.Impl
             return base.Bind<T>() as IInjectionBinding;
         }
 
-        public IInjectionBinding Bind(Type type)
-        {
-            return base.Bind(type) as IInjectionBinding;
-        }
 
-        public IInjectionBinding ToValue(object o)
+        public new IInjectionBinding To(object o)
         {
             Type = InjectionBindingType.VALUE;
             SetValue(o);

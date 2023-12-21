@@ -10,4 +10,5 @@ namespace Cr7Sund.Framework.Impl
 
         public virtual void OnProgress(float progress) { }
     }
+
 }

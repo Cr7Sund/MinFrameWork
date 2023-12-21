@@ -12,7 +12,6 @@ namespace Cr7Sund.Framework.Impl
         [Inject] private ICommandBinder _commandBinder;
         [Inject] private IInjectionBinder _injectionBinder;
         [Inject] private IPoolBinder _poolBinder;
-        [Inject] private IInternalLog _log;
         private List<ICommandPromise> _promiseList;
         private ICommandPromise _firstPromise;
         private Action _releaseHandler;
@@ -307,7 +306,7 @@ namespace Cr7Sund.Framework.Impl
         {
             BindingStatus = CommandBindingStatus.Default;
             ResolveRelease();
-            _log?.Error(e);
+            Debug.Error(e);
         }
 
         private void ResolveRelease()
