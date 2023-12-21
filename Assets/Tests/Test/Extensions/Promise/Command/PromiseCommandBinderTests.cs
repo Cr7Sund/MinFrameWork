@@ -67,16 +67,16 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             var promisePool = poolBinder.GetOrCreate<CommandPromise<int>>();
             var promiseNoValuePool = poolBinder.GetOrCreate<CommandPromise>();
             Assert.AreEqual(0, promisePool.Available);
-            Assert.AreEqual(0, promisePool.Count);
+            Assert.AreEqual(0, promisePool.TotalLength);
             Assert.AreEqual(0, promiseNoValuePool.Available);
-            Assert.AreEqual(0, promiseNoValuePool.Count);
+            Assert.AreEqual(0, promiseNoValuePool.TotalLength);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
 
             Assert.AreEqual(0, promisePool.Available);
             Assert.AreEqual(0, promiseNoValuePool.Available);
-            Assert.AreEqual(0, promisePool.Count);
-            Assert.AreEqual(0, promiseNoValuePool.Count);
+            Assert.AreEqual(0, promisePool.TotalLength);
+            Assert.AreEqual(0, promiseNoValuePool.TotalLength);
         }
 
         [Test]
@@ -351,23 +351,23 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             var promisePool = poolBinder.GetOrCreate<CommandPromise<int>>();
             var promiseNoValuePool = poolBinder.GetOrCreate<CommandPromise>();
             Assert.AreEqual(3, promisePool.Available);
-            Assert.AreEqual(8, promisePool.Count);
+            Assert.AreEqual(8, promisePool.TotalLength);
             Assert.AreEqual(0, promiseNoValuePool.Available);
-            Assert.AreEqual(0, promiseNoValuePool.Count);
+            Assert.AreEqual(0, promiseNoValuePool.TotalLength);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
 
             Assert.AreEqual(2, promisePool.Available);
-            Assert.AreEqual(8, promisePool.Count);
+            Assert.AreEqual(8, promisePool.TotalLength);
             Assert.AreEqual(0, promiseNoValuePool.Available);
-            Assert.AreEqual(4, promiseNoValuePool.Count);
+            Assert.AreEqual(4, promiseNoValuePool.TotalLength);
 
             SimplePromise.simulatePromiseSecond.Resolve(3);
             SimplePromise.simulatePromiseOne.Reject(new Exception());
             Assert.AreEqual(8, promisePool.Available);
             Assert.AreEqual(4, promiseNoValuePool.Available);
-            Assert.AreEqual(8, promisePool.Count);
-            Assert.AreEqual(4, promiseNoValuePool.Count);
+            Assert.AreEqual(8, promisePool.TotalLength);
+            Assert.AreEqual(4, promiseNoValuePool.TotalLength);
         }
 
         [Test]
@@ -447,15 +447,15 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             var promisePool = poolBinder.GetOrCreate<CommandPromise<int>>();
             var promiseNoValuePool = poolBinder.GetOrCreate<CommandPromise>();
             Assert.AreEqual(0, promiseNoValuePool.Available);
-            Assert.AreEqual(0, promiseNoValuePool.Count);
+            Assert.AreEqual(0, promiseNoValuePool.TotalLength);
             Assert.AreEqual(0, promisePool.Available);
-            Assert.AreEqual(4, promisePool.Count);
+            Assert.AreEqual(4, promisePool.TotalLength);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
-            Assert.AreEqual(1, promiseNoValuePool.Available);
-            Assert.AreEqual(1, promiseNoValuePool.Count);
+            Assert.AreEqual(4, promiseNoValuePool.Available);
+            Assert.AreEqual(4, promiseNoValuePool.TotalLength);
             Assert.AreEqual(4, promisePool.Available);
-            Assert.AreEqual(4, promisePool.Count);
+            Assert.AreEqual(4, promisePool.TotalLength);
         }
 
         [Test]
@@ -471,15 +471,15 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             var promisePool = poolBinder.GetOrCreate<CommandPromise<int>>();
             var promiseNoValuePool = poolBinder.GetOrCreate<CommandPromise>();
             Assert.AreEqual(0, promiseNoValuePool.Available);
-            Assert.AreEqual(0, promiseNoValuePool.Count);
+            Assert.AreEqual(0, promiseNoValuePool.TotalLength);
             Assert.AreEqual(0, promisePool.Available);
-            Assert.AreEqual(4, promisePool.Count);
+            Assert.AreEqual(4, promisePool.TotalLength);
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 1);
-            Assert.AreEqual(1, promiseNoValuePool.Available);
-            Assert.AreEqual(1, promiseNoValuePool.Count);
+            Assert.AreEqual(4, promiseNoValuePool.Available);
+            Assert.AreEqual(4, promiseNoValuePool.TotalLength);
             Assert.AreEqual(4, promisePool.Available);
-            Assert.AreEqual(4, promisePool.Count);
+            Assert.AreEqual(4, promisePool.TotalLength);
         }
 
         [Test]
@@ -510,8 +510,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
                 _commandPromiseBinder.Unbind(SomeEnum.ONE);
                 var bindingPool = poolBinder.GetOrCreate<CommandPromiseBinding<int>>();
-                Assert.AreEqual(1, bindingPool.Available);
-                Assert.AreEqual(1, bindingPool.Count);
+                Assert.AreEqual(4, bindingPool.Available);
+                Assert.AreEqual(4, bindingPool.TotalLength);
             }
         }
 
@@ -534,7 +534,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
 
             var bindingPool = poolBinder.GetOrCreate<CommandPromiseBinding<int>>();
             Assert.AreEqual(8, bindingPool.Available);
-            Assert.AreEqual(8, bindingPool.Count);
+            Assert.AreEqual(8, bindingPool.TotalLength);
         }
 
 

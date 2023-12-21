@@ -74,7 +74,7 @@ namespace Cr7Sund.Framework.Tests
 
         public override void OnCatch(Exception e)
         {
-            Debug.Log(e);
+            UnityEngine.Debug.Log(e);
         }
     }
 
@@ -93,7 +93,7 @@ namespace Cr7Sund.Framework.Tests
         public override IPromise<int> OnExecuteAsync(int aggValue)
         {
             // you need to pass the value which is from the prev promise 
-            var promise = DonwloadAsync().Then(value =>
+            var promise = DownloadAsync().Then(value =>
             {
                 SimplePromise.result = (value + aggValue + 3) * 5;
                 return (value + aggValue + 3) * 5;
@@ -101,7 +101,7 @@ namespace Cr7Sund.Framework.Tests
 
             return promise;
         }
-        private static IPromise<int> DonwloadAsync()
+        private static IPromise<int> DownloadAsync()
         {
             SimplePromise.simulatePromiseOne?.Dispose();
 
@@ -109,7 +109,7 @@ namespace Cr7Sund.Framework.Tests
         }
         public override void OnCatch(Exception e)
         {
-            Debug.Log(e);
+            UnityEngine.Debug.Log(e);
         }
     }
 
@@ -141,7 +141,25 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
+    public class SimpleAsyncConvertCommand:AsyncCommand<int,float>
+    {
+        public override IPromise<float> OnExecuteAsync(int aggValue)
+        {
+            var promise = DownloadAsync().Then(value =>
+            {
+                SimplePromise.floatResult = (value + aggValue + 3) * 5;
+                return (value + aggValue + 3) * 5;
+            });
 
+            return promise;
+        }
+        private static IPromise<float> DownloadAsync()
+        {
+            SimplePromise.simulatePromiseFloat?.Dispose();
+
+            return SimplePromise.simulatePromiseFloat;
+        }
+    }
     public class SimpleAsyncCatch_Generic : AsyncCommand<int>
     {
         public override IPromise<int> OnExecuteAsync(int aggValue)

@@ -15,16 +15,17 @@ namespace Cr7Sund.Framework.Tests
         public void Setup()
         {
             pool = new Pool<ClassToBeInjected>();
+            pool.InflationType = PoolInflationType.INCREMENT;
         }
 
 
         [Test]
         public void TestSetPoolProperties()
         {
-            Assert.AreEqual(0, pool.Count);
+            Assert.AreEqual(0, pool.TotalLength);
 
             pool.SetSize(100);
-            Assert.AreEqual(0, pool.Count);
+            Assert.AreEqual(0, pool.TotalLength);
 
             pool.OverflowBehavior = PoolOverflowBehavior.EXCEPTION;
             Assert.AreEqual(PoolOverflowBehavior.EXCEPTION, pool.OverflowBehavior);
@@ -46,7 +47,7 @@ namespace Cr7Sund.Framework.Tests
         public void TestAdd()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 pool.Add(new ClassToBeInjected());
                 Assert.AreEqual(a + 1, pool.Available);
@@ -57,25 +58,25 @@ namespace Cr7Sund.Framework.Tests
         public void TestAddList()
         {
             pool.SetSize(4);
-            var list = new ClassToBeInjected[pool.Count];
-            for (int a = 0; a < pool.Count; a++)
+            var list = new ClassToBeInjected[pool.TotalLength];
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 list[a] = new ClassToBeInjected();
             }
             pool.Add(list);
-            Assert.AreEqual(pool.Count, pool.Available);
+            Assert.AreEqual(pool.TotalLength, pool.Available);
         }
 
         [Test]
         public void TestGetInstance()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
 
-            for (int a = pool.Count; a > 0; a--)
+            for (int a = pool.TotalLength; a > 0; a--)
             {
                 Assert.AreEqual(a, pool.Available);
                 var instance = pool.GetInstance();
@@ -89,38 +90,38 @@ namespace Cr7Sund.Framework.Tests
         public void TestReturnInstance()
         {
             pool.SetSize(4);
-            var stack = new Stack(pool.Count);
-            for (int a = 0; a < pool.Count; a++)
+            var stack = new Stack(pool.TotalLength);
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
 
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 stack.Push(pool.GetInstance());
             }
 
-            Assert.AreEqual(pool.Count, stack.Count);
+            Assert.AreEqual(pool.TotalLength, stack.Count);
             Assert.AreEqual(0, pool.Available);
 
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 pool.ReturnInstance(stack.Pop());
             }
 
             Assert.AreEqual(0, stack.Count);
-            Assert.AreEqual(pool.Count, pool.Available);
+            Assert.AreEqual(pool.TotalLength, pool.Available);
         }
 
         [Test]
-        public void TestClean()
+        public void TestDispose()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
-            pool.Clean();
+            pool.Dispose();
             Assert.AreEqual(0, pool.Available);
         }
 
@@ -134,7 +135,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.Add(new ClassToBeInjected());
             }
 
-            for (int a = pool.Count; a > 0; a--)
+            for (int a = pool.TotalLength; a > 0; a--)
             {
                 Assert.AreEqual(a, pool.Available);
                 pool.GetInstance();
@@ -159,7 +160,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.Add(new ClassToBeInjected());
             }
 
-            for (int a = pool.Count; a > 0; a--)
+            for (int a = pool.TotalLength; a > 0; a--)
             {
                 Assert.AreEqual(a, pool.Available);
                 pool.GetInstance();
@@ -191,12 +192,12 @@ namespace Cr7Sund.Framework.Tests
         public void TestRemoveFromPool()
         {
             pool.SetSize(4);
-            for (int a = 0; a < pool.Count; a++)
+            for (int a = 0; a < pool.TotalLength; a++)
             {
                 pool.Add(new ClassToBeInjected());
             }
 
-            for (int a = pool.Count; a > 0; a--)
+            for (int a = pool.TotalLength; a > 0; a--)
             {
                 Assert.AreEqual(a, pool.Available);
                 var instance = pool.GetInstance();
@@ -216,7 +217,7 @@ namespace Cr7Sund.Framework.Tests
             }
 
             var removalList = new ClassToBeInjected[3];
-            for (int a = 0; a < pool.Count - 1; a++)
+            for (int a = 0; a < pool.TotalLength - 1; a++)
             {
                 removalList[a] = new ClassToBeInjected();
             }
@@ -234,7 +235,7 @@ namespace Cr7Sund.Framework.Tests
             }
 
             var removalList = new ClassToBeInjected[3];
-            for (int a = 0; a < pool.Count - 1; a++)
+            for (int a = 0; a < pool.TotalLength - 1; a++)
             {
                 removalList[a] = pool.GetInstance();
             }
@@ -277,29 +278,29 @@ namespace Cr7Sund.Framework.Tests
 
             var instance1 = pool.GetInstance();
             Assert.IsNotNull(instance1);
-            Assert.AreEqual(1, pool.Count); //First call creates one instance
+            Assert.AreEqual(1, pool.TotalLength); //First call creates one instance
             Assert.AreEqual(0, pool.Available); //Nothing Available
 
             var instance2 = pool.GetInstance();
             Assert.IsNotNull(instance2);
             Assert.AreNotSame(instance1, instance2);
-            Assert.AreEqual(2, pool.Count); //Second call doubles. We have 2
+            Assert.AreEqual(2, pool.TotalLength); //Second call doubles. We have 2
             Assert.AreEqual(0, pool.Available); //Nothing Available
 
             var instance3 = pool.GetInstance();
             Assert.IsNotNull(instance3);
-            Assert.AreEqual(4, pool.Count); //Third call doubles. We have 4
-            Assert.AreEqual(1, pool.Available); //One allocated. One Available.
+            Assert.AreEqual(3, pool.TotalLength); //Third call doubles. We have 4
+            Assert.AreEqual(0, pool.Available); //One allocated. One Available.
 
             var instance4 = pool.GetInstance();
             Assert.IsNotNull(instance4);
-            Assert.AreEqual(4, pool.Count); //Fourth call. No doubling since one was Available.
+            Assert.AreEqual(4, pool.TotalLength); //Fourth call. No doubling since one was Available.
             Assert.AreEqual(0, pool.Available);
 
             var instance5 = pool.GetInstance();
             Assert.IsNotNull(instance5);
-            Assert.AreEqual(8, pool.Count); //Fifth call. Double to 8.
-            Assert.AreEqual(3, pool.Available); //Three left unallocated.
+            Assert.AreEqual(5, pool.TotalLength); //Fifth call. Double to 8.
+            Assert.AreEqual(0, pool.Available); //Three left unallocated.
         }
 
         [Test]
@@ -317,7 +318,7 @@ namespace Cr7Sund.Framework.Tests
             {
                 var instance = pool.GetInstance();
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(a + 1, pool.Count);
+                Assert.AreEqual(a + 1, pool.TotalLength);
                 Assert.AreEqual(0, pool.Available);
                 stack.Push(instance);
             }
@@ -329,7 +330,7 @@ namespace Cr7Sund.Framework.Tests
                 pool.ReturnInstance(instance);
 
                 Assert.AreEqual(a + 1, pool.Available, "This one");
-                Assert.AreEqual(testCount, pool.Count, "Or this one");
+                Assert.AreEqual(testCount, pool.TotalLength, "Or this one");
             }
         }
 

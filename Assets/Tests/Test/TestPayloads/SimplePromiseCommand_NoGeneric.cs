@@ -11,6 +11,7 @@ namespace Cr7Sund.Framework.Tests
         public static IPromise simulatePromise;
         public static IPromise<int> simulatePromiseOne;
         public static IPromise<int> simulatePromiseSecond;
+        public static IPromise<float> simulatePromiseFloat;
         public static string exceptionStr;
         public static float currentProgress;
     }
