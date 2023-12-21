@@ -8,6 +8,7 @@
  */
 
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -36,7 +37,6 @@ namespace Cr7Sund.Framework.Impl
 
                 reflected.PreGenerated = false;
                 retVal = reflected;
-                ;
             }
             else
             {
@@ -52,7 +52,7 @@ namespace Cr7Sund.Framework.Impl
             var constructor = FindPreferredConstructor(type);
             if (constructor == null)
             {
-                throw new ReflectionException("The reflector requires concrete classes.\nType " + type.Name + " has no constructor. Is it an interface?", ReflectionExceptionType.CANNOT_REFLECT_INTERFACE);
+                throw new MyException("The reflector requires concrete classes.\nType " + type.Name + " has no constructor. Is it an interface?", ReflectionExceptionType.CANNOT_REFLECT_INTERFACE);
             }
 
             reflected.Constructor = constructor;
@@ -78,7 +78,7 @@ namespace Cr7Sund.Framework.Impl
                     }
                     else
                     {
-                        throw new ReflectionException("The reflector class.\nType " + type + " has more than one post constructors", ReflectionExceptionType.CANNOT_POST_CONSTRUCTS);
+                        throw new MyException("The reflector class.\nType " + type + " has more than one post constructors", ReflectionExceptionType.CANNOT_POST_CONSTRUCTS);
                     }
                 }
             }
@@ -89,6 +89,18 @@ namespace Cr7Sund.Framework.Impl
             var pairs = new List<Tuple<Type, object, FieldInfo>>();
 
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            FillFields(pairs, fields);
+            if (type.BaseType != null && type.BaseType != typeof(object))
+            {
+                var parentFields = type.BaseType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                FillFields(pairs, parentFields);
+            }
+
+            reflected.Fields = pairs.ToArray();
+        }
+
+        private static void FillFields(List<Tuple<Type, object, FieldInfo>> pairs, FieldInfo[] fields)
+        {
             for (int i = 0; i < fields.Length; i++)
             {
                 FieldInfo field = fields[i];
@@ -102,10 +114,8 @@ namespace Cr7Sund.Framework.Impl
 
                     var pair = new Tuple<Type, object, FieldInfo>(pointType, bindingName, field);
                     pairs.Add(pair);
-
                 }
             }
-            reflected.Fields = pairs.ToArray();
         }
 
 
