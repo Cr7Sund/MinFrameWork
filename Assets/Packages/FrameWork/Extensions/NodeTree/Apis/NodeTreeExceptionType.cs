@@ -13,15 +13,36 @@
         /// <summary>
         /// cant add child still in loading or unloading
         /// </summary>
-        UNVALILD_NODESTATE,
-        
+        INVALID_NODESTATE,
+
         #region Loadable
         /// <summary>
         /// Cant LoadAsync On State of loading or unloading
         /// </summary>
         LOAD_VALID_STATE,
+        /// <summary>
+        /// Cant UnLoadAsync On State of loading or unloading
+        /// </summary>
+        UNLOAD_VALID_STATE,
         Two,
-        
+        #endregion
+
+        #region Controller
+        /// <summary>
+        ///  Add controller error: controller is null!!
+        /// </summary>
+        EMPTY_CONTROLLER_ADD,
+        /// <summary>
+        ///  Remove controller error: controller is null!!
+        /// </summary>
+        EMPTY_CONTROLLER_REMOVE,
+        #endregion
+
+        #region IOC
+        /// <summary>
+        /// there should be a cross context
+        /// </summary>
+        EMPTY_CROSS_CONTEXT,
         #endregion
     }
 }

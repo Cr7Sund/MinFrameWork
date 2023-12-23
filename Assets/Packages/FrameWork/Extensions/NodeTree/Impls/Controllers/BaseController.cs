@@ -3,7 +3,6 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class BaseController : IController
     {
-        [Inject] private IInternalLog _log;
         public bool IsStarted { get; private set; }
         public bool IsActive { get; private set; }
 
@@ -23,7 +22,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    _log.Error($"{GetType().FullName}.OnStart Error: \n", e);
+                    Debug.Error($"{GetType().FullName}.OnStart Error: \n", e);
                 }
             }
         }
@@ -42,7 +41,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    _log.Error($"{GetType().FullName}.OnStop Error: \n", e);
+                    Debug.Error($"{GetType().FullName}.OnStop Error: \n", e);
                 }
             }
 
@@ -65,7 +64,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    _log.Error($"{GetType().FullName}.OnEnable Error: \n", e);
+                    Debug.Error($"{GetType().FullName}.OnEnable Error: \n", e);
                 }
             }
         }
@@ -84,7 +83,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    _log.Error($"{GetType().FullName}.OnDisable Error: \n", e);
+                    Debug.Error($"{GetType().FullName}.OnDisable Error: \n", e);
                 }
             }
             IsActive = false;

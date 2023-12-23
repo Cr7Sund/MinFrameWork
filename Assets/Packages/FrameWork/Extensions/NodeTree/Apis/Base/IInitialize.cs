@@ -1,6 +1,6 @@
 ﻿namespace Cr7Sund.NodeTree.Api
 {
-    public interface IInitializable
+    public interface IInitialize
     {
         bool IsInit { get; }
 

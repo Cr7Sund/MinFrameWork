@@ -4,15 +4,15 @@ using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 namespace Cr7Sund.NodeTree.Impl
 {
-    public abstract class AsyncLoadable<T> : ILoadAsync<T>
+    public abstract class AsyncLoadable : ILoadAsync
     {
-        private IPromise<T> _loadGroup;
-        private IPromise<T> _unloadGroup;
-        private Action<T> _loadedHandler;
-        private Action<T> _unloadedHandler;
+        private IPromise _loadGroup;
+        private IPromise _unloadGroup;
+        private Action _loadedHandler;
+        private Action _unloadedHandler;
         private Action<Exception> _exceptionHandler;
 
-        public IPromise<T> LoadStatus
+        public IPromise LoadStatus
         {
             get
             {
@@ -20,7 +20,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public IPromise<T> UnloadStatus
+        public IPromise UnloadStatus
         {
             get
             {
@@ -37,7 +37,7 @@ namespace Cr7Sund.NodeTree.Impl
             _exceptionHandler = _HandleException;
         }
 
-        public IPromise<T> LoadAsync(T value)
+        public IPromise LoadAsync()
         {
             if (State == LoadState.Loading || State == LoadState.Unloading)
             {
@@ -49,7 +49,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             try
             {
-                _loadGroup = OnLoadAsync(value);
+                _loadGroup = OnLoadAsync();
             }
             catch (Exception e)
             {
@@ -60,24 +60,24 @@ namespace Cr7Sund.NodeTree.Impl
             return _loadGroup;
         }
 
-        public IPromise<T> UnloadAsync(T value)
+        public IPromise UnloadAsync()
         {
             if (State == LoadState.Default || State == LoadState.Unloading || State == LoadState.Unloaded)
             {
                 throw new MyException($"Cant UnloadAsync On State {State} Loadable: {this} ",
                     NodeTreeExceptionType.UNLOAD_VALID_STATE);
             }
-
+            
             if (State == LoadState.Loading)
             {
-                _loadGroup?.Resolve(value);
+                _loadGroup?.Resolve();
             }
 
             State = LoadState.Unloading;
 
             try
             {
-                _unloadGroup = OnUnloadAsync(value);
+                _unloadGroup = OnUnloadAsync();
             }
             catch (Exception e)
             {
@@ -88,12 +88,12 @@ namespace Cr7Sund.NodeTree.Impl
             return _unloadGroup;
         }
 
-        private void _Loaded(T value)
+        private void _Loaded()
         {
             State = LoadState.Loaded;
             OnLoaded();
         }
-        private void _Unloaded(T value)
+        private void _Unloaded()
         {
             State = LoadState.Unloaded;
             OnUnloaded();
@@ -107,7 +107,7 @@ namespace Cr7Sund.NodeTree.Impl
         protected virtual void OnLoaded() { }
         protected virtual void OnUnloaded() { }
         protected virtual void OnCatch(Exception e) { }
-        protected abstract IPromise<T> OnLoadAsync(T content);
-        protected abstract IPromise<T> OnUnloadAsync(T content);
+        protected abstract IPromise OnLoadAsync();
+        protected abstract IPromise OnUnloadAsync();
     }
 }

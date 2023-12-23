@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
@@ -8,37 +7,39 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class Context : IContext
     {
-        private IInjectionBinder _injectionBinder;
         private List<IContext> _contexts;
-        
-        public IInjectionBinder InjectionBinder
+
+        public virtual IInjectionBinder InjectionBinder { get; private set; }
+
+
+        public Context()
         {
-            get
-            {
-                return _injectionBinder;
-            }
-            set
-            {
-                _injectionBinder = value;
-            }
+            _contexts = new List<IContext>();
+            InjectionBinder = new InjectionBinder();
         }
 
+        
         public virtual void AddContext(IContext context)
         {
             AssertUtil.IsFalse(_contexts.Contains(context));
+            ((Context)context).MapBindings();
             _contexts.Add(context);
         }
-        public virtual  void RemoveContext(IContext context)
+        public virtual void RemoveContext(IContext context)
         {
             AssertUtil.IsTrue(_contexts.Contains(context));
+            ((Context)context).UnMappedBindings();
             _contexts.Remove(context);
         }
+
+        public abstract void MapBindings();
+        public abstract void UnMappedBindings();
 
         public void Dispose()
         {
             _contexts.Clear();
             _contexts = null;
-            _injectionBinder.Dispose();
+            InjectionBinder.Dispose();
         }
     }
 }

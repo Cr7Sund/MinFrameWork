@@ -13,13 +13,6 @@ namespace Cr7Sund.EventBus
 	/// <typeparam name="TBaseEvent"><para>The base type all events must inherit/implement.</para> If you don't want to restrict event types to a base type, use <see cref="object"/> as the base type.</typeparam>
 	public class GenericEventBus<TBaseEvent> : IDisposable where TBaseEvent : IEventData
 	{
-		/// <summary>
-		/// A delegate for the callback methods given when subscribing to an event type.
-		/// </summary>
-		/// <param name="eventData">The event that was raised.</param>
-		/// <typeparam name="TEvent">The type of event this callback handles.</typeparam>
-		public delegate void EventHandler<TEvent>(TEvent eventData) where TEvent : TBaseEvent;
-
 
 		protected readonly Queue<QueuedEvent> QueuedEvents = new Queue<QueuedEvent>(32);
 

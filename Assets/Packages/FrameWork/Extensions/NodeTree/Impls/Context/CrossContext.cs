@@ -1,61 +1,61 @@
 ﻿using System.Collections.Generic;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 namespace Cr7Sund.NodeTree.Impl
 {
-    public abstract class CrossContext : Context, ICrossContextCapable
+    public abstract class CrossContext : Context, ICrossContext
     {
         private List<IContext> _contexts;
+        protected ICrossContextInjectionBinder _crossContextInjectionBinder;
 
-        public new ICrossContextInjectionBinder InjectionBinder
+        public override IInjectionBinder InjectionBinder
         {
-            get;
+            get
+            {
+                return _crossContextInjectionBinder;
+            }
         }
 
-        public IDispatcher CrossContextDispatcher { get; private set; }
-
-        
         
         public CrossContext()
         {
-            InjectionBinder = new CrossContextInjectionBinder();
+            _contexts = new List<IContext>();
+            _crossContextInjectionBinder = new CrossContextInjectionBinder();
         }
-        
-        
-        
+
         public override void AddContext(IContext context)
         {
             base.AddContext(context);
-            if (context is ICrossContextCapable crossContext)
+            if (context is ICrossContext  crossContext)
             {
                 AssignCrossContext(crossContext);
             }
         }
         public override void RemoveContext(IContext context)
         {
-            if (context is ICrossContextCapable crossContext)
+            if (context is ICrossContext crossContext)
             {
                 RemoveCrossContext(crossContext);
             }
             base.RemoveContext(context);
         }
 
-        private void AssignCrossContext(ICrossContextCapable childContext)
+        private void AssignCrossContext(ICrossContext childContext)
         {
-            var crossContext = (CrossContext)childContext;
-            // crossContext.CrossContextDispatcher = CrossContextDispatcher;
-            crossContext.InjectionBinder.CrossContextBinder = InjectionBinder.CrossContextBinder;
-        }
-
-        private void RemoveCrossContext(ICrossContextCapable childContext)
-        {
-            if (childContext.CrossContextDispatcher != null)
+            AssertUtil.NotNull(_crossContextInjectionBinder.CrossContextBinder, NodeTreeExceptionType.EMPTY_CROSS_CONTEXT);
+            if (childContext.InjectionBinder is CrossContextInjectionBinder crossContextInjectionBinder)
             {
-                var crossContext = (CrossContext)childContext;
-                // ((crossContext.CrossContextDispatcher) as ITriggerProvider)?.RemoveTriggerable(childContext.GetComponent<IEventDispatcher>(ContextKeys.CONTEXT_DISPATCHER) as ITriggerable);
-                crossContext.CrossContextDispatcher = null;
+                crossContextInjectionBinder.CrossContextBinder = _crossContextInjectionBinder.CrossContextBinder;
             }
         }
+
+        private void RemoveCrossContext(ICrossContext childContext)
+        {
+
+        }
+
+
     }
 }

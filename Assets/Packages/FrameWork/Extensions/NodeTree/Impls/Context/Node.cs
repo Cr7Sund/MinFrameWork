@@ -4,17 +4,17 @@ using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.NodeTree.Impl;
-namespace Cr7Sund.NodeTree.Impls
+namespace Cr7Sund.NodeTree.Impl
 {
-    public class Node : AsyncLoadable, INode
+    public abstract class Node : AsyncLoadable<INode>, INode
     {
         private Action<Node> _addChildHandler;
         private Action<Node> _removeChildHandler;
-        private readonly Action _disposeHandler;
         private List<Node> _childNodes;
-        private IContext _context;
         private Node _parent;
+
+        protected IContext _context;
+
 
         public bool IsInjected
         {
@@ -43,15 +43,29 @@ namespace Cr7Sund.NodeTree.Impls
             get;
             private set;
         }
-
-
-        public Node()
+        protected List<Node> ChildNodes
         {
-            _disposeHandler = DisposeRecursively;
+            get
+            {
+                return _childNodes ??= new List<Node>();
+            }
         }
 
+
+
+
         #region LifeCycle
-        void IInitializable.Init()
+
+        public IPromise<INode> PreLoadAsync(Node content)
+        {
+            AssertUtil.IsTrue(State == LoadState.Default);
+            Inject();
+            if (!IsInit)
+                Init();
+            return LoadAsync(content);
+        }
+
+        public void Init()
         {
             if (IsInit)
             {
@@ -61,6 +75,7 @@ namespace Cr7Sund.NodeTree.Impls
             IsInit = true;
             OnInit();
         }
+
         public void Start()
         {
             if (IsStarted)
@@ -68,25 +83,20 @@ namespace Cr7Sund.NodeTree.Impls
                 return;
             }
 
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-            var stackPool = poolBinder.GetOrCreate<Stack<Node>>();
-            var stack = stackPool.GetInstance();
-            var queuePool = poolBinder.GetOrCreate<Queue<Node>>();
-            var queue = queuePool.GetInstance();
+            GetCollection(out var stack, out var queue);
 
             // N-ary Tree Postorder Traversal
-
             var root = this;
             stack.Push(root);
             while (stack.Count > 0)
             {
                 var top = stack.Pop();
                 queue.Enqueue(top);
-                for (int i = top._childNodes.Count; i >= 0; i--)
+                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
-                    if (!top._childNodes[i].IsStarted)
+                    if (!top.ChildNodes[i].IsStarted)
                     {
-                        stack.Push(top._childNodes[i]);
+                        stack.Push(top.ChildNodes[i]);
                     }
                 }
             }
@@ -97,23 +107,18 @@ namespace Cr7Sund.NodeTree.Impls
                 first.OnStart();
                 first.IsStarted = true;
             }
-            stack.Clear();
-            stackPool.ReturnInstance(stack);
-            queue.Clear();
-            queuePool.ReturnInstance(queue);
+
+            ReleaseCollection(stack, queue);
         }
+
         public void Enable()
         {
-            if (IsActive)
+            if (IsActive || !IsStarted)
             {
                 return;
             }
 
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-            var stackPool = poolBinder.GetOrCreate<Stack<Node>>();
-            var stack = stackPool.GetInstance();
-            var queuePool = poolBinder.GetOrCreate<Queue<Node>>();
-            var queue = queuePool.GetInstance();
+            GetCollection(out var stack, out var queue);
 
             // N-ary Tree Postorder Traversal
             var root = this;
@@ -122,11 +127,11 @@ namespace Cr7Sund.NodeTree.Impls
             {
                 var top = stack.Pop();
                 queue.Enqueue(top);
-                for (int i = top._childNodes.Count; i >= 0; i--)
+                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
-                    if (!top._childNodes[i].IsActive)
+                    if (!top.ChildNodes[i].IsActive && top.ChildNodes[i].IsStarted)
                     {
-                        stack.Push(top._childNodes[i]);
+                        stack.Push(top.ChildNodes[i]);
                     }
                 }
             }
@@ -137,24 +142,17 @@ namespace Cr7Sund.NodeTree.Impls
                 first.OnEnable();
                 first.IsActive = true;
             }
-            stack.Clear();
-            stackPool.ReturnInstance(stack);
-            queue.Clear();
-            queuePool.ReturnInstance(queue);
+            ReleaseCollection(stack, queue);
         }
 
         public void Disable()
         {
-            if (!IsActive)
+            if (!IsStarted || !IsActive)
             {
                 return;
             }
 
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-            var stackPool = poolBinder.GetOrCreate<Stack<Node>>();
-            var stack = stackPool.GetInstance();
-            var queuePool = poolBinder.GetOrCreate<Queue<Node>>();
-            var queue = queuePool.GetInstance();
+            GetCollection(out var stack, out var queue);
 
             // N-ary Tree Postorder Traversal
             var root = this;
@@ -163,11 +161,11 @@ namespace Cr7Sund.NodeTree.Impls
             {
                 var top = stack.Pop();
                 queue.Enqueue(top);
-                for (int i = top._childNodes.Count; i >= 0; i--)
+                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
-                    if (top._childNodes[i].IsActive)
+                    if (top.ChildNodes[i].IsActive)
                     {
-                        stack.Push(top._childNodes[i]);
+                        stack.Push(top.ChildNodes[i]);
                     }
                 }
             }
@@ -178,10 +176,7 @@ namespace Cr7Sund.NodeTree.Impls
                 first.OnDisable();
                 first.IsActive = false;
             }
-            stack.Clear();
-            stackPool.ReturnInstance(stack);
-            queue.Clear();
-            queuePool.ReturnInstance(queue);
+            ReleaseCollection(stack, queue);
         }
         public void Stop()
         {
@@ -190,11 +185,7 @@ namespace Cr7Sund.NodeTree.Impls
                 return;
             }
 
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-            var stackPool = poolBinder.GetOrCreate<Stack<Node>>();
-            var stack = stackPool.GetInstance();
-            var queuePool = poolBinder.GetOrCreate<Queue<Node>>();
-            var queue = queuePool.GetInstance();
+            GetCollection(out var stack, out var queue);
 
             // N-ary Tree Postorder Traversal
 
@@ -204,11 +195,11 @@ namespace Cr7Sund.NodeTree.Impls
             {
                 var top = stack.Pop();
                 queue.Enqueue(top);
-                for (int i = top._childNodes.Count; i >= 0; i--)
+                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
-                    if (top._childNodes[i].IsStarted)
+                    if (top.ChildNodes[i].IsStarted)
                     {
-                        stack.Push(top._childNodes[i]);
+                        stack.Push(top.ChildNodes[i]);
                     }
                 }
             }
@@ -219,10 +210,7 @@ namespace Cr7Sund.NodeTree.Impls
                 first.OnStop();
                 first.IsStarted = false;
             }
-            stack.Clear();
-            stackPool.ReturnInstance(stack);
-            queue.Clear();
-            queuePool.ReturnInstance(queue);
+            ReleaseCollection(stack, queue);
         }
         public void Dispose()
         {
@@ -234,13 +222,22 @@ namespace Cr7Sund.NodeTree.Impls
 
             Stop();
 
-            //先卸载完成后,再进行OnDispose的回调以及销毁IoC
             if (State == LoadState.Loading || State == LoadState.Loaded)
-                UnloadAsync().Then(_disposeHandler);
+                UnloadAsync(this).Then(DisposeRecursively);
             else
-                DisposeRecursively();
+                DisposeRecursively(this);
         }
-        public void SetActive(bool active)
+
+
+        protected virtual void OnInit() { }
+        protected virtual void OnStart() { }
+        protected virtual void OnEnable() { }
+        protected virtual void OnDisable() { }
+        protected virtual void OnStop() { }
+        protected virtual void OnDispose() { }
+
+
+        protected void SetActive(bool active)
         {
             if (IsActive == active)
                 return;
@@ -257,51 +254,44 @@ namespace Cr7Sund.NodeTree.Impls
             }
         }
 
-        /// <summary>
-        /// Init回调
-        /// </summary>
-        protected virtual void OnInit() { }
-        /// <summary>
-        /// 开始回调
-        /// </summary>
-        protected virtual void OnStart() { }
-        /// <summary>
-        /// Enable回调
-        /// </summary>
-        protected virtual void OnEnable() { }
-        /// <summary>
-        /// Disable回调
-        /// </summary>
-        protected virtual void OnDisable() { }
-        /// <summary>
-        /// 停止回调
-        /// </summary>
-        protected virtual void OnStop() { }
-        /// <summary>
-        /// 销毁回调
-        /// </summary>
-        protected virtual void OnDispose() { }
-
-        private void DisposeRecursively()
+        private void ReleaseCollection(Stack<Node> stack, Queue<Node> queue)
         {
             var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<Node>>();
-            var stack = stackPool.GetInstance();
             var queuePool = poolBinder.GetOrCreate<Queue<Node>>();
-            var queue = queuePool.GetInstance();
+
+            stack.Clear();
+            queue.Clear();
+
+            stackPool.ReturnInstance(stack);
+            queuePool.ReturnInstance(queue);
+        }
+        private void GetCollection(out Stack<Node> stack, out Queue<Node> queue)
+        {
+            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+            var stackPool = poolBinder.GetOrCreate<Stack<Node>>();
+            var queuePool = poolBinder.GetOrCreate<Queue<Node>>();
+
+            stack = stackPool.GetInstance();
+            queue = queuePool.GetInstance();
+            stack.Clear();
+            queue.Clear();
+        }
+        private void DisposeRecursively(INode root)
+        {
+            GetCollection(out var stack, out var queue);
 
             // N-ary Tree Postorder Traversal
-            var root = this;
-            stack.Push(root);
+            stack.Push((Node)root);
             while (stack.Count > 0)
             {
                 var top = stack.Pop();
                 queue.Enqueue(top);
-                for (int i = top._childNodes.Count; i >= 0; i--)
+                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
-                    if (top._childNodes[i].IsInit)
+                    if (top.ChildNodes[i].IsInit)
                     {
-                        stack.Push(top._childNodes[i]);
+                        stack.Push(top.ChildNodes[i]);
                     }
                 }
             }
@@ -311,10 +301,8 @@ namespace Cr7Sund.NodeTree.Impls
                 var first = queue.Dequeue();
                 first.RealDispose();
             }
-            stack.Clear();
-            stackPool.ReturnInstance(stack);
-            queue.Clear();
-            queuePool.ReturnInstance(queue);
+
+            ReleaseCollection(stack, queue);
         }
         private void RealDispose()
         {
@@ -325,24 +313,24 @@ namespace Cr7Sund.NodeTree.Impls
             _context.Dispose();
 
             //NodeTree Dispose
-            _parent?._childNodes.Remove(this);
-            _childNodes.Clear();
+            _parent?.ChildNodes.Remove(this);
+            ChildNodes.Clear();
             _parent = null;
             IsInit = false;
         }
         #endregion
 
         #region INode
-        public IPromise AddChildAsync(INode child)
+        public IPromise<INode> AddChildAsync(INode child)
         {
             AssertUtil.NotNull(NodeTreeExceptionType.EMPTY_NODE_ADD);
             if (child.State == LoadState.Loading || child.State == LoadState.Unloading)
             {
-                throw new MyException($"can not add node at : {child.State} State", NodeTreeExceptionType.UNVALILD_NODESTATE);
+                throw new MyException($"can not add node at : {child.State} State", NodeTreeExceptionType.INVALID_NODESTATE);
             }
 
             var implChildNode = child as Node;
-            if (_childNodes.Contains(implChildNode))
+            if (ChildNodes.Contains(implChildNode))
             {
                 return child.LoadStatus;
             }
@@ -362,11 +350,11 @@ namespace Cr7Sund.NodeTree.Impls
 
             if (child.State == LoadState.Default || child.State == LoadState.Unloaded)
             {
-                // TO avoid anonymous function
-                // we will delay the resolve function until child been created
-                // -----  ----
+                // TO avoid closure
                 // child.LoadAsync().Then(() => AddChild(child));
-                child.LoadAsync();
+                // we will delay the resolve until child been created
+                // -----  ----
+                return child.LoadAsync(child);
             }
             else if (child.State == LoadState.Loaded)
             {
@@ -375,24 +363,28 @@ namespace Cr7Sund.NodeTree.Impls
 
             return child.LoadStatus;
         }
-        public IPromise UnloadChildAsync(INode child)
+        public IPromise<INode> UnloadChildAsync(INode child)
         {
             return RemoveChildAsyncInternal(child, true);
         }
-        public IPromise RemoveChildAsync(INode child)
+        public IPromise<INode> RemoveChildAsync(INode child)
         {
             return RemoveChildAsyncInternal(child, false);
         }
-        private IPromise RemoveChildAsyncInternal(INode child, bool shouldUnload)
+
+        protected virtual void OnAddChild(Node child) { }
+        protected virtual void OnRemoveChild(Node child) { }
+
+        private IPromise<INode> RemoveChildAsyncInternal(INode child, bool shouldUnload)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
             if (child.State != LoadState.Loaded)
             {
-                throw new MyException($"can not remove node at : {child.State} State", NodeTreeExceptionType.UNVALILD_NODESTATE);
+                throw new MyException($"can not remove node at : {child.State} State", NodeTreeExceptionType.INVALID_NODESTATE);
             }
 
             var implChildNode = child as Node;
-            if (!_childNodes.Contains(implChildNode)) return child.UnloadStatus;
+            if (!ChildNodes.Contains(implChildNode)) return child.UnloadStatus;
 
             _removeChildHandler ??= RemoveChild;
             implChildNode._removeChildHandler = _removeChildHandler;
@@ -410,7 +402,7 @@ namespace Cr7Sund.NodeTree.Impls
                         child.Stop();
                     }
 
-                    child.UnloadAsync();
+                    return child.UnloadAsync(child);
                 }
             }
             else
@@ -423,9 +415,9 @@ namespace Cr7Sund.NodeTree.Impls
         private void RemoveChild(Node child)
         {
             AssertUtil.NotNull(child);
-            AssertUtil.IsFalse(_childNodes.Contains(child));
+            AssertUtil.IsTrue(ChildNodes.Contains(child));
 
-            _childNodes.Remove(child);
+            ChildNodes.Remove(child);
             child._parent = null;
             OnRemoveChild(child);
         }
@@ -433,9 +425,9 @@ namespace Cr7Sund.NodeTree.Impls
         {
             AssertUtil.NotNull(child);
             AssertUtil.IsTrue(child.State == LoadState.Loaded);
-            AssertUtil.IsFalse(_childNodes.Contains(child));
+            AssertUtil.IsFalse(ChildNodes.Contains(child));
 
-            _childNodes.Add(child);
+            ChildNodes.Add(child);
             OnAddChild(child);
 
             child._parent = this;
@@ -451,49 +443,26 @@ namespace Cr7Sund.NodeTree.Impls
                 child.SetActive(true);
             }
         }
-        protected virtual void OnAddChild(Node child) { }
-        protected virtual void OnRemoveChild(Node child) { }
         #endregion
 
         #region Load
-        protected override IPromise OnLoadAsync()
+        protected override IPromise<INode> OnLoadAsync(INode content)
         {
-            var promise = CreateLoadAsync();
-            AssertUtil.NotNull(promise);
+            return Promise<INode>.Resolved(content);
 
-            foreach (var child in _childNodes)
-            {
-                promise.Then(child.LoadAsync);
-            }
-            return promise;
         }
-        protected override IPromise OnUnloadAsync()
+        protected override IPromise<INode> OnUnloadAsync(INode content)
         {
-            var promise = CreateUnLoadAsync();
-            AssertUtil.NotNull(promise);
-
-            foreach (var child in _childNodes)
-            {
-                promise.Then(child.LoadAsync);
-            }
-            return promise;
-        }
-        protected virtual IPromise CreateUnLoadAsync()
-        {
-            return Promise.Resolved();
-        }
-        protected virtual IPromise CreateLoadAsync()
-        {
-            return Promise.Resolved();
+            return Promise<INode>.Resolved(content);
         }
 
-        protected override void OnLoaded()
+        protected sealed override void OnLoaded()
         {
             base.OnLoaded();
             _addChildHandler?.Invoke(this);
         }
 
-        protected override void OnUnloaded()
+        protected sealed override void OnUnloaded()
         {
             base.OnUnloaded();
             _removeChildHandler?.Invoke(this);
@@ -501,30 +470,30 @@ namespace Cr7Sund.NodeTree.Impls
         #endregion
 
         #region Inject Config
-        public virtual void Inject()
+        public void Inject()
         {
             if (IsInjected)
                 return;
 
             IsInjected = true;
-            OnInjected();
+
+            _context.InjectionBinder.Injector.Inject(this);
         }
 
-        public virtual void DeInject()
+        public void DeInject()
         {
             if (!IsInjected)
                 return;
 
             IsInjected = false;
-            OnDeInjected();
-        }
 
-        protected virtual void OnInjected()
-        {
-        }
-        protected virtual void OnDeInjected()
-        {
+            _context.InjectionBinder.Injector.Uninject(this);
         }
         #endregion
+
+        public int Test_GetChildNodeCount()
+        {
+            return ChildNodes.Count;
+        }
     }
 }
