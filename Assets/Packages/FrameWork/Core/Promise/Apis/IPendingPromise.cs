@@ -3,7 +3,7 @@ namespace Cr7Sund.Framework.Api
     /// <summary>
     ///     Interface for a promise that can be rejected or resolved.
     /// </summary>
-    public interface IPendingPromise<PromisedT> : IPromiseInfo, IRejectable
+    public interface IPendingPromise<PromisedT> : IPromiseInfo, IRejectable, ICancelable
     {
         /// <summary>
         ///     Resolve the promise with a particular value.
@@ -19,7 +19,7 @@ namespace Cr7Sund.Framework.Api
     /// <summary>
     ///     Interface for a promise that can be rejected or resolved.
     /// </summary>
-    public interface IPendingPromise : IPromiseInfo, IRejectable
+    public interface IPendingPromise : IPromiseInfo, IRejectable, ICancelable
     {
         /// <summary>
         ///     Resolve the promise.

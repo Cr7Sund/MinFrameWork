@@ -593,6 +593,19 @@ namespace Cr7Sund.Framework.Impl
 
             InvokeRejectHandlers(ex);
         }
+
+        public void Cancel()
+        {
+            _resolveValue = default(PromisedT);
+            CurState = PromiseState.Pending;
+
+            if (Promise.EnablePromiseTracking)
+            {
+                Promise.PendingPromises.Remove(this);
+            }
+
+            ClearHandlers();
+        }
         #endregion
 
         #region private methods
@@ -896,7 +909,7 @@ namespace Cr7Sund.Framework.Impl
         protected IPromise<ConvertedT> Any<ConvertedT>(IEnumerable<IPromise<ConvertedT>> promises)
         {
             var promisesArray = promises.ToArray();
-            AssertUtil.Greater(promisesArray.Length, 0, 
+            AssertUtil.Greater(promisesArray.Length, 0,
                  PromiseExceptionType.EMPTY_PROMISE_ANY);
 
             int remainingCount = promisesArray.Length;
@@ -961,7 +974,7 @@ namespace Cr7Sund.Framework.Impl
         {
             var promisesArray = promises.ToArray();
             AssertUtil.Greater(promisesArray.Length, 0, PromiseExceptionType.EMPTY_PROMISE_RACE);
-           
+
             int remainingCount = promisesArray.Length;
             var resultPromise = GetRawPromise<ConvertedT>();
             float[] progress = new float[remainingCount];

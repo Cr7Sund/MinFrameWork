@@ -577,6 +577,18 @@ namespace Cr7Sund.Framework.Impl
 
             InvokeRejectHandlers(ex);
         }
+
+        public void Cancel()
+        {
+            CurState = PromiseState.Pending;
+
+            if (Promise.EnablePromiseTracking)
+            {
+                Promise.PendingPromises.Remove(this);
+            }
+
+            ClearHandlers();
+        }
         #endregion
 
         #region private methods
