@@ -5,7 +5,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 namespace Cr7Sund.Server.Impl
 {
-    public class GameNode : ModuleNode
+    public  class GameNode : ModuleNode
     {
 
         public void Run()
@@ -22,7 +22,7 @@ namespace Cr7Sund.Server.Impl
         public IPromise<INode> Destroy()
         {
             DeInject();
-            Dispose();
+            
             return UnloadAsync(this).Then(node =>
             {
                 SetActive(false);

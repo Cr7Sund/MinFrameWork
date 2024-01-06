@@ -4,7 +4,7 @@ using Cr7Sund.NodeTree.Impl;
 
 namespace Cr7Sund.Server.Impl
 {
-    public class GameBuilder
+    public abstract class GameBuilder
     {
         protected GameNode _node { get; private set; }
 
@@ -35,14 +35,12 @@ namespace Cr7Sund.Server.Impl
             return _node;
         }
 
+
+        protected abstract GameContext CreateContext();
+
         protected virtual GameNode CreateGameNode()
         {
             return new GameNode();
-        }
-
-        protected virtual GameContext CreateContext()
-        {
-            return new GameContext();
         }
 
         protected virtual void AddControllers(IControllerModule controllerModule)

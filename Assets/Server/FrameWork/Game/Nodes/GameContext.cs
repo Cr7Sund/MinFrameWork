@@ -4,7 +4,7 @@ using Cr7Sund.NodeTree.Impl;
 
 namespace Cr7Sund.Server.Impl
 {
-    public class GameContext : CrossContext
+    public abstract class GameContext : CrossContext
     {
         public GameContext() : base()
         {

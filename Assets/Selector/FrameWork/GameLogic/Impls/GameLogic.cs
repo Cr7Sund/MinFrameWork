@@ -2,10 +2,11 @@ using Cr7Sund.Framework.Api;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Selector.Apis;
 using Cr7Sund.Server.Impl;
+using UnityEngine;
 
 namespace Cr7Sund.Selector.Impl
 {
-    public class GameLogic : IGameLogic
+    public abstract class GameLogic : IGameLogic
     {
         private GameNode _node;
 
@@ -43,9 +44,7 @@ namespace Cr7Sund.Selector.Impl
         {
         }
         
-        protected virtual GameBuilder CreateBuilder()
-        {
-            return new GameBuilder();
-        }
+        protected abstract GameBuilder CreateBuilder();
+
     }
 }
