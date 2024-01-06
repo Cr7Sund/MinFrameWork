@@ -4,41 +4,49 @@ namespace Cr7Sund
 {
     public static class Debug
     {
-        public static IInternalLog Logger;
+        private static IInternalLog _logger;
+
+
+        public static void Init(IInternalLog logger)
+        {
+            _logger = logger;
+
+            _logger.Init();
+        }
 
         public static void Info(string message)
         {
-            Logger.Info(message);
+            _logger.Info(message);
         }
 
         public static void Error(string message)
         {
-            Logger.Error(message);
+            _logger.Error(message);
         }
 
         public static void Error(string prefix, Exception e)
         {
-            Logger.Error(prefix, e);
+            _logger.Error(prefix, e);
         }
 
         public static void Error(Exception e)
         {
-            Logger.Error(e);
+            _logger.Error(e);
         }
 
         public static void Fatal(string message)
         {
-            Logger.Fatal(message);
+            _logger.Fatal(message);
         }
 
         public static void Fatal(Exception e)
         {
-            Logger.Fatal(e);
+            _logger.Fatal(e);
         }
 
         public static void Fatal(string prefix, Exception e)
         {
-            Logger.Fatal(prefix, e);
+            _logger.Fatal(prefix, e);
         }
     }
 }

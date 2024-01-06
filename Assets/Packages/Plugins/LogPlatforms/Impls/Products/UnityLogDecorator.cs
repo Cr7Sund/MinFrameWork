@@ -12,7 +12,7 @@ namespace Cr7Sund.Logger
 
         public UnityLogDecorator()
         {
-            Debug.UnityEditorDebug("构建UnityLog");
+            Debug.UnityEditorDebug("Start Log: ");
 
             var color = GetLocalColor("log trace", Color.white);
             _colors["log trace"] = color;
