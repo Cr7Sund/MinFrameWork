@@ -2,7 +2,7 @@
 
 namespace Cr7Sund.EventBus.Tests
 {
-    public class SampleTestEvent : IEventData
+    public struct SampleTestEvent : IEventData
     {
 		public int Data;
 

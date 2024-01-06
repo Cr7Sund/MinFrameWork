@@ -17,7 +17,8 @@ namespace Cr7Sund.Framework.Tests
             injectionBinder.Bind<ICommandBinder>().To<CommandBinder>().AsSingleton();
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
-            Debug.Logger = new InternalLogger();
+            Debug.Init(new InternalLogger());
+
         }
 
 

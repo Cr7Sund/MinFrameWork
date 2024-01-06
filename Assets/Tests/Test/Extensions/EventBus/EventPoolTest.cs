@@ -20,7 +20,7 @@ namespace Cr7Sund.EventBus.Tests
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
 
-            Debug.Logger = new InternalLogger();
+            Debug.Init(new InternalLogger());
             injectionBinder.Injector.Inject(eventBus);
         }
 
@@ -33,7 +33,7 @@ namespace Cr7Sund.EventBus.Tests
             var @event = poolBinder.AutoCreate<ClassTestEvent>();
             eventBus.Raise(@event);
             Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().TotalLength);
-            Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().Available );
+            Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().Available);
         }
 
 
