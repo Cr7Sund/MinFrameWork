@@ -1,0 +1,17 @@
+{
+    "name": "Cr7Sund.Timer",
+    "rootNamespace": "",
+    "references": [
+        "Cr7Sund.FrameWork.Extension",
+        "Cr7Sund.FrameWork.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
