@@ -25,7 +25,7 @@ namespace Cr7Sund.NodeTree.Impl
             _crossContextInjectionBinder = new CrossContextInjectionBinder();
         }
 
-        public override void AddContext(IContext context)
+        public sealed override void AddContext(IContext context)
         {
             base.AddContext(context);
             if (context is ICrossContext  crossContext)
@@ -33,7 +33,7 @@ namespace Cr7Sund.NodeTree.Impl
                 AssignCrossContext(crossContext);
             }
         }
-        public override void RemoveContext(IContext context)
+        public sealed override void RemoveContext(IContext context)
         {
             if (context is ICrossContext crossContext)
             {
@@ -45,6 +45,7 @@ namespace Cr7Sund.NodeTree.Impl
         private void AssignCrossContext(ICrossContext childContext)
         {
             AssertUtil.NotNull(_crossContextInjectionBinder.CrossContextBinder, NodeTreeExceptionType.EMPTY_CROSS_CONTEXT);
+        
             if (childContext.InjectionBinder is CrossContextInjectionBinder crossContextInjectionBinder)
             {
                 crossContextInjectionBinder.CrossContextBinder = _crossContextInjectionBinder.CrossContextBinder;

@@ -3,13 +3,11 @@ using Cr7Sund.NodeTree.Api;
 
 namespace Cr7Sund.NodeTree.Impl
 {
-    /// <summary>
-    /// 支持Update、LateUpdate的适配节点
-    /// </summary>
+
     public abstract class UpdateNode : Node, IUpdate, ILateUpdate
     {
-        private List<UpdateNode> _updateList;
-        private List<UpdateNode> _lateUpdatesList;
+        protected List<UpdateNode> _updateList;
+        protected List<UpdateNode> _lateUpdatesList;
 
 
         public UpdateNode() : base()
@@ -87,7 +85,7 @@ namespace Cr7Sund.NodeTree.Impl
             if (!IsStarted || !IsActive)
                 return;
 
-            for (int i = 0; i < _updateList.Count; i++)
+            for (int i = 0; i < _lateUpdatesList.Count; i++)
             {
                 _updateList[i].LateUpdate(elapse);
             }
@@ -96,6 +94,7 @@ namespace Cr7Sund.NodeTree.Impl
 
         protected virtual void OnUpdate(int milliseconds) { }
         protected virtual void OnLateUpdate(int milliseconds) { }
+
 
     }
 }

@@ -70,7 +70,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (State == LoadState.Loading)
             {
-                _loadGroup?.Resolve(value);
+                _unloadGroup?.Resolve(value);
             }
 
             State = LoadState.Unloading;
