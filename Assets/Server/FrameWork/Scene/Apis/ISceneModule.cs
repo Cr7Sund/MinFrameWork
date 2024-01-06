@@ -2,7 +2,7 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;
-namespace TestMono.Scene.Apis
+namespace Cr7Sund.Server.Apis
 {
     /// <summary>
     /// Defines the interface for a scene management module that allows running, removing, preloading, and observing scenes.

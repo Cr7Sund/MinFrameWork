@@ -8,7 +8,6 @@ namespace Cr7Sund.Server.Impl
         {
             builder.BuildContext();
             builder.BuildNode();
-            builder.BuildControllers();
         }
     }
 }

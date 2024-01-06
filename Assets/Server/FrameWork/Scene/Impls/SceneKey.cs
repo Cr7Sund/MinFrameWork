@@ -1,4 +1,6 @@
-﻿namespace Cr7Sund.Server.Impl
+﻿using System;
+
+namespace Cr7Sund.Server.Impl
 {   
     public delegate SceneBuilder CreateSceneBuilderDelegate();
 
@@ -6,14 +8,15 @@
     {
         private readonly string _key;
         
-        internal CreateSceneBuilderDelegate Factory { get; private set; }
-        
-        
-        public SceneKey(string key, CreateSceneBuilderDelegate factory)
+        public SceneBuilder SceneBuilder { get; private set; }
+
+
+        public SceneKey(string key, SceneBuilder sceneBuilder) 
         {
             this._key = key;
-            this.Factory = factory;
+            this.SceneBuilder = sceneBuilder;
         }
+
 
         public static implicit operator string(SceneKey sceneKey) => sceneKey._key;
         public override string ToString() => _key;

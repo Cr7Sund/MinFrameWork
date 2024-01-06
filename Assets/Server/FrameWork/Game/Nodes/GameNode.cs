@@ -1,12 +1,12 @@
-﻿using Cr7Sund.Framework.Api;
+﻿using System;
+using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 namespace Cr7Sund.Server.Impl
 {
-    public class GameNode : Node
+    public class GameNode : ModuleNode
     {
-        internal IControllerModule ControllerModule;
 
         public void Run()
         {
@@ -19,12 +19,17 @@ namespace Cr7Sund.Server.Impl
             });
         }
 
-        protected override IPromise<INode> OnLoadAsync(INode content)
+        public IPromise<INode> Destroy()
         {
-            var promise = Promise<INode>.Resolved(content)
-             .Then(ControllerModule.LoadAsync);
-
-            return promise;
+            DeInject();
+            Dispose();
+            return UnloadAsync(this).Then(node =>
+            {
+                SetActive(false);
+                Stop();
+                Dispose();
+                return node;
+            });
         }
 
         internal void AssignContext(IContext context)
@@ -36,6 +41,13 @@ namespace Cr7Sund.Server.Impl
         {
             base.OnInit();
             _context.InjectionBinder.Bind<GameNode>().To(this);
+        }
+
+        protected override void OnDispose()
+        {
+            _context.InjectionBinder.Unbind<GameNode>();
+
+            base.OnDispose();
         }
     }
 }

@@ -3,6 +3,11 @@ namespace Cr7Sund
 {
     public class InternalLogger : IInternalLog
     {
+        public void Init()
+        {
+            Log.Initialize();
+        }
+
         public void Info(string message)
         {
             Log.Info(LogChannel.Framework, message);
@@ -32,6 +37,8 @@ namespace Cr7Sund
         {
             Log.Fatal(LogChannel.Framework, prefix, e);
         }
+
+
     }
 
 }

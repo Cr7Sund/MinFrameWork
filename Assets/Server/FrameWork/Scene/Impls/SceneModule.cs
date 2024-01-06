@@ -9,10 +9,10 @@ using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Performance;
-using TestMono.Scene.Apis;
+using Cr7Sund.Server.Apis;
 namespace Cr7Sund.Server.Impl
 {
-    public class SceneModule : ControllerModule, ISceneModule
+    public class SceneModule :  ISceneModule
     {
         [Inject]
         private IFingerGesture _fingerGesture;
@@ -36,10 +36,6 @@ namespace Cr7Sund.Server.Impl
             get;
         }
 
-        public virtual void AddInternalControllers()
-        {
-            throw new System.NotImplementedException();
-        }
 
 
         public IPromise<INode> PreLoadScene(SceneKey key)
@@ -238,12 +234,12 @@ namespace Cr7Sund.Server.Impl
         }
         private IPromise<INode> UnloadSceneFromNodeTree(SceneKey key)
         {
-            var removeScene = _treeScenes[key];
+            var unloadScene = _treeScenes[key];
 
-            DispatchRemoveBegin(removeScene.Key);
+            DispatchRemoveBegin(unloadScene.Key);
             _treeScenes.Remove(key);
-            _unloadingScenes.Add(key, removeScene);
-            return removeScene.UnloadAsync(removeScene).Then(OnUnloadScene);
+            _unloadingScenes.Add(key, unloadScene);
+            return _gameNode.UnloadChildAsync(unloadScene).Then(OnUnloadScene);
         }
 
         private INode OnUnloadScene(INode content)

@@ -3,11 +3,13 @@ namespace Cr7Sund.Server.Impl
 {
     public static class GameDirector
     {
-        public static void Construct(GameBuilder builder)
+        public static GameNode Construct(GameBuilder Server)
         {
-            builder.BuildContext();
-            builder.BuildNode();
-            builder.BuildControllers();
+            var gameNode = Server.BuildNode();
+            Server.BuildContext();
+            Server.BuildControllers();
+
+            return gameNode;
         }
     }
 }

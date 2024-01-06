@@ -28,12 +28,12 @@ namespace Cr7Sund.Server.Impl
             OnUnMappedBindings();
         }
 
-        protected void OnMappedBindings()
+        protected virtual void OnMappedBindings()
         {
 
         }
 
-        protected void OnUnMappedBindings()
+        protected virtual void OnUnMappedBindings()
         {
 
         }

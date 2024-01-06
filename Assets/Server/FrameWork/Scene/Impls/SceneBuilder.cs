@@ -1,8 +1,16 @@
-﻿namespace Cr7Sund.Server.Impl
+﻿using System;
+
+namespace Cr7Sund.Server.Impl
 {
-    public class SceneBuilder
+    public abstract class SceneBuilder
     {
         protected SceneNode _node { get; private set; }
+
+
+        public SceneBuilder()
+        {
+            SubClassInitialization();
+        }
 
 
         internal void SetSceneKey(SceneKey key)
@@ -22,29 +30,21 @@
             _node.AssignContext(context);
         }
 
-        public void BuildControllers()
-        {
-            var controllerModule = GetControllerModule();
-            controllerModule.AddInternalControllers();
-            _node.ControllerModule = controllerModule;
-        }
-
         public SceneNode GetProduct()
         {
             return _node;
         }
+        public abstract void SubClassInitialization();
 
         protected virtual SceneNode CreateGameNode()
         {
             return new SceneNode();
         }
-        protected virtual SceneModule GetControllerModule()
-        {
-            return new SceneModule();
-        }
+
         protected virtual SceneContext CreateContext()
         {
             return new SceneContext();
         }
+
     }
 }

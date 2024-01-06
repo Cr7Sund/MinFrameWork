@@ -10,9 +10,10 @@ namespace Cr7Sund.Server.Impl
 
 
 
-        public void BuildNode()
+        public GameNode BuildNode()
         {
             _node = CreateGameNode();
+            return _node;
         }
 
         public void BuildContext()
@@ -24,9 +25,9 @@ namespace Cr7Sund.Server.Impl
 
         public void BuildControllers()
         {
-            var controllerModule = GetControllerModule();
-            controllerModule.AddInternalControllers();
-            _node.ControllerModule = controllerModule;
+            var controllerModule = new ControllerModule();
+            AddControllers(controllerModule);
+            _node.AssignControllerModule(controllerModule);
         }
 
         public GameNode GetProduct()
@@ -38,13 +39,15 @@ namespace Cr7Sund.Server.Impl
         {
             return new GameNode();
         }
-        protected virtual GameModule GetControllerModule()
-        {
-            return new GameModule();
-        }
+
         protected virtual GameContext CreateContext()
         {
             return new GameContext();
+        }
+
+        protected virtual void AddControllers(IControllerModule controllerModule)
+        {
+
         }
     }
 }

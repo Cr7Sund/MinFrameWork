@@ -7,7 +7,7 @@ namespace Cr7Sund.Server.Impl
     {
         public static SceneNode Create(SceneKey key)
         {
-            SceneBuilder builder = key.Factory?.Invoke();
+            SceneBuilder builder = key.SceneBuilder;
 
             if (builder == null)
             {
