@@ -1,6 +1,4 @@
-using System;
-
-namespace Cr7Sund.EventBus
+namespace Cr7Sund.EventBus.Api
 {
     /// <summary>
     /// A delegate for the callback methods given when subscribing to an event type.
@@ -8,7 +6,6 @@ namespace Cr7Sund.EventBus
     /// <param name="eventData">The event that was raised.</param>
     /// <typeparam name="TEvent">The type of event this callback handles.</typeparam>
     public delegate void EventHandler<TEvent>(TEvent eventData) where TEvent : IEventData;
-
 
     public interface IEventBus : IObservable
     {

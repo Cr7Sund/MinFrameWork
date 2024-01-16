@@ -4,10 +4,10 @@ using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Server.Impl;
 using NUnit.Framework;
-using Cr7Sund.EventBus;
 using Cr7Sund.Server.Apis;
 using Cr7Sund.Framework.Tests;
-using System.Security.Cryptography;
+using Cr7Sund.EventBus.Api;
+using Cr7Sund.EventBus.Impl;
 
 namespace Cr7Sund.Server.Tests
 {
@@ -23,7 +23,7 @@ namespace Cr7Sund.Server.Tests
 
             _gameNode = GameDirector.Construct<SampleGameBuilder>();
             var injectionBinder = new InjectionBinder();
-            var eventBus = new EventBus.EventBus();
+            var eventBus = new Cr7Sund.EventBus.Impl.EventBus();
 
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(new PoolBinder());

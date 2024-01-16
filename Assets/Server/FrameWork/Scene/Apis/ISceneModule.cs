@@ -1,4 +1,4 @@
-﻿using Cr7Sund.EventBus;
+﻿using Cr7Sund.EventBus.Api;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;

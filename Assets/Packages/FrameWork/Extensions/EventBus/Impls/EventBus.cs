@@ -1,6 +1,6 @@
-using System;
+using Cr7Sund.EventBus.Api;
 
-namespace Cr7Sund.EventBus
+namespace Cr7Sund.EventBus.Impl
 {
     public class EventBus : GenericEventBus<IEventData>, IEventBus
     {
@@ -14,12 +14,12 @@ namespace Cr7Sund.EventBus
             return this.RaiseImmediately<TEvent>(@event);
         }
 
-        public void AddObserver<TEvent>(EventHandler<TEvent> handler) where TEvent : IEventData, new()
+        public void AddObserver<TEvent>(Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
              this.SubscribeTo<TEvent>(handler);
         }
 
-        public void RemoveObserver<TEvent>(EventHandler<TEvent> handler) where TEvent : IEventData, new()
+        public void RemoveObserver<TEvent>(Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
             this.UnsubscribeFrom<TEvent>(handler);
         }

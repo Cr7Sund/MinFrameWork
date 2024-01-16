@@ -1,4 +1,4 @@
-﻿using Cr7Sund.EventBus;
+﻿using Cr7Sund.EventBus.Impl;
 
 namespace Cr7Sund.Server.Impl
 {

@@ -1,4 +1,5 @@
-﻿using Cr7Sund.Framework.Impl;
+﻿using Cr7Sund.EventBus.Api;
+using Cr7Sund.Framework.Impl;
 
 namespace Cr7Sund.EventBus.Tests
 {

@@ -1,4 +1,6 @@
 ﻿using System;
+using Cr7Sund.EventBus.Api;
+using Cr7Sund.EventBus.Impl;
 using NUnit.Framework;
 
 namespace Cr7Sund.EventBus.Tests

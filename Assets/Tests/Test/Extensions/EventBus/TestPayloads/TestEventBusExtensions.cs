@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cr7Sund.EventBus.Api;
+using Cr7Sund.EventBus.Impl;
 
 namespace Cr7Sund.EventBus.Tests
 {
@@ -18,7 +19,7 @@ namespace Cr7Sund.EventBus.Tests
 			return listener;
 		}
 
-		public static TestListener<TEvent> TestListen<TEvent>(this GenericEventBus<IEventData> bus, Action callback,
+		public static TestListener<TEvent> TestListen<TEvent>(this GenericEventBus<IEventData> bus, System.Action callback,
 			float priority = 0) where TEvent : IEventData, new()
 		{
 			var listener = bus.TestListener<TEvent>();

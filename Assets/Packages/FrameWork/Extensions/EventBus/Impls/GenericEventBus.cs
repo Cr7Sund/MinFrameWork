@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cr7Sund.EventBus.Api;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
 
-namespace Cr7Sund.EventBus
+namespace Cr7Sund.EventBus.Impl
 {
 	/// <summary>
 	/// <para>An event bus.</para>
@@ -122,7 +123,7 @@ namespace Cr7Sund.EventBus
 		/// <param name="priority">Higher priority means this listener will receive the event earlier than other listeners with lower priority.
 		///                        If multiple listeners have the same priority, they will be invoked in the order they subscribed.</param>
 		/// <typeparam name="TEvent">The event type to subscribe to.</typeparam>
-		public virtual void SubscribeTo<TEvent>(EventHandler<TEvent> handler, float priority = 0)
+		public virtual void SubscribeTo<TEvent>(Api.EventHandler<TEvent> handler, float priority = 0)
 			where TEvent : TBaseEvent, new()
 		{
 			EventListeners<TEvent> listeners = EventListeners<TEvent>.GetListeners(this);
@@ -134,7 +135,7 @@ namespace Cr7Sund.EventBus
 		/// </summary>
 		/// <param name="handler">The method that was previously given in SubscribeTo.</param>
 		/// <typeparam name="TEvent">The event type to unsubscribe from.</typeparam>
-		public virtual void UnsubscribeFrom<TEvent>(EventHandler<TEvent> handler) where TEvent : TBaseEvent, new()
+		public virtual void UnsubscribeFrom<TEvent>(Api.EventHandler<TEvent> handler) where TEvent : TBaseEvent, new()
 		{
 			var listeners = EventListeners<TEvent>.GetListeners(this);
 			listeners.RemoveListener(handler);
@@ -210,7 +211,7 @@ namespace Cr7Sund.EventBus
 			public abstract void Raise(GenericEventBus<TBaseEvent> eventBus);
 		}
 
-		private sealed class EventListeners<TEvent> : IEnumerable<EventHandler<TEvent>> where TEvent : TBaseEvent, new()
+		private sealed class EventListeners<TEvent> : IEnumerable<Api.EventHandler<TEvent>> where TEvent : TBaseEvent, new()
 		{
 			private static readonly Dictionary<GenericEventBus<TBaseEvent>, EventListeners<TEvent>>
 				Listeners = new Dictionary<GenericEventBus<TBaseEvent>, EventListeners<TEvent>>();
@@ -259,7 +260,7 @@ namespace Cr7Sund.EventBus
 			}
 
 
-			public void AddListener(EventHandler<TEvent> handler, float priority)
+			public void AddListener(Api.EventHandler<TEvent> handler, float priority)
 			{
 				var listener = new Listener(handler, priority);
 
@@ -274,7 +275,7 @@ namespace Cr7Sund.EventBus
 				}
 			}
 
-			public void RemoveListener(EventHandler<TEvent> handler)
+			public void RemoveListener(Api.EventHandler<TEvent> handler)
 			{
 				for (var i = _sortedListeners.Count - 1; i >= 0; i--)
 				{
@@ -314,10 +315,10 @@ namespace Cr7Sund.EventBus
 
 			private readonly struct Listener : IEquatable<Listener>, IComparable<Listener>
 			{
-				public readonly EventHandler<TEvent> Handler;
+				public readonly Api.EventHandler<TEvent> Handler;
 				public readonly float Priority;
 
-				public Listener(EventHandler<TEvent> handler, float priority)
+				public Listener(Api.EventHandler<TEvent> handler, float priority)
 				{
 					Handler = handler;
 					Priority = priority;
@@ -344,7 +345,7 @@ namespace Cr7Sund.EventBus
 				}
 			}
 
-			public IEnumerator<EventHandler<TEvent>> GetEnumerator()
+			public IEnumerator<Api.EventHandler<TEvent>> GetEnumerator()
 			{
 				var enumerator = EnumeratorPool.Get();
 				enumerator.Index = 0;
@@ -360,12 +361,12 @@ namespace Cr7Sund.EventBus
 				return GetEnumerator();
 			}
 
-			private class Enumerator : IEnumerator<EventHandler<TEvent>>
+			private class Enumerator : IEnumerator<Api.EventHandler<TEvent>>
 			{
 				public EventListeners<TEvent> Owner;
 				public int Index;
 
-				public EventHandler<TEvent> Current { get; private set; }
+				public Api.EventHandler<TEvent> Current { get; private set; }
 				object IEnumerator.Current => Current;
 
 				public bool MoveNext()

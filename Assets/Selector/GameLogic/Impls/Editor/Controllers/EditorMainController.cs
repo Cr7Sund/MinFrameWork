@@ -1,8 +1,9 @@
 using Cr7Sund.NodeTree.Impl;
+using UnityEngine.PlayerLoop;
 
 namespace Cr7Sund.Selector.Impl
 {
-    public class EditorMainController : BaseController
+    public class EditorMainController : UpdateController
     {
         protected override void OnStart()
         {
@@ -23,6 +24,12 @@ namespace Cr7Sund.Selector.Impl
         protected override void OnStop()
         {
             base.OnStop();
+        }
+
+
+        protected override void OnUpdate(int millisecond)
+        {
+            Log.Info("Update");
         }
     }
 }

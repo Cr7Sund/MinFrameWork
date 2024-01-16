@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.EventBus;
+using Cr7Sund.EventBus.Api;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
@@ -433,12 +434,12 @@ namespace Cr7Sund.Server.Impl
             _eventBus.Dispatch(e);
         }
 
-        public void AddObserver<TEvent>(EventBus.EventHandler<TEvent> handler) where TEvent : IEventData, new()
+        public void AddObserver<TEvent>(EventBus.Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
             _eventBus.AddObserver<TEvent>(handler);
         }
 
-        public void RemoveObserver<TEvent>(EventBus.EventHandler<TEvent> handler) where TEvent : IEventData, new()
+        public void RemoveObserver<TEvent>(EventBus.Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
             _eventBus.RemoveObserver<TEvent>(handler);
         }

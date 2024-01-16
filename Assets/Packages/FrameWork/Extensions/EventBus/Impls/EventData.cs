@@ -1,7 +1,8 @@
 
+using Cr7Sund.EventBus.Api;
 using Cr7Sund.Framework.Impl;
 
-namespace Cr7Sund.EventBus
+namespace Cr7Sund.EventBus.Impl
 {
     public abstract class EventData : BasePoolable, IEventData
     {
