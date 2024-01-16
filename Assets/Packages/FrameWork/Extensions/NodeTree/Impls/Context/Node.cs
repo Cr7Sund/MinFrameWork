@@ -56,13 +56,13 @@ namespace Cr7Sund.NodeTree.Impl
 
         #region LifeCycle
 
-        public IPromise<INode> PreLoadAsync(Node content)
+        public IPromise<INode> PreLoadAsync(Node self)
         {
             AssertUtil.IsTrue(State == LoadState.Default);
             Inject();
             if (!IsInit)
                 Init();
-            return LoadAsync(content);
+            return LoadAsync(self);
         }
 
         public void Init()

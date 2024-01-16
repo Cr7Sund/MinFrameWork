@@ -7,6 +7,9 @@ namespace Cr7Sund.NodeTree.Impl
         public bool IsActive { get; private set; }
 
 
+        // No preload
+        // since it should be existed one, but preload the node is still no created
+
         public void Start()
         {
             IsStarted = true;
