@@ -4,7 +4,7 @@ using Cr7Sund.NodeTree.Impl;
 
 namespace Cr7Sund.Server.Impl
 {
-    public class SceneContext : CrossContext
+    public abstract class SceneContext : CrossContext
     {
         public SceneContext() : base()
         {
@@ -29,14 +29,7 @@ namespace Cr7Sund.Server.Impl
             OnUnMappedBindings();
         }
 
-        protected void OnMappedBindings()
-        {
-
-        }
-
-        protected void OnUnMappedBindings()
-        {
-
-        }
+        protected abstract void OnMappedBindings();
+        protected  abstract void OnUnMappedBindings();
     }
 }

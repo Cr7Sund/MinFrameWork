@@ -15,6 +15,11 @@
         /// </summary>
         INVALID_NODESTATE,
 
+        /// <summary>
+        /// empty context, check the gamenode's first root context 
+        /// </summary>
+        EMPTY_CONTEXT,
+
         #region Loadable
         /// <summary>
         /// Cant LoadAsync On State of loading or unloading

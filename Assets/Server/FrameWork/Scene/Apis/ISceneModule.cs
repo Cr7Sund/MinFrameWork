@@ -21,10 +21,16 @@ namespace Cr7Sund.Server.Apis
         IPromise<INode> SwitchScene(SceneKey key);
 
         /// <summary>
-        /// Removes a scene, unloading it from the module.
+        /// Removes a scene from the module.
         /// </summary>
         /// <param name="key">The key of the scene to remove.</param>
         IPromise<INode> RemoveScene(SceneKey key);
+
+        /// <summary>
+        /// Unload a scene from the module.
+        /// </summary>
+        /// <param name="key">The key of the scene to remove.</param>
+        IPromise<INode> UnloadScene(SceneKey key);
 
         /// <summary>
         /// Asynchronously preloads a scene in the background.

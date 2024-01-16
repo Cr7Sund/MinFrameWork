@@ -323,7 +323,8 @@ namespace Cr7Sund.NodeTree.Impl
         #region INode
         public IPromise<INode> AddChildAsync(INode child)
         {
-            AssertUtil.NotNull(NodeTreeExceptionType.EMPTY_NODE_ADD);
+            AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_ADD);
+
             if (child.State == LoadState.Loading || child.State == LoadState.Unloading)
             {
                 throw new MyException($"can not add node at : {child.State} State", NodeTreeExceptionType.INVALID_NODESTATE);
@@ -378,6 +379,7 @@ namespace Cr7Sund.NodeTree.Impl
         private IPromise<INode> RemoveChildAsyncInternal(INode child, bool shouldUnload)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
+            
             if (child.State != LoadState.Loaded)
             {
                 throw new MyException($"can not remove node at : {child.State} State", NodeTreeExceptionType.INVALID_NODESTATE);
@@ -404,13 +406,13 @@ namespace Cr7Sund.NodeTree.Impl
 
                     return child.UnloadAsync(child);
                 }
+                return child.UnloadStatus;
             }
             else
             {
                 RemoveChild(implChildNode);
+                return Promise<INode>.Resolved(child);
             }
-
-            return child.UnloadStatus;
         }
         private void RemoveChild(Node child)
         {

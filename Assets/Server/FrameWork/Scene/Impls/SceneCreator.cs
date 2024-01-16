@@ -7,15 +7,15 @@ namespace Cr7Sund.Server.Impl
     {
         public static SceneNode Create(SceneKey key)
         {
-            SceneBuilder builder = key.SceneBuilder;
+            SceneBuilder builder = key.Create();
 
             if (builder == null)
             {
                 throw new MyException($"SceneCreator::Create SceneBuilder is null, Key: {key}");
             }
 
-            builder.SetSceneKey(key);
             SceneDirector.Construct(builder);
+            builder.SetSceneKey(key);
             return builder.GetProduct();
         }
     }

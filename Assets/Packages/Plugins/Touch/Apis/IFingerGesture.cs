@@ -1,4 +1,4 @@
-﻿namespace Cr7Sund.FingerGesture.Apis
+﻿namespace Cr7Sund.Touch.Api
 {
     public interface IFingerGesture
     {

@@ -7,14 +7,14 @@ using Is = NUnit.Framework.Is;
 
 namespace Cr7Sund.Server.Tests
 {
-    public class TestSceneNode
+    public class TestSceneBuilder
     {
-        private SceneBuilder _gameLogic;
+        private SceneBuilder _sceneBuilder;
 
         [SetUp]
         public void SetUp()
         {
-            _gameLogic = new SampleSceneBuilder();
+            _sceneBuilder = new SampleSceneBuilder();
         }
 
         [Test]

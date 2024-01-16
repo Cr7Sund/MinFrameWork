@@ -229,7 +229,7 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public void LateUpdate(int millisecond)
         {
-            for (int i = 0, length = _lsUpdates.Count; i < length; i++)
+            for (int i = 0, length = _lsLateUpdates.Count; i < length; i++)
             {
                 var update = _lsLateUpdates[i];
 

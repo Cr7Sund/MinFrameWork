@@ -6,8 +6,9 @@ namespace Cr7Sund.Server.Impl
     {
         public static void Construct(SceneBuilder builder)
         {
-            builder.BuildContext();
             builder.BuildNode();
+            builder.BuildContext();
+            builder.BuildControllers();
         }
     }
 }

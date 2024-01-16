@@ -173,6 +173,10 @@
             }
         }
 
+        /// <summary>
+        /// stop the game when exception happens 
+        /// similar to unity editor error pause
+        /// </summary>
         public static bool NoCatchMode
         {
             get

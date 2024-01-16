@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Cr7Sund.Logger;
+using UnityEngine.Profiling;
 using Object = UnityEngine.Object;
 
 namespace Cr7Sund
@@ -437,6 +438,7 @@ namespace Cr7Sund
         /// </summary>
         internal static void Initialize()
         {
+            Profiler.enableAllocationCallstacks = true;
             LogDecorator.Initialize();
         }
 

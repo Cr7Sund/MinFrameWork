@@ -1,4 +1,6 @@
 ﻿using System;
+using Cr7Sund.NodeTree.Api;
+using Cr7Sund.NodeTree.Impl;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -7,44 +9,37 @@ namespace Cr7Sund.Server.Impl
         protected SceneNode _node { get; private set; }
 
 
-        public SceneBuilder()
-        {
-            SubClassInitialization();
-        }
-
-
-        internal void SetSceneKey(SceneKey key)
+        public void SetSceneKey(SceneKey key)
         {
             _node.Key = key;
         }
-
         public void BuildNode()
         {
             _node = CreateGameNode();
         }
-
         public void BuildContext()
         {
             var context = CreateContext();
             context.MapBindings();
             _node.AssignContext(context);
         }
-
+        public void BuildControllers()
+        {
+            var controllerModule = new ControllerModule();
+            AddControllers(controllerModule);
+            _node.AssignControllerModule(controllerModule);
+        }
         public SceneNode GetProduct()
         {
             return _node;
         }
-        public abstract void SubClassInitialization();
 
         protected virtual SceneNode CreateGameNode()
         {
             return new SceneNode();
         }
-
-        protected virtual SceneContext CreateContext()
-        {
-            return new SceneContext();
-        }
+        protected abstract void AddControllers(IControllerModule controllerModule);
+        protected abstract SceneContext CreateContext();
 
     }
 }

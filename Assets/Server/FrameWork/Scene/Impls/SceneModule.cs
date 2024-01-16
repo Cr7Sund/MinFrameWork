@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.EventBus;
-using Cr7Sund.FingerGesture.Apis;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Performance;
 using Cr7Sund.Server.Apis;
+using Cr7Sund.Touch.Api;
+using NUnit.Framework.Constraints;
+
 namespace Cr7Sund.Server.Impl
 {
-    public class SceneModule :  ISceneModule
+    public class SceneModule : ISceneModule
     {
         [Inject]
         private IFingerGesture _fingerGesture;
@@ -23,17 +24,29 @@ namespace Cr7Sund.Server.Impl
         [Inject]
         private IPoolBinder _poolBinder;
         private SceneNode _focusScene;
-        private Dictionary<string, SceneNode> _treeScenes;
-        private Dictionary<string, SceneNode> _preloadScenes;
-        private Dictionary<string, SceneNode> _loadingScenes;
-        private Dictionary<string, SceneNode> _addingScenes;
-        private Dictionary<string, SceneNode> _removingScenes;
-        private Dictionary<string, SceneNode> _unloadingScenes;
+        private Dictionary<SceneKey, SceneNode> _treeScenes;
+        private Dictionary<SceneKey, SceneNode> _preloadScenes;
+        private Dictionary<SceneKey, SceneNode> _loadingScenes;
+        private Dictionary<SceneKey, SceneNode> _addingScenes;
+        private Dictionary<SceneKey, SceneNode> _removingScenes;
+        private Dictionary<SceneKey, SceneNode> _unloadingScenes;
 
 
         public SceneNode FocusScene
         {
             get;
+            private set;
+        }
+
+
+        public SceneModule()
+        {
+            _treeScenes = new Dictionary<SceneKey, SceneNode>();
+            _preloadScenes = new Dictionary<SceneKey, SceneNode>();
+            _loadingScenes = new Dictionary<SceneKey, SceneNode>();
+            _addingScenes = new Dictionary<SceneKey, SceneNode>();
+            _removingScenes = new Dictionary<SceneKey, SceneNode>();
+            _unloadingScenes = new Dictionary<SceneKey, SceneNode>();
         }
 
 
@@ -70,9 +83,9 @@ namespace Cr7Sund.Server.Impl
                 return _preloadScenes[key].LoadStatus;
             }
 
-            SceneNode sceneNode = SceneCreator.Create(key);
-            _loadingScenes[key] = sceneNode;
-            return sceneNode.PreLoadAsync(_gameNode).Then(OnPreloadNewScene);
+            var newScene = SceneCreator.Create(key);
+            _loadingScenes[key] = newScene;
+            return newScene.PreLoadAsync(newScene).Then(OnPreloadNewScene );
         }
 
         public IPromise<INode> AddScene(SceneKey key)
@@ -95,12 +108,11 @@ namespace Cr7Sund.Server.Impl
             }
             if (_treeScenes.ContainsKey(key))
             {
-                Log.Warn($"SceneModule.AddScene: the scene is on the nodeTree. SceneName: {key}");
+                Log.Warn($"SceneModule.AddScene: the scene is already on the nodeTree. SceneName: {key}");
                 _fingerGesture.UnFreeze();
                 return _treeScenes[key].LoadStatus;
             }
-
-
+            
             var preloadPromise = AddSceneFromPreload(key);
             if (preloadPromise != null)
                 return preloadPromise;
@@ -196,30 +208,36 @@ namespace Cr7Sund.Server.Impl
             return AddScene(key).Then(OnSwitchScene);
         }
 
-
         private IPromise<INode> OnSwitchScene(INode curNode)
         {
             var curScene = curNode as SceneNode;
-
             var promise = Promise<INode>.Resolved(curNode);
+
+            if (_treeScenes.Count <= 1) return promise;
+            
+            FocusScene = curScene;
+
             var tmpList = _treeScenes.Values.ToArray();
             for (int i = tmpList.Length - 1; i >= 0; i--)
             {
+                var sceneNode = tmpList[i];
+                if(sceneNode == curNode) continue;
+                
                 promise = promise.Then(_ =>
                    {
-                       return RemoveScene(tmpList[i].Key).Then((lastNode) =>
+                       return RemoveScene(sceneNode.Key).Then((prevNode) =>
                           {
-                              var lastScene = lastNode as SceneNode;
-                              DispatchSwitch(curScene.Key, lastScene.Key);
-                              return lastNode;
+                              var prevScene = prevNode as SceneNode;
+                              DispatchSwitch(curScene.Key, prevScene.Key);
+                              return prevNode;
                           });
                    });
             }
 
-            return promise.Then(_ =>
+            return promise.Then(node =>
             {
                 MemoryMonitor.CleanMemory();
-                return _;
+                return node;
             });
         }
 

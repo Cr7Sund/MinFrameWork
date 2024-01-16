@@ -6,12 +6,12 @@ namespace Cr7Sund.EventBus
     {
         public bool Dispatch<TEvent>(TEvent @event) where TEvent : IEventData, new()
         {
-            return this.Dispatch<TEvent>(@event);
+            return base.Raise<TEvent>(@event);
         }
 
         public bool DispatchImmediately<TEvent>(TEvent @event) where TEvent : IEventData, new()
         {
-            return this.DispatchImmediately<TEvent>(@event);
+            return this.RaiseImmediately<TEvent>(@event);
         }
 
         public void AddObserver<TEvent>(EventHandler<TEvent> handler) where TEvent : IEventData, new()

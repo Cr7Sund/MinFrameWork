@@ -1,15 +1,18 @@
 ﻿using System;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
+using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 namespace Cr7Sund.Server.Impl
 {
-    public  class GameNode : ModuleNode
+    public class GameNode : ModuleNode
     {
 
         public void Run()
         {
+            AssertUtil.NotNull(_context, NodeTreeExceptionType.EMPTY_CONTEXT);
+            
             Inject();
             Init();
             LoadAsync(this).Then(_ =>
@@ -22,7 +25,7 @@ namespace Cr7Sund.Server.Impl
         public IPromise<INode> Destroy()
         {
             DeInject();
-            
+
             return UnloadAsync(this).Then(node =>
             {
                 SetActive(false);
@@ -32,7 +35,7 @@ namespace Cr7Sund.Server.Impl
             });
         }
 
-        internal void AssignContext(IContext context)
+        public void AssignContext(IContext context)
         {
             _context = context;
         }

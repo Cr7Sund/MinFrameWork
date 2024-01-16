@@ -47,14 +47,8 @@ namespace Cr7Sund.NodeTree.Impl
 
             State = LoadState.Loading;
 
-            try
-            {
-                _loadGroup = OnLoadAsync(value);
-            }
-            catch (Exception e)
-            {
-                _exceptionHandler?.Invoke(e);
-            }
+            _loadGroup = OnLoadAsync(value);
+
             _loadGroup?.Then(onResolved: _loadedHandler, onRejected: _exceptionHandler);
 
             return _loadGroup;
@@ -75,14 +69,8 @@ namespace Cr7Sund.NodeTree.Impl
 
             State = LoadState.Unloading;
 
-            try
-            {
-                _unloadGroup = OnUnloadAsync(value);
-            }
-            catch (Exception e)
-            {
-                _exceptionHandler?.Invoke(e);
-            }
+            _unloadGroup = OnUnloadAsync(value);
+
             _unloadGroup?.Then(onResolved: _unloadedHandler, onRejected: _exceptionHandler);
 
             return _unloadGroup;
@@ -102,6 +90,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             State = LoadState.Fail;
             OnCatch(e);
+            Debug.Error(e);
         }
 
         protected virtual void OnLoaded() { }

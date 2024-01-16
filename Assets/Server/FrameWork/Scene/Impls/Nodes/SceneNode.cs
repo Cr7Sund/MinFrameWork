@@ -17,5 +17,10 @@ namespace Cr7Sund.Server.Impl
             base.OnInit();
             _context.InjectionBinder.Bind<SceneNode>().To(this);
         }
+
+        // protected override IPromise<INode> OnLoadAsync(INode content)
+        // {
+            // return SceneManager.LoadSceneAsync(content.Key);
+        // }
     }
 }
