@@ -2,6 +2,7 @@ using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
 
@@ -11,6 +12,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         public void Setup()
         {
             SimplePromise.simulatePromise = new Promise();
+
+            Debug.Init(new InternalLogger());
         }
 
         [TearDown]
@@ -54,6 +57,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             var promise = new CommandPromise();
             var rejectPromise = promise.Then<ExceptionCommand>() as Promise;
             promise.Resolve();
@@ -63,6 +68,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_break_chain()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             var promise = new CommandPromise();
 
             promise.Then<SimpleCommandTwo>().Then<ExceptionCommand>().Then<SimpleCommandOne>();

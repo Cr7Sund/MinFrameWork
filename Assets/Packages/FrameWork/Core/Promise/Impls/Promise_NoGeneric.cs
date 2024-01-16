@@ -575,6 +575,7 @@ namespace Cr7Sund.Framework.Impl
                 PendingPromises.Remove(this);
             }
 
+            Debug.Error(ex);
             InvokeRejectHandlers(ex);
         }
 

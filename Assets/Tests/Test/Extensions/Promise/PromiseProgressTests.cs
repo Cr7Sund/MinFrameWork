@@ -3,10 +3,17 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseTest
 {
     public class PromiseProgressTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Debug.Init(new InternalLogger());
+        }
+        
         [Test]
         public void can_report_simple_progress()
         {
@@ -152,6 +159,7 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void exception_is_thrown_for_progress_after_reject()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promise = new Promise<int>();
             promise.Reject(new Exception());
 
@@ -162,6 +170,7 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void first_progress_is_averaged()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promiseA = new Promise<int>();
             var promiseB = new Promise<int>();
             var promiseC = new Promise<int>();

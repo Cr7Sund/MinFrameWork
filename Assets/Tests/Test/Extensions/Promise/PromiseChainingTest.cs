@@ -3,6 +3,7 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
 using NUnit.Framework;
 using System;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseTest
 {
     public class PromiseChainingTest
@@ -22,7 +23,7 @@ namespace Cr7Sund.Framework.PromiseTest
             intResult = 0;
             floatResult = 0f;
             command = new ExampleCommand();
-
+            Debug.Init(new InternalLogger());
         }
 
         [Test]
@@ -78,6 +79,7 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void chaining_value_exception()
         {
+            LogAssert.ignoreFailingMessages = true;
             Exception e = null;
             Func<int, int> exceptionHandler = v => throw new Exception("west");
             promise
@@ -133,6 +135,7 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void handle_rejected_catch_but_break_chain()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promise = new Promise<int>();
             SimplePromise.simulatePromiseOne = new Promise<int>();
 

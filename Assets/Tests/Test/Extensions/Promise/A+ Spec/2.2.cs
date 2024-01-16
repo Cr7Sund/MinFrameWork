@@ -2,13 +2,26 @@ using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
 using System;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseTest.A__Spec
 {
     public class _2_2
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Debug.Init(new InternalLogger());
+        }
+        
         // 2.2.1
         public class _both_onFulfilled_and_onRejected_are_optional_arguments_
         {
+            [SetUp]
+            public void SetUp()
+            {
+                Debug.Init(new InternalLogger());
+            }
+            
             // 2.2.1.1
             [Test]
             public void _if_onFulfilled_is_not_a_function_it_must_be_ignored()
@@ -36,6 +49,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _if_onRejected_is_not_a_function_it_must_be_ignored_1()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var promise = new Promise<object>();
 
                 var resultPromise = promise
@@ -63,6 +77,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _if_onRejected_is_not_a_function_it_must_be_ignored_2()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var promise = new Promise<object>();
 
                 var resultPromise = promise
@@ -151,10 +166,17 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
         // 2.2.3
         public class _If_onRejected_is_a_function_
         {
+            [SetUp]
+            public void SetUp()
+            {
+                Debug.Init(new InternalLogger());
+            }
+            
             // 2.2.3.1
             [Test]
             public void _it_must_be_called_after_promise_is_rejected_with_promises_reason_as_its_first_argument()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var promise = new Promise<object>();
                 var rejectedReason = new Exception();
                 bool errored = false;
@@ -192,6 +214,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _it_must_not_be_called_more_than_once()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var promise = new Promise<object>();
                 var rejectedReason = new Exception();
                 int errored = 0;
@@ -216,6 +239,12 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
         // 2.2.6
         public class then_may_be_called_multiple_times_on_the_same_promise_
         {
+            [SetUp]
+            public void SetUp()
+            {
+                Debug.Init(new InternalLogger());
+            }
+            
             // 2.2.6.1
             [Test]
             public void _when_promise_is_fulfilled_all_respective_onFulfilled_callbacks_must_execute_in_the_order_of_their_originating_calls_to_then_1()
@@ -279,6 +308,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _when_promise_is_rejected_all_respective_onRejected_callbacks_must_execute_in_the_order_of_their_originating_calls_to_then()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var promise = new Promise<object>();
 
                 int order = 0;
@@ -305,7 +335,11 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
         // 2.2.7
         public class then_must_return_a_promise
         {
-
+            [SetUp]
+            public void SetUp()
+            {
+                Debug.Init(new InternalLogger());
+            }
             // 2.2.7.3
             [Test]
             public void _If_onFulfilled_is_not_a_function_and_promise1_is_fulfilled_promise2_must_be_fulfilled_with_the_same_value_as_promise1()
@@ -333,6 +367,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _If_onRejected_is_not_a_function_and_promise1_is_rejected_promise2_must_be_rejected_with_the_same_reason_as_promise1()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var promise1 = new Promise<object>();
 
                 var promise2 = promise1.Then(_ =>
@@ -392,6 +427,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_no_value_in_catch()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     bool callbackInvoked = false;
 
                     new Promise<object>((res, rej) => rej(new Exception()))
@@ -404,6 +440,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_no_value_in_then()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     bool callbackInvoked = false;
                     bool resolveHandlerInvoked = false;
                     bool rejectHandlerInvoked = false;
@@ -423,6 +460,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_value_in_catch()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     string expectedValue = "Value returned from Catch";
                     string actualValue = string.Empty;
 
@@ -436,6 +474,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected_with_value_in_then()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     string expectedValue = "Value returned from reject handler";
                     string actualValue = string.Empty;
 
@@ -452,6 +491,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_non_generic_promise1_is_rejected()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     bool callbackInvoked = false;
 
                     new Promise((res, rej) => rej(new Exception()))
@@ -465,9 +505,16 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             // 2.2.7.2
             public class _if_either_onFulfilled_or_onRejected_throws_an_exception_e_promise2_must_be_rejected_with_e_as_the_reason
             {
+                [SetUp]
+                public void SetUp()
+                {
+                    Debug.Init(new InternalLogger());
+                }
+                
                 [Test]
                 public void _when_promise1_is_resolved_1()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     var promise1 = new Promise<object>();
 
                     var e = new Exception();
@@ -494,6 +541,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_resolved_2()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     var promise1 = new Promise<object>();
 
                     var e = new Exception();
@@ -520,6 +568,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
                 [Test]
                 public void _when_promise1_is_rejected()
                 {
+                    LogAssert.ignoreFailingMessages = true;
                     var promise1 = new Promise<object>();
 
                     var e = new Exception();

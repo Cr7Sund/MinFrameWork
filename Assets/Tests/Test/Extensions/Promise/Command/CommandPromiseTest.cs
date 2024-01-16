@@ -1,7 +1,10 @@
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Tests;
+using Cr7Sund.Framework.Util;
 using NUnit.Framework;
+using UnityEditor.VersionControl;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseCommandTest
 {
 
@@ -13,6 +16,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             SimplePromise.simulatePromiseOne = new Promise<int>();
             SimplePromise.simulatePromiseSecond = new Promise<int>();
             SimplePromise.simulatePromise = new Promise();
+
+            Debug.Init(new InternalLogger());
         }
 
         [TearDown]
@@ -48,7 +53,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             promise.Resolve(0);
             Assert.AreEqual(((0 + 2) * 3 + 1) * 2 - 200, ((Promise<int>)donePromise).Test_GetResolveValue());
         }
-        
+
         [Test]
         public void command_with_async_operation()
         {
@@ -68,7 +73,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         {
             var promise = new CommandPromise<int>();
             promise.IsOnceOff = true;
-            
+
             var donePromise1 = promise.Then<SimpleCommandTwoGeneric>();
             var donePromise2 = donePromise1.Then<SimpleAsyncCommandOneGeneric>().Then<SimpleCommandOneGeneric>();
 
@@ -78,7 +83,7 @@ namespace Cr7Sund.Framework.PromiseCommandTest
             SimplePromise.simulatePromiseOne.Resolve(0);
             Assert.AreEqual((((0 + 2) * 3 + 3) * 5 + 1) * 2, ((Promise<int>)donePromise2).Test_GetResolveValue());
         }
-        
+
         [Test]
         public void command_with_multiple_async_operation()
         {
@@ -157,8 +162,10 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_exception_rejectedState()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<ExceptionCommandGeneric>() as Promise<int>;
+
             promise.Resolve(0);
 
             Assert.AreEqual(PromiseState.Resolved, promise.CurState);
@@ -168,20 +175,24 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<ExceptionCommandGeneric>() as Promise;
             promise.Resolve(0);
+
             Assert.NotNull(SimplePromise.exceptionStr);
         }
 
         [Test]
         public void command_break_chain()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimpleCommandTwoGeneric>();
-            var finalPromise = donePromise.Then<ExceptionCommandGeneric>().Then<SimpleCommandOneGeneric>();
-
+            ICommandPromise<int> finalPromise = donePromise.Then<ExceptionCommandGeneric>().Then<SimpleCommandOneGeneric>();
             promise.Resolve(0);
+
+
             Assert.AreEqual((0 + 2) * 3, ((Promise<int>)donePromise).Test_GetResolveValue());
             Assert.AreEqual(0, ((Promise<int>)finalPromise).Test_GetResolveValue());
         }
@@ -189,12 +200,14 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void handle_rejected_catch_but_break_chain()
         {
+            LogAssert.ignoreFailingMessages = true;
             var promise = new CommandPromise<int>();
             var finalPromise = promise.Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleAsyncException_Generic>()
                 .Then<SimpleCommandTwoGeneric>();
 
             promise.Resolve(1);
+
             Assert.AreEqual(9, SimplePromise.result);
         }
 

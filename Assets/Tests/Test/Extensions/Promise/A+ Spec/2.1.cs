@@ -3,14 +3,22 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseTest.A__Spec
 {
     public class _2_1
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Debug.Init(new InternalLogger());
+        }
+        
         // 2.1.1.1.
         [Test]
         public void When_pending_a_promise_may_transition_to_either_the_fulfilled_or_rejected_state()
         {
+            LogAssert.ignoreFailingMessages = true;
             var pendingPromise1 = new Promise<object>();
             Assert.AreEqual(PromiseState.Pending, pendingPromise1.CurState);
             pendingPromise1.Resolve(new object());
@@ -66,6 +74,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _must_not_transition_to_any_other_state()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var rejectedPromise = new Promise<object>();
                 rejectedPromise.Reject(new Exception());
 
@@ -78,6 +87,7 @@ namespace Cr7Sund.Framework.PromiseTest.A__Spec
             [Test]
             public void _must_have_a_reason_which_must_not_change()
             {
+                LogAssert.ignoreFailingMessages = true;
                 var rejectedPromise = new Promise<object>();
                 var reason = new Exception();
                 int handled = 0;

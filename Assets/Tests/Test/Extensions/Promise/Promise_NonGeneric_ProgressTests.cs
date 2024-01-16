@@ -3,10 +3,17 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
+using UnityEngine.TestTools;
 namespace Cr7Sund.Framework.PromiseTest
 {
     public class Promise_NonGeneric_ProgressTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Debug.Init(new InternalLogger());
+        }
+
         [Test]
         public void can_report_simple_progress()
         {
@@ -142,6 +149,8 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void exception_is_thrown_for_progress_after_reject()
         {
+            LogAssert.ignoreFailingMessages = true;
+            
             var promise = new Promise();
             promise.Reject(new Exception());
 

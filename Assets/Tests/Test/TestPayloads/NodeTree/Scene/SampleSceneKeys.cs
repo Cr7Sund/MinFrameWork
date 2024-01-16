@@ -6,6 +6,9 @@ namespace Cr7Sund.Framework.Tests
     public partial class SampleSceneKeys
     {
         public static SceneKey SampleSceneKeyOne =
-                new SceneKey("", typeof(SampleSceneBuilder));
+            new SceneKey("OneScene", typeof(SampleSceneOneBuilder));
+
+        public static SceneKey SampleSceneKeyTwo =
+            new SceneKey("TowScene", typeof(SampleSceneTwoBuilder));
     }
 }

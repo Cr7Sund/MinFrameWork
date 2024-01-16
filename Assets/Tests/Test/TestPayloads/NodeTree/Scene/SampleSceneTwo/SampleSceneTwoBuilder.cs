@@ -3,15 +3,15 @@ using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.Framework.Tests
 {
-    public class SampleSceneOneBuilder : SceneBuilder
+    public class SampleSceneTwoBuilder : SceneBuilder
     {
         protected override void AddControllers(IControllerModule controllerModule)
         {
-            controllerModule.AddController<SampleSceneOneController>();
+            controllerModule.AddController<SampleSceneTwoController>();
         }
         protected override SceneContext CreateContext()
         {
-            return new SampleSceneOneContext();
+            return new SampleSceneTwoContext();
         }
     }
 }

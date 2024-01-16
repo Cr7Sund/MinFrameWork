@@ -196,6 +196,8 @@ namespace Cr7Sund.Framework.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOne>()
                 .Then<ExceptionCommand>()
