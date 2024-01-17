@@ -28,7 +28,9 @@ namespace Cr7Sund.Framework.Api
         /// </summary>
         IInjectionBinding AsPool();
 
-        /// <summary>  Map the binding and give access to all contexts in hierarchy </summary>
+        /// <summary>  
+        ///   Map the binding and give access to all contexts in hierarchy
+        /// </summary>
         IInjectionBinding AsCrossContext();
 
         /// <summary>

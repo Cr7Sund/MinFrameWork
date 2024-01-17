@@ -9,6 +9,8 @@ namespace Cr7Sund.Framework.Impl
         private static readonly IInjectorFactory _factory = new InjectorFactory();
         private readonly IPoolBinder _poolBinder;
         private readonly IReflectionBinder _reflectionBinder;
+        private int _depth;
+        private const int MAX_DEPTH = 100;
 
         public Injector()
         {
@@ -68,9 +70,8 @@ namespace Cr7Sund.Framework.Impl
                 {
                     if (binding.IsToInject)
                     {
-                        retVal = Inject(retVal);
+                        retVal = InjectInternal(retVal);
                     }
-
                     if (binding.Type == InjectionBindingType.SINGLETON || binding.Type == InjectionBindingType.VALUE)
                     {
                         binding.ToInject(false);
@@ -85,23 +86,8 @@ namespace Cr7Sund.Framework.Impl
 
         public object Inject(object target)
         {
-            var t = target.GetType();
-
-            failIf(Binder == null, InjectionExceptionType.NO_BINDER_INJECT, t, target);
-            failIf(Reflector == null, InjectionExceptionType.NO_REFLECTOR, t, target);
-            failIf(target == null, InjectionExceptionType.NULL_TARGET_INJECT, t, target);
-
-            //Some things can't be injected into. Bail out.
-            if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))
-            {
-                return target;
-            }
-
-            var reflection = Reflector.Get(t);
-
-            PerformFieldInjection(target, reflection);
-            PostInject(target, reflection);
-            return target;
+            _depth = 0;
+            return InjectInternal(target);
         }
 
         public void Destroy(object instance)
@@ -131,6 +117,31 @@ namespace Cr7Sund.Framework.Impl
             var reflection = Reflector.Get(t);
 
             PerformUninjection(target, reflection);
+        }
+
+        private object InjectInternal(object target)
+        {
+            var t = target.GetType();
+
+            failIf(Binder == null, InjectionExceptionType.NO_BINDER_INJECT, t, target);
+            failIf(Reflector == null, InjectionExceptionType.NO_REFLECTOR, t, target);
+            failIf(target == null, InjectionExceptionType.NULL_TARGET_INJECT, t, target);
+
+            //Some things can't be injected into. Bail out.
+            if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))
+            {
+                return target;
+            }
+
+            _depth++;
+            failIf(_depth > MAX_DEPTH, InjectionExceptionType.INJECT_DEPTH_LIMIT, t, target);
+
+
+            var reflection = Reflector.Get(t);
+
+            PerformFieldInjection(target, reflection);
+            PostInject(target, reflection);
+            return target;
         }
 
         private void PerformUninjection(object target, IReflectedClass reflection)
@@ -212,8 +223,8 @@ namespace Cr7Sund.Framework.Impl
                 }
                 else
                 {
-                    retVal = Inject(bindingValue);
                     binding.ToInject(false);
+                    retVal = InjectInternal(bindingValue);
                 }
             }
             else if (binding.Type == InjectionBindingType.SINGLETON)

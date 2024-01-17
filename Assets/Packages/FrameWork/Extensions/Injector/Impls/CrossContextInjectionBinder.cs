@@ -4,7 +4,7 @@ namespace Cr7Sund.Framework.Impl
 {
     public class CrossContextInjectionBinder : InjectionBinder, ICrossContextInjectionBinder
     {
-        public IInjectionBinder  CrossContextBinder { get; set; }
+        public IInjectionBinder CrossContextBinder { get; set; }
 
         public override IInjectionBinding GetBinding(Type type, object name)
         {

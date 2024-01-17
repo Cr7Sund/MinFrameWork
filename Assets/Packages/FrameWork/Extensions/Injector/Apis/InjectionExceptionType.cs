@@ -79,6 +79,8 @@ namespace Cr7Sund.Framework.Api
         /// During an attempt to construct, no pool can be instantiate
         NULL_POOL,
         // try to release a null instance, pay attention to that. maybe you have destroy the instance at first
-        NULL_RELEASE
+        NULL_RELEASE,
+        // ioc dependency circle when inject field value 
+        INJECT_DEPTH_LIMIT
     }
 }
