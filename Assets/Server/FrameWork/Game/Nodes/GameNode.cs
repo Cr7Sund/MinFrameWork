@@ -4,15 +4,16 @@ using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Apis;
 namespace Cr7Sund.Server.Impl
 {
     public class GameNode : ModuleNode
     {
-
+        [Inject] public ISceneModule SceneModule;
         public void Run()
         {
             AssertUtil.NotNull(_context, NodeTreeExceptionType.EMPTY_CONTEXT);
-            
+
             Inject();
             Init();
             LoadAsync(this).Then(_ =>
@@ -40,17 +41,29 @@ namespace Cr7Sund.Server.Impl
             _context = context;
         }
 
-        protected override void OnInit()
+        public override void Inject()
         {
-            base.OnInit();
+            if (IsInjected)
+                return;
+
+            _context.AddComponents();
             _context.InjectionBinder.Bind<GameNode>().To(this);
+
+            _context.InjectionBinder.Injector.Inject(this);
+            IsInjected = true;
         }
 
-        protected override void OnDispose()
+        public override void DeInject()
         {
-            _context.InjectionBinder.Unbind<GameNode>();
+            if (!IsInjected)
+                return;
 
-            base.OnDispose();
+            _context.InjectionBinder.Injector.Uninject(this);
+            _context.InjectionBinder.Unbind<GameNode>();
+            
+            _context.RemoveComponents();
+            IsInjected = false;
         }
+
     }
 }

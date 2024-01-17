@@ -19,7 +19,7 @@ namespace Cr7Sund.Server.Impl
         public void BuildContext()
         {
             var context = CreateContext();
-            context.MapBindings();
+
             _node.AssignContext(context);
         }
 

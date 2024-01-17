@@ -312,7 +312,7 @@ namespace Cr7Sund.Server.Impl
 
             return newScene
                           .PreLoadAsync(newScene)
-                          .Then(OnAddNewLoadedScene);
+                          .Then(OnAddNewLoadedScene); //PLAN:  potential callback hell, replace with async
         }
         private IPromise<INode> AddSceneFromLoading(SceneKey key)
         {
