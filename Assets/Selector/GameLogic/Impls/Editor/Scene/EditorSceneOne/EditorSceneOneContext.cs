@@ -1,19 +1,15 @@
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;
 
-namespace Cr7Sund.Selector.Impl
+namespace Cr7Sund.Framework.Tests
 {
-    public class EditorGameContext : GameContext
+    public class EditorSceneOneContext : SceneContext
     {
         protected override void OnMappedBindings()
         {
-            base.OnMappedBindings();
         }
 
         protected override void OnUnMappedBindings()
         {
-            base.OnUnMappedBindings();
         }
-
     }
 }

@@ -8,6 +8,7 @@ namespace Cr7Sund.Selector.Impl
         protected override void AddControllers(IControllerModule controllerModule)
         {
             controllerModule.AddController<EditorMainController>();
+            controllerModule.AddController<EditorAdditiveSceneController>();
         }
 
         protected override GameContext CreateContext()
