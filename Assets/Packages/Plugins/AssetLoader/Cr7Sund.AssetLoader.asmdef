@@ -1,0 +1,19 @@
+{
+    "name": "Cr7Sund.AssetLoader",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Cr7Sund.FrameWork.Core",
+        "Cr7Sund.FrameWork.Extension"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
