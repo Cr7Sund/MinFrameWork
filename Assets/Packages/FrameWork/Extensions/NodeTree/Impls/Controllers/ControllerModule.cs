@@ -269,7 +269,6 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
 
             IsInjected = true;
-            OnMappedBindings();
 
             _context.InjectionBinder.Injector.Inject(this);
         }
@@ -280,17 +279,10 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
 
             IsInjected = false;
-            OnUnMappedBindings();
 
             _context.InjectionBinder.Injector.Uninject(this);
         }
 
-        protected virtual void OnMappedBindings()
-        {
-        }
-        protected virtual void OnUnMappedBindings()
-        {
-        }
         #endregion
 
 

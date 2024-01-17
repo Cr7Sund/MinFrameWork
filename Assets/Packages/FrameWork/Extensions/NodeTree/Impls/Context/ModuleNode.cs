@@ -6,7 +6,7 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public class ModuleNode : UpdateNode
     {
-        private IControllerModule _controllerModule;
+        protected IControllerModule _controllerModule;
 
 
         public void AssignControllerModule(ControllerModule controllerModule)

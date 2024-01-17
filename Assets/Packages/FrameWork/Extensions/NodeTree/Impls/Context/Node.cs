@@ -19,7 +19,7 @@ namespace Cr7Sund.NodeTree.Impl
         public bool IsInjected
         {
             get;
-            private set;
+            protected set;
         }
         public bool IsActive
         {
@@ -50,8 +50,6 @@ namespace Cr7Sund.NodeTree.Impl
                 return _childNodes ??= new List<Node>();
             }
         }
-
-
 
 
         #region LifeCycle
@@ -379,7 +377,7 @@ namespace Cr7Sund.NodeTree.Impl
         private IPromise<INode> RemoveChildAsyncInternal(INode child, bool shouldUnload)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
-            
+
             if (child.State != LoadState.Loaded)
             {
                 throw new MyException($"can not remove node at : {child.State} State", NodeTreeExceptionType.INVALID_NODESTATE);
@@ -472,25 +470,27 @@ namespace Cr7Sund.NodeTree.Impl
         #endregion
 
         #region Inject Config
-        public void Inject()
+        public virtual void Inject()
         {
             if (IsInjected)
                 return;
 
             IsInjected = true;
 
+            _context.AddComponents();
             _context.InjectionBinder.Injector.Inject(this);
         }
 
-        public void DeInject()
+        public virtual void DeInject()
         {
             if (!IsInjected)
                 return;
-
             IsInjected = false;
 
             _context.InjectionBinder.Injector.Uninject(this);
+            _context.RemoveComponents();
         }
+
         #endregion
 
         public int Test_GetChildNodeCount()

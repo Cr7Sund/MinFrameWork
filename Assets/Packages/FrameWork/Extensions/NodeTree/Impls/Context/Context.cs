@@ -22,18 +22,13 @@ namespace Cr7Sund.NodeTree.Impl
         public virtual void AddContext(IContext context)
         {
             AssertUtil.IsFalse(_contexts.Contains(context));
-            ((Context)context).MapBindings();
             _contexts.Add(context);
         }
         public virtual void RemoveContext(IContext context)
         {
             AssertUtil.IsTrue(_contexts.Contains(context));
-            ((Context)context).UnMappedBindings();
             _contexts.Remove(context);
         }
-
-        public abstract void MapBindings();
-        public abstract void UnMappedBindings();
 
         public void Dispose()
         {
@@ -41,5 +36,8 @@ namespace Cr7Sund.NodeTree.Impl
             _contexts = null;
             InjectionBinder.Dispose();
         }
+
+        public abstract void AddComponents();
+        public abstract void RemoveComponents();
     }
 }

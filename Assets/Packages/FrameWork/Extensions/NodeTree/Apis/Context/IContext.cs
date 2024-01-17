@@ -10,8 +10,8 @@ namespace Cr7Sund.NodeTree.Api
 
         /// Remove a context from this one
         void RemoveContext(IContext context);
-        
-        void MapBindings();
-        void UnMappedBindings();
+
+        void AddComponents();
+        void RemoveComponents();
     }
 }
