@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: SampleTwoScene
+  m_EditorClassIdentifier: 
+  m_GroupName: SampleTwoScene
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 0218c80860c213c47ba9fcf7ede46514
+  m_SerializeEntries:
+  - m_GUID: d22ce382351d99a47af644017a8347b8
+    m_Address: SampleTwoScene
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: e1998269fb3078b4aa459ddd4f8e7ed1, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 564bd8ca992dfab47be4f8f32f78e7b2, type: 2}
+    - {fileID: 11400000, guid: 98ad16f1406c9634ea4e13b9f57e2aa1, type: 2}
