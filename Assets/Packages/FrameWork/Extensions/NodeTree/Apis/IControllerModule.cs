@@ -3,7 +3,7 @@ namespace Cr7Sund.NodeTree.Api
     /// <summary>
     /// Defines the interface for the controller module.
     /// </summary>
-    public interface IControllerModule : IUpdate, ILateUpdate, IController, ILoadAsync<INode>
+    public interface IControllerModule : IUpdate, ILateUpdate, IController, ILoadAsync<INode>,IInjectable
     {
         /// <summary>
         /// Adds an controller of type <typeparamref name="T"/>.

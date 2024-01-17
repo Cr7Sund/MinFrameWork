@@ -13,7 +13,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             _controllerModule = controllerModule;
         }
-        
+
 
         protected override IPromise<INode> OnLoadAsync(INode content)
         {
@@ -25,6 +25,24 @@ namespace Cr7Sund.NodeTree.Impl
             return base.OnUnloadAsync(content).Then(_controllerModule.UnloadAsync);
         }
 
+        public override void Inject()
+        {
+            if (IsInjected)
+                return;
+
+            base.Inject();
+            ((ControllerModule)_controllerModule).AssignContext(_context);
+            _controllerModule.Inject();
+        }
+
+        public override void DeInject()
+        {
+            if (IsInjected)
+                return;
+
+            base.DeInject();
+            _controllerModule.DeInject();
+        }
 
         protected override void OnStart()
         {

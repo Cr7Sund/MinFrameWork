@@ -33,9 +33,9 @@ namespace Cr7Sund.Server.Impl
             else
             {
                 var sceneNode = content as SceneNode;
-
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key).Then(
-                         () => _controllerModule.LoadAsync(content));
+                return _sceneLoader.LoadSceneAsync(sceneNode.Key, 
+                            sceneNode.Key.LoadSceneMode, sceneNode.Key.ActivateOnLoad)
+                            .Then(() => _controllerModule.LoadAsync(content));
 
             }
 

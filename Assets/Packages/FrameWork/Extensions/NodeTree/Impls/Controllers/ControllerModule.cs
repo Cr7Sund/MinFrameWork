@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.Framework.Util;
@@ -11,7 +10,7 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public class ControllerModule : AsyncLoadable<INode>, IControllerModule
     {
-        [Inject] protected IContext _context;
+        protected IContext _context;
         protected List<IController> _lsControllers;
         protected List<IUpdate> _lsUpdates;
         protected List<ILateUpdate> _lsLateUpdates;
@@ -205,7 +204,6 @@ namespace Cr7Sund.NodeTree.Impl
                 _lsControllers[i].Start();
             }
         }
-
         public void Enable()
         {
             if (!IsStarted || IsActive) return;
@@ -237,7 +235,6 @@ namespace Cr7Sund.NodeTree.Impl
                     update.LateUpdate(millisecond);
             }
         }
-
         public void Stop()
         {
             if (!IsStarted) return;
@@ -270,7 +267,10 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = true;
 
-            _context.InjectionBinder.Injector.Inject(this);
+            foreach (var ctrl in _lsControllers)
+            {
+                _context.InjectionBinder.Injector.Inject(ctrl);
+            }
         }
 
         public void DeInject()
@@ -280,9 +280,16 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = false;
 
-            _context.InjectionBinder.Injector.Uninject(this);
+            foreach (var ctrl in _lsControllers)
+            {
+                _context.InjectionBinder.Injector.Uninject(ctrl);
+            }
         }
 
+        public void AssignContext(IContext context)
+        {
+            _context = context;
+        }
         #endregion
 
 

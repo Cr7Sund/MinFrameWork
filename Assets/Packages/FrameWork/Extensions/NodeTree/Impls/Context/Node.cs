@@ -323,9 +323,13 @@ namespace Cr7Sund.NodeTree.Impl
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_ADD);
 
-            if (child.State == LoadState.Loading || child.State == LoadState.Unloading)
+            if (child.State == LoadState.Loading)
             {
-                throw new MyException($"can not add node at : {child.State} State", NodeTreeExceptionType.INVALID_NODESTATE);
+                return child.LoadStatus;
+            }
+            if (child.State == LoadState.Unloading)
+            {
+                throw new MyException($"can not add node when unloading", NodeTreeExceptionType.INVALID_NODESTATE);
             }
 
             var implChildNode = child as Node;

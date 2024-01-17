@@ -13,9 +13,10 @@ namespace Cr7Sund.Server.Impl
 
         public static GameNode Construct(GameBuilder builder)
         {
-            var gameNode = builder.BuildNode();
             builder.BuildContext();
             builder.BuildControllers();
+
+            var gameNode = builder.BuildNode();
 
             return gameNode;
         }

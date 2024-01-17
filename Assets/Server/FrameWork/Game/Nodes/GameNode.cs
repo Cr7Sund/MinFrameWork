@@ -46,11 +46,9 @@ namespace Cr7Sund.Server.Impl
             if (IsInjected)
                 return;
 
-            _context.AddComponents();
             _context.InjectionBinder.Bind<GameNode>().To(this);
-
+            base.Inject();
             _context.InjectionBinder.Injector.Inject(this);
-            IsInjected = true;
         }
 
         public override void DeInject()
@@ -59,10 +57,8 @@ namespace Cr7Sund.Server.Impl
                 return;
 
             _context.InjectionBinder.Injector.Uninject(this);
+            base.DeInject();
             _context.InjectionBinder.Unbind<GameNode>();
-            
-            _context.RemoveComponents();
-            IsInjected = false;
         }
 
     }
