@@ -30,6 +30,7 @@ namespace Cr7Sund.Server.Tests
             injectionBinder.Bind<IFingerGesture>().To(new FingerGesture());
             injectionBinder.Bind<GameNode>().To(_gameNode);
             injectionBinder.Bind<IEventBus>().To(eventBus);
+            injectionBinder.Bind<ISceneModule>().To<SceneModule>();
             Debug.Init(new InternalLogger());
 
             injectionBinder.Injector.Inject(eventBus);

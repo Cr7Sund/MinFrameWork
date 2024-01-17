@@ -16,7 +16,7 @@ namespace Cr7Sund.Framework.Tests
         {
             _node = new SampleNode();
             var context = new SampleRootContext();
-            context.MapBindings();
+            context.AddComponents();
             _node.AssignContext(context);
         }
 

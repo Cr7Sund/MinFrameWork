@@ -15,7 +15,7 @@ namespace Cr7Sund.Framework.Tests
         {
             _node = new SampleUpdateNode();
             var context = new SampleRootContext();
-            context.MapBindings();
+            context.AddComponents();
             _node.AssignContext(context);
 
             SampleUpdateNode.LateUpdateValue = 0;

@@ -10,13 +10,13 @@ namespace Cr7Sund.Framework.Tests
         {
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
         }
-        public override void MapBindings()
+        public override void AddComponents()
         {
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsCrossContext();
         }
-        public override void UnMappedBindings()
+
+        public override void RemoveComponents()
         {
-            throw new NotImplementedException();
         }
     }
 }

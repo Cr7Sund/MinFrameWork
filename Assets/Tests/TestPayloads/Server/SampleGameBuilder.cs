@@ -18,7 +18,7 @@ namespace Cr7Sund.Server.Tests
 
         protected override GameNode CreateGameNode()
         {
-            return new SampleGameNode();
+            return new GameNode();
         }
     }
 }

@@ -1,4 +1,5 @@
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Framework.Tests
 {
@@ -6,7 +7,6 @@ namespace Cr7Sund.Framework.Tests
     {
         public static int StartValue;
         public static int EnableCount;
-
 
         public static void Init()
         {
@@ -28,6 +28,7 @@ namespace Cr7Sund.Framework.Tests
         {
             base.OnEnable();
             Debug.Info("Enable scene one");
+
 
             EnableCount++;
         }

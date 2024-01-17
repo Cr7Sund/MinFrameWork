@@ -4,12 +4,12 @@ namespace Cr7Sund.Framework.Tests
 {
     public class SampleContext : CrossContext
     {
-        public override void MapBindings()
+        public override void AddComponents()
         {
         }
-        public override void UnMappedBindings()
+
+        public override void RemoveComponents()
         {
-            throw new NotImplementedException();
         }
     }
 }

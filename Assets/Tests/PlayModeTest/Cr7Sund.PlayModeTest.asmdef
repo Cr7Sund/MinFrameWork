@@ -1,0 +1,27 @@
+{
+    "name": "Cr7Sund.PlayModeTest",
+    "rootNamespace": "",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Cr7Sund.AssetLoader",
+        "Cr7Sund.FarmeWork.Server",
+        "Cr7Sund.FrameWork.Core",
+        "Cr7Sund.Test.Payloads",
+        "Cr7Sund.FrameWork.Extension",
+        "Cr7Sund.Touch"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
