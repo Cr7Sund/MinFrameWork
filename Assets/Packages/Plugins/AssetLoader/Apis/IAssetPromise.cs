@@ -10,4 +10,6 @@ namespace Cr7Sund.AssetLoader.Api
         IAssetKey Key { get; }
         int ControlId { get; }
     }
+
+
 }

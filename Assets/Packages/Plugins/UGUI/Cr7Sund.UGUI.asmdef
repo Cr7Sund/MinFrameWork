@@ -1,0 +1,17 @@
+{
+    "name": "Cr7Sund.UGUI",
+    "rootNamespace": "",
+    "references": [
+        "UnityEngine.UI",
+        "Cr7Sund.FrameWork.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
