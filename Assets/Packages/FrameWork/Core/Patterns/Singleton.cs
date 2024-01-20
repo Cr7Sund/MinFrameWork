@@ -2,21 +2,27 @@ using System;
 
 namespace Cr7Sund.Patterns
 {
-    public class Singleton<T> where T : Singleton<T>, new()
+    public class Singleton<T> : IInitialize where T : Singleton<T>, new()
     {
         private static T instance;
+
+        public bool IsInit {get;private set;}
+
 
         static Singleton()
         {
             Singleton<T>.instance = default(T);
         }
 
+
         public virtual void Init()
         {
+            IsInit = true;
         }
 
         public virtual void Dispose()
         {
+            IsInit = false;
             Singleton<T>.instance = default(T);
         }
 
@@ -24,6 +30,7 @@ namespace Cr7Sund.Patterns
         {
             get { return GetInstance(); }
         }
+
 
         public static T GetInstance()
         {
