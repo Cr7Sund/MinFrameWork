@@ -1,9 +1,7 @@
-﻿using System;
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
+﻿using Cr7Sund.Framework.Api;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Apis;
 using UnityEngine;
 namespace Cr7Sund.Server.Impl
 {
@@ -11,7 +9,7 @@ namespace Cr7Sund.Server.Impl
     {
         [Inject] private ISceneLoader _sceneLoader;
 
-        public SceneKey Key { get; set; }
+        public ISceneKey Key { get; set; }
 
 
         internal void AssignContext(IContext context)

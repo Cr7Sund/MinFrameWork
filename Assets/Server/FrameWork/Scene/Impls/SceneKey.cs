@@ -1,13 +1,13 @@
 ﻿using System;
-using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Framework.Util;
+using Cr7Sund.Server.Apis;
 using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.Server.Impl
 {
     public delegate SceneBuilder CreateSceneBuilderDelegate();
 
-    public class SceneKey : IAssetKey
+    public class SceneKey : ISceneKey
     {
         private readonly Type _builderType;
 
@@ -16,13 +16,7 @@ namespace Cr7Sund.Server.Impl
         public bool ActivateOnLoad { get; private set; }
 
 
-        public SceneKey(string key, Type builderType) : this(key, builderType, LoadSceneMode.Single, true)
-        {
-        }
-        public SceneKey(string key, Type builderType, LoadSceneMode loadMode) : this(key, builderType, loadMode, true)
-        {
-        }
-        public SceneKey(string key, Type builderType, LoadSceneMode loadMode, bool activateOnLoad)
+        public SceneKey(string key, Type builderType, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true)
         {
             AssertUtilEditor.IsAssignableFrom(typeof(SceneBuilder), builderType, SceneExceptionType.INVALID_SCENE_BUILDER_TYPE);
 

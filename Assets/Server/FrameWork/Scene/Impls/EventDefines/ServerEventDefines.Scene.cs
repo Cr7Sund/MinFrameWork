@@ -1,10 +1,12 @@
 ﻿using Cr7Sund.EventBus.Impl;
+using Cr7Sund.Server.Apis;
+using Cr7Sund.Server.Impl;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.Server
 {
     public class AddSceneBeginEvent : EventData
     {
-        public SceneKey TargetScene { get; internal set; }
+        public ISceneKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -13,7 +15,7 @@ namespace Cr7Sund.Server.Impl
 
     public class AddSceneEndEvent : EventData
     {
-        public SceneKey TargetScene { get; internal set; }
+        public ISceneKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -21,7 +23,7 @@ namespace Cr7Sund.Server.Impl
     }
     public class RemoveSceneBeginEvent : EventData
     {
-        public SceneKey TargetScene { get; internal set; }
+        public ISceneKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -30,7 +32,7 @@ namespace Cr7Sund.Server.Impl
 
     public class RemoveSceneEndEvent : EventData
     {
-        public SceneKey TargetScene { get; internal set; }
+        public ISceneKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -39,8 +41,8 @@ namespace Cr7Sund.Server.Impl
 
     public class SwitchSceneEvent : EventData
     {
-        public SceneKey LastScene { get; internal set; }
-        public SceneKey CurScene { get; internal set; }
+        public ISceneKey LastScene { get; internal set; }
+        public ISceneKey CurScene { get; internal set; }
         public override void Clear()
         {
             LastScene = null;

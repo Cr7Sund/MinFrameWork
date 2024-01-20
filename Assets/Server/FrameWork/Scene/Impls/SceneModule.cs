@@ -10,7 +10,6 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Performance;
 using Cr7Sund.Server.Apis;
 using Cr7Sund.Touch.Api;
-using NUnit.Framework.Constraints;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -23,17 +22,18 @@ namespace Cr7Sund.Server.Impl
         [Inject]
         private IEventBus _eventBus;
         [Inject]
+
         private IPoolBinder _poolBinder;
         private SceneNode _focusScene;
-        private Dictionary<SceneKey, SceneNode> _treeScenes;
-        private Dictionary<SceneKey, SceneNode> _preloadScenes;
-        private Dictionary<SceneKey, SceneNode> _loadingScenes;
-        private Dictionary<SceneKey, SceneNode> _addingScenes;
-        private Dictionary<SceneKey, SceneNode> _removingScenes;
-        private Dictionary<SceneKey, SceneNode> _unloadingScenes;
+        private Dictionary<ISceneKey, SceneNode> _treeScenes;
+        private Dictionary<ISceneKey, SceneNode> _preloadScenes;
+        private Dictionary<ISceneKey, SceneNode> _loadingScenes;
+        private Dictionary<ISceneKey, SceneNode> _addingScenes;
+        private Dictionary<ISceneKey, SceneNode> _removingScenes;
+        private Dictionary<ISceneKey, SceneNode> _unloadingScenes;
 
 
-        public SceneNode FocusScene
+        public INode FocusScene
         {
             get;
             private set;
@@ -42,17 +42,17 @@ namespace Cr7Sund.Server.Impl
 
         public SceneModule()
         {
-            _treeScenes = new Dictionary<SceneKey, SceneNode>();
-            _preloadScenes = new Dictionary<SceneKey, SceneNode>();
-            _loadingScenes = new Dictionary<SceneKey, SceneNode>();
-            _addingScenes = new Dictionary<SceneKey, SceneNode>();
-            _removingScenes = new Dictionary<SceneKey, SceneNode>();
-            _unloadingScenes = new Dictionary<SceneKey, SceneNode>();
+            _treeScenes = new Dictionary<ISceneKey, SceneNode>();
+            _preloadScenes = new Dictionary<ISceneKey, SceneNode>();
+            _loadingScenes = new Dictionary<ISceneKey, SceneNode>();
+            _addingScenes = new Dictionary<ISceneKey, SceneNode>();
+            _removingScenes = new Dictionary<ISceneKey, SceneNode>();
+            _unloadingScenes = new Dictionary<ISceneKey, SceneNode>();
         }
 
 
 
-        public IPromise<INode> PreLoadScene(SceneKey key)
+        public IPromise<INode> PreLoadScene(ISceneKey key)
         {
             if (!_gameNode.IsStarted)
             {
@@ -84,12 +84,11 @@ namespace Cr7Sund.Server.Impl
                 return _preloadScenes[key].LoadStatus;
             }
 
-            var newScene = SceneCreator.Create(key);
+            var newScene = SceneCreator.Create((SceneKey)key);
             _loadingScenes[key] = newScene;
             return newScene.PreLoadAsync(newScene).Then(OnPreloadNewScene );
         }
-
-        public IPromise<INode> AddScene(SceneKey key)
+        public IPromise<INode> AddScene(ISceneKey key)
         {
             _fingerGesture.Freeze();
             if (!_gameNode.IsStarted)
@@ -128,16 +127,15 @@ namespace Cr7Sund.Server.Impl
 
             return AddSceneFromStart(key);
         }
-
-        public IPromise<INode> RemoveScene(SceneKey key)
+        public IPromise<INode> RemoveScene(ISceneKey key)
         {
             return UnloadSceneInternal(key, false);
         }
-        public IPromise<INode> UnloadScene(SceneKey key)
+        public IPromise<INode> UnloadScene(ISceneKey key)
         {
             return UnloadSceneInternal(key, true);
         }
-        public IPromise<INode> UnloadSceneInternal(SceneKey key, bool unload)
+        public IPromise<INode> UnloadSceneInternal(ISceneKey key, bool unload)
         {
             _fingerGesture.Freeze();
             if (!_gameNode.IsStarted)
@@ -204,11 +202,11 @@ namespace Cr7Sund.Server.Impl
                 return Promise<INode>.Rejected(new MyException($"SceneModule.RemoveScene: Can't find scene...RemoveScene Fail.. SceneName: {key}"));
             }
         }
-        public IPromise<INode> SwitchScene(SceneKey key)
+        public IPromise<INode> SwitchScene(ISceneKey key)
         {
             return AddScene(key).Then(OnSwitchScene);
         }
-
+    
         private IPromise<INode> OnSwitchScene(INode curNode)
         {
             var curScene = curNode as SceneNode;
@@ -241,8 +239,7 @@ namespace Cr7Sund.Server.Impl
                 return node;
             });
         }
-
-        private IPromise<INode> RemoveSceneFromNodeTree(SceneKey key)
+        private IPromise<INode> RemoveSceneFromNodeTree(ISceneKey key)
         {
             var removeScene = _treeScenes[key];
 
@@ -251,7 +248,7 @@ namespace Cr7Sund.Server.Impl
             _removingScenes.Add(key, removeScene);
             return _gameNode.RemoveChildAsync(removeScene).Then(OnRemoveScene);
         }
-        private IPromise<INode> UnloadSceneFromNodeTree(SceneKey key)
+        private IPromise<INode> UnloadSceneFromNodeTree(ISceneKey key)
         {
             var unloadScene = _treeScenes[key];
 
@@ -260,7 +257,6 @@ namespace Cr7Sund.Server.Impl
             _unloadingScenes.Add(key, unloadScene);
             return _gameNode.UnloadChildAsync(unloadScene).Then(OnUnloadScene);
         }
-
         private INode OnUnloadScene(INode content)
         {
             var removeNode = content as SceneNode;
@@ -289,11 +285,10 @@ namespace Cr7Sund.Server.Impl
 
             return content;
         }
-
         private INode OnPreloadNewScene(INode node)
         {
             SceneNode newScene = node as SceneNode;
-            SceneKey key = newScene.Key;
+            ISceneKey key = newScene.Key;
 
             if (_loadingScenes.ContainsKey(key))
             {
@@ -303,9 +298,9 @@ namespace Cr7Sund.Server.Impl
 
             return node;
         }
-        private IPromise<INode> AddSceneFromStart(SceneKey key)
+        private IPromise<INode> AddSceneFromStart(ISceneKey key)
         {
-            SceneNode newScene = SceneCreator.Create(key);
+            SceneNode newScene = SceneCreator.Create((SceneKey)key);
             DispatchAddBegin(newScene.Key);
 
             _loadingScenes[key] = newScene;
@@ -314,7 +309,7 @@ namespace Cr7Sund.Server.Impl
                           .PreLoadAsync(newScene)
                           .Then(OnAddNewLoadedScene); //PLAN:  potential callback hell, replace with async
         }
-        private IPromise<INode> AddSceneFromLoading(SceneKey key)
+        private IPromise<INode> AddSceneFromLoading(ISceneKey key)
         {
             if (!_loadingScenes.TryGetValue(key, out SceneNode loadingScene))
             {
@@ -329,7 +324,7 @@ namespace Cr7Sund.Server.Impl
 
             return _gameNode.AddChildAsync(loadingScene).Then(OnAddLoadedScene);
         }
-        private IPromise<INode> AddSceneFromAdding(SceneKey key)
+        private IPromise<INode> AddSceneFromAdding(ISceneKey key)
         {
             if (!_addingScenes.TryGetValue(key, out SceneNode addingScene))
             {
@@ -338,7 +333,7 @@ namespace Cr7Sund.Server.Impl
 
             return addingScene.LoadStatus;
         }
-        private IPromise<INode> AddSceneFromPreload(SceneKey key)
+        private IPromise<INode> AddSceneFromPreload(ISceneKey key)
         {
             if (!_preloadScenes.TryGetValue(key, out SceneNode loadedScene))
                 return null;
@@ -351,7 +346,7 @@ namespace Cr7Sund.Server.Impl
         private IPromise<INode> OnAddNewLoadedScene(INode node)
         {
             SceneNode newScene = node as SceneNode;
-            SceneKey key = newScene.Key;
+            ISceneKey key = newScene.Key;
             if (!_loadingScenes.ContainsKey(key))
             {
                 return node.LoadStatus;
@@ -366,7 +361,7 @@ namespace Cr7Sund.Server.Impl
         private INode OnAddLoadedScene(INode node)
         {
             SceneNode loadingScene = node as SceneNode;
-            SceneKey key = loadingScene.Key;
+            ISceneKey key = loadingScene.Key;
 
             if (!_addingScenes.ContainsKey(key))
             {
@@ -385,7 +380,7 @@ namespace Cr7Sund.Server.Impl
         private INode OnAddPreloadScene(INode node)
         {
             var loadedScene = node as SceneNode;
-            SceneKey key = loadedScene.Key;
+            ISceneKey key = loadedScene.Key;
 
             if (!_addingScenes.ContainsKey(key))
             {
@@ -402,32 +397,32 @@ namespace Cr7Sund.Server.Impl
 
             return node;
         }
-        private void DispatchSwitch(SceneKey curScene, SceneKey lastScene)
+        private void DispatchSwitch(ISceneKey curScene, ISceneKey lastScene)
         {
             var e = _poolBinder.AutoCreate<SwitchSceneEvent>();
             e.LastScene = lastScene;
             e.CurScene = curScene;
             _eventBus.Dispatch(e);
         }
-        private void DispatchAddBegin(SceneKey targetScene)
+        private void DispatchAddBegin(ISceneKey targetScene)
         {
             var e = _poolBinder.AutoCreate<AddSceneBeginEvent>();
             e.TargetScene = targetScene;
             _eventBus.Dispatch(e);
         }
-        private void DispatchAddEnd(SceneKey targetScene)
+        private void DispatchAddEnd(ISceneKey targetScene)
         {
             var e = _poolBinder.AutoCreate<AddSceneEndEvent>();
             e.TargetScene = targetScene;
             _eventBus.Dispatch(e);
         }
-        private void DispatchRemoveBegin(SceneKey targetScene)
+        private void DispatchRemoveBegin(ISceneKey targetScene)
         {
             var e = _poolBinder.AutoCreate<AddSceneBeginEvent>();
             e.TargetScene = targetScene;
             _eventBus.Dispatch(e);
         }
-        private void DispatchRemoveEnd(SceneKey targetScene)
+        private void DispatchRemoveEnd(ISceneKey targetScene)
         {
             var e = _poolBinder.AutoCreate<AddSceneEndEvent>();
             e.TargetScene = targetScene;
