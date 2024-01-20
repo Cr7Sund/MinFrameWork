@@ -9,6 +9,7 @@ namespace Cr7Sund.NodeTree.Impl
         private IPromise<T> _loadGroup;
         private IPromise<T> _unloadGroup;
         private Action<T> _loadedHandler;
+        private Action<T> _preloadedHandler;
         private Action<T> _unloadedHandler;
         private Action<Exception> _exceptionHandler;
 
@@ -27,73 +28,94 @@ namespace Cr7Sund.NodeTree.Impl
                 return _unloadGroup;
             }
         }
-        public LoadState State { get; protected set; }
+        public LoadState LoadState { get; protected set; }
 
 
         public AsyncLoadable()
         {
             _unloadedHandler = _Unloaded;
             _loadedHandler = _Loaded;
+            _preloadedHandler = _Preloaded;
             _exceptionHandler = _HandleException;
         }
-
         public IPromise<T> LoadAsync(T value)
         {
-            if (State == LoadState.Loading || State == LoadState.Unloading)
+            if (LoadState == LoadState.Loading || LoadState == LoadState.Unloading)
             {
-                throw new MyException($"Cant LoadAsync On State {State} Loadable: {this} ",
+                throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.LOAD_VALID_STATE);
             }
 
-            State = LoadState.Loading;
-
+            LoadState = LoadState.Loading;
             _loadGroup = OnLoadAsync(value);
-
             _loadGroup?.Then(onResolved: _loadedHandler, onRejected: _exceptionHandler);
 
             return _loadGroup;
         }
+        public IPromise<T> PreLoadAsync(T value)
+        {
+            if (LoadState == LoadState.Loading || LoadState == LoadState.Unloading)
+            {
+                throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
+                    NodeTreeExceptionType.LOAD_VALID_STATE);
+            }
 
+            LoadState = LoadState.Loading;
+            _loadGroup = OnLoadAsync(value);
+            _loadGroup?.Then(onResolved: _preloadedHandler, onRejected: _exceptionHandler);
+
+            return _loadGroup;
+        }
         public IPromise<T> UnloadAsync(T value)
         {
-            if (State == LoadState.Default || State == LoadState.Unloading || State == LoadState.Unloaded)
+            if (LoadState == LoadState.Default || LoadState == LoadState.Unloading || LoadState == LoadState.Unloaded)
             {
-                throw new MyException($"Cant UnloadAsync On State: {State}  Loadable: {this} ",
+                throw new MyException($"Cant UnloadAsync On State: {LoadState}  Loadable: {this} ",
                     NodeTreeExceptionType.UNLOAD_VALID_STATE);
             }
 
-            if (State == LoadState.Loading)
+            if (LoadState == LoadState.Loading)
             {
                 _unloadGroup?.Resolve(value);
             }
 
-            State = LoadState.Unloading;
-
+            LoadState = LoadState.Unloading;
             _unloadGroup = OnUnloadAsync(value);
-
             _unloadGroup?.Then(onResolved: _unloadedHandler, onRejected: _exceptionHandler);
 
             return _unloadGroup;
         }
+        public IPromise<T> CancelLoad()
+        {
+            AssertUtil.NotNull(LoadStatus, NodeTreeExceptionType.CANCEL_NOTLOADED);
 
+            LoadStatus.Cancel();
+            return LoadStatus.Then(UnloadAsync);
+        }
         private void _Loaded(T value)
         {
-            State = LoadState.Loaded;
+            LoadState = LoadState.Loaded;
             OnLoaded();
+        }
+        private void _Preloaded(T value)
+        {
+            LoadState = LoadState.Loaded;
+            OnPreLoaded();
         }
         private void _Unloaded(T value)
         {
-            State = LoadState.Unloaded;
+            LoadState = LoadState.Unloaded;
             OnUnloaded();
         }
         private void _HandleException(Exception e)
         {
-            State = LoadState.Fail;
+            LoadState = LoadState.Fail;
             OnCatch(e);
             Debug.Error(e);
         }
 
         protected virtual void OnLoaded() { }
+        protected virtual void OnPreLoaded() { }
         protected virtual void OnUnloaded() { }
         protected virtual void OnCatch(Exception e) { }
         protected abstract IPromise<T> OnLoadAsync(T content);

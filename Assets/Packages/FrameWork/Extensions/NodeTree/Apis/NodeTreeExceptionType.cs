@@ -29,7 +29,12 @@
         /// Cant UnLoadAsync On State of loading or unloading
         /// </summary>
         UNLOAD_VALID_STATE,
-        Two,
+        /// <summary>
+        /// Cant cancel when not loaded 
+        /// </summary>
+        CANCEL_NOTLOADED,
+
+
         #endregion
 
         #region Controller
