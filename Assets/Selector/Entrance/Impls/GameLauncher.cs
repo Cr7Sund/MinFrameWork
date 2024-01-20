@@ -20,7 +20,7 @@ namespace Cr7Sund.Selector.Impl
             if (!_dispose)
             {
                 _dispose = true;
-                return _gameLogic.Destroy();
+                return _gameLogic?.Destroy();
             }
 
             return Promise<INode>.Resolved(null);

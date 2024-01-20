@@ -12,6 +12,9 @@ namespace Cr7Sund.Selector.Impl
         private GameObject _go;
         private GameLauncher _launch;
 
+        public GameStatus Status => _status;
+
+
         public void Start()
         {
             switch (_status)
