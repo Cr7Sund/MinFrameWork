@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Cr7Sund.EventBus;
 using Cr7Sund.EventBus.Api;
 using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
@@ -22,15 +20,9 @@ namespace Cr7Sund.Server.Impl
         [Inject]
         private IEventBus _eventBus;
         [Inject]
-
         private IPoolBinder _poolBinder;
         private SceneNode _focusScene;
         private Dictionary<ISceneKey, SceneNode> _treeScenes;
-        private Dictionary<ISceneKey, SceneNode> _preloadScenes;
-        private Dictionary<ISceneKey, SceneNode> _loadingScenes;
-        private Dictionary<ISceneKey, SceneNode> _addingScenes;
-        private Dictionary<ISceneKey, SceneNode> _removingScenes;
-        private Dictionary<ISceneKey, SceneNode> _unloadingScenes;
 
 
         public INode FocusScene
@@ -43,13 +35,7 @@ namespace Cr7Sund.Server.Impl
         public SceneModule()
         {
             _treeScenes = new Dictionary<ISceneKey, SceneNode>();
-            _preloadScenes = new Dictionary<ISceneKey, SceneNode>();
-            _loadingScenes = new Dictionary<ISceneKey, SceneNode>();
-            _addingScenes = new Dictionary<ISceneKey, SceneNode>();
-            _removingScenes = new Dictionary<ISceneKey, SceneNode>();
-            _unloadingScenes = new Dictionary<ISceneKey, SceneNode>();
         }
-
 
 
         public IPromise<INode> PreLoadScene(ISceneKey key)
@@ -59,34 +45,49 @@ namespace Cr7Sund.Server.Impl
                 return Promise<INode>.Rejected(new MyException($"SceneModule.PreLoadScene: Do not allow PreLoadScene while App.Started is false! SceneName: {key}"));
             }
 
-            if (_addingScenes.ContainsKey(key))
+            if (_treeScenes.TryGetValue(key, out var sceneNode))
             {
-                return Promise<INode>.Rejected(new MyException($"SceneModule.PreLoadScene: Do not allow PreLoadScene while scene is removing from node tree! SceneName: {key}"));
-            }
-            if (_unloadingScenes.ContainsKey(key))
-            {
-                return Promise<INode>.Rejected(new MyException($"SceneModule.PreLoadScene: Do not allow PreLoadScene while scene is unloading from node tree! SceneName: {key}"));
-            }
-            if (_loadingScenes.ContainsKey(key))
-            {
-                Log.Warn($"SceneModule.PreLoadScene: the scene is loading! SceneName: {key} ");
-                return _loadingScenes[key].LoadStatus;
-            }
-            if (_treeScenes.ContainsKey(key))
-            {
-                Log.Warn($"SceneModule.PreLoadScene: the scene is on the nodeTree. SceneName: {key} ");
-                return _treeScenes[key].LoadStatus;
-            }
-
-            if (_preloadScenes.ContainsKey(key))
-            {
-                Log.Warn($"SceneModule.PreLoadScene: the scene is Loaded! SceneName: {key} ");
-                return _preloadScenes[key].LoadStatus;
+                if (sceneNode.NodeState == NodeState.Removed)
+                {
+                    Log.Warn($"SceneModule.PreLoadScene: the scene has been removed. SceneName: {key} ");
+                    return _treeScenes[key].LoadStatus;
+                }
+                if (sceneNode.NodeState == NodeState.Unloading)
+                {
+                    return Promise<INode>.Rejected(new MyException
+                            ($"SceneModule.PreLoadScene: Do not allow PreLoadScene while scene is unloading from node tree! SceneName: {key}"));
+                }
+                if (sceneNode.NodeState == NodeState.Removing)
+                {
+                    return Promise<INode>.Rejected(new MyException
+                            ($"SceneModule.PreLoadScene: Do not allow PreLoadScene while scene is removing from node tree! SceneName: {key}"));
+                }
+                if (sceneNode.IsLoading())
+                {
+                    Log.Warn($"SceneModule.PreLoadScene: the scene is loading! SceneName: {key} ");
+                    return sceneNode.LoadStatus;
+                }
+                if (sceneNode.NodeState == NodeState.Adding)
+                {
+                    Log.Warn($"SceneModule.PreLoadScene: the scene is adding! SceneName: {key} ");
+                    return sceneNode.LoadStatus;
+                }
+                if (sceneNode.NodeState == NodeState.Preloaded)
+                {
+                    Log.Warn($"SceneModule.PreLoadScene: the scene is preloaded! SceneName: {key} ");
+                    return sceneNode.LoadStatus;
+                }
+                if (sceneNode.NodeState == NodeState.Ready)
+                {
+                    return Promise<INode>.Rejected(new MyException
+                             ($"SceneModule.PreLoadScene: the scene is on the nodeTree. SceneName: {key} "));
+                }
             }
 
             var newScene = SceneCreator.Create((SceneKey)key);
-            _loadingScenes[key] = newScene;
-            return newScene.PreLoadAsync(newScene).Then(OnPreloadNewScene );
+            newScene.StartLoad();
+            _treeScenes[key] = newScene;
+            return newScene.PreLoad(newScene).Then(OnPreloadNewScene);
         }
         public IPromise<INode> AddScene(ISceneKey key)
         {
@@ -96,28 +97,32 @@ namespace Cr7Sund.Server.Impl
                 _fingerGesture.UnFreeze();
                 return Promise<INode>.Rejected(new MyException($"SceneModule.AddScene: Do not allow AddScene while App.Started is false! SceneName: {key}"));
             }
-            if (_removingScenes.ContainsKey(key))
+
+            if (_treeScenes.TryGetValue(key, out var sceneNode))
             {
-                _fingerGesture.UnFreeze();
-                return Promise<INode>.Rejected(new MyException($"SceneModule.AddScene: the scene is removing. SceneName: {key}"));
+                if (sceneNode.NodeState == NodeState.Removing)
+                {
+                    _fingerGesture.UnFreeze();
+                    return Promise<INode>.Rejected(new MyException($"SceneModule.AddScene: the scene is removing. SceneName: {key}"));
+                }
+                if (sceneNode.NodeState == NodeState.Unloading)
+                {
+                    _fingerGesture.UnFreeze();
+                    return Promise<INode>.Rejected(new MyException($"SceneModule.AddScene: the scene is unloading. SceneName: {key}"));
+                }
+                if (sceneNode.NodeState == NodeState.Ready)
+                {
+                    Log.Warn($"SceneModule.AddScene: the scene is already on the nodeTree. SceneName: {key}");
+                    _fingerGesture.UnFreeze();
+                    return _treeScenes[key].LoadStatus;
+                }
             }
-            if (_unloadingScenes.ContainsKey(key))
-            {
-                _fingerGesture.UnFreeze();
-                return Promise<INode>.Rejected(new MyException($"SceneModule.AddScene: the scene is unloading. SceneName: {key}"));
-            }
-            if (_treeScenes.ContainsKey(key))
-            {
-                Log.Warn($"SceneModule.AddScene: the scene is already on the nodeTree. SceneName: {key}");
-                _fingerGesture.UnFreeze();
-                return _treeScenes[key].LoadStatus;
-            }
-            
+
             var preloadPromise = AddSceneFromPreload(key);
             if (preloadPromise != null)
                 return preloadPromise;
 
-            var loadingPromise = AddSceneFromLoading(key);
+            var loadingPromise = AddSceneFromPreLoading(key);
             if (loadingPromise != null)
                 return loadingPromise;
 
@@ -125,7 +130,11 @@ namespace Cr7Sund.Server.Impl
             if (addingPromise != null)
                 return addingPromise;
 
-            return AddSceneFromStart(key);
+            var disActivePromise = AddSceneFromDisable(key);
+            if (disActivePromise != null)
+                return disActivePromise;
+
+            return AddSceneFromStart(key);//Or Restart
         }
         public IPromise<INode> RemoveScene(ISceneKey key)
         {
@@ -143,50 +152,52 @@ namespace Cr7Sund.Server.Impl
                 _fingerGesture.UnFreeze();
                 return Promise<INode>.Rejected(new MyException($"SceneModule.RemoveScene: Do not allow PreLoadScene while App.Started is false! SceneName: {key}"));
             }
-            if (_removingScenes.TryGetValue(key, out SceneNode removingScene))
+            if (_treeScenes.TryGetValue(key, out var sceneNode))
             {
-                return removingScene.UnloadStatus;
-            }
-            if (_unloadingScenes.TryGetValue(key, out SceneNode unloadingScene))
-            {
-                return unloadingScene.UnloadStatus;
-            }
-            if (_loadingScenes.TryGetValue(key, out SceneNode loadingScene))
-            {
-                DispatchRemoveBegin(loadingScene.Key);
-                _loadingScenes.Remove(key);
-                loadingScene.LoadStatus.Cancel();
+                if (sceneNode.NodeState == NodeState.Removing)
+                {
+                    return sceneNode.UnloadStatus;
+                }
+                if (sceneNode.NodeState == NodeState.Unloading)
+                {
+                    return sceneNode.UnloadStatus;
+                }
+                if (sceneNode.IsLoading())
+                {
+                    DispatchRemoveBegin(sceneNode.Key);
+                    return sceneNode.CancelLoad()
+                            .Then(node =>
+                            {
+                                DispatchRemoveEnd(((SceneNode)node).Key);
+                                _fingerGesture.UnFreeze();
+                                return node;
+                            });
+                }
+                if (sceneNode.NodeState == NodeState.Adding)
+                {
+                    DispatchRemoveBegin(sceneNode.Key);
+                    return sceneNode.CancelLoad()
+                            .Then(node =>
+                            {
+                                DispatchRemoveEnd(((SceneNode)node).Key);
+                                _fingerGesture.UnFreeze();
+                                return node;
+                            });
+                }
+                if (sceneNode.NodeState == NodeState.Preloaded)
+                {
+                    DispatchRemoveBegin(sceneNode.Key);
 
-                DispatchRemoveEnd(loadingScene.Key);
-                _fingerGesture.UnFreeze();
-                return loadingScene.LoadStatus;
-            }
+                    return sceneNode.UnloadAsync(sceneNode).Then(node =>
+                    {
+                        var sNode = (SceneNode)node;
+                        _treeScenes.Remove(sNode.Key);
+                        DispatchRemoveEnd(sNode.Key);
+                        _fingerGesture.UnFreeze();
+                        return node;
+                    });
+                }
 
-            if (_preloadScenes.TryGetValue(key, out SceneNode loadedScene))
-            {
-                DispatchRemoveBegin(loadedScene.Key);
-                _preloadScenes.Remove(key);
-
-                loadingScene.LoadStatus.Cancel();
-
-                DispatchRemoveEnd(loadingScene.Key);
-                _fingerGesture.UnFreeze();
-                return loadingScene.LoadStatus;
-            }
-
-            if (_addingScenes.TryGetValue(key, out SceneNode addingScene))
-            {
-                DispatchRemoveBegin(loadedScene.Key);
-                _addingScenes.Remove(key);
-                addingScene.LoadStatus.Cancel();
-
-                DispatchRemoveEnd(addingScene.Key);
-                _fingerGesture.UnFreeze();
-                return addingScene.LoadStatus;
-            }
-
-            if (_treeScenes.TryGetValue(key, out SceneNode removeScene))
-            {
                 if (unload == false)
                 {
                     return RemoveSceneFromNodeTree(key);
@@ -206,22 +217,22 @@ namespace Cr7Sund.Server.Impl
         {
             return AddScene(key).Then(OnSwitchScene);
         }
-    
+
         private IPromise<INode> OnSwitchScene(INode curNode)
         {
             var curScene = curNode as SceneNode;
             var promise = Promise<INode>.Resolved(curNode);
 
             if (_treeScenes.Count <= 1) return promise;
-            
+
             FocusScene = curScene;
 
             var tmpList = _treeScenes.Values.ToArray();
             for (int i = tmpList.Length - 1; i >= 0; i--)
             {
                 var sceneNode = tmpList[i];
-                if(sceneNode == curNode) continue;
-                
+                if (sceneNode == curNode) continue;
+
                 promise = promise.Then(_ =>
                    {
                        return RemoveScene(sceneNode.Key).Then((prevNode) =>
@@ -244,8 +255,7 @@ namespace Cr7Sund.Server.Impl
             var removeScene = _treeScenes[key];
 
             DispatchRemoveBegin(removeScene.Key);
-            _treeScenes.Remove(key);
-            _removingScenes.Add(key, removeScene);
+            removeScene.StartUnload(false);
             return _gameNode.RemoveChildAsync(removeScene).Then(OnRemoveScene);
         }
         private IPromise<INode> UnloadSceneFromNodeTree(ISceneKey key)
@@ -253,34 +263,33 @@ namespace Cr7Sund.Server.Impl
             var unloadScene = _treeScenes[key];
 
             DispatchRemoveBegin(unloadScene.Key);
-            _treeScenes.Remove(key);
-            _unloadingScenes.Add(key, unloadScene);
-            return _gameNode.UnloadChildAsync(unloadScene).Then(OnUnloadScene);
-        }
-        private INode OnUnloadScene(INode content)
-        {
-            var removeNode = content as SceneNode;
+            unloadScene.StartUnload(true);
 
-            _unloadingScenes.Remove(removeNode.Key);
-            DispatchRemoveEnd(removeNode.Key);
-            _fingerGesture.UnFreeze();
-            return content;
+            return _gameNode.UnloadChildAsync(unloadScene).Then(OnUnloadScene);
         }
         private INode OnRemoveScene(INode content)
         {
             var removeNode = content as SceneNode;
+
+            _fingerGesture.UnFreeze();
+            removeNode.EndLoad(true);
+            if (_focusScene != null && _focusScene.Key == removeNode.Key)
+                _focusScene = null;
+
+            DispatchRemoveEnd(removeNode.Key);
+            return content;
+        }
+        private INode OnUnloadScene (INode content)
+        {
+            var removeNode = content as SceneNode;
             var key = removeNode.Key;
 
-            if (!_removingScenes.ContainsKey(key))
-            {
-                return removeNode;
-            }
-
-            _removingScenes.Remove(key);
             _fingerGesture.UnFreeze();
+            removeNode.EndLoad(false);
             if (_focusScene != null && _focusScene.Key == key)
                 _focusScene = null;
-            removeNode.Dispose();
+
+            _treeScenes.Remove(removeNode.Key);
             DispatchRemoveEnd(removeNode.Key);
 
             return content;
@@ -290,11 +299,7 @@ namespace Cr7Sund.Server.Impl
             SceneNode newScene = node as SceneNode;
             ISceneKey key = newScene.Key;
 
-            if (_loadingScenes.ContainsKey(key))
-            {
-                _loadingScenes.Remove(key);
-                _preloadScenes[key] = newScene;
-            }
+            newScene.EndPreload();
 
             return node;
         }
@@ -303,97 +308,81 @@ namespace Cr7Sund.Server.Impl
             SceneNode newScene = SceneCreator.Create((SceneKey)key);
             DispatchAddBegin(newScene.Key);
 
-            _loadingScenes[key] = newScene;
+            newScene.StartLoad();
+            _treeScenes[key] = newScene;
 
             return newScene
-                          .PreLoadAsync(newScene)
+                          .PreLoad(newScene)
                           .Then(OnAddNewLoadedScene); //PLAN:  potential callback hell, replace with async
         }
-        private IPromise<INode> AddSceneFromLoading(ISceneKey key)
+        private IPromise<INode> AddSceneFromPreLoading(ISceneKey key)
         {
-            if (!_loadingScenes.TryGetValue(key, out SceneNode loadingScene))
+            if (!_treeScenes.TryGetValue(key, out var sceneNode)
+                 || (sceneNode.NodeState != NodeState.Preloading))
             {
                 return null;
             }
 
-            DispatchAddBegin(loadingScene.Key);
+            DispatchAddBegin(sceneNode.Key);
+            sceneNode.SetAdding();
 
-            _loadingScenes.Remove(key);
-            _preloadScenes[key] = loadingScene;
-            _addingScenes[key] = loadingScene;
-
-            return _gameNode.AddChildAsync(loadingScene).Then(OnAddLoadedScene);
-        }
-        private IPromise<INode> AddSceneFromAdding(ISceneKey key)
-        {
-            if (!_addingScenes.TryGetValue(key, out SceneNode addingScene))
-            {
-                return null;
-            }
-
-            return addingScene.LoadStatus;
+            return _gameNode.AddChildAsync(sceneNode).Then(OnAddLoadedScene);
         }
         private IPromise<INode> AddSceneFromPreload(ISceneKey key)
         {
-            if (!_preloadScenes.TryGetValue(key, out SceneNode loadedScene))
+            if (!_treeScenes.TryGetValue(key, out var sceneNode)
+                || sceneNode.NodeState != NodeState.Preloaded)
+            {
                 return null;
+            }
 
-            DispatchAddBegin(loadedScene.Key);
-            _addingScenes[key] = loadedScene;
+            DispatchAddBegin(sceneNode.Key);
+            sceneNode.SetAdding();
 
-            return _gameNode.AddChildAsync(loadedScene).Then(OnAddPreloadScene);
+            return _gameNode.AddChildAsync(sceneNode).Then(OnAddLoadedScene);
         }
+        private IPromise<INode> AddSceneFromDisable(ISceneKey key)
+        {
+            if (!_treeScenes.TryGetValue(key, out var sceneNode)
+                || sceneNode.NodeState != NodeState.Removed)
+            {
+                return null;
+            }
+
+            DispatchAddBegin(sceneNode.Key);
+            sceneNode.SetAdding();
+
+            return _gameNode.AddChildAsync(sceneNode).Then(OnAddLoadedScene);
+        }
+        private IPromise<INode> AddSceneFromAdding(ISceneKey key)
+        {
+            if (!_treeScenes.TryGetValue(key, out var sceneNode)
+                || sceneNode.NodeState != NodeState.Adding)
+            {
+                return null;
+            }
+
+            return sceneNode.LoadStatus;
+        }
+
         private IPromise<INode> OnAddNewLoadedScene(INode node)
         {
             SceneNode newScene = node as SceneNode;
             ISceneKey key = newScene.Key;
-            if (!_loadingScenes.ContainsKey(key))
-            {
-                return node.LoadStatus;
-            }
 
-            _loadingScenes.Remove(key);
-            _preloadScenes[key] = newScene;
-            _addingScenes[key] = newScene;
+            newScene.SetAdding();
 
-            return _gameNode.AddChildAsync(newScene).Then(OnAddPreloadScene);
+            return _gameNode.AddChildAsync(newScene).Then(OnAddLoadedScene);
         }
         private INode OnAddLoadedScene(INode node)
         {
             SceneNode loadingScene = node as SceneNode;
             ISceneKey key = loadingScene.Key;
 
-            if (!_addingScenes.ContainsKey(key))
-            {
-                return node;
-            }
-
+            loadingScene.SetReady();
             _fingerGesture.UnFreeze();
             DispatchAddEnd(loadingScene.Key);
             _focusScene = loadingScene;
-            _addingScenes.Remove(key);
-
-            _treeScenes[key] = loadingScene;
-
-            return node;
-        }
-        private INode OnAddPreloadScene(INode node)
-        {
-            var loadedScene = node as SceneNode;
-            ISceneKey key = loadedScene.Key;
-
-            if (!_addingScenes.ContainsKey(key))
-            {
-                return node;
-            }
-
-            _fingerGesture.UnFreeze();
-            DispatchAddEnd(loadedScene.Key);
-            _focusScene = loadedScene;
-            _addingScenes.Remove(key);
-            _preloadScenes.Remove(key);
-
-            _treeScenes[key] = loadedScene;
 
             return node;
         }
@@ -438,5 +427,6 @@ namespace Cr7Sund.Server.Impl
         {
             _eventBus.RemoveObserver<TEvent>(handler);
         }
+
     }
 }
