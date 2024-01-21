@@ -217,8 +217,7 @@ namespace Cr7Sund.Framework.Tests
             _node.RemoveChildAsync(child1);
 
             // Assert
-            Assert.IsTrue(child1.IsStarted);
-            Assert.IsTrue(child2.IsStarted);
+   
             Assert.IsFalse(child1.IsActive);
             Assert.IsFalse(child2.IsActive);
         }

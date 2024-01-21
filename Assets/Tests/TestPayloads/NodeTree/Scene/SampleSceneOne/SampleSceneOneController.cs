@@ -21,7 +21,7 @@ namespace Cr7Sund.Framework.Tests
             base.OnStart();
             Debug.Info("Load scene one");
 
-            StartValue++;
+            StartValue+=2;
         }
 
         protected override void OnEnable()

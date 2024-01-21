@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Cr7Sund.Server.Apis;
 using Cr7Sund.Framework.Tests;
 using Cr7Sund.EventBus.Api;
-using Cr7Sund.EventBus.Impl;
+using Cr7Sund.NodeTree.Api;
 
 namespace Cr7Sund.Server.Tests
 {
@@ -28,7 +28,7 @@ namespace Cr7Sund.Server.Tests
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(new PoolBinder());
             injectionBinder.Bind<IFingerGesture>().To(new FingerGesture());
-            injectionBinder.Bind<GameNode>().To(_gameNode);
+            injectionBinder.Bind<INode>().To(_gameNode);
             injectionBinder.Bind<IEventBus>().To(eventBus);
             injectionBinder.Bind<ISceneModule>().To<SceneModule>();
             Debug.Init(new InternalLogger());
@@ -48,7 +48,7 @@ namespace Cr7Sund.Server.Tests
 
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 
-            Assert.AreEqual(1, SampleSceneOneController.StartValue);
+            Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
@@ -59,7 +59,7 @@ namespace Cr7Sund.Server.Tests
 
             _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyOne);
 
-            Assert.AreEqual(1, SampleSceneOneController.StartValue);
+            Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
@@ -71,7 +71,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
 
-            Assert.AreEqual(0, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
             Assert.AreEqual(1, SampleSceneTwoController.StartValue);
             Assert.AreEqual(1, SampleSceneTwoController.EnableCount);
@@ -85,7 +85,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
 
-            Assert.AreEqual(1, SampleSceneOneController.StartValue);
+            Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
             Assert.AreEqual(1, SampleSceneTwoController.StartValue);
             Assert.AreEqual(1, SampleSceneTwoController.EnableCount);
@@ -99,7 +99,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
 
-            Assert.AreEqual(0, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
         }
 
@@ -113,7 +113,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyTwo);
 
-            Assert.AreEqual(0, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
             Assert.AreEqual(0, SampleSceneTwoController.StartValue);
             Assert.AreEqual(0, SampleSceneTwoController.EnableCount);
@@ -128,7 +128,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
 
-            Assert.AreEqual(0, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
         }
 
@@ -142,7 +142,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyTwo);
 
-            Assert.AreEqual(0, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
             Assert.AreEqual(0, SampleSceneTwoController.StartValue);
             Assert.AreEqual(0, SampleSceneTwoController.EnableCount);
@@ -167,8 +167,7 @@ namespace Cr7Sund.Server.Tests
             _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 
-
-            Assert.AreEqual(1, SampleSceneOneController.StartValue);
+            Assert.AreEqual(2, SampleSceneOneController.StartValue);
         }
 
         [Test]
@@ -182,6 +181,44 @@ namespace Cr7Sund.Server.Tests
 
             Assert.AreEqual(0, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneTwoController.StartValue);
+        }
+
+        [Test]
+        public void ReActiveScene()
+        {
+            _gameNode.Run();
+
+            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+
+            Assert.AreEqual(3, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.EnableCount);
+        }
+
+        [Test]
+        public void ReActivePreloadScene()
+        {
+            _gameNode.Run();
+
+            _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+
+            Assert.AreEqual(2, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.EnableCount);
+        }
+
+        [Test]
+        public void ReAddUnloadScene(){
+            _gameNode.Run();
+
+            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+
+            Assert.AreEqual(3, SampleSceneOneController.StartValue);
+            Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
     }
 }
