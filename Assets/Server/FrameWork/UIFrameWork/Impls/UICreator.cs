@@ -1,0 +1,13 @@
+﻿
+using Cr7Sund.Framework.Util;
+
+namespace Cr7Sund.Server.UI.Impl
+{
+    public static class UICreator
+    {
+        public static UINode Create(UIKey key)
+        {
+            return new UINode();
+        }
+    }
+}
