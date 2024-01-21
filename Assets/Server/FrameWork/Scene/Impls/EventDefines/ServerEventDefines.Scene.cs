@@ -6,7 +6,7 @@ namespace Cr7Sund.Server
 {
     public class AddSceneBeginEvent : EventData
     {
-        public ISceneKey TargetScene { get; internal set; }
+        public IAssetKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -15,7 +15,7 @@ namespace Cr7Sund.Server
 
     public class AddSceneEndEvent : EventData
     {
-        public ISceneKey TargetScene { get; internal set; }
+        public IAssetKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -23,7 +23,7 @@ namespace Cr7Sund.Server
     }
     public class RemoveSceneBeginEvent : EventData
     {
-        public ISceneKey TargetScene { get; internal set; }
+        public IAssetKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -32,7 +32,7 @@ namespace Cr7Sund.Server
 
     public class RemoveSceneEndEvent : EventData
     {
-        public ISceneKey TargetScene { get; internal set; }
+        public IAssetKey TargetScene { get; internal set; }
         public override void Clear()
         {
             TargetScene = null;
@@ -41,8 +41,8 @@ namespace Cr7Sund.Server
 
     public class SwitchSceneEvent : EventData
     {
-        public ISceneKey LastScene { get; internal set; }
-        public ISceneKey CurScene { get; internal set; }
+        public IAssetKey LastScene { get; internal set; }
+        public IAssetKey CurScene { get; internal set; }
         public override void Clear()
         {
             LastScene = null;

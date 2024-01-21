@@ -58,12 +58,14 @@
     },
     "dotnet.defaultSolution": "MinFrameWork.sln",
     "cSpell.words": [
+        "Addressables",
         "Doesnt",
         "NODESTATE",
         "NULLOIDNAME",
         "Poolable",
         "Postorder",
         "Triggerable",
+        "UGUI",
         "unhandler",
         "Uninject"
     ]

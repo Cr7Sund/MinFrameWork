@@ -36,7 +36,7 @@ namespace Cr7Sund.Selector.Impl
             }
             else
             {
-                // GameMgr.Instance.Start();
+                GameMgr.Instance.Start();
             }
         }
     }

@@ -1,4 +1,4 @@
-namespace Cr7Sund.AssetLoader.Api
+namespace Cr7Sund
 {
     public interface IAssetKey
     {

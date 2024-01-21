@@ -1,6 +1,4 @@
-﻿using System;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
+﻿using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
@@ -46,7 +44,7 @@ namespace Cr7Sund.Server.Impl
             if (IsInjected)
                 return;
 
-            _context.InjectionBinder.Bind<GameNode>().To(this);
+            _context.InjectionBinder.Bind<INode>().To(this);
             base.Inject();
             _context.InjectionBinder.Injector.Inject(this);
         }
@@ -58,7 +56,7 @@ namespace Cr7Sund.Server.Impl
 
             _context.InjectionBinder.Injector.Uninject(this);
             base.DeInject();
-            _context.InjectionBinder.Unbind<GameNode>();
+            _context.InjectionBinder.Unbind<INode>();
         }
 
     }

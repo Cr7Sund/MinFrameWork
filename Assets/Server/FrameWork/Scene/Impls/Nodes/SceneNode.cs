@@ -10,7 +10,6 @@ namespace Cr7Sund.Server.Impl
     {
         [Inject] private ISceneLoader _sceneLoader;
 
-        public ISceneKey Key { get; set; }
 
 
         internal void AssignContext(IContext context)
@@ -32,8 +31,9 @@ namespace Cr7Sund.Server.Impl
             else
             {
                 var sceneNode = content as SceneNode;
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key, 
-                            sceneNode.Key.LoadSceneMode, sceneNode.Key.ActivateOnLoad)
+                var sceneKey = sceneNode.Key as SceneKey;
+                return _sceneLoader.LoadSceneAsync(sceneNode.Key,
+                            sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
                             .Then(() => _controllerModule.LoadAsync(content));
 
             }

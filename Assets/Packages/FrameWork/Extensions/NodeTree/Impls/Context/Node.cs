@@ -22,6 +22,11 @@ namespace Cr7Sund.NodeTree.Impl
                 return _parent;
             }
         }
+        public IAssetKey Key
+        {
+            get;
+            set;
+        }
         public NodeState NodeState
         {
             get;
@@ -59,7 +64,7 @@ namespace Cr7Sund.NodeTree.Impl
 
         #region LifeCycle
 
-        public IPromise<INode> PreLoad(Node self)
+        public IPromise<INode> PreLoad(INode self)
         {
             AssertUtil.IsTrue(LoadState == LoadState.Default);
             Inject();
