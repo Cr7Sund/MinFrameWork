@@ -7,7 +7,6 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class CrossContext : Context, ICrossContext
     {
-        private List<IContext> _contexts;
         protected ICrossContextInjectionBinder _crossContextInjectionBinder;
 
         public override IInjectionBinder InjectionBinder
@@ -21,7 +20,6 @@ namespace Cr7Sund.NodeTree.Impl
         
         public CrossContext()
         {
-            _contexts = new List<IContext>();
             _crossContextInjectionBinder = new CrossContextInjectionBinder();
         }
 

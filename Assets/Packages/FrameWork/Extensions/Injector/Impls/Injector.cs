@@ -121,11 +121,12 @@ namespace Cr7Sund.Framework.Impl
 
         private object InjectInternal(object target)
         {
+            failIf(target == null, InjectionExceptionType.NULL_TARGET_INJECT, null, target);
+
             var t = target.GetType();
 
             failIf(Binder == null, InjectionExceptionType.NO_BINDER_INJECT, t, target);
             failIf(Reflector == null, InjectionExceptionType.NO_REFLECTOR, t, target);
-            failIf(target == null, InjectionExceptionType.NULL_TARGET_INJECT, t, target);
 
             //Some things can't be injected into. Bail out.
             if (t.IsPrimitive || t == typeof(decimal) || t == typeof(string))

@@ -17,7 +17,7 @@ namespace Cr7Sund.NodeTree.Impl
         }
 
 
-        protected override void OnAddChild(Node child)
+        protected override void OnAddChild(INode child)
         {
             base.OnAddChild(child);
 
@@ -41,7 +41,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        protected override void OnRemoveChild(Node child)
+        protected override void OnRemoveChild(INode child)
         {
             base.OnRemoveChild(child);
 

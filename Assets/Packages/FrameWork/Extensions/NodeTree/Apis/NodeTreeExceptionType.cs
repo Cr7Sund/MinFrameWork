@@ -7,7 +7,7 @@
         /// </summary>
         EMPTY_NODE_ADD,
         /// <summary>
-        /// remove add empty child 
+        /// remove empty child 
         /// </summary>
         EMPTY_NODE_REMOVE,
         /// <summary>
@@ -16,9 +16,14 @@
         INVALID_NODESTATE,
 
         /// <summary>
-        /// empty context, check the gamenode's first root context 
+        /// empty context, check the game-node's first root context 
         /// </summary>
         EMPTY_CONTEXT,
+
+        /// <summary>
+        /// can not remove an existed node
+        /// </summary>
+        REMOVE_NO_EXISTED,
 
         #region Loadable
         /// <summary>
