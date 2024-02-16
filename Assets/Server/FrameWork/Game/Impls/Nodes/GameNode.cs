@@ -2,10 +2,11 @@
 using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Api;
 using Cr7Sund.Server.Apis;
 namespace Cr7Sund.Server.Impl
 {
-    public class GameNode : ModuleNode
+    public class GameNode : ModuleNode,IGameNode
     {
         [Inject] public ISceneModule SceneModule;
         public void Run()
@@ -34,19 +35,13 @@ namespace Cr7Sund.Server.Impl
             });
         }
 
-        public void AssignContext(IContext context)
-        {
-            _context = context;
-        }
-
         public override void Inject()
         {
             if (IsInjected)
                 return;
 
-            _context.InjectionBinder.Bind<INode>().To(this);
+            _context.InjectionBinder.Bind<IGameNode>().To(this);
             base.Inject();
-            _context.InjectionBinder.Injector.Inject(this);
         }
 
         public override void DeInject()

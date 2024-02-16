@@ -9,7 +9,7 @@ namespace Cr7Sund
         public void EndPreload();
         public void SetReady();
         public void StartUnload(bool unload);
-        public void EndLoad(bool unload);
+        public void EndUnLoad(bool unload);
     }
 
 

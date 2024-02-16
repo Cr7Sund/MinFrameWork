@@ -1,5 +1,4 @@
 ﻿using Cr7Sund.AssetLoader.Impl;
-using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
 using Cr7Sund.NodeTree.Impl;
 
@@ -11,12 +10,12 @@ namespace Cr7Sund.Server.Impl
         {
             // Cross Context
             // --- --- 
-            InjectionBinder.Bind<ISceneLoader>().To(AssetLoaderFactory.CreateSceneLoader());
 
 
             // Local In GameNode or GameController
             // --- --- 
             // InjectionBinder.Bind<IPoolBinder>().To(new PoolBinder());
+            InjectionBinder.Bind<ISceneLoader>().To(AssetLoaderFactory.CreateSceneLoader()).AsSingleton();
 
             OnMappedBindings();
         }
@@ -36,5 +35,10 @@ namespace Cr7Sund.Server.Impl
         {
         }
 
+
+        public void Test_CreateCrossContext()
+        {
+            _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
+        }
     }
 }

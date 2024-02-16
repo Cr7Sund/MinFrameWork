@@ -10,8 +10,12 @@ namespace Cr7Sund.NodeTree.Impl
     {
         private List<INode> _childNodes;
         private Node _parent;
-
+        private IPromise<INode> _addPromise;
+        private IPromise<INode> _removePromise;
+        
         protected IContext _context;
+
+        
         public INode Parent
         {
             get
@@ -28,6 +32,21 @@ namespace Cr7Sund.NodeTree.Impl
         {
             get;
             private set;
+        }
+        public IPromise<INode> AddStatus
+        {
+            get
+            {
+                return _addPromise;
+            }
+        }
+
+        public IPromise<INode> RemoveStatus
+        {
+            get
+            {
+                return _removePromise;
+            }
         }
         public bool IsInjected
         {
@@ -367,15 +386,17 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (child.LoadState == LoadState.Default || child.LoadState == LoadState.Unloaded)
             {
-                return child.LoadAsync(child)
+                _addPromise = child.LoadAsync(child)
                     .Then(AddChild);
             }
             else
             {
                 // AssertUtil.AreEqual(LoadState.Loaded, child.LoadState);
 
-                return AddChild(implChildNode);
+                _addPromise = AddChild(implChildNode);
             }
+
+            return _addPromise;
         }
         public IPromise<INode> UnloadChildAsync(INode child)
         {
@@ -416,13 +437,15 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     implChildNode.DeInject();
                 }
-                return child.UnloadAsync(child)
-                            .Then(RemoveChild);
+                _removePromise = child.UnloadAsync(child)
+                    .Then(RemoveChild);
             }
             else
             {
-                return RemoveChild(implChildNode);
+                _removePromise = RemoveChild(implChildNode);
             }
+
+            return _removePromise;
         }
         private IPromise<INode> RemoveChild(INode child)
         {
@@ -473,7 +496,7 @@ namespace Cr7Sund.NodeTree.Impl
         public void StartUnload(bool unload) =>
             NodeState = unload ? NodeState.Removing :
                 NodeState.Unloading;
-        public void EndLoad(bool unload) =>
+        public void EndUnLoad(bool unload) =>
             NodeState = unload ? NodeState.Removed :
                 NodeState.Unloaded;
 

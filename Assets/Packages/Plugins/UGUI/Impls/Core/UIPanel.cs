@@ -1,5 +1,6 @@
 using System;
 using Cr7Sund.Framework.Api;
+using Cr7Sund.Framework.Impl;
 using UnityEngine.EventSystems;
 
 namespace Cr7Sund.UGUI.Apis
@@ -8,10 +9,6 @@ namespace Cr7Sund.UGUI.Apis
     {
         public bool IsInit => throw new System.NotImplementedException();
 
-        public IPromise Animate(bool push)
-        {
-            throw new NotImplementedException();
-        }
 
         public void Dispose()
         {
@@ -23,19 +20,24 @@ namespace Cr7Sund.UGUI.Apis
             throw new System.NotImplementedException();
         }
 
-        public void Hide(bool push)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Init()
         {
-            throw new System.NotImplementedException();
+            
+        }
+        
+        public void Hide(bool push)
+        {
+           
+        }
+
+        public IPromise Animate(bool push)
+        {
+            return Promise.Resolved();
         }
 
         public void Show(bool push)
         {
-            throw new NotImplementedException();
+           
         }
     }
 }

@@ -6,38 +6,45 @@ using Cr7Sund.Server.Apis;
 using UnityEngine;
 namespace Cr7Sund.Server.Impl
 {
-    public partial class SceneNode : ModuleNode
+    public class SceneNode : ModuleNode, ISceneNode
     {
         [Inject] private ISceneLoader _sceneLoader;
 
 
-
-        internal void AssignContext(IContext context)
+        public override void Inject()
         {
-            _context = context;
+            if (IsInjected)
+                return;
+
+            base.Inject();
+            _context.InjectionBinder.Bind<ISceneNode>().To(this);
         }
 
-        protected override void OnInit()
+        public override void DeInject()
         {
-            base.OnInit();
-        }
+            if (IsInjected)
+                return;
 
+            _context.InjectionBinder.Unbind<INode>(this);
+            base.DeInject();
+        }
         protected override IPromise<INode> OnLoadAsync(INode content)
         {
-            if (MacroDefine.IsEditor && !Application.isPlaying)
+            var sceneNode = content as SceneNode;
+            var sceneKey = sceneNode.Key as SceneKey;
+
+            if (sceneKey.IsVirtualScene)
             {
                 return base.OnLoadAsync(content);
             }
             else
             {
-                var sceneNode = content as SceneNode;
-                var sceneKey = sceneNode.Key as SceneKey;
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key,
-                            sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
-                            .Then(() => _controllerModule.LoadAsync(content));
+                return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
+                                   .Then(() => _controllerModule.LoadAsync(content));
 
             }
-
         }
+
+
     }
 }

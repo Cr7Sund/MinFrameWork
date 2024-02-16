@@ -6,8 +6,8 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class AsyncLoadable<T> : ILoadAsync<T>
     {
-        private IPromise<T> _loadGroup;
-        private IPromise<T> _unloadGroup;
+        private IPromise<T> _loadPromise;
+        private IPromise<T> _unloadPromise;
         private Action<T> _loadedHandler;
         private Action<T> _preloadedHandler;
         private Action<T> _unloadedHandler;
@@ -17,7 +17,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             get
             {
-                return _loadGroup;
+                return _loadPromise;
             }
         }
 
@@ -25,7 +25,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             get
             {
-                return _unloadGroup;
+                return _unloadPromise;
             }
         }
         public LoadState LoadState { get; protected set; }
@@ -47,10 +47,10 @@ namespace Cr7Sund.NodeTree.Impl
             }
 
             LoadState = LoadState.Loading;
-            _loadGroup = OnLoadAsync(value);
-            _loadGroup?.Then(onResolved: _loadedHandler, onRejected: _exceptionHandler);
+            _loadPromise = OnLoadAsync(value);
+            _loadPromise?.Then(onResolved: _loadedHandler, onRejected: _exceptionHandler);
 
-            return _loadGroup;
+            return _loadPromise;
         }
         public IPromise<T> PreLoadAsync(T value)
         {
@@ -61,10 +61,10 @@ namespace Cr7Sund.NodeTree.Impl
             }
 
             LoadState = LoadState.Loading;
-            _loadGroup = OnLoadAsync(value);
-            _loadGroup?.Then(onResolved: _preloadedHandler, onRejected: _exceptionHandler);
+            _loadPromise = OnLoadAsync(value);
+            _loadPromise?.Then(onResolved: _preloadedHandler, onRejected: _exceptionHandler);
 
-            return _loadGroup;
+            return _loadPromise;
         }
         public IPromise<T> UnloadAsync(T value)
         {
@@ -76,14 +76,14 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (LoadState == LoadState.Loading)
             {
-                _unloadGroup?.Resolve(value);
+                _unloadPromise?.Resolve(value);
             }
 
             LoadState = LoadState.Unloading;
-            _unloadGroup = OnUnloadAsync(value);
-            _unloadGroup?.Then(onResolved: _unloadedHandler, onRejected: _exceptionHandler);
+            _unloadPromise = OnUnloadAsync(value);
+            _unloadPromise?.Then(onResolved: _unloadedHandler, onRejected: _exceptionHandler);
 
-            return _unloadGroup;
+            return _unloadPromise;
         }
         public IPromise<T> CancelLoad()
         {

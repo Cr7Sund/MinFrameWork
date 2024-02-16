@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Cr7Sund.EventBus.Api;
-using Cr7Sund.Framework.Api;
+﻿using Cr7Sund.Framework.Api;
 using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Util;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Performance;
+using Cr7Sund.Server.Api;
 using Cr7Sund.Server.Apis;
-using Cr7Sund.Touch.Api;
 
 namespace Cr7Sund.Server.Impl
 {
     public class SceneModule : LoadModule, ISceneModule
     {
+        [Inject]
+        private IGameNode _gameNode;
+        public INode FocusScene => _focusNode;
 
-        public INode FocusScene
+        protected override INode _parentNode
         {
-            get;
-            private set;
+            get
+            {
+                return _gameNode;
+            }
         }
 
         protected override INode CreateNode(IAssetKey key)

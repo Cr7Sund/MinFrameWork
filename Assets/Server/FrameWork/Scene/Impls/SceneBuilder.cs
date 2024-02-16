@@ -17,7 +17,7 @@ namespace Cr7Sund.Server.Impl
         }
         public void BuildNode()
         {
-            _node = CreateGameNode();
+            _node = CreateSceneNode();
             _node.AssignContext(_context);
             _node.AssignControllerModule(_controllerModule);
 
@@ -36,7 +36,7 @@ namespace Cr7Sund.Server.Impl
             return _node;
         }
 
-        protected virtual SceneNode CreateGameNode()
+        protected virtual SceneNode CreateSceneNode()
         {
             return new SceneNode();
         }

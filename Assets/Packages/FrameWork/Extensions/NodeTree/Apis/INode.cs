@@ -5,6 +5,8 @@ namespace Cr7Sund.NodeTree.Api
     {
         IContext Context { get; }
         INode Parent { get; }
+        IPromise<INode> AddStatus { get; }
+        IPromise<INode> RemoveStatus { get; }
         NodeState NodeState { get; }
         IAssetKey Key { get; }
         int ChildCount { get; }

@@ -14,9 +14,10 @@ namespace Cr7Sund.Server.Impl
         public LoadSceneMode LoadSceneMode { get; private set; }
         public string Key { get; private set; }
         public bool ActivateOnLoad { get; private set; }
+        public bool IsVirtualScene { get; private set; }
 
 
-        public SceneKey(string key, Type builderType, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true)
+        public SceneKey(string key, Type builderType, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, bool isVirtualScene = false)
         {
             AssertUtilEditor.IsAssignableFrom(typeof(SceneBuilder), builderType, SceneExceptionType.INVALID_SCENE_BUILDER_TYPE);
 
@@ -24,6 +25,7 @@ namespace Cr7Sund.Server.Impl
             _builderType = builderType;
             LoadSceneMode = loadMode;
             ActivateOnLoad = activateOnLoad;
+            IsVirtualScene = isVirtualScene;
         }
 
 

@@ -33,7 +33,7 @@ namespace Cr7Sund.Framework.Tests
             _node.AddChildAsync(child2);
 
             // Assert
-            Assert.AreEqual(2, _node.Test_GetChildNodeCount());
+            Assert.AreEqual(2, _node.ChildCount);
         }
 
         [Test]
@@ -179,7 +179,7 @@ namespace Cr7Sund.Framework.Tests
             _node.AddChildAsync(child2);
             _node.RemoveChildAsync(child2);
 
-            Assert.AreEqual(1, _node.Test_GetChildNodeCount());
+            Assert.AreEqual(1, _node.ChildCount);
         }
 
 
@@ -196,7 +196,7 @@ namespace Cr7Sund.Framework.Tests
             _node.RemoveChildAsync(child2);
             _node.RemoveChildAsync(child1);
 
-            Assert.AreEqual(0, _node.Test_GetChildNodeCount());
+            Assert.AreEqual(0, _node.ChildCount);
         }
 
 
