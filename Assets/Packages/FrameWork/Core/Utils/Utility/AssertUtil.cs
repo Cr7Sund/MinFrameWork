@@ -151,16 +151,16 @@ namespace Cr7Sund.Framework.Util
         }
 
 
-        public static void Greater(int arg1, int arg2)
+        public static void Greater(int value, int expected)
         {
-            if (arg1 <= arg2)
-                throw new MyException($"excepted {arg1} greater than {arg2}");
+            if (value <= expected)
+                throw new MyException($"excepted {value} greater than {expected}");
         }
 
 
-        public static void Greater<TEnum>(int arg1, int arg2, TEnum errorCode) where TEnum : Enum
+        public static void Greater<TEnum>(int value, int expected, TEnum errorCode) where TEnum : Enum
         {
-            if (arg1 <= arg2)
+            if (value <= expected)
                 throw new MyException(errorCode);
         }
 

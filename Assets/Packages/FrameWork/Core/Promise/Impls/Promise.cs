@@ -608,6 +608,7 @@ namespace Cr7Sund.Framework.Impl
 
             ClearHandlers();
         }
+
         #endregion
 
         #region private methods
@@ -813,8 +814,7 @@ namespace Cr7Sund.Framework.Impl
             AssertUtil.NotNull(ex);
 
             var promise = GetRawPromise<ConvertedT>();
-            promise.CurState = PromiseState.Rejected;
-            promise._rejectionException = ex;
+            promise.Reject(ex);
             return promise;
         }
 

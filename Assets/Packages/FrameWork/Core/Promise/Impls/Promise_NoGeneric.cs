@@ -756,10 +756,8 @@ namespace Cr7Sund.Framework.Impl
         {
             AssertUtil.NotNull(ex);
 
-            var promise = new Promise(PromiseState.Rejected)
-            {
-                _rejectionException = ex
-            };
+            var promise =new Promise();
+            promise.Reject(ex);
             return promise;
         }
 
