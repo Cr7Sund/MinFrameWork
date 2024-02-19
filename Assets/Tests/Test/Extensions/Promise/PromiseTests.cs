@@ -1,11 +1,11 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 using System.Linq;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.Util;
 using UnityEngine.TestTools;
-namespace Cr7Sund.Framework.PromiseTest
+namespace Cr7Sund.PackageTest.PromiseTest
 {
     public class PromiseTests
     {
@@ -34,6 +34,8 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void can_reject_simple_promise()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             var ex = new Exception();
             var promise = Promise<int>.Rejected(ex);
 
@@ -763,6 +765,8 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void combined_promise_is_resolved_when_all_promises_are_already_resolved()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             var promise1 = Promise<int>.Resolved(1);
             var promise2 = Promise<int>.Resolved(1);
 

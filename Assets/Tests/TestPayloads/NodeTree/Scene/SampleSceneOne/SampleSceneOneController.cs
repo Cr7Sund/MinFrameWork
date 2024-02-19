@@ -1,7 +1,6 @@
 using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Server.Apis;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleSceneOneController : BaseController
     {

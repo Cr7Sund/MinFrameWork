@@ -1,8 +1,8 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using NUnit.Framework;
 
-namespace Cr7Sund.EventBus.Tests
+namespace Cr7Sund.PackageTest.EventBus
 {
     public class EventPoolTest
     {

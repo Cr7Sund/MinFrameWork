@@ -1,13 +1,13 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Tests;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.IOC;
+using Cr7Sund.PackageTest.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using UnityEngine.TestTools;
-namespace Cr7Sund.Framework.PromiseCommandTest
+namespace Cr7Sund.PackageTest.PromiseCommandTest
 {
     public class CommandPromiseBinderTests
     {

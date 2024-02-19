@@ -1,7 +1,6 @@
-using Cr7Sund.AssetLoader.Api;
 using UnityEngine.SceneManagement;
 
-namespace Cr7Sund.Server.Apis
+namespace Cr7Sund.Server.Scene.Apis
 {
     public interface ISceneKey : IAssetKey
     {

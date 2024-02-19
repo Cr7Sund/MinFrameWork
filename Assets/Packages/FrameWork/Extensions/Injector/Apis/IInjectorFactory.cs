@@ -6,7 +6,7 @@
  * @seeCr7Sund.Framework.Api.IInjector
  */
 
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     public interface IInjectorFactory
     {

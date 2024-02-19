@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     /// <summary>
     /// Represents an asynchronous command without parameters or return value.

@@ -1,10 +1,10 @@
 using System;
-using Cr7Sund.Framework.Util;
-using Cr7Sund.EventBus.Tests;
+using Cr7Sund.PackageTest.Util;
+using Cr7Sund.PackageTest.EventBus;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Cr7Sund.EventBus.Tests
+namespace Cr7Sund.PackageTest.EventBus
 {
     class EventCircleTest
     {

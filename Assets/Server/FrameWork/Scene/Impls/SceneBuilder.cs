@@ -1,8 +1,7 @@
-﻿using System;
-using Cr7Sund.NodeTree.Api;
+﻿using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.Server.Scene.Impl
 {
     public abstract class SceneBuilder
     {

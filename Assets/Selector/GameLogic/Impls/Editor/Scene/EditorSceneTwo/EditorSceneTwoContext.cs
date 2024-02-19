@@ -1,6 +1,6 @@
-using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Scene.Impl;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class EditorSceneTwoContext : SceneContext
     {

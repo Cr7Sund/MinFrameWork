@@ -1,6 +1,6 @@
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleNode : Node
     {

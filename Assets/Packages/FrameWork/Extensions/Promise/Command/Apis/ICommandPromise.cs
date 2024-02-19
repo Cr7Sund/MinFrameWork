@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     /// <summary>
     /// Represents a command promise interface that extends IPromise, ISequence, IPoolable, and IResetable.

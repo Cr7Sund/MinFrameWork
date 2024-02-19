@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Cr7Sund.Framework.Impl
+namespace Cr7Sund.PackageTest.Impl
 {
     public class TimeCorrector
     {

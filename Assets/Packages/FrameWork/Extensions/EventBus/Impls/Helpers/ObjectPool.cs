@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cr7Sund.EventBus.Impl
+namespace Cr7Sund.PackageTest.EventBus.Impl
 {
 	internal class ObjectPool<T> where T : class, new()
 	{

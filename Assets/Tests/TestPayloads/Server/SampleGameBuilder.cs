@@ -1,4 +1,4 @@
-using Cr7Sund.Framework.Tests;
+using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;
 

@@ -1,6 +1,6 @@
 using Cr7Sund.UGUI.Apis;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleThreePanel : UIPanel
     {

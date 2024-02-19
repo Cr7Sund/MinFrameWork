@@ -1,9 +1,9 @@
 ﻿using System;
-using Cr7Sund.Framework.Util;
-using Cr7Sund.Server.Apis;
+using Cr7Sund.PackageTest.Util;
+using Cr7Sund.Server.Scene.Apis;
 using UnityEngine.SceneManagement;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.Server.Scene.Impl
 {
     public delegate SceneBuilder CreateSceneBuilderDelegate();
 

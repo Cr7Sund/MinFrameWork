@@ -1,9 +1,9 @@
 ﻿using System;
-using Cr7Sund.EventBus.Api;
-using Cr7Sund.EventBus.Impl;
+using Cr7Sund.PackageTest.EventBus.Api;
+using Cr7Sund.PackageTest.EventBus.Impl;
 using NUnit.Framework;
 
-namespace Cr7Sund.EventBus.Tests
+namespace Cr7Sund.PackageTest.EventBus
 {
 	public abstract class TestListener
 	{

@@ -1,5 +1,5 @@
-﻿using Cr7Sund.Framework.Api;
-namespace Cr7Sund.Framework.Impl
+﻿using Cr7Sund.PackageTest.Api;
+namespace Cr7Sund.PackageTest.Impl
 {
     public abstract class Command : BaseCommand, ICommand
     {

@@ -1,7 +1,8 @@
-using Cr7Sund.Framework.Tests;
+using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Scene.Impl;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public partial class SampleSceneKeys
     {

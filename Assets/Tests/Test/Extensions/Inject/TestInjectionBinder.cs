@@ -1,11 +1,13 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.IOC;
+using Cr7Sund.PackageTest.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine.TestTools;
-namespace Cr7Sund.Framework.Tests
+
+namespace Cr7Sund.PackageTest.Inject
 {
     [TestFixture]
     public class TestinjectionBinder : IPrebuildSetup, IPostBuildCleanup
@@ -451,49 +453,5 @@ namespace Cr7Sund.Framework.Tests
         }
     }
 
-    internal interface ITestPooled : IPoolable
-    {
-    }
 
-    internal class TestPooled : ITestPooled
-    {
-        public void Restore()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Retain()
-        {
-
-        }
-
-        public void Release()
-        {
-
-        }
-
-        public bool IsRetain { get; set; }
-    }
-
-    internal interface IUsesPool
-    {
-        ISimpleInterface Instance1 { get; set; }
-        ISimpleInterface Instance2 { get; set; }
-    }
-
-    internal class UsesPool : IUsesPool
-    {
-        [Inject]
-        public IPool<SimpleInterfaceImplementer> pool;
-
-        public ISimpleInterface Instance1 { get; set; }
-        public ISimpleInterface Instance2 { get; set; }
-
-        [PostConstruct]
-        public void PostConstruct()
-        {
-            Instance1 = pool.GetInstance();
-            Instance2 = pool.GetInstance();
-        }
-    }
 }

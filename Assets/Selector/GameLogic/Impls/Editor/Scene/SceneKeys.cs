@@ -1,8 +1,7 @@
-using Cr7Sund.Framework.Tests;
-using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Scene.Impl;
 using UnityEngine.SceneManagement;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public partial class SceneKeys
     {

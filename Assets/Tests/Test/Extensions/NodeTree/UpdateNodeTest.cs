@@ -1,9 +1,10 @@
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.IOC;
+using Cr7Sund.PackageTest.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.NodeTree
 {
     public class UpdateNodeTest
     {

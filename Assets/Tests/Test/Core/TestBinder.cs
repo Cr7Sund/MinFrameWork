@@ -1,9 +1,9 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.Util;
 using NUnit.Framework;
 using System;
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     internal class TestBinder
     {
@@ -81,7 +81,7 @@ namespace Cr7Sund.Framework.Tests
             binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassOne>();
 
 
-            var ex = Assert.Throws<Util.MyException>(() => { binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>(); });
+            var ex = Assert.Throws<MyException>(() => { binder.Bind<InjectableSuperClass>().To<InjectableDerivedClassTwo>(); });
             UnityEngine.Assertions.Assert.AreEqual(BinderExceptionType.CONFLICT_IN_BINDER, ex.Type);
         }
     }

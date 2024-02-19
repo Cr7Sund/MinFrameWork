@@ -1,9 +1,9 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-namespace Cr7Sund.Framework.Impl
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Util;
+namespace Cr7Sund.PackageTest.Impl
 {
     public class Promise : IPromise
     {
@@ -756,7 +756,7 @@ namespace Cr7Sund.Framework.Impl
         {
             AssertUtil.NotNull(ex);
 
-            var promise =new Promise();
+            var promise = new Promise();
             promise.Reject(ex);
             return promise;
         }

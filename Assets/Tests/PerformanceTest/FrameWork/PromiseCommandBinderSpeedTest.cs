@@ -1,8 +1,8 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class PromiseCommandBinderSpeedTest
     {

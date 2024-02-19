@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cr7Sund.EventBus.Api;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Util;
+using Cr7Sund.PackageTest.EventBus.Api;
 
-namespace Cr7Sund.EventBus.Impl
+namespace Cr7Sund.PackageTest.EventBus.Impl
 {
 	/// <summary>
 	/// <para>An event bus.</para>
-	/// If you want to be able to raise events that are targeted to specific objects and that can have source objects, use <see cref="GenericEventBus{TEvent, TObject}"/> instead.
+	/// If you want to be able to raise events that are targeted to specific objects and that can have source objects, use <see cref="GenericEventBus{TBaseEvent}"/> instead.
 	/// </summary>
 	/// <typeparam name="TBaseEvent"><para>The base type all events must inherit/implement.</para> If you don't want to restrict event types to a base type, use <see cref="object"/> as the base type.</typeparam>
 	public class GenericEventBus<TBaseEvent> : IDisposable where TBaseEvent : IEventData

@@ -2,7 +2,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using UnityEngine.PlayerLoop;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleUpdateNode : UpdateNode
     {

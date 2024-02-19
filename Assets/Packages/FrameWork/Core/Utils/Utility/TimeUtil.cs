@@ -1,5 +1,5 @@
 using System;
-namespace Cr7Sund.Framework.Util
+namespace Cr7Sund.PackageTest.Util
 {
     public class TimeUtils
     {

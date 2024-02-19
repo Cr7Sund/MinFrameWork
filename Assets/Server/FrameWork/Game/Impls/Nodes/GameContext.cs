@@ -1,9 +1,9 @@
-using System;
-using Cr7Sund.EventBus.Api;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
+using Cr7Sund.PackageTest.EventBus.Api;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Server.Apis;
+using Cr7Sund.Server.Scene.Apis;
+using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Touch.Api;
 using Cr7Sund.Touch.Impl;
 
@@ -23,7 +23,7 @@ namespace Cr7Sund.Server.Impl
         {
             // Cross Context
             // --- --- 
-            _eventBus = new EventBus.Impl.EventBus();
+            _eventBus = new PackageTest.EventBus.Impl.EventBus();
             _sceneModule = new SceneModule();
 
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton().AsCrossContext();

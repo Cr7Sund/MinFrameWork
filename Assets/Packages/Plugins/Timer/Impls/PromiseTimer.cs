@@ -1,7 +1,7 @@
-using Cr7Sund.Framework.Api;
 using System;
 using System.Collections.Generic;
-namespace Cr7Sund.Framework.Impl
+using Cr7Sund.PackageTest.Api;
+namespace Cr7Sund.PackageTest.Impl
 {
     public class PromiseTimer : IPromiseTimer
     {

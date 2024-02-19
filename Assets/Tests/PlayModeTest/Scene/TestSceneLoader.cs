@@ -7,7 +7,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class TestSceneLoader : MonoBehaviour
     {

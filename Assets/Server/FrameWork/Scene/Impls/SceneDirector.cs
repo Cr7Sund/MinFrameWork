@@ -1,6 +1,6 @@
 ﻿
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.Server.Scene.Impl
 {
     public static class SceneDirector
     {

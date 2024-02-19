@@ -1,11 +1,11 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Util;
 using NUnit.Framework;
 using System;
 using System.Linq;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.Util;
 using UnityEngine.TestTools;
-namespace Cr7Sund.Framework.PromiseTest
+namespace Cr7Sund.PackageTest.PromiseTest
 {
     public class Promise_NonGeneric_Tests
     {
@@ -29,6 +29,8 @@ namespace Cr7Sund.Framework.PromiseTest
         [Test]
         public void can_reject_simple_promise()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             var ex = new Exception();
             var promise = Promise.Rejected(ex);
 

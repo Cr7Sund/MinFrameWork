@@ -1,9 +1,9 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
 using NUnit.Framework;
 using System;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using UnityEngine.TestTools;
-namespace Cr7Sund.Framework.PromiseTimerTest
+namespace Cr7Sund.PackageTest.PromiseTimerTest
 {
     public class PromiseTimerTests
     {

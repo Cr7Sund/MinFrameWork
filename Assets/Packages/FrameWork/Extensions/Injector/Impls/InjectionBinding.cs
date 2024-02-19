@@ -1,7 +1,7 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.Util;
 using System;
-namespace Cr7Sund.Framework.Impl
+using Cr7Sund.PackageTest.Api;
+namespace Cr7Sund.PackageTest.Impl
 {
     public class InjectionBinding : Binding, IInjectionBinding
     {

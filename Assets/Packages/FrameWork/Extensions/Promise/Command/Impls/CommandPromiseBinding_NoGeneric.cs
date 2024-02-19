@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Cr7Sund.Framework.Api;
 using System;
-using Cr7Sund.Framework.Util;
-namespace Cr7Sund.Framework.Impl
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Util;
+namespace Cr7Sund.PackageTest.Impl
 {
     public class CommandPromiseBinding : Binding, ICommandPromiseBinding
     {

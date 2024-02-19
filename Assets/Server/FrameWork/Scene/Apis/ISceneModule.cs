@@ -1,7 +1,7 @@
-﻿using Cr7Sund.EventBus.Api;
-using Cr7Sund.Framework.Api;
+﻿using Cr7Sund.PackageTest.EventBus.Api;
+using Cr7Sund.PackageTest.Api;
 using Cr7Sund.NodeTree.Api;
-namespace Cr7Sund.Server.Apis
+namespace Cr7Sund.Server.Scene.Apis
 {
     /// <summary>
     /// Defines the interface for a scene management module that allows running, removing, preloading, and observing scenes.

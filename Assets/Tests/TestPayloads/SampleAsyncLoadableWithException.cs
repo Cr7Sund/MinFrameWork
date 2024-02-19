@@ -1,7 +1,7 @@
 ﻿using System;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.Util;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
 namespace Cr7Sund.FrameWork.Test

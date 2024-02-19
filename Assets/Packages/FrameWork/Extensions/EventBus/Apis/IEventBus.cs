@@ -1,4 +1,4 @@
-namespace Cr7Sund.EventBus.Api
+namespace Cr7Sund.PackageTest.EventBus.Api
 {
     /// <summary>
     /// A delegate for the callback methods given when subscribing to an event type.

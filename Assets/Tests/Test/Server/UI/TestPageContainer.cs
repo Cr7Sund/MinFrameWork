@@ -1,18 +1,19 @@
 ﻿using Cr7Sund;
-using Cr7Sund.EventBus.Api;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Tests;
-using Cr7Sund.Framework.Util;
+using Cr7Sund.PackageTest.EventBus.Api;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.IOC;
+using Cr7Sund.PackageTest.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 using Cr7Sund.Touch.Api;
 using Cr7Sund.Touch.Impl;
 using NUnit.Framework;
 
-namespace Cr7Sund.UIFrameWork.Tests
+namespace Cr7Sund.ServerTest.UI
 {
     public class TestPageContainer
     {
@@ -32,7 +33,7 @@ namespace Cr7Sund.UIFrameWork.Tests
             var injectionBinder = _sceneNode.Context.InjectionBinder;
             injectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             injectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
-            injectionBinder.Bind<IEventBus>().To<EventBus.Impl.EventBus>().AsSingleton().AsCrossContext();
+            injectionBinder.Bind<IEventBus>().To<PackageTest.EventBus.Impl.EventBus>().AsSingleton().AsCrossContext();
 
             Debug.Init(new InternalLogger());
             RunScene();

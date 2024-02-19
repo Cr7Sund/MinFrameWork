@@ -5,7 +5,7 @@
  * When all you need is a new instance, use this instead of IInjectionBinder.
  */
 using System;
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     public interface IInstanceProvider
     {

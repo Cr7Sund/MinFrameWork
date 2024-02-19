@@ -1,6 +1,6 @@
-using Cr7Sund.Framework.Api;
+using Cr7Sund.PackageTest.Api;
 
-namespace Cr7Sund.EventBus.Api
+namespace Cr7Sund.PackageTest.EventBus.Api
 {
     public interface IEventData : IPoolable
     {

@@ -1,7 +1,7 @@
-﻿using Cr7Sund.EventBus.Tests;
+﻿using Cr7Sund.PackageTest.EventBus;
 using NUnit.Framework;
 
-namespace Cr7Sund.EventBus.Tests
+namespace Cr7Sund.PackageTest.EventBus
 {
 	[TestFixture]
 	public class MultipleEventListenersTests

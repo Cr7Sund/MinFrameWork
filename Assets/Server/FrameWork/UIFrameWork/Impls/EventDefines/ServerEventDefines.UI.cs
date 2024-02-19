@@ -1,4 +1,4 @@
-﻿using Cr7Sund.EventBus.Impl;
+﻿using Cr7Sund.PackageTest.EventBus.Impl;
 using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.Server

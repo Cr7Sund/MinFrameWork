@@ -1,6 +1,6 @@
-using Cr7Sund.EventBus.Api;
+using Cr7Sund.PackageTest.EventBus.Api;
 
-namespace Cr7Sund.EventBus.Impl
+namespace Cr7Sund.PackageTest.EventBus.Impl
 {
     public class EventBus : GenericEventBus<IEventData>, IEventBus
     {

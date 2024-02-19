@@ -1,4 +1,4 @@
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     /// <summary>
     ///     Interface for a promise that can be rejected or resolved.

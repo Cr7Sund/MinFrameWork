@@ -1,4 +1,4 @@
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class GuaranteedUniqueInstances
     {

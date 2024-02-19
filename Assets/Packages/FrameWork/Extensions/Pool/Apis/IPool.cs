@@ -1,6 +1,6 @@
 using System;
 
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     /// <summary>
     /// Represents a mechanism for storing and reusing instances.

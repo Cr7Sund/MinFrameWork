@@ -1,13 +1,21 @@
-﻿using Cr7Sund.Framework.Util;
+﻿using Cr7Sund.PackageTest.Util;
+using Cr7Sund.FrameWork.Test;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
-namespace Cr7Sund.FrameWork.Test
+using UnityEngine.TestTools;
+
+namespace Cr7Sund.PackageTest.NodeTree
 {
     [TestFixture]
     [TestOf(typeof(AsyncLoadable))]
     public class ResolveAsyncLoadableTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Debug.Init(new InternalLogger());
+        }
 
         [Test]
         public void TestLoadAsync()
@@ -38,8 +46,10 @@ namespace Cr7Sund.FrameWork.Test
         }
 
         [Test]
-        public void TestLoadRejeced()
+        public void TestLoadRejected()
         {
+            LogAssert.ignoreFailingMessages = true;
+
             // Arrange
             var sampleLoadable = new RejectableAsyncLoadable();
 
@@ -62,7 +72,7 @@ namespace Cr7Sund.FrameWork.Test
             // Assert
             Assert.AreEqual(LoadState.Fail, sampleLoadable.State);
         }
-        
+
         [Test]
         public void TestUnloadAsync_Exception()
         {
@@ -70,7 +80,7 @@ namespace Cr7Sund.FrameWork.Test
             var sampleLoadable = new ResolveAsyncLoadable();
 
             // Act
-           TestDelegate handler = ()=>  sampleLoadable.UnloadAsync();
+            TestDelegate handler = () => sampleLoadable.UnloadAsync();
 
             // Assert
             var ex = Assert.Throws<MyException>(handler);

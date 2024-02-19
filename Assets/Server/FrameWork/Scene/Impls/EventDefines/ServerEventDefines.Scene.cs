@@ -1,8 +1,6 @@
-﻿using Cr7Sund.EventBus.Impl;
-using Cr7Sund.Server.Apis;
-using Cr7Sund.Server.Impl;
+﻿using Cr7Sund.PackageTest.EventBus.Impl;
 
-namespace Cr7Sund.Server
+namespace Cr7Sund.Server.Scene.Impl
 {
     public class AddSceneBeginEvent : EventData
     {

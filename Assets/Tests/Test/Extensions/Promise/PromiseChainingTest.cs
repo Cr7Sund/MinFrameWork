@@ -1,10 +1,10 @@
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
-using Cr7Sund.Framework.Tests;
+using Cr7Sund.PackageTest.IOC;
 using NUnit.Framework;
 using System;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using UnityEngine.TestTools;
-namespace Cr7Sund.Framework.PromiseTest
+namespace Cr7Sund.PackageTest.PromiseTest
 {
     public class PromiseChainingTest
     {

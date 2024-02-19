@@ -1,5 +1,5 @@
 
-namespace Cr7Sund.EventBus.Api
+namespace Cr7Sund.PackageTest.EventBus.Api
 {
     public interface IObservable
     {

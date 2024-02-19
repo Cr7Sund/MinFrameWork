@@ -5,7 +5,7 @@
  * are either a SemiBinding or a Pool. A ManagedList can have objects added or removed.
  */
 using System;
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     public interface IManagedList : IDisposable
     {

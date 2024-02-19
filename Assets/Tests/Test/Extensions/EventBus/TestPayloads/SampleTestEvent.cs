@@ -1,7 +1,7 @@
-﻿using Cr7Sund.EventBus.Api;
-using Cr7Sund.Framework.Impl;
+﻿using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.PackageTest.EventBus.Api;
 
-namespace Cr7Sund.EventBus.Tests
+namespace Cr7Sund.PackageTest.EventBus
 {
     public struct SampleTestEvent : IEventData
     {

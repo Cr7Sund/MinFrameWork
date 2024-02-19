@@ -39,7 +39,7 @@
 
 using System;
 using System.Collections.Generic;
-namespace Cr7Sund.Framework.Api
+namespace Cr7Sund.PackageTest.Api
 {
     public interface IInjectionBinder : IBinder, IInstanceProvider
     {

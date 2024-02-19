@@ -1,7 +1,8 @@
-using Cr7Sund.Framework.Impl;
+using Cr7Sund.PackageTest.Api;
+using Cr7Sund.PackageTest.Impl;
 using NUnit.Framework;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class TestPoolBinder
     {
@@ -37,7 +38,7 @@ namespace Cr7Sund.Framework.Tests
         {
             var poolBinder = new PoolBinder();
             var pool = poolBinder.GetOrCreate<ClassToBeInjected>();
-            pool.InflationType = Api.PoolInflationType.INCREMENT;
+            pool.InflationType = PoolInflationType.INCREMENT;
 
             var instance1 = pool.GetInstance();
             var instance2 = poolBinder.AutoCreate<ClassToBeInjected>();

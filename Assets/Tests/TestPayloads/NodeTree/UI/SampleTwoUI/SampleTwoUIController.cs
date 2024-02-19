@@ -1,6 +1,6 @@
 using Cr7Sund.Server.UI.Impl;
 
-namespace Cr7Sund.Framework.Tests
+namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleTwoUIController : BaseUIController
     {

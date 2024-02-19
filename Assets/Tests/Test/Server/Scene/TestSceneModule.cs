@@ -1,16 +1,13 @@
-using Cr7Sund.Touch.Api;
-using Cr7Sund.Touch.Impl;
-using Cr7Sund.Framework.Api;
-using Cr7Sund.Framework.Impl;
+using Cr7Sund.PackageTest.Api;
 using Cr7Sund.Server.Impl;
 using NUnit.Framework;
-using Cr7Sund.Server.Apis;
-using Cr7Sund.Framework.Tests;
-using Cr7Sund.EventBus.Api;
+using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Server.Api;
+using Cr7Sund.Server.Scene.Apis;
+using Cr7Sund.Server.Scene.Impl;
+using Cr7Sund.Server.Tests;
 
-namespace Cr7Sund.Server.Tests
+namespace Cr7Sund.ServerTest.Scene
 {
     public class TestSceneModule
     {
