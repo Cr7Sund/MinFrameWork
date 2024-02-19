@@ -9,7 +9,7 @@ namespace Cr7Sund.AssetLoader.Api
         IAssetPromise LoadAsync<T>(IAssetKey key) where T : Object;
         IAssetPromise InstantiateAsync(IAssetKey key) ;
         IAssetPromise Instantiate(IAssetKey key) ;
-        void UnloadAsync<T>(IAssetPromise handler) where T : Object;
+        void Unload<T>(IAssetPromise handler) where T : Object;
         void ReleaseInstance(IAssetPromise instance);
     }
 

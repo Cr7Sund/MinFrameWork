@@ -1,11 +1,15 @@
-﻿using Cr7Sund.Framework.Api;
-using Cr7Sund.NodeTree.Api;
+﻿using Cr7Sund.Framework.Api;  // Importing the framework's API namespace
+using Cr7Sund.NodeTree.Api;  // Importing the node tree API namespace
 
 namespace Cr7Sund.Server.Api
 {
     public interface ILoadModule
     {
-        IPromise<INode> RemoveNode(IAssetKey uiKey);
-        IPromise<INode> AddNode(IAssetKey openUiKey);
+        //  remove a node with the specified asset key
+        IPromise<INode> RemoveNode(IAssetKey assetKey);
+
+        // dd a node with the specified asset key
+        // Optional parameter 'overwrite' to indicate whether existing nodes should be overwritten
+        IPromise<INode> AddNode(IAssetKey assetKey, bool overwrite = false);
     }
 }

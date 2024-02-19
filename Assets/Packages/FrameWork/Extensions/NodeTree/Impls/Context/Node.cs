@@ -12,10 +12,10 @@ namespace Cr7Sund.NodeTree.Impl
         private Node _parent;
         private IPromise<INode> _addPromise;
         private IPromise<INode> _removePromise;
-        
+
         protected IContext _context;
 
-        
+
         public INode Parent
         {
             get
@@ -86,15 +86,24 @@ namespace Cr7Sund.NodeTree.Impl
         public IContext Context => _context;
 
         #region LifeCycle
-        public IPromise<INode> PreLoad(INode self)
+        public override IPromise<INode> PreLoadAsync(INode self)
         {
             AssertUtil.IsTrue(LoadState == LoadState.Default);
-            Inject();
+
+            var selfNode = self as Node;
+            selfNode.StartPreload();
+            if (!IsInjected)
+            {
+                Inject();
+            }
             if (!IsInit)
+            {
                 Init();
+            }
+
             // since we don't add child first
             // on loaded will not be call 
-            return PreLoadAsync(self);
+            return base.PreLoadAsync(self);
         }
 
         public void Init()
@@ -365,16 +374,23 @@ namespace Cr7Sund.NodeTree.Impl
             }
             if (child.LoadState == LoadState.Unloading)
             {
-                throw new MyException($"can not add node when unloading", NodeTreeExceptionType.INVALID_NODESTATE);
+                return Promise<INode>.Rejected(new MyException(
+                    $"can not add node when unloading", NodeTreeExceptionType.INVALID_NODESTATE));
+            }
+            if (child.LoadState == LoadState.Fail)
+            {
+                throw new NotImplementedException();
             }
 
-            var implChildNode = child as Node;
-            if (ChildNodes.Contains(implChildNode))
+            var childNode = child as Node;
+            if (ChildNodes.Contains(childNode))
             {
                 return child.LoadStatus;
             }
 
-            _context.AddContext(implChildNode._context);
+            childNode.SetAdding();
+
+            _context.AddContext(childNode._context);
             if (!child.IsInjected)
             {
                 child.Inject();
@@ -384,19 +400,18 @@ namespace Cr7Sund.NodeTree.Impl
                 child.Init();
             }
 
-            if (child.LoadState == LoadState.Default || child.LoadState == LoadState.Unloaded)
+            if (child.LoadState == LoadState.Default
+                || child.LoadState == LoadState.Unloaded)
             {
-                _addPromise = child.LoadAsync(child)
-                    .Then(AddChild);
+                childNode._addPromise = child.LoadAsync(child)
+                    .Then(AddChildInternal);
             }
             else
             {
-                // AssertUtil.AreEqual(LoadState.Loaded, child.LoadState);
-
-                _addPromise = AddChild(implChildNode);
+                childNode._addPromise = AddChildInternal(childNode);
             }
 
-            return _addPromise;
+            return childNode._addPromise;
         }
         public IPromise<INode> UnloadChildAsync(INode child)
         {
@@ -415,17 +430,21 @@ namespace Cr7Sund.NodeTree.Impl
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
             if (child.LoadState != LoadState.Loaded)
             {
-                throw new MyException($"can not remove node at : {child.LoadState} State", NodeTreeExceptionType.INVALID_NODESTATE);
+                Promise<INode>.Rejected(new MyException(
+                    $"can not remove node at : {child.LoadState} State", NodeTreeExceptionType.INVALID_NODESTATE));
             }
             AssertUtil.IsTrue(ChildNodes.Contains(child), NodeTreeExceptionType.REMOVE_NO_EXISTED);
 
-            var implChildNode = child as Node;
-            if (implChildNode.IsActive)
+
+            var childNode = child as Node;
+            childNode.StartUnload(shouldUnload);
+
+            if (childNode.IsActive)
             {
-                implChildNode.SetActive(false);
+                childNode.SetActive(false);
             }
 
-            _context.RemoveContext(implChildNode._context);
+            _context.RemoveContext(childNode._context);
 
             if (shouldUnload)
             {
@@ -433,21 +452,21 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     child.Stop();
                 }
-                if (implChildNode.IsInjected)
+                if (childNode.IsInjected)
                 {
-                    implChildNode.DeInject();
+                    childNode.DeInject();
                 }
-                _removePromise = child.UnloadAsync(child)
-                    .Then(RemoveChild);
+                childNode._removePromise = child.UnloadAsync(child)
+                    .Then(RemoveChildInternal);
             }
             else
             {
-                _removePromise = RemoveChild(implChildNode);
+                childNode._removePromise = RemoveChildInternal(childNode);
             }
 
-            return _removePromise;
+            return childNode._removePromise;
         }
-        private IPromise<INode> RemoveChild(INode child)
+        private IPromise<INode> RemoveChildInternal(INode child)
         {
             AssertUtil.NotNull(child);
             AssertUtil.IsTrue(ChildNodes.Contains(child));
@@ -457,9 +476,10 @@ namespace Cr7Sund.NodeTree.Impl
             childNode._parent = null;
             OnRemoveChild(child);
 
+            childNode.EndUnLoad(true);
             return Promise<INode>.Resolved(child);
         }
-        private IPromise<INode> AddChild(INode child)
+        private IPromise<INode> AddChildInternal(INode child)
         {
             AssertUtil.NotNull(child);
             AssertUtil.IsTrue(child.LoadState == LoadState.Loaded);
@@ -481,22 +501,23 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 childNode.SetActive(true);
             }
+
+            childNode.SetReady();
             return Promise<INode>.Resolved(child);
         }
         #endregion
 
         #region Load
-        public bool IsLoading() => NodeState == NodeState.Loading || NodeState == NodeState.Preloading;
-        public void StartLoad() => NodeState = NodeState.Loading;
-        public void SetAdding() =>
+        public bool IsLoading() => LoadState == LoadState.Loading;
+        private void SetAdding() =>
             NodeState = NodeState.Adding;
-        public void StartPreload() => NodeState = NodeState.Preloading;
-        public void EndPreload() => NodeState = NodeState.Preloaded;
-        public void SetReady() => NodeState = NodeState.Ready;
-        public void StartUnload(bool unload) =>
-            NodeState = unload ? NodeState.Removing :
+        private void StartPreload() => NodeState = NodeState.Preload;
+        private void EndPreload() => NodeState = NodeState.Preloaded;
+        private void SetReady() => NodeState = NodeState.Ready;
+        private void StartUnload(bool shouldUnload) =>
+            NodeState = shouldUnload ? NodeState.Removing :
                 NodeState.Unloading;
-        public void EndUnLoad(bool unload) =>
+        private void EndUnLoad(bool unload) =>
             NodeState = unload ? NodeState.Removed :
                 NodeState.Unloaded;
 
@@ -518,7 +539,7 @@ namespace Cr7Sund.NodeTree.Impl
         }
         protected override void OnPreLoaded()
         {
-
+            EndPreload();
         }
         #endregion
 
@@ -550,6 +571,9 @@ namespace Cr7Sund.NodeTree.Impl
         #endregion
 
 
-
+        public override string ToString()
+        {
+            return Key.ToString();
+        }
     }
 }

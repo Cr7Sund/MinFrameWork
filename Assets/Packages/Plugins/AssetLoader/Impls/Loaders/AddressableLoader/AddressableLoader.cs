@@ -54,7 +54,7 @@ namespace Cr7Sund.AssetLoader.Impl
         {
             return LoadInternal<T>(key, true);
         }
-        public void UnloadAsync<T>(IAssetPromise assetPromise) where T : Object
+        public void Unload<T>(IAssetPromise assetPromise) where T : Object
         {
             if (!_controlIdToHandles.ContainsKey(assetPromise.ControlId))
             {

@@ -7,7 +7,8 @@
         "Cr7Sund.FrameWork.Core",
         "Cr7Sund.FrameWork.Extension",
         "Cr7Sund.FarmeWork.Server",
-        "Cr7Sund.FrameWork.Selector"
+        "Cr7Sund.FrameWork.Selector",
+        "Cr7Sund.UGUI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

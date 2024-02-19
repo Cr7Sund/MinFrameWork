@@ -45,6 +45,19 @@ namespace Cr7Sund.Server.Impl
             }
         }
 
+        protected override IPromise<INode> OnUnloadAsync(INode content)
+        {
+            var sceneNode = content as SceneNode;
+            var sceneKey = sceneNode.Key as SceneKey;
+
+            if (!sceneKey.IsVirtualScene)
+            {
+                _sceneLoader.UnloadScene(sceneKey);
+            }
+
+            return base.OnUnloadAsync(content);
+
+        }
 
     }
 }

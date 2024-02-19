@@ -52,7 +52,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             return _loadPromise;
         }
-        public IPromise<T> PreLoadAsync(T value)
+        public virtual IPromise<T> PreLoadAsync(T value)
         {
             if (LoadState == LoadState.Loading || LoadState == LoadState.Unloading)
             {
@@ -87,7 +87,7 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public IPromise<T> CancelLoad()
         {
-            AssertUtil.NotNull(LoadStatus, NodeTreeExceptionType.CANCEL_NOTLOADED);
+            AssertUtil.NotNull(LoadStatus, NodeTreeExceptionType.CANCEL_NOT_LOADED);
 
             LoadStatus.Cancel();
             return LoadStatus.Then(UnloadAsync);

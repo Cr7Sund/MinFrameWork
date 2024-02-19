@@ -1,8 +1,5 @@
-
-
-
-using Cr7Sund.Framework.Api;
-using Cr7Sund.UGUI.Apis;
+using Cr7Sund.Framework.Api;  
+using Cr7Sund.UGUI.Apis;     
 
 /**
  * @class Cr7Sund.Framework.Api.IView
@@ -16,23 +13,37 @@ namespace Cr7Sund.Server.UI.Api
 {
     public interface IUIView
     {
-        IUIController VM { get; }
-        /// <summary>
-        /// 是否可见
-        /// </summary>
-        bool Visible { get; }
-        /// <summary>
-        /// UI组件获取器
-        /// </summary>
+        //  get the UI controller associated with the view
+        IUIController Controller { get; }
+
+        //  get the UI panel associated with the view
         IUIPanel View { get; }
-        string PageId { get;set; }
 
+        //  get or set the page ID
+        string PageId { get; set; }
 
+        //  check if the view is currently transitioning
+        bool IsTransitioning { get; }
+
+        //  get the asset key associated with the view
+        IAssetKey Key { get; }
+
+        // Method called before exiting the view
         IPromise BeforeExit(bool push, IUIView partnerView);
+
+        // Method called before entering the view
         IPromise BeforeEnter(bool push, IUIView partnerView);
-        IPromise Exit(bool push,  IUIView partnerView);
-        IPromise Enter(bool push, IUIView partnerView);
+
+        // Method called when exiting the view
+        IPromise Exit(bool push, IUIView partnerView, bool playAnimation);
+
+        // Method called when entering the view
+        IPromise Enter(bool push, IUIView partnerView, bool playAnimation);
+
+        // Method called after exiting the view
         IPromise AfterExit(bool push, IUIView enterPage);
+
+        // Method called after entering the view
         IPromise AfterEnter(bool push, IUIView enterPage);
     }
 }

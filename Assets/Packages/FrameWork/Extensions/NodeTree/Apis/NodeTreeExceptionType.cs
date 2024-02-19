@@ -37,7 +37,7 @@
         /// <summary>
         /// Cant cancel when not loaded 
         /// </summary>
-        CANCEL_NOTLOADED,
+        CANCEL_NOT_LOADED,
 
 
         #endregion

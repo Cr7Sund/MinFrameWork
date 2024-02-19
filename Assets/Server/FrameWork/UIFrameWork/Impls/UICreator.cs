@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using Cr7Sund.Framework.Util;
 
 namespace Cr7Sund.Server.UI.Impl
@@ -7,7 +7,13 @@ namespace Cr7Sund.Server.UI.Impl
     {
         public static UINode Create(UIKey key)
         {
-            return new UINode();
+            return new UINode()
+            {
+                Key = key,
+                PageId = Guid.NewGuid().ToString(),
+                View = key.CreateView(),
+                Controller = key.CreateCtrl(),
+            };
         }
     }
 }

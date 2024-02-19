@@ -183,7 +183,7 @@
             {
                 #if NO_TRY_CATCH 
                 return true;
-#else
+                #else
                 return false;
                 #endif
             }
