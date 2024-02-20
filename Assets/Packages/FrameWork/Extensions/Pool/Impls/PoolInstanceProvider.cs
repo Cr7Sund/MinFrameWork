@@ -1,6 +1,6 @@
 using System;
-using Cr7Sund.PackageTest.Api;
-namespace Cr7Sund.PackageTest.Impl
+using Cr7Sund.Package.Api;
+namespace Cr7Sund.Package.Impl
 {
     public class PoolInstanceProvider : IInstanceProvider
     {

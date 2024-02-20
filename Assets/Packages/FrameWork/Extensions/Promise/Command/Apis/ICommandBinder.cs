@@ -1,4 +1,4 @@
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Represents a binder for commands, providing methods to get or create instances of specific command types.

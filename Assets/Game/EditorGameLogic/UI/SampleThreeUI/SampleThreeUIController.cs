@@ -1,4 +1,4 @@
-using Cr7Sund.PackageTest.Api;
+using Cr7Sund.Package.Api;
 using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.Game.UI

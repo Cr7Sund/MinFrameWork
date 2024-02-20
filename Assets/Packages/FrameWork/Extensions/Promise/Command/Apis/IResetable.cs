@@ -1,4 +1,4 @@
-﻿namespace Cr7Sund.PackageTest.Api
+﻿namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Represents an interface for objects that can be reset.

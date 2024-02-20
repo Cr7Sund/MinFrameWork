@@ -1,5 +1,7 @@
-﻿using Cr7Sund.PackageTest.EventBus.Api;
-using Cr7Sund.PackageTest.EventBus.Impl;
+﻿
+
+using Cr7Sund.Package.EventBus.Api;
+using Cr7Sund.Package.EventBus.Impl;
 
 namespace Cr7Sund.PackageTest.EventBus
 {

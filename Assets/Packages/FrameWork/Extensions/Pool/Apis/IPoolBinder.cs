@@ -1,6 +1,6 @@
 using System;
 
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Represents a binder for managing pools.

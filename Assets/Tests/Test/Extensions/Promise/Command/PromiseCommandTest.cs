@@ -1,7 +1,7 @@
 using Cr7Sund.PackageTest.IOC;
-using Cr7Sund.PackageTest.Util;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.FrameWork.Util;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 namespace Cr7Sund.PackageTest.PromiseCommandTest

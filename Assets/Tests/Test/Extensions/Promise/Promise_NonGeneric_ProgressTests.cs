@@ -1,8 +1,8 @@
 using NUnit.Framework;
 using System;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
-using Cr7Sund.PackageTest.Util;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.FrameWork.Util;
 using UnityEngine.TestTools;
 namespace Cr7Sund.PackageTest.PromiseTest
 {
@@ -141,7 +141,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             var promise = new Promise();
             promise.Resolve();
 
-            var promiseException = Assert.Throws<Util.MyException>(() => promise.ReportProgress(1f));
+            var promiseException = Assert.Throws<MyException>(() => promise.ReportProgress(1f));
             Assert.AreEqual(PromiseExceptionType.Valid_PROGRESS_STATE, promiseException.Type);
 
         }
@@ -154,7 +154,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             var promise = new Promise();
             promise.Reject(new Exception());
 
-            var promiseException = Assert.Throws<Util.MyException>(() => promise.ReportProgress(1f));
+            var promiseException = Assert.Throws<MyException>(() => promise.ReportProgress(1f));
             Assert.AreEqual(PromiseExceptionType.Valid_PROGRESS_STATE, promiseException.Type);
         }
 

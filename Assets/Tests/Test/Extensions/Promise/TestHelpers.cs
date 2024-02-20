@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System;
-using Cr7Sund.PackageTest.Impl;
-using Cr7Sund.PackageTest.Util;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.FrameWork.Util;
 namespace Cr7Sund.PackageTest.PromiseTest
 {
     internal static class TestHelpers

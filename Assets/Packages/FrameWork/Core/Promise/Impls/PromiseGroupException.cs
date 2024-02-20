@@ -1,6 +1,6 @@
-using Cr7Sund.PackageTest.Api;
+using Cr7Sund.Package.Api;
 using System;
-namespace Cr7Sund.PackageTest.Impl
+namespace Cr7Sund.Package.Impl
 {
     public class PromiseGroupException : Exception
     {

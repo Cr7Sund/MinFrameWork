@@ -1,7 +1,7 @@
-using Cr7Sund.PackageTest.Util;
+using Cr7Sund.FrameWork.Util;
 using System;
-using Cr7Sund.PackageTest.Api;
-namespace Cr7Sund.PackageTest.Impl
+using Cr7Sund.Package.Api;
+namespace Cr7Sund.Package.Impl
 {
     public class InjectionBinding : Binding, IInjectionBinding
     {
@@ -19,7 +19,7 @@ namespace Cr7Sund.PackageTest.Impl
                 var keyType = Key.SingleValue as Type;
                 if (keyType.IsAssignableFrom(objType) == false)
                 {
-                    throw new Util.MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                    throw new MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
                 }
             }
             else
@@ -29,7 +29,7 @@ namespace Cr7Sund.PackageTest.Impl
                     var keyType = Key[i] as Type;
                     if (keyType.IsAssignableFrom(objType) == false)
                     {
-                        throw new Util.MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
+                        throw new MyException("Injection cannot bind a value that does not extend or implement the binding type.", InjectionExceptionType.ILLEGAL_BINDING_VALUE);
                     }
                 }
 

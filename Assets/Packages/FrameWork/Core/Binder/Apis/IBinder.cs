@@ -15,7 +15,7 @@
  * @see Cr7Sund.Framework.Api.IBinding
  */
 using System;
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     public interface IBinder : IDisposable
     {

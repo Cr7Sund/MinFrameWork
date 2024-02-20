@@ -1,12 +1,13 @@
-using Cr7Sund.PackageTest.EventBus.Api;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.Package.EventBus.Api;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Impl;
 using Cr7Sund.Touch.Api;
 using Cr7Sund.Touch.Impl;
+using Cr7Sund.Package.EventBus.Impl;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -25,7 +26,7 @@ namespace Cr7Sund.Server.Impl
             // Cross Context
             // --- --- 
             InjectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IEventBus>().To<PackageTest.EventBus.Impl.EventBus>().AsSingleton().AsCrossContext();
+            InjectionBinder.Bind<IEventBus>().To<EventBus>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<ISceneModule>().To<SceneModule>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<PageContainer>().To<PageContainer>().AsSingleton().AsCrossContext();
 

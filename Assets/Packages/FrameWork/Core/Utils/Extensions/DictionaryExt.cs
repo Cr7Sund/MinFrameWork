@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cr7Sund.PackageTest.Util
+namespace Cr7Sund.FrameWork.Util
 {
 	/// <summary>
 	/// Container for extension functions for the System.Collections.Generic.Dictionary{T}

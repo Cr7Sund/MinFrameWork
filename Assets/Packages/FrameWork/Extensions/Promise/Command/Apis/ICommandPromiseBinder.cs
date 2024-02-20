@@ -1,4 +1,4 @@
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Represents a binder for command promises with a specified promised type, extending the generic IBinder interface with additional command-specific functionalities.

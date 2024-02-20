@@ -1,7 +1,7 @@
-using Cr7Sund.PackageTest.Impl;
-using Cr7Sund.PackageTest.EventBus.Api;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.Package.EventBus.Api;
 
-namespace Cr7Sund.PackageTest.EventBus.Impl
+namespace Cr7Sund.Package.EventBus.Impl
 {
     public abstract class EventData : BasePoolable, IEventData
     {

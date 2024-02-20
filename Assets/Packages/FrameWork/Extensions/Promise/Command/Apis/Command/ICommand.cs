@@ -1,4 +1,4 @@
-﻿namespace Cr7Sund.PackageTest.Api
+﻿namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Represents a basic command without any parameter or return value.

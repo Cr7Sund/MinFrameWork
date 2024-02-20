@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Implements a non-generic C# promise, a promise that simply resolves without delivering a value.

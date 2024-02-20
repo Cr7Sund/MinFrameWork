@@ -1,6 +1,6 @@
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
-using Cr7Sund.PackageTest.Util;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
 using System.Collections;

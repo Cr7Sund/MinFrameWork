@@ -1,4 +1,4 @@
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     /// <summary>
     ///     Used to list information of pending promises.

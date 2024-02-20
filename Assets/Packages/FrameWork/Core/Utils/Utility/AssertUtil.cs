@@ -15,7 +15,7 @@
  */
 using System;
 using System.Collections.Generic;
-namespace Cr7Sund.PackageTest.Util
+namespace Cr7Sund.FrameWork.Util
 {
     public static class AssertUtil
     {

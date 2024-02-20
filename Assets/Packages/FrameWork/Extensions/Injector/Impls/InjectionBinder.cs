@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Util;
-namespace Cr7Sund.PackageTest.Impl
+using Cr7Sund.Package.Api;
+using Cr7Sund.FrameWork.Util;
+namespace Cr7Sund.Package.Impl
 {
     public class InjectionBinder : Binder, IInjectionBinder
     {
@@ -43,7 +43,7 @@ namespace Cr7Sund.PackageTest.Impl
 
             if (binding == null)
             {
-                throw new Util.MyException("InjectionBinder has no binding for:\n\tkey: " + key + "\nname: " + name, InjectionExceptionType.NULL_BINDING_CREATE);
+                throw new MyException("InjectionBinder has no binding for:\n\tkey: " + key + "\nname: " + name, InjectionExceptionType.NULL_BINDING_CREATE);
             }
 
             object instance = GetInjectorForBinding(binding).Instantiate(binding);
@@ -57,7 +57,7 @@ namespace Cr7Sund.PackageTest.Impl
             var binding = GetBinding(instance.GetType(), name);
             if (binding == null)
             {
-                throw new Util.MyException("InjectionBinder has no binding for:\n\tkey: " + instance.GetType() + "\nname: " + name, InjectionExceptionType.NULL_BINDING_RELEASE);
+                throw new MyException("InjectionBinder has no binding for:\n\tkey: " + instance.GetType() + "\nname: " + name, InjectionExceptionType.NULL_BINDING_RELEASE);
             }
 
             GetInjectorForBinding(binding).Destroy(instance);

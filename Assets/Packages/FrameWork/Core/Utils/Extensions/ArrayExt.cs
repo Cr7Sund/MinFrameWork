@@ -1,5 +1,5 @@
 using System;
-namespace Cr7Sund.PackageTest.Util
+namespace Cr7Sund.FrameWork.Util
 {
     public static class ArrayExt
     {

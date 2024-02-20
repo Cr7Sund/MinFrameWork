@@ -14,7 +14,7 @@
  * instead we recommend pass an new specific exception type to provide meaningful error messages.
  */
 using System;
-namespace Cr7Sund.PackageTest.Util
+namespace Cr7Sund.FrameWork.Util
 {
     public class MyException : Exception
     {

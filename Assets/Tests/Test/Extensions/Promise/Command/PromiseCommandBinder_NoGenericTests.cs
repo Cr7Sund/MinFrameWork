@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 using Cr7Sund.PackageTest.IOC;
-using Cr7Sund.PackageTest.Util;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.FrameWork.Util;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 namespace Cr7Sund.PackageTest.PromiseCommandTest
@@ -238,7 +238,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
 
-            var ex = Assert.Throws<Util.MyException>(() =>
+            var ex = Assert.Throws<MyException>(() =>
             {
                 _commandPromiseBinder.ReactTo(SomeEnum.ONE);
                 Assert.AreEqual(22 * 3, SimplePromise.result);
@@ -258,7 +258,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
 
             _commandPromiseBinder.ReactTo(SomeEnum.ONE);
 
-            var ex = Assert.Throws<Util.MyException>(() =>
+            var ex = Assert.Throws<MyException>(() =>
                 _commandPromiseBinder.ReactTo(SomeEnum.ONE));
             Assert.AreEqual(PromiseExceptionType.CAN_NOT_REACT_RUNNING, ex.Type);
         }
@@ -360,7 +360,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
                 _commandPromiseBinder.Bind(SomeEnum.ONE)
                     .Then<SimpleCommandTwo>();
             };
-            var ex = Assert.Throws<Util.MyException>(testDelegate);
+            var ex = Assert.Throws<MyException>(testDelegate);
             Assert.AreEqual(BinderExceptionType.CONFLICT_IN_BINDER, ex.Type);
         }
     }

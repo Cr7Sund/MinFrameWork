@@ -1,7 +1,8 @@
 using System;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
+
+using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Package.Api;
 namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleRootContext : CrossContext

@@ -1,7 +1,8 @@
 using System;
 using System.Reflection;
-using Cr7Sund.PackageTest.Api;
-namespace Cr7Sund.PackageTest.Impl
+using Cr7Sund.Package.Api;
+using Cr7Sund.FrameWork.Util;
+namespace Cr7Sund.Package.Impl
 {
     public class Injector : IInjector
     {
@@ -205,7 +206,7 @@ namespace Cr7Sund.PackageTest.Impl
                 message += "\n\t\ttarget: " + target;
                 message += "\n\t\ttype: " + t;
                 message += "\n\t\tname: " + name;
-                throw new Util.MyException(message, type);
+                throw new MyException(message, type);
             }
         }
 

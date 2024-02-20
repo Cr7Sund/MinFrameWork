@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     /// <summary>
     /// Represents a C# promise.

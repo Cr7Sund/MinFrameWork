@@ -1,6 +1,6 @@
-using Cr7Sund.PackageTest.Api;
+using Cr7Sund.Package.Api;
 
-namespace Cr7Sund.PackageTest.Impl
+namespace Cr7Sund.Package.Impl
 {
     public abstract class BasePoolable : IPoolable
     {

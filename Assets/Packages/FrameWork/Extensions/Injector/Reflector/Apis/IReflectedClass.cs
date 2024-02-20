@@ -10,7 +10,7 @@
 
 using System;
 using System.Reflection;
-namespace Cr7Sund.PackageTest.Api
+namespace Cr7Sund.Package.Api
 {
     public interface IReflectedClass
     {

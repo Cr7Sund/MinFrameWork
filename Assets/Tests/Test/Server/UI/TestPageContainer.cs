@@ -1,7 +1,8 @@
-﻿using Cr7Sund.PackageTest.EventBus.Api;
-using Cr7Sund.PackageTest.Impl;
+﻿using Cr7Sund.Package.EventBus.Impl;
+using Cr7Sund.Package.EventBus.Api;
+using Cr7Sund.Package.Impl;
 using Cr7Sund.PackageTest.IOC;
-using Cr7Sund.PackageTest.Util;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
@@ -29,7 +30,7 @@ namespace Cr7Sund.ServerTest.UI
             var injectionBinder = _sceneNode.Context.InjectionBinder;
             // injectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             injectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
-            injectionBinder.Bind<IEventBus>().To<PackageTest.EventBus.Impl.EventBus>().AsSingleton().AsCrossContext();
+            injectionBinder.Bind<IEventBus>().To<EventBus>().AsSingleton().AsCrossContext();
 
             Debug.Init(new InternalLogger());
             RunScene();

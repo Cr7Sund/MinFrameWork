@@ -1,8 +1,8 @@
-using Cr7Sund.PackageTest.Util;
+using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
 using UnityEngine.TestTools;
 namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
 {
@@ -40,7 +40,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                 var fulfilledPromise = new Promise<object>();
                 fulfilledPromise.Resolve(new object());
 
-                var promiseException = Assert.Throws<Util.MyException>(() => fulfilledPromise.Resolve(new object()));
+                var promiseException = Assert.Throws<MyException>(() => fulfilledPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
                 Assert.AreEqual(PromiseState.Resolved, fulfilledPromise.CurState);
             }
@@ -61,7 +61,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
 
                 fulfilledPromise.Resolve(promisedValue);
 
-                var promiseException = Assert.Throws<Util.MyException>(() => fulfilledPromise.Resolve(new object()));
+                var promiseException = Assert.Throws<MyException>(() => fulfilledPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
                 Assert.AreEqual(1, handled);
             }
@@ -78,7 +78,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                 var rejectedPromise = new Promise<object>();
                 rejectedPromise.Reject(new Exception());
 
-                var promiseException = Assert.Throws<Util.MyException>(() => rejectedPromise.Resolve(new object()));
+                var promiseException = Assert.Throws<MyException>(() => rejectedPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
                 Assert.AreEqual(PromiseState.Rejected, rejectedPromise.CurState);
             }
@@ -100,7 +100,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
 
                 rejectedPromise.Reject(reason);
 
-                var promiseException = Assert.Throws<Util.MyException>(() => rejectedPromise.Reject(new Exception()));
+                var promiseException = Assert.Throws<MyException>(() => rejectedPromise.Reject(new Exception()));
                 Assert.AreEqual(PromiseExceptionType.Valid_REJECTED_STATE, promiseException.Type);
                 Assert.AreEqual(1, handled);
             }

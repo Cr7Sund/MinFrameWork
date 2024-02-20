@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cr7Sund.PackageTest.Api;
-using Cr7Sund.PackageTest.Util;
-namespace Cr7Sund.PackageTest.Impl
+using Cr7Sund.Package.Api;
+using Cr7Sund.FrameWork.Util;
+namespace Cr7Sund.Package.Impl
 {
     public class Pool<T> : BasePool, IPool<T> where T :  new()
     {
