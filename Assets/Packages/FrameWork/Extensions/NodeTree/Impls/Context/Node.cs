@@ -86,24 +86,31 @@ namespace Cr7Sund.NodeTree.Impl
         public IContext Context => _context;
 
         #region LifeCycle
-        public override IPromise<INode> PreLoadAsync(INode self)
+        
+        public IPromise<INode> PreLoadChild(INode child)
         {
-            AssertUtil.IsTrue(LoadState == LoadState.Default);
-
-            var selfNode = self as Node;
-            selfNode.StartPreload();
-            if (!IsInjected)
+            if (child.LoadState != LoadState.Default)
             {
-                Inject();
+                return Promise<INode>.Rejected(new MyException(
+                    $"Expected Default state , but it's {child.LoadState}"));
             }
-            if (!IsInit)
+
+            var childNode = child as Node;
+            childNode.StartPreload();
+
+            _context.AddContext(childNode._context);
+            if (!childNode.IsInjected)
             {
-                Init();
+                childNode.Inject();
+            }
+            if (!childNode.IsInit)
+            {
+                childNode.Init();
             }
 
             // since we don't add child first
             // on loaded will not be call 
-            return base.PreLoadAsync(self);
+            return childNode.PreLoadAsync(child);
         }
 
         public void Init()

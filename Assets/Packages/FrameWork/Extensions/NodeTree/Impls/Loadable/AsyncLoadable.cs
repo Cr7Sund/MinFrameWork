@@ -52,7 +52,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             return _loadPromise;
         }
-        public virtual IPromise<T> PreLoadAsync(T value)
+        public IPromise<T> PreLoadAsync(T value)
         {
             if (LoadState == LoadState.Loading || LoadState == LoadState.Unloading)
             {

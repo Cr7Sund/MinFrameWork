@@ -15,7 +15,7 @@ namespace Cr7Sund.Server.UI.Impl
     {
         [Inject]
         private ISceneNode _sceneNode;
-        private Stack<IUIView> _pageContainers = new Stack<IUIView>(16);
+        private Stack<IUINode> _pageContainers = new Stack<IUINode>(16);
 
         protected override INode _parentNode
         {
@@ -263,7 +263,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         #region View Transition Sequence
 
-        private IPromise OpenSequence(IUIView enterPage, IUIView exitPage)
+        private IPromise OpenSequence(IUINode enterPage, IUINode exitPage)
         {
             var handlers = new List<Func<IPromise>>();
             var enterUIKey = enterPage.Key as UIKey;
@@ -305,15 +305,15 @@ namespace Cr7Sund.Server.UI.Impl
             return Promise.Sequence(handlers);
         }
 
-        private IPromise HideFirstSequence(IUIView exitPage)
+        private IPromise HideFirstSequence(IUINode exitPage)
         {
             if (exitPage == null)
             {
                 return Promise.Resolved();
             }
 
-            IUIView enterPage = null;
-            // IUIView enterPage=  UINode.CreateBlackScreen();
+            IUINode enterPage = null;
+            // IUINode enterPage=  UINode.CreateBlackScreen();
             var exitUIKey = exitPage.Key as UIKey;
             bool isPush = exitUIKey.IsPush;
 
@@ -330,7 +330,7 @@ namespace Cr7Sund.Server.UI.Impl
             return Promise.Sequence(handlers);
         }
 
-        private IPromise ShowAfterSequence(IUIView enterPage, IUIView exitPage)
+        private IPromise ShowAfterSequence(IUINode enterPage, IUINode exitPage)
         {
             var handlers = new List<Func<IPromise>>();
             var enterUIKey = enterPage.Key as UIKey;

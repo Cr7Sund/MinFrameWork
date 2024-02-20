@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Cr7Sund.Server.UI.Impl
 {
-    public class UINode : UpdateNode, IUIView, IUINode
+    public class UINode : UpdateNode, IUINode
     {
         [Inject] private IAssetLoader _assetLoader;
         [Inject] private IPoolBinder _poolBinder;
@@ -19,7 +19,7 @@ namespace Cr7Sund.Server.UI.Impl
 
 
 
-        public IUIPanel View { get; set; }
+        public IUIView View { get; set; }
         public string PageId { get; set; }
         public bool IsTransitioning { get; private set; }
         public IUIController Controller { get; set; }
@@ -60,7 +60,7 @@ namespace Cr7Sund.Server.UI.Impl
         }
 
 
-        public IPromise BeforeExit(bool push, IUIView enterPage)
+        public IPromise BeforeExit(bool push, IUINode enterPage)
         {
             IsTransitioning = true;
 
@@ -71,7 +71,7 @@ namespace Cr7Sund.Server.UI.Impl
             else
                 return Controller.WillPopExit();
         }
-        public IPromise BeforeEnter(bool push, IUIView enterPage)
+        public IPromise BeforeEnter(bool push, IUINode enterPage)
         {
             IsTransitioning = true;
 
@@ -82,7 +82,7 @@ namespace Cr7Sund.Server.UI.Impl
             else
                 return Controller.WillPushEnter();
         }
-        public IPromise Enter(bool push, IUIView partnerView, bool playAnimation)
+        public IPromise Enter(bool push, IUINode partnerView, bool playAnimation)
         {
             View.Show(push);
             Controller.Enable();
@@ -91,7 +91,7 @@ namespace Cr7Sund.Server.UI.Impl
             else
                 return Promise.Resolved();
         }
-        public IPromise Exit(bool push, IUIView partnerView, bool playAnimation)
+        public IPromise Exit(bool push, IUINode partnerView, bool playAnimation)
         {
             View.Hide(push);
             Controller.Disable();
@@ -101,7 +101,7 @@ namespace Cr7Sund.Server.UI.Impl
                 return Promise.Resolved();
         }
 
-        public IPromise AfterEnter(bool push, IUIView exitPage)
+        public IPromise AfterEnter(bool push, IUINode exitPage)
         {
             IsTransitioning = false;
 
@@ -110,7 +110,7 @@ namespace Cr7Sund.Server.UI.Impl
             else
                 return Controller.DidPopEnter();
         }
-        public IPromise AfterExit(bool push, IUIView enterPage)
+        public IPromise AfterExit(bool push, IUINode enterPage)
         {
             IsTransitioning = false;
 

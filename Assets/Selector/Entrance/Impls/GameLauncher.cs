@@ -1,3 +1,5 @@
+using Cr7Sund.AssetLoader.Impl;
+using Cr7Sund.GameLogic;
 using Cr7Sund.PackageTest.Api;
 using Cr7Sund.PackageTest.Impl;
 using Cr7Sund.NodeTree.Api;
@@ -28,11 +30,10 @@ namespace Cr7Sund.Selector.Impl
 
         private void Awake()
         {
-            _gameLogic = GameLogicCreator.Create();
+            _gameLogic = CreateGameLogic();
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
         }
-
         private void Start()
         {
             _gameLogic.Start();
@@ -53,5 +54,15 @@ namespace Cr7Sund.Selector.Impl
             Dispose();
         }
 
+        private  IGameLogic CreateGameLogic()
+        {
+            var configLoader = AssetLoaderFactory.CreateLoader();
+            configLoader.Init();
+            
+            var gameConfig =  configLoader.Load<GameConfig>(new ConfigKey("GameConfig"));
+            var gameLogic = gameConfig.GetLogic();
+            gameLogic.Init();
+            return gameLogic;
+        }
     }
 }

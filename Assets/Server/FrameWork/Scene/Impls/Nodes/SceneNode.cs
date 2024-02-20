@@ -15,8 +15,8 @@ namespace Cr7Sund.Server.Scene.Impl
             if (IsInjected)
                 return;
 
-            base.Inject();
             _context.InjectionBinder.Bind<ISceneNode>().To(this);
+            base.Inject();
         }
 
         public override void DeInject()

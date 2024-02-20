@@ -3,9 +3,9 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Selector.Apis;
 using Cr7Sund.Server.Impl;
 
-namespace Cr7Sund.Selector.Impl
+namespace Cr7Sund.GameLogic
 {
-    public abstract class GameLogic : IGameLogic
+    public abstract class GameLogic :  IGameLogic
     {
         private GameNode _node;
 
@@ -42,7 +42,7 @@ namespace Cr7Sund.Selector.Impl
         protected virtual void OnInit()
         {
         }
-        
+
         protected abstract GameBuilder CreateBuilder();
 
     }

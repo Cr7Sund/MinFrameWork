@@ -1,8 +1,9 @@
-using Cr7Sund.UGUI.Apis;
+
+using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.PackageTest.IOC
 {
-    public class SampleThreePanel : UIPanel
+    public class SampleThreePanel : UIView
     {
 
     }

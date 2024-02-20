@@ -25,6 +25,15 @@
         /// </summary>
         REMOVE_NO_EXISTED,
 
+        /// <summary>
+        /// try to add an already added node
+        /// </summary>
+        already_added,
+        /// <summary>
+        /// should be default state
+        /// </summary>
+        default_state,
+        
         #region Loadable
         /// <summary>
         /// Cant LoadAsync On State of loading or unloading

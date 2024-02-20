@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 944da2c8153b4afbb650413ef65891ca, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: 
+  GameAssembly: {fileID: 5897886265953266890, guid: c955f71c4a3aa734190c5493c3a84d5b, type: 3}
+  GameLogicTypeFullName: Cr7Sund.Game.GameLogic.EditorGameLogic
+  AssemblyInfo: Cr7Sund.Game

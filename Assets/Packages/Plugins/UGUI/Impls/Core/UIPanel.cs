@@ -1,9 +1,10 @@
 using System;
 using Cr7Sund.PackageTest.Api;
 using Cr7Sund.PackageTest.Impl;
+using Cr7Sund.UGUI.Apis;
 using UnityEngine.EventSystems;
 
-namespace Cr7Sund.UGUI.Apis
+namespace Cr7Sund.UGUI.Impls
 {
     public class UIPanel : UIBehaviour, IUIPanel
     {

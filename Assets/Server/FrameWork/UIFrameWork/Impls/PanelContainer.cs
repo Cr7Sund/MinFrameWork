@@ -53,15 +53,15 @@ namespace Cr7Sund.Server.UI.Impl
                     .Then(() => Promise<INode>.Resolved(node));
         }
 
-        private IPromise CloseSequence(IUIView exitPage)
+        private IPromise CloseSequence(IUINode exitPage)
         {
             if (exitPage != null)
             {
                 return Promise.Resolved();
             }
 
-            IUIView enterPage = null;
-            // IUIView enterPage=  UINode.CreateBlackScreen();
+            IUINode enterPage = null;
+            // IUINode enterPage=  UINode.CreateBlackScreen();
             var exitPageUIKey = exitPage.Key as UIKey;
 
             var handlers = new List<Func<IPromise>>();
@@ -80,10 +80,10 @@ namespace Cr7Sund.Server.UI.Impl
         }
 
 
-        private IPromise OpenSequence(IUIView enterPage)
+        private IPromise OpenSequence(IUINode enterPage)
         {
             var handlers = new List<Func<IPromise>>();
-            IUIView exitPage = null;
+            IUINode exitPage = null;
             var enterPageUIKey = enterPage.Key as UIKey;
 
             Func<IPromise> beforeEnterHandler = () => enterPage.BeforeEnter(true, exitPage);

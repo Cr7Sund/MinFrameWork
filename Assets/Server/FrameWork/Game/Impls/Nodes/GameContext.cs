@@ -4,6 +4,7 @@ using Cr7Sund.PackageTest.Impl;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.Server.Scene.Impl;
+using Cr7Sund.Server.UI.Impl;
 using Cr7Sund.Touch.Api;
 using Cr7Sund.Touch.Impl;
 
@@ -23,16 +24,14 @@ namespace Cr7Sund.Server.Impl
         {
             // Cross Context
             // --- --- 
-            _eventBus = new PackageTest.EventBus.Impl.EventBus();
-            _sceneModule = new SceneModule();
-
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IEventBus>().To(_eventBus).AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<ISceneModule>().To(_sceneModule).AsSingleton().AsCrossContext();
+            InjectionBinder.Bind<IEventBus>().To<PackageTest.EventBus.Impl.EventBus>().AsSingleton().AsCrossContext();
+            InjectionBinder.Bind<ISceneModule>().To<SceneModule>().AsSingleton().AsCrossContext();
+            InjectionBinder.Bind<PageContainer>().To<PageContainer>().AsSingleton().AsCrossContext();
 
             // Local In GameNode or GameController
             // --- --- 
+            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
 
             OnMappedBindings();
         }

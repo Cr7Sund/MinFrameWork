@@ -21,8 +21,10 @@ namespace Cr7Sund.NodeTree.Impl
         
         public virtual void AddContext(IContext context)
         {
-            AssertUtil.IsFalse(_contexts.Contains(context));
-            _contexts.Add(context);
+            if (!_contexts.Contains(context))
+            {
+                _contexts.Add(context);
+            }
         }
         public virtual void RemoveContext(IContext context)
         {

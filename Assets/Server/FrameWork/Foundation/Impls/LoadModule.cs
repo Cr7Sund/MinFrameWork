@@ -149,7 +149,7 @@ namespace Cr7Sund.Server.Impl
 
             var newNode = CreateNode(key);
             _treeNodes.Add(key, newNode);
-            return newNode.PreLoadAsync(newNode);
+            return _parentNode.PreLoadChild(newNode);
         }
         internal IPromise<INode> UnloadNode(IAssetKey key)
         {
@@ -320,15 +320,17 @@ namespace Cr7Sund.Server.Impl
 
             _treeNodes.Add(key, newNode);
 
-            return newNode
-                .PreLoadAsync(newNode)
+            return _parentNode
+                .PreLoadChild(newNode)
                 .Then(OnAddNewLoadedNode); //PLAN:  potential callback hell, replace with async
         }
         private IPromise<INode> AddNodeFromLoaded(INode assetNode)
         {
             DispatchAddBegin(assetNode.Key);
 
-            return _parentNode.AddChildAsync(assetNode).Then(OnAddLoadedNode);
+            return _parentNode
+                .AddChildAsync(assetNode)
+                .Then(OnAddLoadedNode);
         }
         private IPromise<INode> AddNodeFromRemoving(INode assetNode, bool overwrite)
         {
@@ -359,8 +361,8 @@ namespace Cr7Sund.Server.Impl
             {
                 assetNode.UnloadStatus.Cancel();
                 return assetNode.UnloadStatus
-                       .Then(OnUnloadNode)
-                       .Then((node) => AddNodeFromStart(node.Key));
+                    .Then(OnUnloadNode)
+                    .Then((node) => AddNodeFromStart(node.Key));
             }
         }
         private IPromise<INode> OnAddNewLoadedNode(INode node)

@@ -15,6 +15,7 @@ namespace Cr7Sund.AssetLoader
             if (addressableHandle.Status != AsyncOperationStatus.None)
             {
                 OnCompleted(addressableHandle, setter);
+                return;
             }
 
             addressableHandle.Completed += x =>

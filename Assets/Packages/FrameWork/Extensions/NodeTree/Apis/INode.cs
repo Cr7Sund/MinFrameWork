@@ -11,6 +11,7 @@ namespace Cr7Sund.NodeTree.Api
         IAssetKey Key { get; }
         int ChildCount { get; }
 
+        IPromise<INode> PreLoadChild(INode child);
         IPromise<INode> AddChildAsync(INode child);
         IPromise<INode> UnloadChildAsync(INode child);
         IPromise<INode> RemoveChildAsync(INode child);

@@ -37,7 +37,7 @@ namespace Cr7Sund.Server.UI.Impl
         }
 
         public IUIController CreateCtrl() => Activator.CreateInstance(_ctrlType) as IUIController;
-        public IUIPanel CreateView() => Activator.CreateInstance(_viewType) as IUIPanel;
+        public IUIView CreateView() => Activator.CreateInstance(_viewType) as IUIView;
 
         public override string ToString()
         {

@@ -9,7 +9,7 @@ namespace Cr7Sund.NodeTree.Api
 
 
         IPromise<T> LoadAsync(T value);
-        IPromise<T> PreLoadAsync(T value);
+        IPromise<T> PreLoadAsync(T child);
         IPromise<T> UnloadAsync(T value);
         IPromise<T> CancelLoad();
     }

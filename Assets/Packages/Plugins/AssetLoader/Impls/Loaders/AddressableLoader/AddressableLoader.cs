@@ -1,5 +1,3 @@
-
-
 using System.Collections.Generic;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.PackageTest.Util;
@@ -46,9 +44,10 @@ namespace Cr7Sund.AssetLoader.Impl
             }
         }
 
-        public IAssetPromise Load<T>(IAssetKey key) where T : Object
+        public T Load<T>(IAssetKey key) where T : Object
         {
-            return LoadInternal<T>(key, false);
+            var loadPromise = LoadInternal<T>(key, false);
+            return loadPromise.Handler.Result as T;
         }
         public IAssetPromise LoadAsync<T>(IAssetKey key) where T : Object
         {
