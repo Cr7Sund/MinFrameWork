@@ -4,7 +4,7 @@ namespace Cr7Sund.NodeTree.Api
     public enum NodeState
     {
         Default,
-        Preload,
+        Preloading,
         Preloaded,
         Adding,
         Ready,

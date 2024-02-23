@@ -2,7 +2,7 @@
 using Cr7Sund.NodeTree.Api;
 namespace Cr7Sund.NodeTree.Impl
 {
-    public abstract class UpdateController : BaseController, IUpdate
+    public abstract class UpdateController : BaseController, IUpdatable
     {
         public void Update(int millisecond)
         {

@@ -4,7 +4,7 @@ using Cr7Sund.NodeTree.Api;
 namespace Cr7Sund.NodeTree.Impl
 {
 
-    public abstract class UpdateNode : Node, IUpdate, ILateUpdate
+    public abstract class UpdateNode : Node, IUpdatable, ILateUpdate
     {
         protected List<UpdateNode> _updateList;
         protected List<UpdateNode> _lateUpdatesList;
@@ -26,7 +26,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
             }
 
-            if (child is IUpdate)
+            if (child is IUpdatable)
             {
                 var updateNode = child as UpdateNode;
                 if (!_updateList.Contains(updateNode))
@@ -51,7 +51,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
 
 
-            if (child is IUpdate)
+            if (child is IUpdatable)
             {
                 var updateNode = child as UpdateNode;
                 if (_updateList.Contains(updateNode))

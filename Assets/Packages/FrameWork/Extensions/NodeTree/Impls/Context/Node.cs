@@ -83,10 +83,11 @@ namespace Cr7Sund.NodeTree.Impl
                 return ChildNodes.Count;
             }
         }
+        public INode this[int index] => ChildNodes[index];
         public IContext Context => _context;
 
         #region LifeCycle
-        
+
         public IPromise<INode> PreLoadChild(INode child)
         {
             if (child.LoadState != LoadState.Default)
@@ -97,16 +98,6 @@ namespace Cr7Sund.NodeTree.Impl
 
             var childNode = child as Node;
             childNode.StartPreload();
-
-            _context.AddContext(childNode._context);
-            if (!childNode.IsInjected)
-            {
-                childNode.Inject();
-            }
-            if (!childNode.IsInit)
-            {
-                childNode.Init();
-            }
 
             // since we don't add child first
             // on loaded will not be call 
@@ -278,7 +269,6 @@ namespace Cr7Sund.NodeTree.Impl
                 DisposeRecursively(this);
         }
 
-
         protected virtual void OnInit() { }
         protected virtual void OnStart() { }
         protected virtual void OnEnable() { }
@@ -386,7 +376,8 @@ namespace Cr7Sund.NodeTree.Impl
             }
             if (child.LoadState == LoadState.Fail)
             {
-                throw new NotImplementedException();
+                return Promise<INode>.Rejected(new MyException(
+                    $"can not add node when already fail", NodeTreeExceptionType.INVALID_NODESTATE));
             }
 
             var childNode = child as Node;
@@ -411,7 +402,13 @@ namespace Cr7Sund.NodeTree.Impl
                 || child.LoadState == LoadState.Unloaded)
             {
                 childNode._addPromise = child.LoadAsync(child)
-                    .Then(AddChildInternal);
+                                        .Then(AddChildInternal, ex =>
+                                        {
+                                            _context.RemoveContext(childNode._context);
+                                            childNode.Dispose();
+                                            childNode.EndUnLoad(true);
+                                            return Promise<INode>.RejectedWithoutDebug(ex);
+                                        });
             }
             else
             {
@@ -464,7 +461,11 @@ namespace Cr7Sund.NodeTree.Impl
                     childNode.DeInject();
                 }
                 childNode._removePromise = child.UnloadAsync(child)
-                    .Then(RemoveChildInternal);
+                    .Catch((ex) =>
+                    {
+                        RemoveChildInternal(childNode);
+                        return child;
+                    }); // if unload fail, we still remove from node tree
             }
             else
             {
@@ -518,7 +519,7 @@ namespace Cr7Sund.NodeTree.Impl
         public bool IsLoading() => LoadState == LoadState.Loading;
         private void SetAdding() =>
             NodeState = NodeState.Adding;
-        private void StartPreload() => NodeState = NodeState.Preload;
+        private void StartPreload() => NodeState = NodeState.Preloading;
         private void EndPreload() => NodeState = NodeState.Preloaded;
         private void SetReady() => NodeState = NodeState.Ready;
         private void StartUnload(bool shouldUnload) =>
@@ -529,6 +530,11 @@ namespace Cr7Sund.NodeTree.Impl
                 NodeState.Unloaded;
 
         protected override IPromise<INode> OnLoadAsync(INode content)
+        {
+            return Promise<INode>.Resolved(content);
+        }
+
+        protected override IPromise<INode> OnPreloadAsync(INode content)
         {
             return Promise<INode>.Resolved(content);
         }

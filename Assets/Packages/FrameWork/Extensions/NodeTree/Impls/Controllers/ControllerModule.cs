@@ -12,7 +12,7 @@ namespace Cr7Sund.NodeTree.Impl
     {
         protected IContext _context;
         protected List<IController> _lsControllers;
-        protected List<IUpdate> _lsUpdates;
+        protected List<IUpdatable> _lsUpdates;
         protected List<ILateUpdate> _lsLateUpdates;
 
         public bool IsInjected
@@ -41,7 +41,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             _lsControllers = new List<IController>();
             _lsLateUpdates = new List<ILateUpdate>();
-            _lsUpdates = new List<IUpdate>();
+            _lsUpdates = new List<IUpdatable>();
         }
 
 
@@ -159,7 +159,7 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 return;
             }
-            if (controller is IUpdate update)
+            if (controller is IUpdatable update)
             {
                 if (!_lsUpdates.Contains(update))
                     _lsUpdates.Add(update);
@@ -178,7 +178,7 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 return;
             }
-            if (controller is IUpdate update)
+            if (controller is IUpdatable update)
             {
                 if (_lsUpdates.Contains(update))
                     _lsUpdates.Remove(update);
@@ -219,7 +219,8 @@ namespace Cr7Sund.NodeTree.Impl
             for (int i = 0, length = _lsUpdates.Count; i < length; i++)
             {
                 var update = _lsUpdates[i];
-                if (update.IsStarted && update.IsActive)
+                if (update is IController controller &&
+                     controller.IsStarted && controller.IsActive)
                 {
                     update.Update(millisecond);
                 }
@@ -231,8 +232,11 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 var update = _lsLateUpdates[i];
 
-                if (update.IsStarted && update.IsActive)
+                if (update is IController controller &&
+                   controller.IsStarted && controller.IsActive)
+                {
                     update.LateUpdate(millisecond);
+                }
             }
         }
         public void Stop()
@@ -292,6 +296,10 @@ namespace Cr7Sund.NodeTree.Impl
         }
         #endregion
 
+        protected override IPromise<INode> OnPreloadAsync(INode content)
+        {
+            return Promise<INode>.Resolved(content);
+        }
 
         protected override IPromise<INode> OnLoadAsync(INode content)
         {

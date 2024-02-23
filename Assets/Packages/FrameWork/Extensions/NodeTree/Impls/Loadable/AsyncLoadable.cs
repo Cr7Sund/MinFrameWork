@@ -28,7 +28,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return _unloadPromise;
             }
         }
-        public LoadState LoadState { get; protected set; }
+        public LoadState LoadState { get; private set; }
 
 
         public AsyncLoadable()
@@ -40,11 +40,15 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public IPromise<T> LoadAsync(T value)
         {
-            if (LoadState == LoadState.Loading || LoadState == LoadState.Unloading)
+            if (LoadState == LoadState.Loading
+             || LoadState == LoadState.Unloading
+             || LoadState == LoadState.Loaded)
             {
                 throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.LOAD_VALID_STATE);
             }
+
+            // handle override promise externally
 
             LoadState = LoadState.Loading;
             _loadPromise = OnLoadAsync(value);
@@ -54,21 +58,25 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public IPromise<T> PreLoadAsync(T value)
         {
-            if (LoadState == LoadState.Loading || LoadState == LoadState.Unloading)
+            if (LoadState == LoadState.Loading
+                || LoadState == LoadState.Unloading
+                || LoadState == LoadState.Loaded)
             {
                 throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.LOAD_VALID_STATE);
             }
 
             LoadState = LoadState.Loading;
-            _loadPromise = OnLoadAsync(value);
+            _loadPromise = OnPreloadAsync(value);
             _loadPromise?.Then(onResolved: _preloadedHandler, onRejected: _exceptionHandler);
 
             return _loadPromise;
         }
         public IPromise<T> UnloadAsync(T value)
         {
-            if (LoadState == LoadState.Default || LoadState == LoadState.Unloading || LoadState == LoadState.Unloaded)
+            if (LoadState == LoadState.Default
+            || LoadState == LoadState.Unloading
+            || LoadState == LoadState.Unloaded)
             {
                 throw new MyException($"Cant UnloadAsync On State: {LoadState}  Loadable: {this} ",
                     NodeTreeExceptionType.UNLOAD_VALID_STATE);
@@ -111,7 +119,6 @@ namespace Cr7Sund.NodeTree.Impl
         {
             LoadState = LoadState.Fail;
             OnCatch(e);
-            Debug.Error(e);
         }
 
         protected virtual void OnLoaded() { }
@@ -119,6 +126,7 @@ namespace Cr7Sund.NodeTree.Impl
         protected virtual void OnUnloaded() { }
         protected virtual void OnCatch(Exception e) { }
         protected abstract IPromise<T> OnLoadAsync(T content);
+        protected abstract IPromise<T> OnPreloadAsync(T content);
         protected abstract IPromise<T> OnUnloadAsync(T content);
     }
 }

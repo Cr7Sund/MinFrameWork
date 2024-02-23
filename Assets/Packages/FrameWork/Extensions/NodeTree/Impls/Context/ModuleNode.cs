@@ -89,7 +89,6 @@ namespace Cr7Sund.NodeTree.Impl
         protected override void OnDispose()
         {
             base.OnDispose();
-
         }
     }
 }

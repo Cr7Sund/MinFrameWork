@@ -17,6 +17,4 @@ namespace Cr7Sund.NodeTree.Api
         IPromise<INode> RemoveChildAsync(INode child);
 
     }
-
-
 }
