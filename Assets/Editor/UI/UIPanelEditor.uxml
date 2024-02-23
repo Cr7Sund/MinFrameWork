@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:TabView>
+        <ui:Tab label="Basic(Container)" name="BasicTab" icon-image="project://database/Assets/TextMesh%20Pro/Sprites/EmojiOne.png?fileID=2800000&amp;guid=dffef66376be4fa480fb02b19edbe903&amp;type=3#EmojiOne" />
+        <ui:Tab label="Advance" name="AdvanceTab" icon-image="project://database/Assets/TextMesh%20Pro/Sprites/EmojiOne.png?fileID=2800000&amp;guid=dffef66376be4fa480fb02b19edbe903&amp;type=3#EmojiOne" />
+    </ui:TabView>
+    <ui:VisualElement name="BasicTabView" style="flex-grow: 1;">
+        <uie:Toolbar>
+            <uie:ToolbarMenu />
+            <uie:ToolbarSpacer />
+            <uie:ToolbarPopupSearchField />
+        </uie:Toolbar>
+        <ui:ScrollView name="ContainerView">
+            <ui:ListView name="ContainerListView" />
+            <ui:TreeView name="ContainerTreeView" />
+        </ui:ScrollView>
+        <ui:Button text="Generate" name="Generate" />
+        <ui:ProgressBar value="22" title="my-progress" />
+    </ui:VisualElement>
+</ui:UXML>

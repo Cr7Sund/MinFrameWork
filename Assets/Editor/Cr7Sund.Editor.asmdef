@@ -3,7 +3,12 @@
     "rootNamespace": "",
     "references": [
         "Cr7Sund.FrameWork.Selector",
-        "UnityEditor.UI"
+        "UnityEditor.UI",
+        "Cr7Sund.FarmeWork.Server",
+        "Cr7Sund.Attributes",
+        "Cr7Sund.UGUI",
+        "Unity.Addressables.Editor",
+        "Cr7Sund.FrameWork.Core"
     ],
     "includePlatforms": [
         "Editor"

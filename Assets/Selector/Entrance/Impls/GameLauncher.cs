@@ -5,6 +5,8 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Selector.Apis;
 using UnityEngine;
+using Cr7Sund.Config;
+using Cr7Sund.Server.Utils;
 
 namespace Cr7Sund.Selector.Impl
 {
@@ -54,15 +56,17 @@ namespace Cr7Sund.Selector.Impl
             Dispose();
         }
 
-        private  IGameLogic CreateGameLogic()
+        private IGameLogic CreateGameLogic()
         {
-            var configLoader = AssetLoaderFactory.CreateLoader();
-            configLoader.Init();
-            
-            var gameConfig =  configLoader.Load<GameConfig>(new ConfigKey("GameConfig"));
-            var gameLogic = gameConfig.GetLogic();
-            gameLogic.Init();
-            return gameLogic;
+            using (var configLoader = AssetLoaderFactory.CreateLoader())
+            {
+                configLoader.Init();
+                var gameConfig = configLoader.LoadSync<GameConfig>(ConfigDefines.GameConfig);
+                var gameLogic = gameConfig.GetLogic();
+                gameLogic.Init();
+                return gameLogic;
+            }
+
         }
     }
 }

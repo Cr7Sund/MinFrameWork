@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Editor/UI/UIScreenNavgaorSettings.uss?fileID=7433441132597879392&amp;guid=4d51d88de3c4618478481e168487325c&amp;type=3#UIScreenNavgaorSettings" />
+    <ui:Foldout text="Page" style="flex-direction: column; flex-wrap: nowrap;">
+        <ui:VisualElement name="EnterPush" style="flex-grow: 1; flex-direction: row; align-items: center; align-content: auto; flex-wrap: nowrap;">
+            <uie:PropertyField name="enterPushField" binding-path="_pagePushEnterAnimation" />
+            <ui:Button text="Create" name="enterPushBtn" class="enterPushBtn" />
+        </ui:VisualElement>
+        <ui:VisualElement name="EnterPop" style="flex-grow: 1; align-items: center; align-content: auto; flex-direction: row;">
+            <uie:PropertyField name="enterPopField" binding-path="_pagePopEnterAnimation" />
+            <ui:Button text="Create" name="enterPopBtn" style="-unity-text-align: middle-right;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="ExitPush" style="flex-grow: 1; align-content: auto; align-items: center; flex-direction: row;">
+            <uie:PropertyField name="exitPushField" binding-path="_pagePushExitAnimation" />
+            <ui:Button text="Create" name="exitPushBtn" />
+        </ui:VisualElement>
+        <ui:VisualElement name="ExitPop" style="flex-grow: 1; flex-direction: row; align-items: center; align-content: auto;">
+            <uie:PropertyField name="exitPopField" binding-path="_pagePopExitAnimation" />
+            <ui:Button text="Create" name="exitPopBtn" />
+        </ui:VisualElement>
+    </ui:Foldout>
+</ui:UXML>

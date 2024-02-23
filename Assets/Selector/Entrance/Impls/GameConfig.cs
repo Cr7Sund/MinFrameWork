@@ -2,12 +2,13 @@
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Serialization;
-namespace Cr7Sund.GameLogic
+
+namespace Cr7Sund.Config
 {
     [CreateAssetMenu(menuName = "Cr7Sund/GameConfig")]
     public class GameConfig : ScriptableObject
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         public UnityEditorInternal.AssemblyDefinitionAsset GameAssembly;
 #endif
 
@@ -17,8 +18,7 @@ namespace Cr7Sund.GameLogic
         public string GameLogicTypeFullName;
         public string AssemblyInfo;
 
-
-        public GameLogic GetLogic()
+        public GameLogic.GameLogic GetLogic()
         {
             if (!string.IsNullOrEmpty(AssemblyInfo) &&
                 !string.IsNullOrEmpty(GameLogicTypeFullName))
@@ -27,7 +27,7 @@ namespace Cr7Sund.GameLogic
                 var type = assembly.GetType(GameLogicTypeFullName);
                 if (type != null)
                 {
-                    return Activator.CreateInstance(type) as GameLogic;
+                    return Activator.CreateInstance(type) as GameLogic.GameLogic;
                 }
             }
 
@@ -36,16 +36,5 @@ namespace Cr7Sund.GameLogic
 
     }
 
-    public class ConfigKey : IAssetKey
-    {
-        public string Key
-        {
-            get;
-        }
 
-        public ConfigKey(string key)
-        {
-            Key = key;
-        }
-    }
 }

@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca4e092782761b449b7ca3bee9c194d2, type: 3}
-  m_Name: GameConfig
+  m_Script: {fileID: 11500000, guid: c68d0f5f9efa8c94993f23427ea5d7db, type: 3}
+  m_Name: UITransitionConfig
   m_EditorClassIdentifier: 
-  GameAssembly: {fileID: 5897886265953266890, guid: c955f71c4a3aa734190c5493c3a84d5b, type: 3}
-  GameLogicTypeFullName: Cr7Sund.Game.GameLogic.EditorGameLogic
-  AssemblyInfo: Cr7Sund.Game
+  _pagePushEnterAnimation: {fileID: 0}
+  _pagePushExitAnimation: {fileID: 0}
+  _pagePopEnterAnimation: {fileID: 0}
+  _pagePopExitAnimation: {fileID: 0}

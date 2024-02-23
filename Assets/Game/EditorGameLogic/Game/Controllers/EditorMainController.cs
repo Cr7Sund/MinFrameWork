@@ -1,39 +1,35 @@
 using Cr7Sund.Game.Scene;
-using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.NodeTree.Api;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
 
 namespace Cr7Sund.Game.GameLogic
 {
-    public class EditorMainController : UpdateController
+    public class EditorMainController : GameBaseController
     {
         [Inject] private ISceneModule _sceneModule;
 
-        protected override void OnStart()
+
+        #region  Login
+
+        protected override void InitGameEnv()
         {
-            base.OnStart();
             Debug.Info("EditorMainController Start");
         }
 
-        protected override void OnEnable()
+        protected override IPromise HandleHotfix()
         {
-            base.OnEnable();
-            _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
+            return Promise.Resolved();
         }
 
-        protected override void OnDisable()
+        protected override IPromise<INode> RunLoginScene()
         {
-            base.OnDisable();
-        }
-
-        protected override void OnStop()
-        {
-            base.OnStop();
+            return _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
         }
 
 
-        protected override void OnUpdate(int millisecond)
-        {
-            // Log.Info("Update");
-        }
+        #endregion
     }
 }

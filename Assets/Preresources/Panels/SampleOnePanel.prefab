@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5123078770893422249}
   - component: {fileID: 1657499708792661863}
   - component: {fileID: 925759140959835404}
+  - component: {fileID: 6892394754539139025}
   m_Layer: 5
   m_Name: SampleOnePanel
   m_TagString: Untagged
@@ -116,6 +117,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74a5409d73b356f47baccc08423bb6c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pushEnterAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _pushExitAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _popEnterAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _popExitAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _componentContainers:
+    _keys:
+    - CanvasGroup
+    - Canvas
+    _values:
+    - {fileID: 6892394754539139025}
+    - {fileID: 4682641725578919461}
+--- !u!225 &6892394754539139025
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2182994013587389721}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2228286289868107713
 GameObject:
   m_ObjectHideFlags: 0

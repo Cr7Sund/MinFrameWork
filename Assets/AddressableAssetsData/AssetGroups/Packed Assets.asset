@@ -32,6 +32,31 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de53dcf8dd81e594cb2b8b5ba5274f34
+    m_Address: Assets/Preresources/Config/UI/UITransitionConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa91df563bef74946bd0b1421d0d3224
+    m_Address: Assets/Preresources/Config/UI/Page/PagePopEnterAnimation.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7dcddce7d5bc981489f0a466ec79db5f
+    m_Address: Assets/Preresources/Config/UI/Page/PagePushExitAnimation.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37b71c67e8b7d4249a55af2ce0371cd6
+    m_Address: Assets/Preresources/Config/UI/Page/PagePopExitAnimation.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3dc25e2d20452648acbf4ef381642b7
+    m_Address: Assets/Preresources/Config/UI/Page/PagePushEnterAnimation.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e1998269fb3078b4aa459ddd4f8e7ed1, type: 2}
   m_SchemaSet:

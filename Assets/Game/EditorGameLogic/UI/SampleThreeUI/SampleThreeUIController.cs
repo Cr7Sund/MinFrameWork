@@ -9,7 +9,7 @@ namespace Cr7Sund.Game.UI
         public static int EnableCount;
 
         public static IPromise promise;
-        public override IPromise Prepare(object intent = null)
+        protected override IPromise OnPrepare(object intent)
         {
             return promise;
         }
