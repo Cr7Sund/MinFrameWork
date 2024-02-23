@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.FrameWork.Util;
 using UnityEngine;
@@ -10,16 +11,14 @@ namespace Cr7Sund.AssetLoader.Impl
 {
     public class AddressableLoader : IAssetLoader
     {
-        private Dictionary<int, IAssetPromise> _controlIdToHandles;
+        private Dictionary<int, IAssetPromise> _controlIdToHandles = new();
         private int _nextControlId;
 
         public bool IsInit { get; private set; }
 
+
         public void Init()
         {
-            _controlIdToHandles =
-                new Dictionary<int, IAssetPromise>();
-
             Addressables.InitializeAsync();
 
             IsInit = true;
@@ -28,6 +27,12 @@ namespace Cr7Sund.AssetLoader.Impl
         {
             IsInit = false;
 
+            var promiseList = _controlIdToHandles.Values.ToArray();
+            for (int i = promiseList.Length - 1; i >= 0; i--)
+            {
+                IAssetPromise value = promiseList[i];
+                UnloadAssetPromise(value);
+            }
             _nextControlId = 0;
             _controlIdToHandles.Clear();
         }
@@ -44,15 +49,16 @@ namespace Cr7Sund.AssetLoader.Impl
             }
         }
 
-        public T Load<T>(IAssetKey key) where T : Object
+        public IAssetPromise Load<T>(IAssetKey key) where T : Object
         {
-            var loadPromise = LoadInternal<T>(key, false);
-            return loadPromise.Handler.Result as T;
+            return LoadInternal<T>(key.Key, false);
         }
+      
         public IAssetPromise LoadAsync<T>(IAssetKey key) where T : Object
         {
-            return LoadInternal<T>(key, true);
+            return LoadInternal<T>(key.Key, true);
         }
+      
         public void Unload<T>(IAssetPromise assetPromise) where T : Object
         {
             if (!_controlIdToHandles.ContainsKey(assetPromise.ControlId))
@@ -61,17 +67,18 @@ namespace Cr7Sund.AssetLoader.Impl
                     $"There is no asset that has been requested for release (Asset:{assetPromise.Key} ControlId: {assetPromise.ControlId}).");
             }
 
-            var addressableHandle = _controlIdToHandles[assetPromise.ControlId];
             _controlIdToHandles.Remove(assetPromise.ControlId);
-            Addressables.Release(addressableHandle);
+            Addressables.Release(assetPromise.Handler);
         }
+      
         public IAssetPromise InstantiateAsync(IAssetKey key)
         {
-            return InstantiateInternal(key, true);
+            return InstantiateInternal(key.Key, true);
         }
+      
         public IAssetPromise Instantiate(IAssetKey key)
         {
-            return InstantiateInternal(key, false);
+            return InstantiateInternal(key.Key, false);
         }
 
         public void ReleaseInstance(IAssetPromise assetPromise)
@@ -82,36 +89,47 @@ namespace Cr7Sund.AssetLoader.Impl
                     $"There is no asset that has been requested for release (Asset:{assetPromise.Key} ControlId: {assetPromise.ControlId}).");
             }
 
-            var addressableHandle = _controlIdToHandles[assetPromise.ControlId];
             _controlIdToHandles.Remove(assetPromise.ControlId);
-            Addressables.ReleaseInstance(addressableHandle.Handler.Result as GameObject);
+            Addressables.ReleaseInstance(assetPromise.GetResult<GameObject>());
         }
 
-        private IAssetPromise LoadInternal<T>(IAssetKey key, bool isAsync) where T : Object
+        private IAssetPromise LoadInternal<T>(string key, bool isAsync) where T : Object
         {
-            var addressableHandle = Addressables.LoadAssetAsync<T>(key.Key);
+            var addressableHandle = Addressables.LoadAssetAsync<T>(key);
             if (!isAsync) addressableHandle.WaitForCompletion();
 
             var controlId = _nextControlId++;
-            var setter = new AssetPromise(addressableHandle, key, controlId);
+            var setter = new AssetPromise(addressableHandle, key, controlId, false);
             _controlIdToHandles.Add(controlId, setter);
 
             addressableHandle.ToPromise(setter);
 
             return setter;
         }
-        private IAssetPromise InstantiateInternal(IAssetKey key, bool isAsync)
+      
+        private IAssetPromise InstantiateInternal(string key, bool isAsync)
         {
-            AsyncOperationHandle<GameObject> addressableHandle = Addressables.InstantiateAsync(key.Key);
+            AsyncOperationHandle<GameObject> addressableHandle = Addressables.InstantiateAsync(key);
             if (!isAsync) addressableHandle.WaitForCompletion();
 
             var controlId = _nextControlId++;
-            var setter = new AssetPromise(addressableHandle, key, controlId);
+            var setter = new AssetPromise(addressableHandle, key, controlId, true);
             _controlIdToHandles.Add(controlId, setter);
 
             addressableHandle.ToPromise(setter);
             return setter;
         }
-
+       
+        private void UnloadAssetPromise(IAssetPromise value)
+        {
+            if (value.IsInstantiate)
+            {
+                ReleaseInstance(value);
+            }
+            else
+            {
+                Unload<Object>(value);
+            }
+        }
     }
 }

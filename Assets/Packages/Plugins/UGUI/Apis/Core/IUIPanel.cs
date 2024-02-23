@@ -1,12 +1,10 @@
 using Cr7Sund.Package.Api;
+using Cr7Sund.UGUI.Impls;
 
 namespace Cr7Sund.UGUI.Apis
 {
     public interface IUIPanel : IUIComponentGetter, IInitialize
     {
-        void Hide(bool push);
-        void Show(bool push);
-        IPromise Animate(bool push);
-
+        UITransitionAnimation GetAnimation(bool push, bool enter, IAssetKey partnerTransitionUI);
     }
 }

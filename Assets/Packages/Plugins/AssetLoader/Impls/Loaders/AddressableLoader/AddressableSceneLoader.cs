@@ -17,11 +17,10 @@ namespace Cr7Sund.Server.Impl
         protected Dictionary<IAssetKey, AsyncOperationHandle<SceneInstance>> _assetKeyToHandles
             = new Dictionary<IAssetKey, AsyncOperationHandle<SceneInstance>>();
 
- 
+
         public IPromise LoadSceneAsync(IAssetKey key,
             LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true)
         {
-
             if (_assetKeyToHandles.ContainsKey(key))
             {
                 // currently dont support duplicate scene load
@@ -42,6 +41,7 @@ namespace Cr7Sund.Server.Impl
                     resultPromise.Reject(handler.OperationException);
                 }
             };
+
             return resultPromise;
         }
         public void UnloadScene(IAssetKey key)

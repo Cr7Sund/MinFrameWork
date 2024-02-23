@@ -1,10 +1,10 @@
-using UnityEngine.EventSystems;
+using UnityEngine;
 
 namespace Cr7Sund.UGUI.Apis
 {
     public interface IUIComponentGetter
     {
-        T GetUIComponent<T>(string key) where T : UIBehaviour;
+        T GetUIComponent<T>(string key) where T : Behaviour;
     }
 
 }

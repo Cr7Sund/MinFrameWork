@@ -1,11 +1,7 @@
 {
-    "name": "Cr7Sund.UGUI",
+    "name": "Cr7Sund.Attributes",
     "rootNamespace": "",
-    "references": [
-        "UnityEngine.UI",
-        "Cr7Sund.FrameWork.Core",
-        "Cr7Sund.Attributes"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

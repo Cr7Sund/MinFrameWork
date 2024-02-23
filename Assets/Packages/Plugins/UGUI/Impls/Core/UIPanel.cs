@@ -1,24 +1,56 @@
-using System;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.UGUI.Apis;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using Object = UnityEngine.Object;
 
 namespace Cr7Sund.UGUI.Impls
 {
-    public class UIPanel : UIBehaviour, IUIPanel
+    [RequireComponent(typeof(Canvas))]
+    [RequireComponent(typeof(CanvasGroup))]
+    public partial class UIPanel : UIBehaviour, IUIPanel
     {
-        public bool IsInit => throw new System.NotImplementedException();
+        [SerializeField] private UITransitionAnimation _pushEnterAnimations;
+        [SerializeField] private UITransitionAnimation _pushExitAnimations;
+        [SerializeField] private UITransitionAnimation _popEnterAnimations;
+        [SerializeField] private UITransitionAnimation _popExitAnimations;
+        [SerializeField] private StringBehaviourDictionary _componentContainers;
 
+
+        public bool IsInit { get; }
+        public StringBehaviourDictionary ComponentContainers { get => _componentContainers; }
 
         public void Dispose()
         {
+
             throw new System.NotImplementedException();
         }
 
-        public T GetUIComponent<T>(string key) where T : UIBehaviour
+        public T GetUIComponent<T>(string key) where T : Behaviour
         {
-            throw new System.NotImplementedException();
+            if (!_componentContainers.ContainsKey(key))
+            {
+                Debug.Error($"Panel {name} don't bind {key}");
+                return default;
+            }
+            return _componentContainers[key] as T;
+        }
+
+        public UITransitionAnimation GetAnimation(bool push, bool enter, IAssetKey partnerTransitionUI)
+        {
+            UITransitionAnimation animation = null;
+            if (push)
+            {
+                animation = enter ? _pushEnterAnimations : _pushExitAnimations;
+            }
+
+            animation = enter ? _popEnterAnimations : _popExitAnimations;
+
+            if (!animation.IsValid(partnerTransitionUI))
+            {
+                return null;
+            }
+
+            return animation;
         }
 
         public void Init()
@@ -26,24 +58,5 @@ namespace Cr7Sund.UGUI.Impls
 
         }
 
-        public void Hide(bool push)
-        {
-
-        }
-
-        public IPromise Animate(bool push)
-        {
-            // why we dont animate the view in controller, such as tween
-            // we want separate view from controller
-            // which means the controller don't depends on specific view
-            // check this link 
-            // https://www.notion.so/UI-FrameWork-89d22f2f2c894171bf023b056be177ce?d=be45aab0adcc4151965d8524c2445efa&pvs=4#39a09f1482394541b255c4b97f741174
-            return Promise.Resolved();
-        }
-
-        public void Show(bool push)
-        {
-
-        }
     }
 }

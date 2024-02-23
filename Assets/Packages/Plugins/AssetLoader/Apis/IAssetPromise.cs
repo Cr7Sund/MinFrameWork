@@ -7,8 +7,11 @@ namespace Cr7Sund.AssetLoader.Api
     public interface IAssetPromise : IPromise<Object>
     {
         AsyncOperationHandle Handler { get; }
-        IAssetKey Key { get; }
+        string Key { get; }
         int ControlId { get; }
+        bool IsInstantiate { get; }
+
+        T GetResult<T>() where T : Object;
     }
 
 

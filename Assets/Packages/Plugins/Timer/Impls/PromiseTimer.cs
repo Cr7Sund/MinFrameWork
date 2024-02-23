@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Api;
 namespace Cr7Sund.Package.Impl
 {
     public class PromiseTimer : IPromiseTimer
     {
-
         /// <summary>
         ///     Currently pending promises
         /// </summary>
-        private readonly LinkedList<PredicateWait> waiting = new LinkedList<PredicateWait>();
+        private readonly LinkedList<PredicateWait> waitings = new LinkedList<PredicateWait>();
 
         /// <summary>
         ///     The current running total for the amount of frames the PromiseTimer has run for
@@ -18,7 +18,7 @@ namespace Cr7Sund.Package.Impl
         /// <summary>
         ///     The current running total for time that this PromiseTimer has run for
         /// </summary>
-        private float curTime;
+        private int curTime;
 
         public bool Cancel(IPromise promise)
         {
@@ -32,21 +32,21 @@ namespace Cr7Sund.Package.Impl
             node.Value.pendingPromise.Reject(
                 new PromiseTimerException("Promise was cancelled by user.",
                     PromiseTimerExceptionType.CANCEL_TIMER));
-            waiting.Remove(node);
+            waitings.Remove(node);
 
             return true;
         }
 
-        public void Update(float deltaTime)
+        public void Update(int deltaTime)
         {
             curTime += deltaTime;
             curFrame += 1;
 
-            var node = waiting.First;
+            var node = waitings.First;
             while (node != null)
             {
                 var wait = node.Value;
-                float newElapsedTime = curTime - wait.timeStarted;
+                int newElapsedTime = curTime - wait.timeStarted;
                 wait.timeData.deltaTime = newElapsedTime - wait.timeData.elapsedTime;
                 wait.timeData.elapsedTime = newElapsedTime;
                 int newElapsedUpdates = curFrame - wait.frameStarted;
@@ -56,7 +56,8 @@ namespace Cr7Sund.Package.Impl
 
                 try
                 {
-                    result = wait.predicate(wait.timeData);
+                    wait.polling?.Invoke(wait.timeData);
+                    result = wait.predicate.Invoke(wait.timeData);
                 }
                 catch (Exception e)
                 {
@@ -77,9 +78,11 @@ namespace Cr7Sund.Package.Impl
             }
         }
 
-        public IPromise WaitFor(float seconds)
+        public IPromise WaitFor(int duration)
         {
-            return WaitUntil(t => t.elapsedTime > seconds);
+            AssertUtil.LessOrEqual(0, duration,PromiseTimerExceptionType.INVALID_DURATION);
+
+            return WaitUntil(t => t.elapsedTime > duration);
         }
 
         public IPromise WaitUntil(Func<TimeData, bool> predicate)
@@ -95,7 +98,7 @@ namespace Cr7Sund.Package.Impl
                 frameStarted = curFrame
             };
 
-            waiting.AddLast(wait);
+            waitings.AddLast(wait);
 
             return promise;
         }
@@ -105,19 +108,45 @@ namespace Cr7Sund.Package.Impl
             return WaitUntil(t => !predicate(t));
         }
 
+        public IPromise WaitUntil(Func<TimeData, bool> predicate, Action<TimeData> poll)
+        {
+            var promise = new Promise();
+
+            var wait = new PredicateWait
+            {
+                timeStarted = curTime,
+                pendingPromise = promise,
+                timeData = new TimeData(),
+                predicate = predicate,
+                polling = poll,
+                frameStarted = curFrame
+            };
+
+            waitings.AddLast(wait);
+
+            return promise;
+        }
+
+        public IPromise WaitFor(int duration, Action<int> poll)
+        {
+            AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
+
+            return WaitUntil(t => t.elapsedTime > duration, t => poll(t.elapsedTime));
+        }
+
         /// <summary>
         ///     Removes the provided node and returns the next node in the list.
         /// </summary>
         private LinkedListNode<PredicateWait> RemoveNode(LinkedListNode<PredicateWait> node)
         {
             var currentNode = node.Next;
-            waiting.Remove(node);
+            waitings.Remove(node);
             return currentNode;
         }
 
         private LinkedListNode<PredicateWait> FindInWaiting(IPromise promise)
         {
-            for (var node = waiting.First; node != null; node = node.Next)
+            for (var node = waitings.First; node != null; node = node.Next)
             {
                 if (node.Value.pendingPromise.Id.Equals(promise.Id))
                 {
@@ -127,37 +156,6 @@ namespace Cr7Sund.Package.Impl
 
             return null;
         }
-    }
-
-    /// <summary>
-    ///     A class that wraps a pending promise with it's predicate and time data
-    /// </summary>
-    internal class PredicateWait
-    {
-
-        /// <summary>
-        ///     The frame the promise was started
-        /// </summary>
-        public int frameStarted;
-
-        /// <summary>
-        ///     The pending promise which is an interface for a promise that can be rejected or resolved.
-        /// </summary>
-        public IPendingPromise pendingPromise;
-        /// <summary>
-        ///     Predicate for resolving the promise
-        /// </summary>
-        public Func<TimeData, bool> predicate;
-
-        /// <summary>
-        ///     The time data specific to this pending promise. Includes elapsed time and delta time.
-        /// </summary>
-        public TimeData timeData;
-
-        /// <summary>
-        ///     The time the promise was started
-        /// </summary>
-        public float timeStarted;
     }
 
 }

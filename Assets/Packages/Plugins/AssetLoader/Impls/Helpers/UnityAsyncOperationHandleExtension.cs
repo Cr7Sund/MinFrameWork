@@ -12,7 +12,7 @@ namespace Cr7Sund.AssetLoader
         {
             AssertUtil.IsTrue(addressableHandle.IsValid());
 
-            if (addressableHandle.Status != AsyncOperationStatus.None)
+            if (addressableHandle.IsDone)
             {
                 OnCompleted(addressableHandle, setter);
                 return;
