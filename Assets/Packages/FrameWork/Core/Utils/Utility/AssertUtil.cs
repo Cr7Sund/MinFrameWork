@@ -98,14 +98,13 @@ namespace Cr7Sund.FrameWork.Util
             }
         }
 
-        public static void NotNull(object anObject, Exception exception)
+        public static void IsNull<TEnum>(object anObject, TEnum errorCode) where TEnum : Enum
         {
-            if (anObject == null)
+            if (anObject != null)
             {
-                throw exception;
+                throw new MyException(errorCode);
             }
         }
-
         public static void IsInstanceOf<T>(object actual)
         {
             if (!typeof(T).IsInstanceOfType(actual))

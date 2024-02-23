@@ -1,6 +1,6 @@
 namespace Cr7Sund
 {
-    public interface ILateUpdate : IRunnable, ILifeTime
+    public interface ILateUpdate 
     {
         /// <summary>
         /// LateUpdate

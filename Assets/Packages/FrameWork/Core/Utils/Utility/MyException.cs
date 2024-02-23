@@ -20,21 +20,33 @@ namespace Cr7Sund.FrameWork.Util
     {
         public Enum Type { get; private set; }
 
-        public MyException(Enum type) 
-        {
-            Type = type;
-        }
-    
 
         public MyException(string message) : base(message)
         {
 
         }
 
+#if UNITY_EDITOR
+        public MyException(Enum type) : base($"ErrorCode: {type}")
+        {
+            Type = type;
+        }
+
+        public MyException(string message, Enum type) : base($"ErrorCode: {type} Info:  {message} ")
+        {
+            Type = type;
+        }
+#else
+        public MyException(Enum type)
+        {
+            Type = type;
+        }
+
         public MyException(string message, Enum type) : base(message)
         {
             Type = type;
         }
+#endif
 
         public override string ToString()
         {

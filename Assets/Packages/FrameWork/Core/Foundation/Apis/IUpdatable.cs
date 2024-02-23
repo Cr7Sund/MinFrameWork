@@ -1,6 +1,6 @@
 namespace Cr7Sund
 {
-    public interface IUpdate:IRunnable,ILifeTime
+    public interface IUpdatable 
     {
         /// <summary>
         /// Update
