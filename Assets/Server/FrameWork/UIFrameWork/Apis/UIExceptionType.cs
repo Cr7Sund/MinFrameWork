@@ -26,5 +26,17 @@ namespace Cr7Sund.Server.UI.Api
         /// try to unload but not load at first
         /// </summary>
         no_load_promise,
+        /// <summary>
+        /// cant show page in transition
+        /// </summary>
+        OPEN_IN_TRANSITION,
+        /// <summary>
+        /// missing page animation source
+        /// </summary>
+        empty_page_animSource,
+        /// <summary>
+        /// try to instantiate ui repeatedly
+        /// </summary>
+        instantiate_UI_repeat
     }
 }

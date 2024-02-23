@@ -7,7 +7,6 @@ namespace Cr7Sund.Server.UI.Api
         // Called before view crate and do some async work
         public IPromise Prepare(object intent = null);
 
-
         // Called just before this page is displayed by the Push transition.
         public IPromise WillPushEnter();
         // Called just after this page is displayed by the Push transition.

@@ -24,7 +24,6 @@ namespace Cr7Sund.Server.Impl
         public void BuildContext()
         {
             _context = CreateContext();
-
         }
 
         public void BuildControllers()

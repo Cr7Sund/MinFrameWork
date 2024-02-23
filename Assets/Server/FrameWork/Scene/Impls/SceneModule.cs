@@ -21,10 +21,41 @@ namespace Cr7Sund.Server.Scene.Impl
             }
         }
 
+
+        public IPromise<INode> SwitchScene(IAssetKey key)
+        {
+            return SwitchNode(key);
+        }
+        public IPromise<INode> RemoveScene(IAssetKey key)
+        {
+            return RemoveNode(key);
+        }
+        public IPromise<INode> UnloadScene(IAssetKey key)
+        {
+            return UnloadNode(key);
+        }
+        public IPromise<INode> PreLoadScene(IAssetKey key)
+        {
+            return PreLoadNode(key);
+        }
+        public IPromise<INode> AddScene(IAssetKey key)
+        {
+            return AddNode(key);
+        }
+
         protected override INode CreateNode(IAssetKey key)
         {
             return SceneCreator.Create((SceneKey)key);
         }
+
+        protected override IPromise<INode> OnAdded(INode node)
+        {
+            var sceneNode = node as SceneNode;
+            return sceneNode.ActiveScene()
+                .Then(() => Promise<INode>.Resolved(node));
+        }
+
+        #region  Event
         protected override void DispatchSwitch(IAssetKey curScene, IAssetKey lastScene)
         {
             var e = _poolBinder.AutoCreate<SwitchSceneEvent>();
@@ -57,25 +88,7 @@ namespace Cr7Sund.Server.Scene.Impl
             _eventBus.Dispatch(e);
         }
 
-        public IPromise<INode> SwitchScene(IAssetKey key)
-        {
-            return SwitchNode(key);
-        }
-        public IPromise<INode> RemoveScene(IAssetKey key)
-        {
-            return RemoveNode(key);
-        }
-        public IPromise<INode> UnloadScene(IAssetKey key)
-        {
-            return UnloadNode(key);
-        }
-        public IPromise<INode> PreLoadScene(IAssetKey key)
-        {
-            return PreLoadNode(key);
-        }
-        public IPromise<INode> AddScene(IAssetKey key)
-        {
-            return AddNode(key);
-        }
+        #endregion
+
     }
 }

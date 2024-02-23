@@ -6,9 +6,8 @@ using Cr7Sund.Server.Api;
 using Cr7Sund.Server.Scene.Apis;
 namespace Cr7Sund.Server.Impl
 {
-    public class GameNode : ModuleNode,IGameNode
+    public class GameNode : ModuleNode, IGameNode
     {
-        [Inject] public ISceneModule SceneModule;
         public void Run()
         {
             AssertUtil.NotNull(_context, NodeTreeExceptionType.EMPTY_CONTEXT);

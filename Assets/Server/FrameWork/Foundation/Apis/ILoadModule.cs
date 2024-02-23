@@ -1,5 +1,5 @@
-﻿using Cr7Sund.Package.Api;  // Importing the framework's API namespace
-using Cr7Sund.NodeTree.Api;  // Importing the node tree API namespace
+﻿using Cr7Sund.Package.Api;  
+using Cr7Sund.NodeTree.Api;  
 
 namespace Cr7Sund.Server.Api
 {

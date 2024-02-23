@@ -7,7 +7,7 @@ namespace Cr7Sund.Server.Scene.Impl
 {
     public delegate SceneBuilder CreateSceneBuilderDelegate();
 
-    public class SceneKey : ISceneKey
+    public struct SceneKey : ISceneKey
     {
         private readonly Type _builderType;
 

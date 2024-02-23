@@ -75,7 +75,6 @@ namespace Cr7Sund.Server.UI.Impl
                     break;
                 }
             }
-
         }
 
         public IPromise<INode> PushPage(IAssetKey uiKey)
@@ -86,6 +85,10 @@ namespace Cr7Sund.Server.UI.Impl
             var enterKey = uiKey as UIKey;
             var exitPage = GetViewByKey(exitKey);
             var enterPage = GetViewByKey(enterKey);
+            if (IsInTransition)
+            {
+                throw new MyException(UIExceptionType.OPEN_IN_TRANSITION);
+            }
 
             enterKey.exitPage = exitKey;
             enterKey.IsPush = true;
@@ -94,18 +97,11 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (enterKey.ShowAfter)
             {
-                if (!exitPage.IsTransitioning)
-                {
-                    var hideFirstPromise = HideFirstSequence(exitPage)
-                                .Then(() => Promise<INode>.Resolved(exitPage));
-                    var addPromise = AddNode(enterKey);
-                    return Promise<INode>.All(hideFirstPromise, addPromise)
-                            .Then((nodes) => OnShowAfter(nodes, exitPage));
-                }
-                else
-                {
-                    return Promise<INode>.Rejected(new MyException(UIExceptionType.HIDE_IN_TRANSITION));
-                }
+                var hideFirstPromise = HideFirstSequence(exitPage)
+                            .Then(() => Promise<INode>.Resolved(exitPage));
+                var addPromise = AddNode(enterKey);
+                return Promise<INode>.All(hideFirstPromise, addPromise)
+                        .Then((nodes) => OnShowAfter(nodes, exitPage));
             }
             else
             {
@@ -124,7 +120,7 @@ namespace Cr7Sund.Server.UI.Impl
             uINode.AssignContext(new UIContext());
             return uINode;
         }
-      
+
         protected override IPromise<INode> OnAdded(INode node)
         {
             var enterPage = node as UINode;
@@ -134,20 +130,30 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (!enterKey.ShowAfter)
             {
-                return OpenSequence(enterPage, exitPage)
-                                   .Then(() =>
-                                       {
-                                           AddIntoStack(enterPage);
+                AddIntoStack(enterPage);
 
-                                           if (exitPage != null)
-                                           {
-                                               return RemovePage(node, exitPage);
-                                           }
-                                           else
-                                           {
-                                               return Promise<INode>.Resolved(node);
-                                           }
-                                       });
+                // 1. 
+                // OpenSequence including controller's lifetime
+                // we  can switch page on controllers' OnEnable
+                // so we need to ensure the internal state that it's done. such as ui stack
+                // and the controller lifecycle is also been called after the transition  
+
+                // 2. something wrong with OpenSequence ?
+                // load already done internal, and the controller have not been called
+                // unload will be called too, and the controller 
+                // PLAN unload operation
+
+                if (exitPage != null)
+                {
+                    return RemovePage(enterPage, exitPage)
+                            .Then(_ => OpenSequence(enterPage, exitPage))
+                            .Then(() => Promise<INode>.Resolved(node));
+                }
+                else
+                {
+                    return OpenSequence(enterPage, exitPage)
+                            .Then(() => Promise<INode>.Resolved(node));
+                }
             }
             else
             {
@@ -195,21 +201,12 @@ namespace Cr7Sund.Server.UI.Impl
             var enterKey = enterNode.Key as UIKey;
             var exitPageKey = enterKey.exitPage;
 
-            return ShowAfterSequence(enterPage, exitPage)
-                    .Then(() =>
-                    {
-                        AddIntoStack(enterPage);
-
-                        if (exitPage != null)
-                        {
-                            return RemovePage(enterNode, exitPage);
-                        }
-                        else
-                        {
-                            return Promise<INode>.Resolved(enterNode);
-                        }
-                    });
+            AddIntoStack(enterPage);
+            return RemovePage(enterPage, exitPage)
+                    .Then(_ => ShowAfterSequence(enterPage, exitPage))
+                    .Then(() => Promise<INode>.Resolved(enterNode));
         }
+
         private IPromise<INode> PopPage(IAssetKey uiKey, IAssetKey exitKey)
         {
             var enterKey = uiKey as UIKey;

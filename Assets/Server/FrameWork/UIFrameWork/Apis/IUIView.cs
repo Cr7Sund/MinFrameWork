@@ -1,5 +1,8 @@
+using System;
+using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Package.Api;
-using Cr7Sund.UGUI.Apis;     
+using Cr7Sund.UGUI.Apis;
+using UnityEngine;
 
 /**
  * @class Cr7Sund.Framework.Api.IView
@@ -11,10 +14,23 @@ using Cr7Sund.UGUI.Apis;
  */
 namespace Cr7Sund.Server.UI.Api
 {
-    public interface IUIView
+    public interface IUIView : IDisposable
     {
-        void Hide(bool push);
-        void Show(bool push);
-        IPromise Animate(bool push);
+        int SortingOrder { get; }
+        RectTransform RectTransform { get; }
+        /// <summary>
+        ///     Progress of the transition animation.
+        /// </summary>
+        public float TransitionAnimationProgress { get; }
+
+        void Start(UnityEngine.Object asset, INode parent);
+        void Enable(INode parent);
+        void BeforeEnter();
+        IPromise EnterRoutine(bool push, IUINode partnerView, bool playAnimation);
+        void AfterEnter();
+        void BeforeExit();
+        IPromise ExitRoutine(bool push, IUINode partnerView, bool playAnimation);
+        void AfterExit();
+        void Stop();
     }
 }

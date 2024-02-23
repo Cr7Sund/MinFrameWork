@@ -10,17 +10,14 @@ namespace Cr7Sund.Server.UI.Impl
     {
         public sealed override void AddComponents()
         {
-            // Cross Context
-            // --- --- 
-
-
             // Local In GameNode or GameController
             // --- --- 
             var assetLoader = AssetLoaderFactory.CreateLoader();
             assetLoader.Init();
 
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            base.InjectionBinder.Bind<IAssetLoader>().To(assetLoader).AsSingleton();
+            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton();
+            InjectionBinder.Bind<IAssetLoader>().To(assetLoader);
         }
 
         public sealed override void RemoveComponents()
