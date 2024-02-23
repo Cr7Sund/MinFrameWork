@@ -9,10 +9,11 @@ using Cr7Sund.Server.UI.Impl;
 using Cr7Sund.Touch.Api;
 using Cr7Sund.Touch.Impl;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 
 namespace Cr7Sund.ServerTest.UI
 {
-    public class TestPageContainer
+    public partial class TestPageContainer
     {
         private SceneNode _sceneNode;
         private PageContainer _pageContainer;
@@ -39,8 +40,12 @@ namespace Cr7Sund.ServerTest.UI
             SampleOneUIController.Init();
             SampleTwoUIController.Init();
             SampleThreeUIController.Init();
+            SampleFourUIController.Init();
+            SampleFiveUIController.Init();
             SampleThreeUIController.promise = Promise.Resolved();
-
+            SampleFivePanel.AnimPromise = Promise.Resolved();
+            SampleThreeUIController.Rejected = false;
+            SampleFivePanel.Rejected = false;
         }
 
         private void RunScene()
@@ -98,39 +103,6 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
 
-        [Test]
-        public void PreparePage_Pending()
-        {
-            SampleThreeUIController.promise = new Promise();
-
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
-            Assert.AreEqual(0, _pageContainer.OperateNum);
-            Assert.AreEqual(0, SampleThreeUIController.EnableCount);
-        }
-
-        [Test]
-        public void PreparePage_Resolved()
-        {
-            SampleThreeUIController.promise = new Promise();
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
-            SampleThreeUIController.promise.Resolve();
-            Assert.AreEqual(1, _pageContainer.OperateNum);
-            Assert.AreEqual(1, SampleThreeUIController.EnableCount);
-        }
-
-        [Test]
-        public void PreparePages_Resolved()
-        {
-            SampleThreeUIController.promise = new Promise();
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
-            SampleThreeUIController.promise.Resolve();
-            Assert.AreEqual(1, _pageContainer.OperateNum);
-            Assert.AreEqual(1, SampleThreeUIController.EnableCount);
-        }
 
 
         [Test]
@@ -145,6 +117,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleOneUIController.EnableCount);
             Assert.AreEqual(0, SampleThreeUIController.StartValue);
         }
+
         [Test]
         public void ExitBeforeSequence_Resolved()
         {
@@ -251,5 +224,6 @@ namespace Cr7Sund.ServerTest.UI
             var ex = Assert.Throws<MyException>(testDelegate);
             Assert.AreEqual(UIExceptionType.NO_LEFT_BACK, ex.Type);
         }
+
     }
 }

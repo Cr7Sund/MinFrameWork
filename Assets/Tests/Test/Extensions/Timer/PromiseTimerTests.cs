@@ -38,14 +38,14 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            const float testTime = 2f;
+            const int testTime = 2000;
             bool hasResolved = false;
 
             testObject.WaitFor(testTime)
                 .Then(() => hasResolved = true)
                 .Done();
 
-            testObject.Update(1f);
+            testObject.Update(1000);
 
             Assert.AreEqual(false, hasResolved);
         }
@@ -55,14 +55,14 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         {
             var testObject = new PromiseTimer();
 
-            const float testTime = 1f;
+            const int testTime = 1000;
             bool hasResolved = false;
 
             testObject.WaitFor(testTime)
                 .Then(() => hasResolved = true)
                 .Done();
 
-            testObject.Update(2f);
+            testObject.Update(2000);
 
             Assert.AreEqual(true, hasResolved);
         }
@@ -83,7 +83,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
             Assert.AreEqual(false, hasResolved);
 
             doResolve = true;
-            testObject.Update(1f);
+            testObject.Update(1000);
 
             Assert.AreEqual(true, hasResolved);
         }
@@ -104,7 +104,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
             Assert.AreEqual(false, hasResovled);
 
             doWait = false;
-            testObject.Update(1f);
+            testObject.Update(1000);
 
             Assert.AreEqual(true, hasResovled);
         }
@@ -126,8 +126,8 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
                 })
                 .Done();
 
-            testObject.Update(1.0f);
-            testObject.Update(1.0f);
+            testObject.Update(1000);
+            testObject.Update(1000);
 
             Assert.AreEqual(1, runCount);
         }
@@ -141,17 +141,17 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
 
 
             var promise = testObject
-                .WaitUntil(timeData => timeData.elapsedTime > 1.0f)
+                .WaitUntil(timeData => timeData.elapsedTime > 1000)
                 .Then(() => hasResolved = true)
                 .Catch(ex => caughtException = ex);
 
             promise.Done(null, ex => caughtException = ex);
 
-            testObject.Update(1.0f);
+            testObject.Update(1000);
 
             Assert.AreEqual(hasResolved, false);
 
-            testObject.Update(1.0f);
+            testObject.Update(1000);
 
             Assert.AreEqual(caughtException, null);
             Assert.AreEqual(hasResolved, true);
@@ -166,14 +166,14 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
 
 
             var promise = testObject
-                .WaitUntil(timeData => timeData.elapsedTime > 1.0f);
+                .WaitUntil(timeData => timeData.elapsedTime > 1000);
             promise.Catch(ex => caughtException = ex);
 
             promise.Done(null, ex => caughtException = ex);
 
-            testObject.Update(1.0f);
+            testObject.Update(1000);
             testObject.Cancel(promise);
-            testObject.Update(1.0f);
+            testObject.Update(1000);
 
             Assert.AreEqual(typeof(PromiseTimerException), caughtException.GetType());
             Assert.AreEqual(PromiseTimerExceptionType.CANCEL_TIMER, ((PromiseTimerException)caughtException).Type);
@@ -195,7 +195,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
                 .Catch(ex => caughtException = ex)
                 .Done();
 
-            testObject.Update(1.0f);
+            testObject.Update(1000);
 
             Assert.AreEqual(expectedException, caughtException);
         }
@@ -233,7 +233,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
                     return false;
                 });
 
-            testObject.Update(0.01f);
+            testObject.Update(10);
 
             Assert.AreEqual(1, p1Updates);
             Assert.AreEqual(1, p2Updates);
@@ -278,7 +278,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
                     return false;
                 });
 
-            testObject.Update(0.01f);
+            testObject.Update(10);
 
             Assert.AreEqual(1, p1Updates);
             Assert.AreEqual(1, p2Updates);

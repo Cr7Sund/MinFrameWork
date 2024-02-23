@@ -13,5 +13,8 @@ namespace Cr7Sund.PackageTest.IOC
 
                 public static UIKey SampleFourUI = new UIKey("SampleFourUI",
                                 typeof(SampleFourUIController), typeof(SampleFourPanel), stack: false);
+                public static UIKey SampleFiveUI = new UIKey("SampleFiveUI",
+                     typeof(SampleFiveUIController), typeof(SampleFivePanel));
+
         }
 }

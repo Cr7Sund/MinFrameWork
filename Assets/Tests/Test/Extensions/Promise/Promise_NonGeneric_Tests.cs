@@ -32,7 +32,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             LogAssert.ignoreFailingMessages = true;
 
             var ex = new Exception();
-            var promise = Promise.Rejected(ex);
+            var promise = Promise.RejectedWithoutDebug(ex);
 
             int errors = 0;
             promise.Catch(e =>
@@ -464,7 +464,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             var promiseA = new Promise();
             var promise = Promise
-                .All(promiseA, Promise.Rejected(exception))
+                .All(promiseA, Promise.RejectedWithoutDebug(exception))
                 .Then(() => resolved = true)
                 .Catch(ex =>
                 {

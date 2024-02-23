@@ -3,26 +3,12 @@ using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.PackageTest.IOC
 {
-    public class SampleThreeUIController : BaseUIController
+    public class SampleFiveUIController : BaseUIController
     {
         public static int StartValue;
         public static int EnableCount;
 
-        public static bool Rejected;
 
-        public static IPromise promise;
-
-        protected override IPromise OnPrepare(object intent = null)
-        {
-            if (Rejected)
-            {
-                throw new System.Exception();
-            }
-            else
-            {
-                return promise;
-            }
-        }
         public static void Init()
         {
             StartValue = 0;
@@ -33,7 +19,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStart()
         {
             base.OnStart();
-            Debug.Info("Load ui three");
+            Debug.Info("Load ui five");
 
             StartValue++;
 
@@ -42,7 +28,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnEnable()
         {
             base.OnEnable();
-            Debug.Info("Enable ui three");
+            Debug.Info("Enable ui five");
 
             EnableCount++;
         }
@@ -50,7 +36,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnDisable()
         {
             base.OnDisable();
-            Debug.Info("Disable ui three");
+            Debug.Info("Disable ui five");
 
             EnableCount--;
         }
@@ -58,7 +44,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStop()
         {
             base.OnStop();
-            Debug.Info("Stop ui three");
+            Debug.Info("Stop ui five");
 
             StartValue--;
         }

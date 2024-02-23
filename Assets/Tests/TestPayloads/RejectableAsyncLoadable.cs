@@ -11,12 +11,12 @@ namespace Cr7Sund.FrameWork.Test
 
         protected override IPromise OnLoadAsync()
         {
-            return Promise.Rejected(new Exception(exMsg));
+            return Promise.RejectedWithoutDebug(new Exception(exMsg));
         }
 
         protected override IPromise OnUnloadAsync()
         {
-            return Promise.Rejected(new Exception("qw"));
+            return Promise.RejectedWithoutDebug(new Exception("qw"));
         }
 
         protected override void OnCatch(Exception e)
