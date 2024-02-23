@@ -122,7 +122,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
             }
 
-            GetCollection(out var stack, out var queue);
+            GetCollection(out var stack, out var resultQueue);
 
             // N-ary Tree Postorder Traversal
             var root = this;
@@ -130,7 +130,7 @@ namespace Cr7Sund.NodeTree.Impl
             while (stack.Count > 0)
             {
                 var top = stack.Pop() as Node;
-                queue.Enqueue(top);
+                resultQueue.Push(top);
                 for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
                     if (!top.ChildNodes[i].IsStarted)
@@ -140,14 +140,14 @@ namespace Cr7Sund.NodeTree.Impl
                 }
             }
 
-            while (queue.Count > 0)
+            while (resultQueue.Count > 0)
             {
-                var first = queue.Dequeue() as Node;
+                var first = resultQueue.Pop() as Node;
                 first.OnStart();
                 first.IsStarted = true;
             }
 
-            ReleaseCollection(stack, queue);
+            ReleaseCollection(stack, resultQueue);
         }
 
         public void Enable()
@@ -157,7 +157,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
             }
 
-            GetCollection(out var stack, out var queue);
+            GetCollection(out var stack, out var resultQueue);
 
             // N-ary Tree Postorder Traversal
             var root = this;
@@ -165,8 +165,8 @@ namespace Cr7Sund.NodeTree.Impl
             while (stack.Count > 0)
             {
                 var top = stack.Pop() as Node;
-                queue.Enqueue(top);
-                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
+                resultQueue.Push(top);
+                for (int i = 0; i < top.ChildNodes.Count; i++)
                 {
                     if (!top.ChildNodes[i].IsActive && top.ChildNodes[i].IsStarted)
                     {
@@ -174,14 +174,15 @@ namespace Cr7Sund.NodeTree.Impl
                     }
                 }
             }
+            var list  = new List<int>();
 
-            while (queue.Count > 0)
+            while (resultQueue.Count > 0)
             {
-                var first = queue.Dequeue() as Node;
+                var first = resultQueue.Pop() as Node;
                 first.OnEnable();
                 first.IsActive = true;
             }
-            ReleaseCollection(stack, queue);
+            ReleaseCollection(stack, resultQueue);
         }
 
         public void Disable()
@@ -191,7 +192,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
             }
 
-            GetCollection(out var stack, out var queue);
+            GetCollection(out var stack, out var resultQueue);
 
             // N-ary Tree Postorder Traversal
             var root = this;
@@ -199,7 +200,7 @@ namespace Cr7Sund.NodeTree.Impl
             while (stack.Count > 0)
             {
                 var top = stack.Pop() as Node;
-                queue.Enqueue(top);
+                resultQueue.Push(top);
                 for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
                     if (top.ChildNodes[i].IsActive)
@@ -209,13 +210,13 @@ namespace Cr7Sund.NodeTree.Impl
                 }
             }
 
-            while (queue.Count > 0)
+            while (resultQueue.Count > 0)
             {
-                var first = queue.Dequeue() as Node;
+                var first = resultQueue.Pop() as Node;
                 first.OnDisable();
                 first.IsActive = false;
             }
-            ReleaseCollection(stack, queue);
+            ReleaseCollection(stack, resultQueue);
         }
         public void Stop()
         {
@@ -224,7 +225,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
             }
 
-            GetCollection(out var stack, out var queue);
+            GetCollection(out var stack, out var resultQueue);
 
             // N-ary Tree Postorder Traversal
 
@@ -233,7 +234,7 @@ namespace Cr7Sund.NodeTree.Impl
             while (stack.Count > 0)
             {
                 var top = stack.Pop() as Node;
-                queue.Enqueue(top);
+                resultQueue.Push(top);
                 for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
                     if (top.ChildNodes[i].IsStarted)
@@ -243,13 +244,13 @@ namespace Cr7Sund.NodeTree.Impl
                 }
             }
 
-            while (queue.Count > 0)
+            while (resultQueue.Count > 0)
             {
-                var first = queue.Dequeue() as Node;
+                var first = resultQueue.Pop() as Node;
                 first.OnStop();
                 first.IsStarted = false;
             }
-            ReleaseCollection(stack, queue);
+            ReleaseCollection(stack, resultQueue);
         }
         public void Dispose()
         {
@@ -294,39 +295,39 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        private void ReleaseCollection(Stack<INode> stack, Queue<INode> queue)
+        private void ReleaseCollection(Stack<INode> stack, Stack<INode> resultQueue)
         {
             var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<INode>>();
-            var queuePool = poolBinder.GetOrCreate<Queue<INode>>();
+            var queuePool = poolBinder.GetOrCreate<Stack<INode>>();
 
             stack.Clear();
-            queue.Clear();
+            resultQueue.Clear();
 
             stackPool.ReturnInstance(stack);
-            queuePool.ReturnInstance(queue);
+            queuePool.ReturnInstance(resultQueue);
         }
-        private void GetCollection(out Stack<INode> stack, out Queue<INode> queue)
+        private void GetCollection(out Stack<INode> stack, out Stack<INode> resultQueue)
         {
             var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<INode>>();
-            var queuePool = poolBinder.GetOrCreate<Queue<INode>>();
+            var queuePool = poolBinder.GetOrCreate<Stack<INode>>();
 
             stack = stackPool.GetInstance();
-            queue = queuePool.GetInstance();
+            resultQueue = queuePool.GetInstance();
             stack.Clear();
-            queue.Clear();
+            resultQueue.Clear();
         }
         private void DisposeRecursively(INode root)
         {
-            GetCollection(out var stack, out var queue);
+            GetCollection(out var stack, out var resultQueue);
 
             // N-ary Tree Postorder Traversal
             stack.Push(root);
             while (stack.Count > 0)
             {
                 var top = stack.Pop() as Node;
-                queue.Enqueue(top);
+                resultQueue.Push(top);
                 for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
                 {
                     if (top.ChildNodes[i].IsInit)
@@ -336,13 +337,13 @@ namespace Cr7Sund.NodeTree.Impl
                 }
             }
 
-            while (queue.Count > 0)
+            while (resultQueue.Count > 0)
             {
-                var first = queue.Dequeue() as Node;
+                var first = resultQueue.Pop() as Node;
                 first.RealDispose();
             }
 
-            ReleaseCollection(stack, queue);
+            ReleaseCollection(stack, resultQueue);
         }
         private void RealDispose()
         {
