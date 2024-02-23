@@ -173,6 +173,13 @@ namespace Cr7Sund.Package.Api
         IPromise ContinueWith(Func<IPromise> onResolved);
 
         /// <summary>
+        /// Adds a callback that chains a non-value promise.
+        /// ContinueWith callbacks will always be called, even if any preceding promise is rejected or encounters an error.
+        /// The state of the returning promise will be based on the new non-value promise, not the preceding (rejected or resolved) promise.
+        /// </summary>
+        IPromise ContinueWith(Action onComplete);
+        
+        /// <summary>
         /// Adds a callback that chains a value promise (optionally converting to a different value type).
         /// ContinueWith callbacks will always be called, even if any preceding promise is rejected or encounters an error.
         /// The state of the returning promise will be based on the new value promise, not the preceding (rejected or resolved) promise.

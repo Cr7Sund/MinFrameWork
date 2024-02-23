@@ -30,7 +30,7 @@ namespace Cr7Sund.Package.Impl
                 {
                     if (!alreadyRejected)
                     {
-                        promise.Reject(e);
+                        promise.RejectWithoutDebug(e);
                     }
 
                     alreadyRejected = true;
@@ -51,7 +51,7 @@ namespace Cr7Sund.Package.Impl
                 {
                     if (!alreadyRejected)
                     {
-                        promise.Reject(e);
+                        promise.RejectWithoutDebug(e);
                     }
 
                     alreadyRejected = true;

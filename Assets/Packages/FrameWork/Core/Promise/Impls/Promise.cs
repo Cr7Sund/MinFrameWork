@@ -65,7 +65,7 @@ namespace Cr7Sund.Package.Impl
             {
                 if (_rejectHandler == null)
                 {
-                    _rejectHandler = Reject;
+                    _rejectHandler = RejectWithoutDebug;
                 }
                 return _rejectHandler;
             }
@@ -202,15 +202,15 @@ namespace Cr7Sund.Package.Impl
             resultPromise.WithName(Name);
 
 
-            void RejectHandler(Exception ex)
+            void RejectHandler(Exception e)
             {
                 try
                 {
-                    resultPromise.Resolve(onRejected(ex));
+                    resultPromise.Resolve(onRejected(e));
                 }
-                catch (Exception cbEx)
+                catch (Exception ex)
                 {
-                    resultPromise.Reject(cbEx);
+                    resultPromise.Reject(ex);
                 }
             }
 
@@ -383,7 +383,14 @@ namespace Cr7Sund.Package.Impl
                 }
                 catch (Exception ex)
                 {
-                    return Rejected<ConvertedT>(ex);
+                    if (onRejected != null)
+                    {
+                        return onRejected.Invoke(ex);
+                    }
+                    else
+                    {
+                        return Promise<ConvertedT>.Rejected(ex);
+                    }
                 }
             }
 
@@ -485,7 +492,7 @@ namespace Cr7Sund.Package.Impl
                 }
                 catch (Exception ex)
                 {
-                    return Rejected<PromisedT>(ex);
+                    return Promise<PromisedT>.Rejected(ex);
                 }
             }
 
@@ -500,7 +507,7 @@ namespace Cr7Sund.Package.Impl
                 try
                 {
                     onComplete();
-                    promise.Reject(e);
+                    promise.RejectWithoutDebug(e);
                 }
                 catch (Exception ne)
                 {
@@ -516,6 +523,17 @@ namespace Cr7Sund.Package.Impl
         }
 
         public IPromise ContinueWith(Func<IPromise> onComplete)
+        {
+            var promise = GetRawPromise();
+            promise.WithName(Name);
+
+            Then(_ => promise.Resolve());
+            Catch(_ => promise.Resolve());
+
+            return promise.Then(onComplete);
+        }
+
+        public IPromise ContinueWith(Action onComplete)
         {
             var promise = GetRawPromise();
             promise.WithName(Name);
@@ -577,6 +595,13 @@ namespace Cr7Sund.Package.Impl
 
         public void Reject(Exception ex)
         {
+            RejectWithoutDebug(ex);
+            // only output error when you don't achieve onRejected
+            Debug.Error(ex);
+        }
+        
+        public void RejectWithoutDebug(Exception ex)
+        {
             AssertUtil.NotNull(ex);
             if (CurState != PromiseState.Pending)
             {
@@ -590,8 +615,6 @@ namespace Cr7Sund.Package.Impl
             {
                 Promise.PendingPromises.Remove(this);
             }
-
-            Debug.Error(ex);
 
             InvokeRejectHandlers(ex);
         }
@@ -743,6 +766,12 @@ namespace Cr7Sund.Package.Impl
         // Convert an exception directly into a rejected promise.
         public static IPromise<PromisedT> Rejected(Exception ex)
         {
+            Debug.Error(ex);
+            return _resolvePromise.Rejected<PromisedT>(ex);
+        }
+        
+        public static IPromise<PromisedT> RejectedWithoutDebug(Exception ex)
+        {
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
 
@@ -814,7 +843,9 @@ namespace Cr7Sund.Package.Impl
             AssertUtil.NotNull(ex);
 
             var promise = GetRawPromise<ConvertedT>();
-            promise.Reject(ex);
+            promise._rejectionException = ex;
+            promise.CurState = PromiseState.Rejected;
+
             return promise;
         }
 
@@ -884,7 +915,7 @@ namespace Cr7Sund.Package.Impl
                             if (resultPromise.CurState == PromiseState.Pending)
                             {
                                 // If a promise errored and the result promise is still pending, reject it.
-                                resultPromise.Reject(ex);
+                                resultPromise.RejectWithoutDebug(ex);
                             }
                         });
             });
@@ -951,7 +982,7 @@ namespace Cr7Sund.Package.Impl
                             if (remainingCount <= 0 && resultPromise.CurState == PromiseState.Pending)
                             {
                                 // This will happen if all of the promises are rejected.
-                                resultPromise.Reject(groupException);
+                                resultPromise.RejectWithoutDebug(groupException);
                             }
                         });
             });
@@ -1002,7 +1033,7 @@ namespace Cr7Sund.Package.Impl
                                 if (resultPromise.CurState == PromiseState.Pending)
                                 {
                                     // If a promise errored and the result promise is still pending, reject it.
-                                    resultPromise.Reject(ex);
+                                    resultPromise.RejectWithoutDebug(ex);
                                 }
                             });
                 }
@@ -1031,7 +1062,7 @@ namespace Cr7Sund.Package.Impl
             int count = 0;
 
             fns.Aggregate(
-                    Rejected<ConvertedT>(new Exception()),
+                     Promise<ConvertedT>.RejectedWithoutDebug(new Exception()),
                     (prevPromise, fn) =>
                     {
                         int itemSequence = count;
@@ -1060,7 +1091,7 @@ namespace Cr7Sund.Package.Impl
                 .Catch(ex =>
                 {
                     promise.ReportProgress(1f);
-                    promise.Reject(ex);
+                    promise.RejectWithoutDebug(ex);
                 });
 
             return promise;
