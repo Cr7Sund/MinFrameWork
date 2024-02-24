@@ -1,27 +1,25 @@
+using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.Server.Tests
 {
-    public class SampleController : BaseController
+    public class SampleController : BaseGameController
     {
-        protected override void OnStart()
+        protected override IPromise HandleHotfix()
         {
-            base.OnStart();
+            return Promise.Resolved();
         }
 
-        protected override void OnEnable()
+        protected override void InitGameEnv()
         {
-            base.OnEnable();
         }
 
-        protected override void OnDisable()
+        protected override IPromise<INode> RunLoginScene()
         {
-            base.OnDisable();
-        }
-
-        protected override void OnStop()
-        {
-            base.OnStop();
+            return Promise<INode>.Resolved(null);
         }
     }
 }

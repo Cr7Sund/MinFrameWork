@@ -3,6 +3,7 @@ using System;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
+using Cr7Sund.NodeTree.Api;
 namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleRootContext : CrossContext
@@ -11,7 +12,7 @@ namespace Cr7Sund.PackageTest.IOC
         {
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
         }
-        public override void AddComponents()
+        public override void AddComponents(INode self)
         {
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsCrossContext();
         }

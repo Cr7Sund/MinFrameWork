@@ -9,7 +9,14 @@ namespace Cr7Sund.PackageTest.IOC
         public static int UpdateValue = 0;
         public static int LateUpdateValue = 0;
 
-        public SampleChildUpdateNode()
+
+        public SampleChildUpdateNode(IAssetKey assetKey) : base(assetKey)
+        {
+            _context = new SampleContext();
+        }
+
+
+        public SampleChildUpdateNode() : this(null)
         {
             _context = new SampleContext();
         }

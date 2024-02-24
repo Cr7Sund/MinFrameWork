@@ -4,14 +4,14 @@ namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleNode : Node
     {
-        public SampleNode()
+        public SampleNode(IAssetKey assetKey) : base(assetKey)
         {
             _context = new SampleContext();
         }
 
-        public void AssignContext(IContext context)
+        public SampleNode() : this(null)
         {
-            _context = context;
+
         }
     }
 }

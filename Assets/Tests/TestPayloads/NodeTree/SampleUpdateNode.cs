@@ -9,15 +9,13 @@ namespace Cr7Sund.PackageTest.IOC
         public static int UpdateValue = 0;
         public static int LateUpdateValue = 0;
 
-        public SampleUpdateNode()
+        public SampleUpdateNode(IAssetKey assetKey) : base(assetKey)
         {
             _context = new SampleContext();
         }
-
-
-        public void AssignContext(IContext context)
+        public SampleUpdateNode() : this(null)
         {
-            _context = context;
+
         }
 
         protected override void OnUpdate(int milliseconds)

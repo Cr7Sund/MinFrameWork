@@ -16,7 +16,7 @@ namespace Cr7Sund.PackageTest.NodeTree
         {
             _node = new SampleUpdateNode();
             var context = new SampleRootContext();
-            context.AddComponents();
+            context.AddComponents(_node);
             _node.AssignContext(context);
 
             SampleUpdateNode.LateUpdateValue = 0;

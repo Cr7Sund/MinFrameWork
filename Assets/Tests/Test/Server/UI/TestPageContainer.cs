@@ -1,15 +1,13 @@
-﻿using Cr7Sund.Package.EventBus.Impl;
-using Cr7Sund.Package.EventBus.Api;
-using Cr7Sund.Package.Impl;
+﻿using Cr7Sund.Package.Impl;
 using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
-using Cr7Sund.Touch.Api;
-using Cr7Sund.Touch.Impl;
 using NUnit.Framework;
-using UnityEngine.TestTools;
+using Cr7Sund.Server.Tests;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.ServerTest.UI
 {
@@ -23,20 +21,24 @@ namespace Cr7Sund.ServerTest.UI
         {
             _pageContainer = new PageContainer();
             var builder = new SampleSceneOneBuilder();
-            SceneDirector.Construct(builder);
+            SceneDirector.Construct(builder, new SceneKey());
             _sceneNode = builder.GetProduct();
-            var sceneContext = _sceneNode.Context as SceneContext;
-            sceneContext.Test_CreateCrossContext();
 
-            var injectionBinder = _sceneNode.Context.InjectionBinder;
-            // injectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            injectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
-            injectionBinder.Bind<IEventBus>().To<EventBus>().AsSingleton().AsCrossContext();
+            var sceneInjectBinder = _sceneNode.Context.InjectionBinder;
+            var gameContext = new SampleGameContext();
+            gameContext.AddComponents(new GameNode());
+            if (sceneInjectBinder is ICrossContextInjectionBinder childContextBinder)
+            {
+                var gameCrossBinder = gameContext.InjectionBinder as ICrossContextInjectionBinder;
+                childContextBinder.CrossContextBinder = new CrossContextInjectionBinder();
+                childContextBinder.CrossContextBinder.CopyFrom(gameCrossBinder.CrossContextBinder);
+            }
+
 
             Debug.Init(new InternalLogger());
             RunScene();
 
-            injectionBinder.Injector.Inject(_pageContainer);
+            sceneInjectBinder.Injector.Inject(_pageContainer);
             SampleOneUIController.Init();
             SampleTwoUIController.Init();
             SampleThreeUIController.Init();
