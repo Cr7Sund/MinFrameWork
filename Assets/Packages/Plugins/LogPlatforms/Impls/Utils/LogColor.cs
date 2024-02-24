@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+
 namespace Cr7Sund.Logger
 {
     internal static class LogColorHelp
     {
         /// <summary>
-        ///     ARGB的16进制数值转Color32
-        ///     如:0xFF8428D9
+        ///     Convert ARGB hexadecimal value to Color32.
+        ///     Example: 0xFF8428D9
         /// </summary>
         /// <param name="hexColor"></param>
         /// <returns></returns>
@@ -24,7 +25,7 @@ namespace Cr7Sund.Logger
         }
 
         /// <summary>
-        ///     Color32转ARGB的16进制数值
+        ///     Convert Color32 to ARGB hexadecimal value.
         /// </summary>
         /// <param name="hexColor"></param>
         /// <returns></returns>

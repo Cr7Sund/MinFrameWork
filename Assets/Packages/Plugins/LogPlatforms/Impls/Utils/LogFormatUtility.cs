@@ -1,4 +1,5 @@
-﻿namespace Cr7Sund.Logger
+﻿
+namespace Cr7Sund.Logger
 {
     internal static class LogFormatUtility
     {
@@ -7,6 +8,10 @@
             if (args == null || args.Length <= 0)
                 return format;
             return string.Format(format, args);
+        }
+        public static string ColorFormat(string msg, UnityEngine.Color color)
+        {
+            return string.Format("<color=#{0}>{1}</color>", LogColorHelp.ColorToHex(color), msg);
         }
     }
 }

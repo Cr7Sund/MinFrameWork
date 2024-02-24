@@ -1087,7 +1087,6 @@ namespace Cr7Sund.Package.Impl
                         })
                         .Then(() =>
                             {
-                                //PLAN test it
                                 if (resultPromise.CurState == PromiseState.Pending)
                                 {
                                     resultPromise.Resolve();

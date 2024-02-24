@@ -7,7 +7,7 @@ using Cr7Sund.Server.Scene.Apis;
 
 namespace Cr7Sund.Game.GameLogic
 {
-    public class EditorMainController : GameBaseController
+    public class EditorMainController : BaseGameController
     {
         [Inject] private ISceneModule _sceneModule;
 

@@ -134,15 +134,15 @@ namespace Cr7Sund.Server.UI.Impl
 
                 // 1. 
                 // OpenSequence including controller's lifetime
-                // we  can switch page on controllers' OnEnable
+                // we can switch page on controllers' transition( the animation it's waiting too long)
                 // so we need to ensure the internal state that it's done. such as ui stack
-                // and the controller lifecycle is also been called after the transition  
+                // and also the controller lifecycle will been called after the transition  
 
                 // 2. something wrong with OpenSequence ?
                 // load already done internal, and the controller have not been called
-                // unload will be called too, and the controller 
-                // PLAN unload operation
-
+                // unload can be called too, and also the controller lifeCycle
+                // Pay attention to the transition lifeCycle since the afterAnimation will not be called
+                // if there is a exception in transition (this can be handled rejected if you want ) 
                 if (exitPage != null)
                 {
                     return RemovePage(enterPage, exitPage)
@@ -357,7 +357,6 @@ namespace Cr7Sund.Server.UI.Impl
 
         #endregion
 
-
         #region Event
         protected override void DispatchSwitch(IAssetKey curUI, IAssetKey lastUI)
         {
@@ -392,6 +391,7 @@ namespace Cr7Sund.Server.UI.Impl
         }
 
         #endregion
+
 
     }
 }

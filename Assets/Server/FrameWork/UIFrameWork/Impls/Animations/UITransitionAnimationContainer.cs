@@ -44,7 +44,6 @@ namespace Cr7Sund.Server.UI.Impl
             _assetLoader.ReleaseInstance(_dict[animation]);
         }
 
-
         public void Dispose()
         {
             foreach (var item in _dict)
