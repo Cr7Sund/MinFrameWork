@@ -80,7 +80,7 @@ namespace Cr7Sund.Package.Impl
 
         public IPromise WaitFor(int duration)
         {
-            AssertUtil.LessOrEqual(0, duration,PromiseTimerExceptionType.INVALID_DURATION);
+            AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 
             return WaitUntil(t => t.elapsedTime > duration);
         }
@@ -108,7 +108,7 @@ namespace Cr7Sund.Package.Impl
             return WaitUntil(t => !predicate(t));
         }
 
-        public IPromise WaitUntil(Func<TimeData, bool> predicate, Action<TimeData> poll)
+        public IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll)
         {
             var promise = new Promise();
 
@@ -127,11 +127,16 @@ namespace Cr7Sund.Package.Impl
             return promise;
         }
 
-        public IPromise WaitFor(int duration, Action<int> poll)
+        public IPromise Schedule(int duration, Action<TimeData> poll)
         {
             AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 
-            return WaitUntil(t => t.elapsedTime > duration, t => poll(t.elapsedTime));
+            return Schedule(t => t.elapsedTime > duration, t => poll(t));
+        }
+
+        public IPromise Schedule(Action<TimeData> poll)
+        {
+            return Schedule(t => false, t => poll(t));
         }
 
         /// <summary>
@@ -155,6 +160,13 @@ namespace Cr7Sund.Package.Impl
             }
 
             return null;
+        }
+
+        public void Dispose()
+        {
+            waitings.Clear();
+            curFrame = 0;
+            curFrame = 0;
         }
     }
 

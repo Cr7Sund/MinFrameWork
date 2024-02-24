@@ -6,7 +6,9 @@ namespace Cr7Sund.Server.Scene.Apis
 {
     public interface ISceneContainer : IDisposable
     {
-        public string SceneName { get; set; }
+        public string SceneName { get; }
+        
+        public void Init(string sceneName);
         public GameObject CreateInstance(string name, params Type[] components);
         public T CreateInstanceWithComponent<T>(string name) where T : Object;
         public GameObject LoadInstance(IAssetKey assetKey, string name);

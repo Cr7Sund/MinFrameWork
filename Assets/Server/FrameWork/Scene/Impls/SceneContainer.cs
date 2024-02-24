@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Scene.Apis;
@@ -17,7 +16,13 @@ namespace Cr7Sund.Server.Scene.Impl
         private Dictionary<string, GameObject> _sceneInstanceContainers = new();
         private Dictionary<string, IAssetPromise> _scenePromiseContainers = new();
 
-        public string SceneName { get; set; }
+        public string SceneName { get; private set; }
+        
+
+        public void Init(string sceneName)
+        {
+            SceneName = sceneName;
+        }
 
         public GameObject CreateInstance(string name, params Type[] components)
         {
@@ -92,7 +97,6 @@ namespace Cr7Sund.Server.Scene.Impl
             _sceneInstanceContainers.Clear();
             SceneName = string.Empty;
         }
-
 
     }
 }

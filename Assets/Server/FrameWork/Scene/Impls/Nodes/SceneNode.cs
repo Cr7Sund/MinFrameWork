@@ -5,38 +5,26 @@ using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
 using UnityEngine;
 using Cr7Sund.Package.Impl;
+using Cr7Sund.Server.UI.Impl;
 namespace Cr7Sund.Server.Scene.Impl
 {
     public class SceneNode : ModuleNode, ISceneNode
     {
         [Inject] private ISceneLoader _sceneLoader;
+        [Inject] private ISceneContainer _sceneContainer;
+        [Inject] private PageContainer _pageContainer;
+        [Inject(ServerBindDefine.SceneTimer)] private IPromiseTimer _sceneTimer;
 
-        public ISceneContainer SceneContainer { get; set; }
+        public SceneNode(IAssetKey assetKey) : base(assetKey)
+        {
+        }
 
 
         protected override void OnInit()
         {
             base.OnInit();
-            SceneContainer = new SceneContainer();
         }
 
-        public override void Inject()
-        {
-            if (IsInjected)
-                return;
-
-            _context.InjectionBinder.Bind<ISceneNode>().To(this);
-            base.Inject();
-        }
-
-        public override void DeInject()
-        {
-            if (IsInjected)
-                return;
-
-            _context.InjectionBinder.Unbind<INode>(this);
-            base.DeInject();
-        }
 
         public IPromise ActiveScene()
         {
@@ -61,8 +49,6 @@ namespace Cr7Sund.Server.Scene.Impl
             }
             else
             {
-                SceneContainer.SceneName = sceneKey;
-
                 return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, false)
                                    .Then(() => _controllerModule.LoadAsync(content));
             }
@@ -79,11 +65,8 @@ namespace Cr7Sund.Server.Scene.Impl
             }
             else
             {
-                SceneContainer.SceneName = sceneKey;
-
                 return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
                                    .Then(() => _controllerModule.LoadAsync(content));
-
             }
         }
 
@@ -98,13 +81,19 @@ namespace Cr7Sund.Server.Scene.Impl
             }
 
             return base.OnUnloadAsync(content);
+        }
 
+        protected void CreateUITransitionBarrier()
+        {
+            _sceneTimer.Schedule((timeData) =>
+            {
+                _pageContainer.TimeOut(timeData.elapsedTime);
+            });
         }
 
         protected override void OnDispose()
         {
             base.OnDispose();
-            SceneContainer.Dispose();
         }
     }
 }

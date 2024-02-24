@@ -1,7 +1,7 @@
 using System;
 namespace Cr7Sund.Package.Api
 {
-    public interface IPromiseTimer
+    public interface IPromiseTimer : IDisposable
     {
         /// <summary>
         ///     Resolve the returned promise once the time has elapsed
@@ -20,11 +20,12 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise WaitUntil(Func<TimeData, bool> predicate, Action<TimeData> poll);
+        IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll);
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise WaitFor(int duration, Action<int> poll);
+        IPromise Schedule(int duration, Action<TimeData> poll);
+        IPromise Schedule(Action<TimeData> poll);
         /// <summary>
         ///     Update all pending promises. Must be called for the promises to progress and resolve at all.
         /// </summary>
@@ -59,6 +60,7 @@ namespace Cr7Sund.Package.Api
         ///     The amount of times that update has been called since the pending promise started running
         /// </summary>
         public int elapsedUpdates;
+
     }
 
 }

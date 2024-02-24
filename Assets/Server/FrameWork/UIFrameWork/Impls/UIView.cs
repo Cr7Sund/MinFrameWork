@@ -11,8 +11,9 @@ using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Impl;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
-using UnityEditor;
 using Cr7Sund.FrameWork.Util;
+using Cr7Sund.Server.Scene.Apis;
+using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -20,8 +21,9 @@ namespace Cr7Sund.Server.UI.Impl
     {
         public const string UI_ROOT_NAME = "UIROOT";
 
-        [Inject] private IPromiseTimer _timer;
-        [Inject] private UITransitionAnimationContainer _animationContainer;
+        [Inject(ServerBindDefine.UITimer)] private IPromiseTimer _uiTimer;
+        [Inject] private IUITransitionAnimationContainer _animationContainer;
+        [Inject] private ISceneContainer _sceneContainer;
         private int _sortingOrder;
         private UIPanel _uiPanel;
         private CanvasGroup _canvasGroup;
@@ -150,7 +152,7 @@ namespace Cr7Sund.Server.UI.Impl
             SetTransitionProgress(1.0f);
             SetActive(false);
         }
-        
+
         public void Stop()
         {
             foreach (var item in _transitionDict)
@@ -170,6 +172,11 @@ namespace Cr7Sund.Server.UI.Impl
         public void Dispose()
         {
             Stop();
+        }
+
+        public void Update(int millisecond)
+        {
+            _uiTimer.Update(millisecond);
         }
 
         private void SetActive(bool enabled)
@@ -218,7 +225,7 @@ namespace Cr7Sund.Server.UI.Impl
             TransitionAnimationProgressChanged?.Invoke(progress);
         }
 
-        public RectTransform GetParentTrans(INode parent)
+        private RectTransform GetParentTrans(INode parent)
         {
             if (parent is UINode uiNode)
             {
@@ -226,8 +233,7 @@ namespace Cr7Sund.Server.UI.Impl
             }
             else if (parent is SceneNode sceneNode)
             {
-                return sceneNode.SceneContainer.
-                CreateInstanceWithComponent<RectTransform>(UI_ROOT_NAME);
+                return _sceneContainer.CreateInstanceWithComponent<RectTransform>(UI_ROOT_NAME);
             }
 
             return null;
@@ -267,7 +273,7 @@ namespace Cr7Sund.Server.UI.Impl
             {
                 transitionBehaviour.SetPartner(partnerPage?.View.RectTransform);
                 transitionBehaviour.Setup(_rectTransform);
-                return _timer.WaitFor(transitionBehaviour.Duration, transitionBehaviour.SetTime)
+                return _uiTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime))
                              .Progress(TransitionProgressReporter);
             }
             else

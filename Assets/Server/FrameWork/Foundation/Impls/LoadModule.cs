@@ -40,6 +40,7 @@ namespace Cr7Sund.Server.Impl
         public IPromise<INode> AddNode(IAssetKey key, bool overwrite = false)
         {
             Freeze();
+
             if (!_parentNode.IsStarted)
             {
                 UnFreeze();
@@ -101,7 +102,7 @@ namespace Cr7Sund.Server.Impl
         {
             return UnloadNodeInternal(key, false);
         }
-        internal IPromise<INode> PreLoadNode(IAssetKey key, bool overwrite = false)
+        public IPromise<INode> PreLoadNode(IAssetKey key, bool overwrite = false)
         {
             AssertUtil.IsFalse(_treeNodes.ContainsKey(key), FoundationExceptionType.duplicate_preloadNode);
 
@@ -163,6 +164,21 @@ namespace Cr7Sund.Server.Impl
             }
 
             return PreloadNodeFromStart(key);
+        }
+        int curTime = -1;
+        public const int UITimeOutTime = 5000;
+        public void TimeOut(int elapsedTime)
+        {
+            if (!IsInTransition || _focusNode == null ||
+                 curTime < 0)
+            {
+                curTime = elapsedTime;
+                return;
+            }
+
+            if (elapsedTime - curTime < UITimeOutTime) return;
+
+            _focusNode.GetCurStatus().Resolve(_focusNode);
         }
 
         internal IPromise<INode> UnloadNode(IAssetKey key)
@@ -245,7 +261,6 @@ namespace Cr7Sund.Server.Impl
 
             if (_treeNodes.Count <= 1) return promise;
 
-            _focusNode = curNode;
 
             foreach (var keyValuePair in _treeNodes)
             {
@@ -362,6 +377,8 @@ namespace Cr7Sund.Server.Impl
 
         private IPromise<INode> AddChildNode(INode assetNode)
         {
+            _focusNode = assetNode;
+
             System.Func<System.Exception, IPromise<INode>> OnRejected = (ex) => OnFailLoadedNode(assetNode, ex);
             return _parentNode
                 .AddChildAsync(assetNode)
@@ -401,7 +418,6 @@ namespace Cr7Sund.Server.Impl
                     .Then((node) => AddNodeFromStart(node.Key));
             }
         }
-
         private IPromise<INode> OnAddLoadedNode(INode node)
         {
             return OnAdded(node)
@@ -409,7 +425,6 @@ namespace Cr7Sund.Server.Impl
                 {
                     UnFreeze();
                     DispatchAddEnd(node.Key);
-                    _focusNode = node;
                     return Promise<INode>.Resolved(node);
                 });
         }
@@ -420,6 +435,7 @@ namespace Cr7Sund.Server.Impl
             _treeNodes.Remove(node.Key);
             return Promise<INode>.RejectedWithoutDebug(ex);
         }
+       
         protected virtual void DispatchSwitch(IAssetKey curNode, IAssetKey lastNode)
         {
         }

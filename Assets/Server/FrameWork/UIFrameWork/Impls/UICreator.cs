@@ -7,13 +7,7 @@ namespace Cr7Sund.Server.UI.Impl
     {
         public static UINode Create(UIKey key)
         {
-            return new UINode()
-            {
-                Key = key,
-                PageId = Guid.NewGuid().ToString(),
-                View = key.CreateView(),
-                Controller = key.CreateCtrl(),
-            };
+            return new UINode(key, key.CreateView(), key.CreateCtrl());
         }
     }
 }

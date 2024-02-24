@@ -8,6 +8,16 @@ namespace Cr7Sund.Server.Impl
 {
     public class GameNode : ModuleNode, IGameNode
     {
+        private GameNode(IAssetKey assetKey) : base(assetKey)
+        {
+
+        }
+        
+        public GameNode() : this(null)
+        {
+
+        }
+
         public void Run()
         {
             AssertUtil.NotNull(_context, NodeTreeExceptionType.EMPTY_CONTEXT);
@@ -23,7 +33,7 @@ namespace Cr7Sund.Server.Impl
 
         public IPromise<INode> Destroy()
         {
-            DeInject();
+            Deject();
 
             return UnloadAsync(this).Then(node =>
             {
@@ -33,25 +43,5 @@ namespace Cr7Sund.Server.Impl
                 return node;
             });
         }
-
-        public override void Inject()
-        {
-            if (IsInjected)
-                return;
-
-            _context.InjectionBinder.Bind<IGameNode>().To(this);
-            base.Inject();
-        }
-
-        public override void DeInject()
-        {
-            if (!IsInjected)
-                return;
-
-            _context.InjectionBinder.Injector.Uninject(this);
-            base.DeInject();
-            _context.InjectionBinder.Unbind<INode>();
-        }
-
     }
 }

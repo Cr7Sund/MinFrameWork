@@ -11,18 +11,29 @@ namespace Cr7Sund.Server.UI.Impl
     public class UINode : UpdateNode, IUINode
     {
         [Inject] private IAssetLoader _assetLoader;
-        [Inject] private IPromiseTimer _timer;
+
         private IAssetPromise _assetPromise;
         // Unload
         // GetInstance
         // Preload
         // private IPanelContainer _panelContainer;
 
-        public IUIView View { get; set; }
+        public IUIView View { get; private set; }
         public string PageId { get; set; }
         public bool IsTransitioning { get; private set; }
-        public IUIController Controller { get; set; }
+        public IUIController Controller { get; private set; }
 
+
+        private UINode(IAssetKey assetKey) : base(assetKey)
+        {
+
+        }
+        public UINode(IAssetKey assetKey, IUIView uiView, IUIController uiController) : this(assetKey)
+        {
+            View = uiView;
+            Controller = uiController;
+            PageId = System.Guid.NewGuid().ToString();
+        }
 
         public IPromise BeforeExit(bool push, IUINode enterPage)
         {
@@ -61,6 +72,7 @@ namespace Cr7Sund.Server.UI.Impl
 
             return View.ExitRoutine(push, partnerView, playAnimation);
         }
+
         public IPromise AfterEnter(bool push, IUINode exitPage)
         {
             IsTransitioning = false;
@@ -71,6 +83,7 @@ namespace Cr7Sund.Server.UI.Impl
             else
                 return Controller.DidPopEnter();
         }
+
         public IPromise AfterExit(bool push, IUINode enterPage)
         {
             IsTransitioning = false;
@@ -131,25 +144,19 @@ namespace Cr7Sund.Server.UI.Impl
         }
 
         #region  LifeCycle
-        public override void Inject()
-        {
-            if (IsInjected)
-                return;
 
-            _context.InjectionBinder.Bind<IUINode>().To(this);
+        protected override void OnInject()
+        {
+            base.OnInject();
             _context.InjectionBinder.Injector.Inject(Controller);
-            base.Inject();
+            _context.InjectionBinder.Injector.Inject(View);
         }
 
-        public override void DeInject()
+        protected override void OnDeject()
         {
-            if (!IsInjected)
-                return;
-            IsInjected = false;
-
+            base.OnDeject();
             _context.InjectionBinder.Injector.Uninject(this);
             _context.InjectionBinder.Injector.Uninject(Controller);
-            _context.InjectionBinder.Unbind<INode>(this);
         }
 
         protected override void OnInit()
@@ -158,6 +165,7 @@ namespace Cr7Sund.Server.UI.Impl
             // and the controller should not control anything 
             // that has not instantiated
         }
+
         protected override void OnStart()
         {
             if (Application.isPlaying)
@@ -168,6 +176,7 @@ namespace Cr7Sund.Server.UI.Impl
             // only call once
             Controller.Start();
         }
+
         protected override void OnEnable()
         {
             // call after transition
@@ -183,7 +192,7 @@ namespace Cr7Sund.Server.UI.Impl
         protected override void OnUpdate(int milliseconds)
         {
             base.OnUpdate(milliseconds);
-            _timer.Update(milliseconds);
+            View.Update(milliseconds);
         }
 
         protected override void OnDisable()
@@ -199,6 +208,7 @@ namespace Cr7Sund.Server.UI.Impl
             Controller.Stop();
             View.Stop();
         }
+
         protected override void OnDispose()
         {
             // duplicate

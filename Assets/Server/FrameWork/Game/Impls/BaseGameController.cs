@@ -11,11 +11,12 @@ using UnityEngine;
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class GameBaseController : UpdateController
+    public abstract class BaseGameController : UpdateController
     {
         [Inject] private ISceneModule _sceneModule;
         [Inject] private IConfigContainer _configModule;
         [Inject] IAssetLoader _assetLoader;
+        [Inject(ServerBindDefine.GameTimer)] IPromiseTimer _gameTimer;
 
         protected sealed override void OnStart()
         {
@@ -35,7 +36,7 @@ namespace Cr7Sund.Server.Impl
 
         protected override void OnUpdate(int millisecond)
         {
-
+            _gameTimer.Update(millisecond);
         }
 
         #region  Login
@@ -52,6 +53,7 @@ namespace Cr7Sund.Server.Impl
             // NetModule.Init();
             // InitHardware(); //_languageModule, Notch
             InitGameEnv();
+
         }
 
         private void InitConfig()

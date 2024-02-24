@@ -14,8 +14,7 @@ namespace Cr7Sund.Server.Scene.Impl
                 throw new MyException($"SceneCreator::Create SceneBuilder is null, Key: {key}");
             }
 
-            SceneDirector.Construct(builder);
-            builder.SetSceneKey(key);
+            SceneDirector.Construct(builder, key);
             return builder.GetProduct();
         }
     }

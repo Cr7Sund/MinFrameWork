@@ -3,6 +3,5 @@ namespace Cr7Sund.Server.Scene.Apis
 {
     public interface ISceneNode : INode
     {
-        ISceneContainer SceneContainer{get;}
     }
 }

@@ -15,6 +15,6 @@ namespace Cr7Sund.NodeTree.Api
         IPromise<INode> AddChildAsync(INode child);
         IPromise<INode> UnloadChildAsync(INode child);
         IPromise<INode> RemoveChildAsync(INode child);
-
+        IPromise<INode> GetCurStatus();
     }
 }

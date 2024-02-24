@@ -10,13 +10,9 @@ namespace Cr7Sund.Server.Scene.Impl
         private ControllerModule _controllerModule;
 
 
-        public void SetSceneKey(SceneKey key)
+        public void BuildNode(SceneKey sceneKey)
         {
-            _node.Key = key;
-        }
-        public void BuildNode()
-        {
-            _node = CreateSceneNode();
+            _node = CreateSceneNode(sceneKey);
             _node.AssignContext(_context);
             _node.AssignControllerModule(_controllerModule);
 
@@ -35,9 +31,9 @@ namespace Cr7Sund.Server.Scene.Impl
             return _node;
         }
 
-        protected virtual SceneNode CreateSceneNode()
+        protected virtual SceneNode CreateSceneNode(SceneKey sceneKey)
         {
-            return new SceneNode();
+            return new SceneNode(sceneKey);
         }
         protected abstract void AddControllers(IControllerModule controllerModule);
         protected abstract SceneContext CreateContext();

@@ -12,6 +12,7 @@ using Cr7Sund.Server.Api;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.AssetLoader.Impl;
+using Cr7Sund.NodeTree.Api;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -23,7 +24,7 @@ namespace Cr7Sund.Server.Impl
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
         }
 
-        public sealed override void AddComponents()
+        public sealed override void AddComponents(INode self)
         {
             IAssetLoader assetLoader = AssetLoaderFactory.CreateLoader();
             assetLoader.Init();
@@ -39,18 +40,27 @@ namespace Cr7Sund.Server.Impl
 
             // Local In GameNode or GameController
             // --- --- 
+            InjectionBinder.Bind<IGameNode>().To(self);
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             InjectionBinder.Bind<IAssetLoader>().To(assetLoader);
+            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.GameTimer);
+
             OnMappedBindings();
         }
 
         public sealed override void RemoveComponents()
         {
-            InjectionBinder.Unbind<IPoolBinder>();
+            InjectionBinder.Unbind<IFingerGesture>();
             InjectionBinder.Unbind<IEventBus>();
             InjectionBinder.Unbind<ISceneModule>();
-            InjectionBinder.Unbind<IFingerGesture>();
             InjectionBinder.Unbind<PageContainer>();
+            InjectionBinder.Unbind<IConfigContainer>();
+            InjectionBinder.Unbind<IUITransitionAnimationContainer>();
+
+            InjectionBinder.Unbind<IGameNode>();
+            InjectionBinder.Unbind<IPoolBinder>();
+            InjectionBinder.Unbind<IAssetLoader>();
+            InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.GameTimer);
 
             OnUnMappedBindings();
         }

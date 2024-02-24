@@ -14,7 +14,7 @@ using UnityEngine;
  */
 namespace Cr7Sund.Server.UI.Api
 {
-    public interface IUIView : IDisposable
+    public interface IUIView : IDisposable, IUpdatable
     {
         int SortingOrder { get; }
         RectTransform RectTransform { get; }

@@ -29,7 +29,7 @@ namespace Cr7Sund.Server.Impl
         public void BuildControllers()
         {
             _controllerModule = new ControllerModule();
-            AddControllers(_controllerModule);
+            _controllerModule.AddController(CreateController());
         }
 
         public GameNode GetProduct()
@@ -45,9 +45,7 @@ namespace Cr7Sund.Server.Impl
             return new GameNode();
         }
 
-        protected virtual void AddControllers(IControllerModule controllerModule)
-        {
+        protected abstract BaseGameController CreateController();
 
-        }
     }
 }
