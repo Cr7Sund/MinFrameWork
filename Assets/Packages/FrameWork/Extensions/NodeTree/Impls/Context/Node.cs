@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
@@ -10,6 +9,7 @@ namespace Cr7Sund.NodeTree.Impl
     {
         private List<INode> _childNodes;
         private Node _parent;
+        private IAssetKey _key;
         private IPromise<INode> _addPromise;
         private IPromise<INode> _removePromise;
 
@@ -25,14 +25,17 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public IAssetKey Key
         {
-            get;
-            set;
+            get
+            {
+                return _key;
+            }
         }
         public NodeState NodeState
         {
             get;
             private set;
         }
+
         public IPromise<INode> AddStatus
         {
             get
@@ -85,6 +88,12 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public INode this[int index] => ChildNodes[index];
         public IContext Context => _context;
+
+
+        public Node(IAssetKey assetKey)
+        {
+            _key = assetKey;
+        }
 
         #region LifeCycle
 
@@ -174,7 +183,7 @@ namespace Cr7Sund.NodeTree.Impl
                     }
                 }
             }
-            var list  = new List<int>();
+            var list = new List<int>();
 
             while (resultQueue.Count > 0)
             {
@@ -350,7 +359,7 @@ namespace Cr7Sund.NodeTree.Impl
             OnDispose();
 
             //IoC Dispose
-            DeInject();
+            Deject();
             _context.Dispose();
 
             //NodeTree Dispose
@@ -426,6 +435,28 @@ namespace Cr7Sund.NodeTree.Impl
         {
             return RemoveChildAsyncInternal(child, false);
         }
+        public IPromise<INode> GetCurStatus()
+        {
+            switch (NodeState)
+            {
+                case NodeState.Preloading:
+                    return LoadStatus;
+                case NodeState.Adding:
+                    return AddStatus;
+                case NodeState.Preloaded:
+                case NodeState.Ready:
+                    return LoadStatus;
+                case NodeState.Unloading:
+                case NodeState.Removing:
+                case NodeState.Removed:
+                    return RemoveStatus;
+                case NodeState.Unloaded:
+                    return UnloadStatus;
+                case NodeState.Default:
+                default:
+                    return Promise<INode>.Resolved(this);
+            }
+        }
 
         protected virtual void OnAddChild(INode child) { }
         protected virtual void OnRemoveChild(INode child) { }
@@ -459,23 +490,23 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 if (childNode.IsInjected)
                 {
-                    childNode.DeInject();
+                    childNode.Deject();
                 }
                 childNode._removePromise = child.UnloadAsync(child)
                     .Catch((ex) =>
                     {
-                        RemoveChildInternal(childNode);
+                        RemoveChildInternal(childNode, shouldUnload);
                         return child;
                     }); // if unload fail, we still remove from node tree
             }
             else
             {
-                childNode._removePromise = RemoveChildInternal(childNode);
+                childNode._removePromise = RemoveChildInternal(childNode, shouldUnload);
             }
 
             return childNode._removePromise;
         }
-        private IPromise<INode> RemoveChildInternal(INode child)
+        private IPromise<INode> RemoveChildInternal(INode child, bool shouldUnload)
         {
             AssertUtil.NotNull(child);
             AssertUtil.IsTrue(ChildNodes.Contains(child));
@@ -485,7 +516,7 @@ namespace Cr7Sund.NodeTree.Impl
             childNode._parent = null;
             OnRemoveChild(child);
 
-            childNode.EndUnLoad(true);
+            childNode.EndUnLoad(shouldUnload);
             return Promise<INode>.Resolved(child);
         }
         private IPromise<INode> AddChildInternal(INode child)
@@ -527,8 +558,8 @@ namespace Cr7Sund.NodeTree.Impl
             NodeState = shouldUnload ? NodeState.Removing :
                 NodeState.Unloading;
         private void EndUnLoad(bool unload) =>
-            NodeState = unload ? NodeState.Removed :
-                NodeState.Unloaded;
+            NodeState = unload ? NodeState.Unloaded :
+                NodeState.Removed;
 
         protected override IPromise<INode> OnLoadAsync(INode content)
         {
@@ -569,21 +600,41 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = true;
 
-            _context.AddComponents();
+            _context.AddComponents(this);
+
             _context.InjectionBinder.Injector.Inject(this);
+            OnInject();
         }
 
-        public virtual void DeInject()
+        public virtual void Deject()
         {
             if (!IsInjected)
                 return;
             IsInjected = false;
 
+            OnDeject();
             _context.InjectionBinder.Injector.Uninject(this);
+            
             _context.RemoveComponents();
         }
-        #endregion
+        /// <summary>
+        /// will be called after inject, 
+        /// do something lik inject other elements
+        /// </summary>
+        protected virtual void OnInject()
+        {
 
+        }
+        /// <summary>
+        /// will be called before Deject, 
+        /// do something lik deject other elements
+        /// </summary>
+        protected virtual void OnDeject()
+        {
+
+        }
+
+        #endregion
 
         public override string ToString()
         {

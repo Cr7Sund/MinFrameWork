@@ -6,6 +6,6 @@
         
         
         void Inject();
-        void DeInject();
+        void Deject();
     }
 }

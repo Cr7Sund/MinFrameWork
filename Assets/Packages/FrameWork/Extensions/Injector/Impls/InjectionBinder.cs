@@ -6,16 +6,17 @@ namespace Cr7Sund.Package.Impl
 {
     public class InjectionBinder : Binder, IInjectionBinder
     {
+        public IInjector Injector { get; set; }
+        
 
         public InjectionBinder()
         {
-
             Injector = new Injector
             {
                 Binder = this
             };
         }
-        public IInjector Injector { get; set; }
+
 
         #region IInstanceProvider implementation
         public object GetInstance(Type key)

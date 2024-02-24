@@ -248,10 +248,23 @@ namespace Cr7Sund.Package.Impl
         {
         }
 
+        public void CopyFrom(IBinder fromBinder)
+        {
+            var implBinder = fromBinder as Binder;
+            foreach (var item in implBinder._bindings)
+            {
+                foreach (var binding in item.Value)
+                {
+                    ResolveBinding(binding, item.Key);
+                }
+            }
+
+        }
         public virtual void Dispose()
         {
 
         }
         #endregion
+
     }
 }

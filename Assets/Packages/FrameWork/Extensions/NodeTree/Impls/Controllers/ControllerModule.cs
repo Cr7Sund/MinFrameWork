@@ -277,7 +277,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public void DeInject()
+        public void Deject()
         {
             if (!IsInjected)
                 return;

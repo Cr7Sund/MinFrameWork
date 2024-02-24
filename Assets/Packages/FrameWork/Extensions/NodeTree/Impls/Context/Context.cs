@@ -39,7 +39,7 @@ namespace Cr7Sund.NodeTree.Impl
             InjectionBinder.Dispose();
         }
 
-        public abstract void AddComponents();
+        public abstract void AddComponents(INode self);
         public abstract void RemoveComponents();
     }
 }

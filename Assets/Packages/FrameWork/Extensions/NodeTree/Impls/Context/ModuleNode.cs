@@ -9,6 +9,11 @@ namespace Cr7Sund.NodeTree.Impl
         protected IControllerModule _controllerModule;
 
 
+        public ModuleNode(IAssetKey assetKey) : base(assetKey)
+        {
+        }
+
+
         public void AssignControllerModule(ControllerModule controllerModule)
         {
             _controllerModule = controllerModule;
@@ -25,23 +30,29 @@ namespace Cr7Sund.NodeTree.Impl
             return base.OnUnloadAsync(content).Then(_controllerModule.UnloadAsync);
         }
 
-        public override void Inject()
+        public sealed override void Inject()
         {
             if (IsInjected)
                 return;
 
             base.Inject();
+
+            // it should be OnInject
+            // but we need to force it will be invoked 
             ((ControllerModule)_controllerModule).AssignContext(_context);
             _controllerModule.Inject();
         }
 
-        public override void DeInject()
+        public sealed override void Deject()
         {
             if (IsInjected)
                 return;
 
-            base.DeInject();
-            _controllerModule.DeInject();
+            base.Deject();
+
+            // it should be OnDeInject
+            // but we need to force it will be invoked 
+            _controllerModule.Deject();
         }
 
         protected override void OnStart()

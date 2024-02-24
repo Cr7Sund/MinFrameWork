@@ -6,6 +6,7 @@ namespace Cr7Sund.Package.Impl
     {
         public IInjectionBinder CrossContextBinder { get; set; }
 
+
         public override IInjectionBinding GetBinding(Type type, object name)
         {
             var binding = base.GetBinding(type, name);

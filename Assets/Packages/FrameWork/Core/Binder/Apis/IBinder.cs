@@ -74,5 +74,11 @@ namespace Cr7Sund.Package.Api
         ///     Places individual Bindings into the bindings Dictionary as part of the resolving process
         /// </summary>
         void ResolveBinding(IBinding binding, object key, object oldName = null);
+
+        /// <summary>
+        /// copy bindings from binder
+        /// </summary>
+        /// <param name="fromBinder"></param>
+        void CopyFrom(IBinder fromBinder);
     }
 }

@@ -10,7 +10,7 @@ namespace Cr7Sund.NodeTree.Impl
         protected List<UpdateNode> _lateUpdatesList;
 
 
-        public UpdateNode() : base()
+        public UpdateNode(IAssetKey assetKey) : base(assetKey)
         {
             _updateList = new List<UpdateNode>();
             _lateUpdatesList = new List<UpdateNode>();
