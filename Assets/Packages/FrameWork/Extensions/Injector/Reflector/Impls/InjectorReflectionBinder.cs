@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
+using System.Collections;
 namespace Cr7Sund.Package.Impl
 {
     public class InjectorReflectionBinder : Binder, IReflectionBinder
@@ -92,18 +93,65 @@ namespace Cr7Sund.Package.Impl
             FillFields(pairs, fields);
             if (type.BaseType != null && type.BaseType != typeof(object))
             {
-                var parentFields = type.BaseType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                FillFields(pairs, parentFields);
+                // try to use more protected or public field instead private fields
+                var parentFields = type.BaseType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+                FillFieldsOfBaseType(pairs, parentFields);
             }
 
             reflected.Fields = pairs.ToArray();
         }
 
-        private static void FillFields(List<Tuple<Type, object, FieldInfo>> pairs, FieldInfo[] fields)
+        private static void FillFieldsOfBaseType(List<Tuple<Type, object, FieldInfo>> pairs, FieldInfo[] parentFields)
         {
-            for (int i = 0; i < fields.Length; i++)
+            for (int i = 0; i < parentFields.Length; i++)
             {
-                FieldInfo field = fields[i];
+                FieldInfo field = parentFields[i];
+                if (!field.IsPrivate)
+                {
+                    continue;
+                }
+
+                if (field.FieldType.IsArray)
+                {
+                    continue;
+                }
+
+                if (field.FieldType.IsGenericType &&
+                 typeof(IEnumerable).IsAssignableFrom(field.FieldType))
+                {
+                    continue;
+                }
+
+                object[] injections = field.GetCustomAttributes(typeof(Inject), true);
+
+                if (injections.Length > 0)
+                {
+                    var attr = injections[0] as Inject;
+                    var pointType = field.FieldType;
+                    object bindingName = attr.Name;
+
+                    var pair = new Tuple<Type, object, FieldInfo>(pointType, bindingName, field);
+                    pairs.Add(pair);
+                }
+            }
+        }
+
+        private static void FillFields(List<Tuple<Type, object, FieldInfo>> pairs, FieldInfo[] parentFields)
+        {
+            for (int i = 0; i < parentFields.Length; i++)
+            {
+                FieldInfo field = parentFields[i];
+                if (field.FieldType.IsArray)
+                {
+                    continue;
+                }
+
+                if (field.FieldType.IsGenericType &&
+                 typeof(IEnumerable).IsAssignableFrom(field.FieldType))
+                {
+                    continue;
+                }
+
                 object[] injections = field.GetCustomAttributes(typeof(Inject), true);
 
                 if (injections.Length > 0)

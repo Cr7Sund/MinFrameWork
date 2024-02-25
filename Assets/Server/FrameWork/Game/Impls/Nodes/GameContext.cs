@@ -26,8 +26,8 @@ namespace Cr7Sund.Server.Impl
 
         public sealed override void AddComponents(INode self)
         {
-            IAssetLoader assetLoader = AssetLoaderFactory.CreateLoader();
-            assetLoader.Init();
+            var assetLoader = AssetLoaderFactory.CreateLoader();
+            var logger = InternalLoggerFactory.Create(LogChannel.GameLogic);
 
             // Cross Context
             // --- --- 
@@ -44,6 +44,7 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             InjectionBinder.Bind<IAssetLoader>().To(assetLoader);
             InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.GameTimer);
+            InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.GameLogger);
 
             OnMappedBindings();
         }
@@ -61,6 +62,7 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Unbind<IPoolBinder>();
             InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.GameTimer);
+            InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.GameLogger);
 
             OnUnMappedBindings();
         }

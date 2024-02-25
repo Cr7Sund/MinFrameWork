@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 namespace Cr7Sund.Logger
 {
     internal class ConsoleLogDecorator : ILogDecorator
     {
 
-        public string Format(LogLevel level, LogChannel logChannel, string format, params object[] args)
+        public string Format(LogLevel level, Enum logChannel, string format, params object[] args)
         {
             string result = LogFormatUtility.Format(format, args);
             string logMessage = string.Format("[{0}][{1}]{2}", level, logChannel, result);

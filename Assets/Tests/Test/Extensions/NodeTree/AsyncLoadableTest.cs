@@ -14,7 +14,7 @@ namespace Cr7Sund.PackageTest.NodeTree
         [SetUp]
         public void SetUp()
         {
-            Debug.Init(new InternalLogger());
+            Console.Init(new InternalLogger());
         }
 
         [Test]

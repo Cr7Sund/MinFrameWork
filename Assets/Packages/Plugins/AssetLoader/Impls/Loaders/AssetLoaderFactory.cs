@@ -9,7 +9,9 @@ namespace Cr7Sund.AssetLoader.Impl
         {
             if (true)
             {
-                return new AddressableLoader();
+                var addressableLoader = new AddressableLoader();
+                addressableLoader.Init();
+                return addressableLoader;
             }
         }
 

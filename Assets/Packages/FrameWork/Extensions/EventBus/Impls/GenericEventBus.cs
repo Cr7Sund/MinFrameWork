@@ -60,39 +60,30 @@ namespace Cr7Sund.Package.EventBus.Impl
 
 			OnBeforeRaiseEvent();
 
-			try
+			var listeners = EventListeners<TEvent>.GetListeners(this);
+			int startListenerCount = listeners.Count;
+			foreach (var listener in listeners)
 			{
-				var listeners = EventListeners<TEvent>.GetListeners(this);
-				int startListenerCount = listeners.Count;
-				foreach (var listener in listeners)
+				AssertUtil.LessOrEqual(listeners.Count - startListenerCount, REGISTER_LIMIT);
+
+				try
 				{
-					AssertUtil.LessOrEqual(listeners.Count - startListenerCount, REGISTER_LIMIT);
+					listener?.Invoke(tEvent);
+				}
+				catch (Exception e)
+				{
+					Console.Error(e);
+				}
 
-					try
-					{
-						listener?.Invoke(tEvent);
-					}
-					catch (Exception e)
-					{
-						Debug.Error(e);
-					}
-
-					if (CurrentEventIsConsumed)
-					{
-						wasConsumed = true;
-						break;
-					}
+				if (CurrentEventIsConsumed)
+				{
+					wasConsumed = true;
+					break;
 				}
 			}
-			catch (Exception e)
-			{
-				Debug.Error(e);
-			}
-			finally
-			{
-				OnAfterRaiseEvent();
-				_poolBinder?.Get<TEvent>()?.ReturnInstance(tEvent);
-			}
+
+			OnAfterRaiseEvent();
+			_poolBinder?.Get<TEvent>()?.ReturnInstance(tEvent);
 
 			return wasConsumed;
 		}

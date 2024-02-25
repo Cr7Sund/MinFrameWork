@@ -9,14 +9,14 @@ namespace Cr7Sund.PackageTest.IOC
         [PostConstruct]
         public void postConstruct1()
         {
-            Console.Write("Calling post construct 1\n");
+            System.Console.Write("Calling post construct 1\n");
         }
 
 
 
         public void notAPostConstruct()
         {
-            Console.Write("notAPostConstruct :: SHOULD NOT CALL THIS!");
+            System.Console.Write("notAPostConstruct :: SHOULD NOT CALL THIS!");
         }
     }
 

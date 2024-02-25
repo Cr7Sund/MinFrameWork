@@ -66,7 +66,6 @@ namespace Cr7Sund.Package.Impl
             var value = o is Type ? o as Type : o.GetType();
 
             object retVal = null;
-            try
             {
                 if (args == null || args.Length == 0)
                 {
@@ -76,13 +75,10 @@ namespace Cr7Sund.Package.Impl
                 {
                     retVal = Activator.CreateInstance(value, args);
                 }
-            }
-            catch
-            {
-                //No-op
-            }
 
-            return retVal;
+
+                return retVal;
+            }
         }
     }
 }

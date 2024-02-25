@@ -17,12 +17,19 @@ namespace Cr7Sund.ServerTest.Scene
         [SetUp]
         public void SetUp()
         {
+            // InternalLog.Warn(LogChannel.Lua,)
+
+            // Logger.Warn(LogChannel.Lua,)
+
+            // Debug // do nothing
+
+
             _sceneModule = new SceneModule();
 
             _gameNode = GameDirector.Construct<SampleGameBuilder>();
             var injectionBinder = _gameNode.Context.InjectionBinder;
 
-            Debug.Init(new InternalLogger());
+            Console.Init(new InternalLogger());
             _gameNode.Run();
 
             injectionBinder.Injector.Inject(_sceneModule);

@@ -17,6 +17,7 @@ namespace Cr7Sund.Server.Impl
         [Inject] private IConfigContainer _configModule;
         [Inject] IAssetLoader _assetLoader;
         [Inject(ServerBindDefine.GameTimer)] IPromiseTimer _gameTimer;
+        [Inject(ServerBindDefine.GameLogger)] protected IInternalLog Debug;
 
         protected sealed override void OnStart()
         {
@@ -73,7 +74,7 @@ namespace Cr7Sund.Server.Impl
 
         protected virtual void GameOver()
         {
-            Debug.Info("Game Over");
+            Console.Info("Game Over");
         }
 
         protected abstract void InitGameEnv();

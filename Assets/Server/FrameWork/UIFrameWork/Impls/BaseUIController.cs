@@ -2,116 +2,183 @@
 using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
+using Cr7Sund.Server.Impl;
+
 
 namespace Cr7Sund.Server.UI.Impl
 {
      public abstract class BaseUIController : BaseController, IUIController
      {
+          [Inject(ServerBindDefine.UILogger)] protected IInternalLog Debug;
+
           public virtual IPromise Prepare(object intent = null)
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnPrepare(intent);
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnPrepare(intent);
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise WillPushEnter()
+          public IPromise WillPushEnter()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnWillPushEnter();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnWillPushEnter();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise DidPushEnter()
+          public IPromise DidPushEnter()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnDidPushEnter();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnDidPushEnter();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise WillPushExit()
+          public IPromise WillPushExit()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnWillPushExit();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnWillPushExit();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise DidPushExit()
+          public IPromise DidPushExit()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnDidPushExit();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnDidPushExit();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise WillPopEnter()
+          public IPromise WillPopEnter()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnWillPopEnter();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnWillPopEnter();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise DidPopEnter()
+          public IPromise DidPopEnter()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnDidPopEnter();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnDidPopEnter();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise WillPopExit()
+          public IPromise WillPopExit()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnWillPopExit();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnWillPopExit();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 
-          public virtual IPromise DidPopExit()
+          public IPromise DidPopExit()
           {
-               try
+               if (MacroDefine.NoCatchMode)
                {
                     return OnDidPopExit();
                }
-               catch (System.Exception e)
+               else
                {
-                    return Promise.Rejected(e);
+                    try
+                    {
+                         return OnDidPopExit();
+                    }
+                    catch (System.Exception e)
+                    {
+                         return Promise.Rejected(e);
+                    }
                }
           }
 

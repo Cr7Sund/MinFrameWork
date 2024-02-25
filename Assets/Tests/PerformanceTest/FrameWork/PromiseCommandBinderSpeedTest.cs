@@ -17,7 +17,7 @@ namespace Cr7Sund.PackageTest.IOC
             injectionBinder.Bind<ICommandBinder>().To<CommandBinder>().AsSingleton();
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
-            Debug.Init(new InternalLogger());
+            Console.Init(new InternalLogger());
 
         }
 

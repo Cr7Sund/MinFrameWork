@@ -569,7 +569,7 @@ namespace Cr7Sund.Package.Impl
         public void Reject(Exception ex)
         {
             RejectWithoutDebug(ex);
-            Debug.Error(ex);
+            Console.Error(ex);
         }
 
         public void RejectWithoutDebug(Exception ex)
@@ -767,7 +767,7 @@ namespace Cr7Sund.Package.Impl
         public static IPromise Rejected(Exception ex)
         {
             var promise = RejectedWithoutDebug(ex);
-            Debug.Error(ex);
+            Console.Error(ex);
 
             return promise;
         }

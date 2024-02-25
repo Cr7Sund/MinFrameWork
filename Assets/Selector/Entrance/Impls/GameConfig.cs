@@ -18,7 +18,7 @@ namespace Cr7Sund.Config
         public string GameLogicTypeFullName;
         public string AssemblyInfo;
 
-        public GameLogic.GameLogic GetLogic()
+        public GameLogic.GameLogic CreateLogic()
         {
             if (!string.IsNullOrEmpty(AssemblyInfo) &&
                 !string.IsNullOrEmpty(GameLogicTypeFullName))
@@ -27,7 +27,9 @@ namespace Cr7Sund.Config
                 var type = assembly.GetType(GameLogicTypeFullName);
                 if (type != null)
                 {
-                    return Activator.CreateInstance(type) as GameLogic.GameLogic;
+                    var gameLogic = Activator.CreateInstance(type) as GameLogic.GameLogic;
+                    gameLogic.Init();
+                    return gameLogic;
                 }
             }
 

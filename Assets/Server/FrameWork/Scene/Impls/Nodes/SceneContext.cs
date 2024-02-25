@@ -3,10 +3,8 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.Impl;
-using UnityEngine.Analytics;
 using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Server.UI.Api;
 using Cr7Sund.NodeTree.Api;
 
 namespace Cr7Sund.Server.Scene.Impl
@@ -19,6 +17,8 @@ namespace Cr7Sund.Server.Scene.Impl
             var sceneLoader = AssetLoaderFactory.CreateSceneLoader();
             var sceneContainer = new SceneContainer();
             sceneContainer.Init(self.Key.Key);
+            var logger = new InternalLogger();
+            logger.Init(LogChannel.SceneLogic);
 
             // Cross Context
             // --- --- 
@@ -31,6 +31,7 @@ namespace Cr7Sund.Server.Scene.Impl
             InjectionBinder.Bind<IAssetLoader>().To(assetLoader);
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.SceneTimer);
+            InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.SceneLogger);
 
             OnMappedBindings();
         }
@@ -42,6 +43,7 @@ namespace Cr7Sund.Server.Scene.Impl
             InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<IPoolBinder>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.SceneTimer);
+            InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.SceneLogger);
 
             OnUnMappedBindings();
         }

@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEditor;
@@ -7,6 +8,7 @@ namespace Cr7Sund.Logger
 {
     public class UnityLogDecorator : ILogDecorator
     {
+        private LogPalette logPalette = new LogPalette();
 
         private readonly Dictionary<string, Color32> _colors = new Dictionary<string, Color32>();
 
@@ -17,26 +19,26 @@ namespace Cr7Sund.Logger
             var color = GetLocalColor("log trace", Color.white);
             _colors["log trace"] = color;
 
-            color = GetLocalColor("log debug", LogColorHelp.HexToColor(0xFF8428D9));
+            color = GetLocalColor("log debug", LogColorHelp.HexToColor(logPalette.DebugHex));
             _colors["log debug"] = color;
 
-            color = GetLocalColor("log info", LogColorHelp.HexToColor(0xFF0E42BC));
+            color = GetLocalColor("log info", LogColorHelp.HexToColor(logPalette.InfoHex1));
             _colors["log info"] = color;
 
-            color = GetLocalColor("log warn", LogColorHelp.HexToColor(0xFFFFFF00));
+            color = GetLocalColor("log warn", LogColorHelp.HexToColor(logPalette.WarnHex1));
             _colors["log warn"] = color;
 
-            color = GetLocalColor("log error", LogColorHelp.HexToColor(0xFFFF0000));
+            color = GetLocalColor("log error", LogColorHelp.HexToColor(logPalette.ErrorHex));
             _colors["log error"] = color;
 
-            color = GetLocalColor("log fatal", LogColorHelp.HexToColor(0xFFF000FF));
+            color = GetLocalColor("log fatal", LogColorHelp.HexToColor(logPalette.FatalHex));
             _colors["log fatal"] = color;
 
             color = GetLocalColor("log event", Color.white);
             _colors["log event"] = color;
         }
 
-        public string Format(LogLevel level, LogChannel logChannel, string format, params object[] args)
+        public string Format(LogLevel level, Enum logChannel, string format, params object[] args)
         {
             string result = LogFormatUtility.Format(format, args);
             string logMessage = string.Format("[{0}][{1}]{2}", level, logChannel, result);
@@ -84,11 +86,11 @@ namespace Cr7Sund.Logger
                 color = level switch
                 {
                     LogLevel.Trace => GetLocalColor("log trace", Color.white),
-                    LogLevel.Debug => GetLocalColor("log debug", LogColorHelp.HexToColor(0xFF8428D9)),
-                    LogLevel.Info => GetLocalColor("log info", LogColorHelp.HexToColor(0xFF0E42BC)),
-                    LogLevel.Warn => GetLocalColor("log warn", LogColorHelp.HexToColor(0xFFFFFF00)),
-                    LogLevel.Error => GetLocalColor("log error", LogColorHelp.HexToColor(0xFFFF0000)),
-                    LogLevel.Fatal => GetLocalColor("log fatal", LogColorHelp.HexToColor(0xFFF000FF)),
+                    LogLevel.Debug => GetLocalColor("log debug", LogColorHelp.HexToColor(logPalette.DebugHex)),
+                    LogLevel.Info => GetLocalColor("log info", LogColorHelp.HexToColor(logPalette.InfoHex1)),
+                    LogLevel.Warn => GetLocalColor("log warn", LogColorHelp.HexToColor(logPalette.WarnHex1)),
+                    LogLevel.Error => GetLocalColor("log error", LogColorHelp.HexToColor(logPalette.ErrorHex)),
+                    LogLevel.Fatal => GetLocalColor("log fatal", LogColorHelp.HexToColor(logPalette.FatalHex)),
                     LogLevel.Event => GetLocalColor("log event", Color.white),
                     _ => Color.white
                 };

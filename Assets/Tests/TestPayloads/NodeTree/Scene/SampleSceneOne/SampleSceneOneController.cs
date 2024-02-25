@@ -1,8 +1,9 @@
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Scene.Impl;
 
 namespace Cr7Sund.PackageTest.IOC
 {
-    public class SampleSceneOneController : BaseController
+    public class SampleSceneOneController : BaseSceneController
     {
         public static int StartValue;
         public static int EnableCount;
@@ -20,7 +21,7 @@ namespace Cr7Sund.PackageTest.IOC
             base.OnStart();
             Debug.Info("Load scene one");
 
-            StartValue+=2;
+            StartValue +=2;
         }
 
         protected override void OnEnable()

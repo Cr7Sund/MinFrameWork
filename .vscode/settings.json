@@ -59,6 +59,7 @@
     "dotnet.defaultSolution": "MinFrameWork.sln",
     "cSpell.words": [
         "Addressables",
+        "Callstacks",
         "Doesnt",
         "Impls",
         "Lerp",
@@ -68,10 +69,12 @@
         "pollings",
         "Poolable",
         "Postorder",
+        "Prefs",
         "Resovled",
         "Scriptable",
         "Triggerable",
         "UGUI",
+        "UIROOT",
         "unhandler",
         "Uninject"
     ]

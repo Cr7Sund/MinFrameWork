@@ -50,8 +50,8 @@ namespace Cr7Sund.Logger
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine("Socket exception: " + ex);
-                    Console.WriteLine("Failed to connect to server. Retrying in " + reconnectInterval + " ms...");
+                    System.Console.WriteLine("Socket exception: " + ex);
+                    System.Console.WriteLine("Failed to connect to server. Retrying in " + reconnectInterval + " ms...");
                     await Task.Delay(reconnectInterval);
                 }
 

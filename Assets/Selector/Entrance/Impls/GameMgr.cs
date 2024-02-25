@@ -21,17 +21,17 @@ namespace Cr7Sund.Selector.Impl
             {
                 case GameStatus.Started:
                     {
-                        Log.Fatal("GameMgr::Start  Game already started...");
+                        Console.Fatal("GameMgr::Start  Game already started...");
                         break;
                     }
                 case GameStatus.Restarting:
                     {
-                        Log.Fatal("GameMgr::Start  Game is currently restarting...");
+                        Console.Fatal("GameMgr::Start  Game is currently restarting...");
                         break;
                     }
                 case GameStatus.Closing:
                     {
-                        Log.Fatal("GameMgr::Start  Game is currently closing...");
+                        Console.Fatal("GameMgr::Start  Game is currently closing...");
                         break;
                     }
                 case GameStatus.Closed:
@@ -62,12 +62,12 @@ namespace Cr7Sund.Selector.Impl
                     }
                 case GameStatus.Restarting:
                     {
-                        Log.Warn("GameMgr::Restart  Game is currently restarting....");
+                        Console.Warn("GameMgr::Restart  Game is currently restarting....");
                         return null;
                     }
                 case GameStatus.Closing:
                     {
-                        Log.Warn("GameMgr::Restart  Game is currently closing....");
+                        Console.Warn("GameMgr::Restart  Game is currently closing....");
                         return null;
                     }
                 case GameStatus.Closed:
@@ -94,17 +94,17 @@ namespace Cr7Sund.Selector.Impl
                     }
                 case GameStatus.Restarting:
                     {
-                        Log.Fatal("GameMgr::Close  Game is currently closing while restarting");
+                        Console.Fatal("GameMgr::Close  Game is currently closing while restarting");
                         return null;
                     }
                 case GameStatus.Closing:
                     {
-                        Log.Fatal("GameMgr::Close  Game is currently closing");
+                        Console.Fatal("GameMgr::Close  Game is currently closing");
                         return null;
                     }
                 case GameStatus.Closed:
                     {
-                        Log.Fatal("GameMgr::Close  Game has not been started yet...");
+                        Console.Fatal("GameMgr::Close  Game has not been started yet...");
                         return null;
                     }
                 default:

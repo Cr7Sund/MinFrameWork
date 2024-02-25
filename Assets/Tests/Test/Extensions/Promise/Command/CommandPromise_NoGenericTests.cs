@@ -13,7 +13,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         {
             SimplePromise.simulatePromise = new Promise();
 
-            Debug.Init(new InternalLogger());
+            Console.Init(new InternalLogger());
         }
 
         [TearDown]

@@ -41,6 +41,21 @@ namespace Cr7Sund.Selector.Impl
             _gameLogic.Start();
         }
 
+        void OnEnable()
+        {
+            UnityEngine.Application.logMessageReceived += MyCallback;
+        }
+
+        void OnDisable()
+        {
+            UnityEngine.Application.logMessageReceived -= MyCallback;
+        }
+
+        private void MyCallback(string condition, string stacktrace, UnityEngine.LogType type)
+        {
+            stacktrace = string.Empty;
+        }
+
         private void Update()
         {
             _gameLogic.Update(_updateCorrector.GetCorrectedTime());
@@ -60,10 +75,8 @@ namespace Cr7Sund.Selector.Impl
         {
             using (var configLoader = AssetLoaderFactory.CreateLoader())
             {
-                configLoader.Init();
                 var gameConfig = configLoader.LoadSync<GameConfig>(ConfigDefines.GameConfig);
-                var gameLogic = gameConfig.GetLogic();
-                gameLogic.Init();
+                var gameLogic = gameConfig.CreateLogic();
                 return gameLogic;
             }
 

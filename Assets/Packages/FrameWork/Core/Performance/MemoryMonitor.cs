@@ -11,7 +11,7 @@ namespace Cr7Sund.Performance
 
         public static void CleanMemory()
         {
-            Debug.Info("Clean Memory!!");
+            Console.Info("Clean Memory!!");
 
             foreach (var register in _delegateRegisters)
             {
@@ -21,7 +21,7 @@ namespace Cr7Sund.Performance
                 }
                 catch (System.Exception e)
                 {
-                    Debug.Fatal($"Memory Warning Delegate Exception: Message: {e.Message}, StackTrace: {e.StackTrace}");
+                    Console.Fatal($"Memory Warning Delegate Exception: Message: {e.Message}, StackTrace: {e.StackTrace}");
                 }
             }
         }

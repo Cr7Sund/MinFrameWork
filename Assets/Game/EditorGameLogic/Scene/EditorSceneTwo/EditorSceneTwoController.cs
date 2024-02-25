@@ -1,8 +1,8 @@
-using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Scene.Impl;
 
 namespace Cr7Sund.Game.Scene
 {
-    public class EditorSceneTwoController : BaseController
+    public class EditorSceneTwoController : BaseSceneController
     {
         public static int StartValue;
         public static int EnableCount;

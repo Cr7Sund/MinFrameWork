@@ -1,10 +1,10 @@
 using Cr7Sund.Game.UI;
-using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.Game.Scene
 {
-    public class EditorSceneOneController : BaseController
+    public class EditorSceneOneController : BaseSceneController
     {
         [Inject] private PageContainer _pageContainer;
         public static int StartValue;
@@ -15,8 +15,6 @@ namespace Cr7Sund.Game.Scene
             StartValue = 0;
             EnableCount = 0;
         }
-
-
 
         protected override void OnStart()
         {

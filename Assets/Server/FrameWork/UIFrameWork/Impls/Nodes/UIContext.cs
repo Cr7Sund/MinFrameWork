@@ -16,7 +16,9 @@ namespace Cr7Sund.Server.UI.Impl
             // Local In GameNode or GameController
             // --- --- 
             var assetLoader = AssetLoaderFactory.CreateLoader();
-            assetLoader.Init();
+            var logger = InternalLoggerFactory.Create(LogChannel.UILogic);
+
+            InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.UILogger).AsCrossContext();
 
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.UITimer);
@@ -28,6 +30,7 @@ namespace Cr7Sund.Server.UI.Impl
             InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<IPoolBinder>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.UITimer);
+            InjectionBinder.Unbind<InternalLogger>(ServerBindDefine.UILogger);
         }
 
     }

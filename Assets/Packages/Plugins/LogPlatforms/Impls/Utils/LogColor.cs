@@ -10,18 +10,14 @@ namespace Cr7Sund.Logger
         /// </summary>
         /// <param name="hexColor"></param>
         /// <returns></returns>
-        public static Color32 HexToColor(uint hexColor)
+        public static Color32 HexToColor(string hexColor)
         {
-            uint byteLimit = 256;
-            uint temp = hexColor;
-            uint b = temp % byteLimit;
-            temp /= byteLimit;
-            uint g = temp % byteLimit;
-            temp /= byteLimit;
-            uint r = temp % byteLimit;
-            temp /= byteLimit;
-            uint a = temp % byteLimit;
-            return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
+            if (!ColorUtility.TryParseHtmlString(hexColor, out var color))
+            {
+                color = Color.white;
+            }
+
+            return color;
         }
 
         /// <summary>
@@ -31,7 +27,7 @@ namespace Cr7Sund.Logger
         /// <returns></returns>
         public static string ColorToHex(Color32 color)
         {
-            return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", color.r, color.g, color.b, color.a);
+            return ColorUtility.ToHtmlStringRGBA(color);
         }
     }
 }

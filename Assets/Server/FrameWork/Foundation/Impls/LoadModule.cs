@@ -64,7 +64,7 @@ namespace Cr7Sund.Server.Impl
                 }
                 if (assetNode.NodeState == NodeState.Ready)
                 {
-                    Log.Warn($"NodeModule.AddNode: the asset is already on the nodeTree. NodeName: {key}");
+                    Console.Warn($"NodeModule.AddNode: the asset is already on the nodeTree. NodeName: {key}");
                     UnFreeze();
                     return assetNode.LoadStatus;
                 }
@@ -115,17 +115,17 @@ namespace Cr7Sund.Server.Impl
             {
                 if (assetNode.NodeState == NodeState.Removed)
                 {
-                    Log.Warn(($"NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {key} "));
+                    Console.Warn(($"NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {key} "));
                     return assetNode.RemoveStatus;
                 }
                 if (assetNode.NodeState == NodeState.Removing)
                 {
-                    Log.Warn($"NodeModule.PreLoadNode: the asset is removing.(which mean it has also already load) NodeName: {key} ");
+                    Console.Warn($"NodeModule.PreLoadNode: the asset is removing.(which mean it has also already load) NodeName: {key} ");
                     return assetNode.RemoveStatus;
                 }
                 if (assetNode.NodeState == NodeState.Preloading)
                 {
-                    Log.Warn($"NodeModule.PreLoadNode: the asset is preloading! NodeName: {key} ");
+                    Console.Warn($"NodeModule.PreLoadNode: the asset is preloading! NodeName: {key} ");
                     if (!overwrite)
                     {
                         return assetNode.LoadStatus;
@@ -138,22 +138,22 @@ namespace Cr7Sund.Server.Impl
                 }
                 if (assetNode.IsLoading())
                 {
-                    Log.Warn($"NodeModule.PreLoadNode: the asset is loading! NodeName: {key} ");
+                    Console.Warn($"NodeModule.PreLoadNode: the asset is loading! NodeName: {key} ");
                     return assetNode.LoadStatus;
                 }
                 if (assetNode.NodeState == NodeState.Adding)
                 {
-                    Log.Warn($"NodeModule.PreLoadNode: the asset is adding! NodeName: {key} ");
+                    Console.Warn($"NodeModule.PreLoadNode: the asset is adding! NodeName: {key} ");
                     return assetNode.AddStatus;
                 }
                 if (assetNode.NodeState == NodeState.Preloaded)
                 {
-                    Log.Warn($"NodeModule.PreLoadNode: the asset is preloaded! NodeName: {key} ");
+                    Console.Warn($"NodeModule.PreLoadNode: the asset is preloaded! NodeName: {key} ");
                     return assetNode.LoadStatus;
                 }
                 if (assetNode.NodeState == NodeState.Ready)
                 {
-                    Log.Warn($"NodeModule.PreLoadNode: the asset is already on the nodeTree. NodeName: {key} ");
+                    Console.Warn($"NodeModule.PreLoadNode: the asset is already on the nodeTree. NodeName: {key} ");
                     return assetNode.AddStatus;
                 }
                 if (assetNode.NodeState == NodeState.Unloading)
@@ -199,13 +199,13 @@ namespace Cr7Sund.Server.Impl
                 if (assetNode.NodeState == NodeState.Unloaded)
                 {
                     UnFreeze();
-                    Log.Warn($"try to remove an unloaded node: {assetNode.Key}");
+                    Console.Warn($"try to remove an unloaded node: {assetNode.Key}");
                     return assetNode.UnloadStatus;
                 }
                 if (assetNode.NodeState == NodeState.Unloading)
                 {
                     UnFreeze();
-                    Log.Warn($"try to remove an unloading node: {assetNode.Key}");
+                    Console.Warn($"try to remove an unloading node: {assetNode.Key}");
                     return assetNode.UnloadStatus;
                 }
                 if (assetNode.IsLoading())
@@ -216,7 +216,7 @@ namespace Cr7Sund.Server.Impl
                 }
                 if (assetNode.NodeState == NodeState.Adding)
                 {
-                    Log.Warn($"NodeModule.RemoveNode: the asset is adding , but is not loading! NodeName: {key} ");
+                    Console.Warn($"NodeModule.RemoveNode: the asset is adding , but is not loading! NodeName: {key} ");
                     assetNode.AddStatus.Cancel();
                 }
 

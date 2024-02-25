@@ -2,7 +2,7 @@ using System;
 
 namespace Cr7Sund
 {
-    public static class Debug
+    public static class Console
     {
         private static IInternalLog _logger;
 
@@ -10,7 +10,6 @@ namespace Cr7Sund
         public static void Init(IInternalLog logger)
         {
             _logger = logger;
-
             _logger.Init();
         }
 
@@ -47,6 +46,11 @@ namespace Cr7Sund
         public static void Fatal(string prefix, Exception e)
         {
             _logger.Fatal(prefix, e);
+        }
+
+        public static void Warn(string message)
+        {
+            _logger.Warn(message);
         }
     }
 }

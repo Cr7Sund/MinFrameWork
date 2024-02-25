@@ -120,7 +120,7 @@ namespace Cr7Sund.Logger
 #endif
         }
 
-        public string Format(LogLevel level, LogChannel logChannel, string format, params object[] args)
+        public string Format(LogLevel level, Enum logChannel, string format, params object[] args)
         {
             string result = LogFormatUtility.Format(format, args);
             Write(LogType.Code, level, result);

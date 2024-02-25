@@ -174,18 +174,19 @@
         }
 
         /// <summary>
-        /// stop the game when exception happens 
+        /// only use when you pursue ultimate performance
+        /// it will stop the game when exception happens 
         /// similar to unity editor error pause
         /// </summary>
         public static bool NoCatchMode
         {
             get
             {
-                #if NO_TRY_CATCH 
+#if NO_TRY_CATCH
                 return true;
-                #else
+#else
                 return false;
-                #endif
+#endif
             }
         }
     }

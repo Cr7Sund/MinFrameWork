@@ -11,15 +11,11 @@ namespace Cr7Sund
         /// <summary>
         ///     Logs from C# to do with our Lua api
         /// </summary>
-        Lua = 1 << 0,
+        Lua = 1 << 1,
         /// <summary>
         ///     Logs directly from the Lua VM
         /// </summary>
-        LuaNative = 1 << 1,
-        /// <summary>
-        ///     Logs to do with AI/GOAP/
-        /// </summary>
-        AI = 1 << 2,
+        LuaNative = 1 << 2,
         /// <summary>
         ///     Logs to do with graphics/rendering
         /// </summary>
@@ -31,7 +27,7 @@ namespace Cr7Sund
         /// <summary>
         ///     Logs to do with our UI system
         /// </summary>
-        UI = 1 << 5,
+        UILogic = 1 << 5,
         /// <summary>
         ///     Logs about NetDevices and networks
         /// </summary>
@@ -45,7 +41,7 @@ namespace Cr7Sund
         /// </summary>
         Loading = 1 << 8,
         /// <summary>
-        ///     Logs to do with localisation
+        ///     Logs to do with localization
         /// </summary>
         Localization = 1 << 9,
         /// <summary>
@@ -73,11 +69,25 @@ namespace Cr7Sund
         /// </summary>
         Assets = 1 << 15,
         /// <summary>
-        ///     Framework logs
+        ///     scene logic logs
         /// </summary>
 
-        Framework = 1 << 19,
-
-        Undefine = 1 << 20
+        SceneLogic = 1 << 19,
+        /// <summary>
+        ///     Logs to do with AI/GOAP/
+        /// </summary>
+        AI = 1 << 20,
+        /// <summary>
+        ///     game logic logs
+        /// </summary>
+        GameLogic = 1 << 21,
+        /// <summary>
+        ///     framework logs
+        /// </summary>
+        FrameWork = 1 << 22,
+        /// <summary>
+        ///     game entrance
+        /// </summary>
+        Entrance = 1 << 23,
     }
 }

@@ -11,7 +11,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
         [SetUp]
         public void SetUp()
         {
-            Debug.Init(new InternalLogger());
+            Console.Init(new InternalLogger());
         }
         
         // 2.1.1.1.

@@ -1,8 +1,9 @@
 using Cr7Sund.NodeTree.Impl;
+using Cr7Sund.Server.Scene.Impl;
 
 namespace Cr7Sund.PackageTest.IOC
 {
-    public class SampleSceneTwoController : BaseController
+    public class SampleSceneTwoController : BaseSceneController
     {
         public static int StartValue;
         public static int EnableCount;

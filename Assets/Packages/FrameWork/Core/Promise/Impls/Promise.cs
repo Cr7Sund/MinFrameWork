@@ -597,7 +597,7 @@ namespace Cr7Sund.Package.Impl
         {
             RejectWithoutDebug(ex);
             // only output error when you don't achieve onRejected
-            Debug.Error(ex);
+            Console.Error(ex);
         }
         
         public void RejectWithoutDebug(Exception ex)
@@ -766,7 +766,7 @@ namespace Cr7Sund.Package.Impl
         // Convert an exception directly into a rejected promise.
         public static IPromise<PromisedT> Rejected(Exception ex)
         {
-            Debug.Error(ex);
+            Console.Error(ex);
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
         

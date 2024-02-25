@@ -10,7 +10,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         [SetUp]
         public void SetUp()
         {
-            Debug.Init(new InternalLogger());
+            Console.Init(new InternalLogger());
         }
         [Test]
         public void wait_until_elapsedUpdates_resolves_when_predicate_is_true()
