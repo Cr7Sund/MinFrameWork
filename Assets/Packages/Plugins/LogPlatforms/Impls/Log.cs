@@ -11,17 +11,17 @@ namespace Cr7Sund
     /// </summary>
     public static class Log
     {
-        private static ILogDecorator _logDecorator;
+        private static ILogAppender _logAppender;
 
         /// <summary>
         ///     Gets the instance of the log decorator, creating it if necessary.
         /// </summary>
-        private static ILogDecorator LogDecorator
+        private static ILogAppender LogAppender
         {
             get
             {
                 // Lazy initialization of log decorator using LogDecoratorCreator.
-                return _logDecorator ??= LogDecoratorCreator.Create();
+                return _logAppender ??= LogAppenderCreator.Create();
             }
         }
 
@@ -49,7 +49,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.UNITY_EDITOR)]
         public static void Trace(string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Trace, BuiltInLogChannel.Undefine, format, args);
+            string result = LogAppender.Format(LogLevel.Trace, BuiltInLogChannel.Undefine, format, args);
             UnityEngine.Debug.Log(result);
         }
 
@@ -62,7 +62,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.UNITY_EDITOR)]
         public static void Trace(Enum logChannel, string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Trace, logChannel, format, args);
+            string result = LogAppender.Format(LogLevel.Trace, logChannel, format, args);
             UnityEngine.Debug.Log(result);
         }
 
@@ -73,7 +73,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.UNITY_EDITOR)]
         public static void Trace(object obj)
         {
-            string result = LogDecorator.Format(LogLevel.Trace, BuiltInLogChannel.Undefine, obj.ToString());
+            string result = LogAppender.Format(LogLevel.Trace, BuiltInLogChannel.Undefine, obj.ToString());
             UnityEngine.Debug.Log(result);
         }
 
@@ -94,7 +94,7 @@ namespace Cr7Sund
 #endif
         public static void Debug(string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Debug, BuiltInLogChannel.Undefine, format, args);
+            string result = LogAppender.Format(LogLevel.Debug, BuiltInLogChannel.Undefine, format, args);
             UnityEngine.Debug.Log(result);
         }
 
@@ -108,7 +108,7 @@ namespace Cr7Sund
 #endif
         public static void Debug(object obj)
         {
-            string result = LogDecorator.Format(LogLevel.Debug, BuiltInLogChannel.Undefine, obj.ToString());
+            string result = LogAppender.Format(LogLevel.Debug, BuiltInLogChannel.Undefine, obj.ToString());
 
             UnityEngine.Debug.Log(result);
         }
@@ -124,7 +124,7 @@ namespace Cr7Sund
 #endif
         public static void Debug(Enum logChannel, string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Debug, logChannel, format, args);
+            string result = LogAppender.Format(LogLevel.Debug, logChannel, format, args);
             UnityEngine.Debug.Log(result);
         }
 
@@ -143,7 +143,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Info(string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Info, BuiltInLogChannel.Undefine, format, args);
+            string result = LogAppender.Format(LogLevel.Info, BuiltInLogChannel.Undefine, format, args);
             UnityEngine.Debug.Log(result);
         }
 
@@ -157,7 +157,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Info(object obj)
         {
-            string result = LogDecorator.Format(LogLevel.Info, BuiltInLogChannel.Undefine, obj.ToString());
+            string result = LogAppender.Format(LogLevel.Info, BuiltInLogChannel.Undefine, obj.ToString());
             UnityEngine.Debug.Log(result);
         }
 
@@ -173,7 +173,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Info(Enum logChannel, string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Info, logChannel, format, args);
+            string result = LogAppender.Format(LogLevel.Info, logChannel, format, args);
             UnityEngine.Debug.Log(result);
         }
         #endregion
@@ -190,7 +190,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.PROFILER)]
         public static void Warn(string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Warn, BuiltInLogChannel.Undefine, format, args);
+            string result = LogAppender.Format(LogLevel.Warn, BuiltInLogChannel.Undefine, format, args);
             UnityEngine.Debug.LogWarning(result);
         }
 
@@ -237,7 +237,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.PROFILER)]
         public static void Warn(Enum logChannel, string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Warn, logChannel, format, args);
+            string result = LogAppender.Format(LogLevel.Warn, logChannel, format, args);
 
             UnityEngine.Debug.LogWarning(result);
         }
@@ -257,7 +257,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Error(string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Error, BuiltInLogChannel.Undefine, format, args);
+            string result = LogAppender.Format(LogLevel.Error, BuiltInLogChannel.Undefine, format, args);
             UnityEngine.Debug.LogError(result);
         }
 
@@ -271,7 +271,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void ErrorWithContext(string msg, object obj)
         {
-            string result = LogDecorator.Format(LogLevel.Error, BuiltInLogChannel.Undefine, msg);
+            string result = LogAppender.Format(LogLevel.Error, BuiltInLogChannel.Undefine, msg);
 
             if (obj is UnityEngine.Object uObject)
             {
@@ -326,7 +326,7 @@ namespace Cr7Sund
             }
 
             string exceptionStr = ParseException(exception);
-            string result = LogDecorator.Format(LogLevel.Error, logChannel, $"{prefix} {exceptionStr}");
+            string result = LogAppender.Format(LogLevel.Error, logChannel, $"{prefix} {exceptionStr}");
             UnityEngine.Debug.LogError(result);
         }
         /// <summary>
@@ -341,7 +341,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Error(Enum logChannel, string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Error, logChannel, format, args);
+            string result = LogAppender.Format(LogLevel.Error, logChannel, format, args);
 
             UnityEngine.Debug.LogError(result);
         }
@@ -361,7 +361,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Fatal(string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Fatal, BuiltInLogChannel.Undefine, format, args);
+            string result = LogAppender.Format(LogLevel.Fatal, BuiltInLogChannel.Undefine, format, args);
             UnityEngine.Debug.LogError(result);
         }
 
@@ -375,7 +375,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Fatal(object obj)
         {
-            string result = LogDecorator.Format(LogLevel.Fatal, BuiltInLogChannel.Undefine, obj.ToString());
+            string result = LogAppender.Format(LogLevel.Fatal, BuiltInLogChannel.Undefine, obj.ToString());
 
             UnityEngine.Debug.LogError(result);
         }
@@ -414,7 +414,7 @@ namespace Cr7Sund
             }
 
             string exceptionStr = ParseException(exception);
-            string result = LogDecorator.Format(LogLevel.Fatal, logChannel, $"{prefix} {exceptionStr}");
+            string result = LogAppender.Format(LogLevel.Fatal, logChannel, $"{prefix} {exceptionStr}");
             UnityEngine.Debug.LogError(result);
         }
         /// <summary>
@@ -429,7 +429,7 @@ namespace Cr7Sund
         [Conditional(MacroDefine.FINAL_RELEASE)]
         public static void Fatal(Enum logChannel, string format, params object[] args)
         {
-            string result = LogDecorator.Format(LogLevel.Fatal, logChannel, format, args);
+            string result = LogAppender.Format(LogLevel.Fatal, logChannel, format, args);
 
             UnityEngine.Debug.LogError(result);
         }
@@ -444,7 +444,7 @@ namespace Cr7Sund
         public static void Initialize()
         {
             Profiler.enableAllocationCallstacks = true;
-            LogDecorator.Initialize();
+            LogAppender.Initialize();
         }
 
         /// <summary>
@@ -452,8 +452,8 @@ namespace Cr7Sund
         /// </summary>
         public static void Dispose()
         {
-            LogDecorator?.Dispose();
-            _logDecorator = null;
+            LogAppender?.Dispose();
+            _logAppender = null;
         }
 
         #endregion

@@ -3,7 +3,7 @@ namespace Cr7Sund
 {
     public interface IInternalLog
     {
-        void Init(Enum logChannel = null);
+        void Init(Enum logChannel);
         void Info(string message);
         void Warn(string message);
         void Error(string message);

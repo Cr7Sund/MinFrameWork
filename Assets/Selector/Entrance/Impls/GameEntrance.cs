@@ -9,7 +9,6 @@ namespace Cr7Sund.Selector.Impl
         {
             Console.Init(new InternalLogger());
 
-
             Log.Info(LogChannel.Entrance, "Before SplashScreen is shown and before the first scene is loaded.");
         }
 

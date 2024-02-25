@@ -67,7 +67,7 @@ namespace Cr7Sund.Logger
             if (_mmFile.IsWritable()) return;
             byte[] buffer = _mmFile.ReadAll();
             buffer = _formatter.Formatting(buffer);
-            LogFileManager.Append(LogFileUtil.GetCopyFilePath(LogType, ((long)(DateTime.UtcNow - FileLogDecorator.StandardTime).TotalSeconds).ToString()), buffer, 0, buffer.Length);
+            LogFileManager.Append(LogFileUtil.GetCopyFilePath(LogType, ((long)(DateTime.UtcNow - FileLogAppender.StandardTime).TotalSeconds).ToString()), buffer, 0, buffer.Length);
         }
 
         private void Write(byte[] buffer, int offset, int length)

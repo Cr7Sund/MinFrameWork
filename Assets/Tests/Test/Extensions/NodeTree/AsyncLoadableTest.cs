@@ -4,6 +4,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
 using UnityEngine.TestTools;
+using System;
 
 namespace Cr7Sund.PackageTest.NodeTree
 {
@@ -67,10 +68,11 @@ namespace Cr7Sund.PackageTest.NodeTree
             var sampleLoadable = new SampleAsyncLoadableWithException();
 
             // Act
-            sampleLoadable.LoadAsync();
+            TestDelegate testDelegate = () => sampleLoadable.LoadAsync();
 
             // Assert
-            Assert.AreEqual(LoadState.Fail, sampleLoadable.State);
+            Assert.Throws<MyException>(testDelegate);
+            Assert.AreEqual(LoadState.Loading, sampleLoadable.State);
         }
 
         [Test]

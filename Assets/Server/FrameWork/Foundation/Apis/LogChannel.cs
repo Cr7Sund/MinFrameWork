@@ -8,10 +8,7 @@ namespace Cr7Sund
     [Flags]
     public enum LogChannel : uint
     {
-        /// <summary>
-        ///     Logs from C# to do with our Lua api
-        /// </summary>
-        Lua = 1 << 1,
+
         /// <summary>
         ///     Logs directly from the Lua VM
         /// </summary>
@@ -81,10 +78,6 @@ namespace Cr7Sund
         ///     game logic logs
         /// </summary>
         GameLogic = 1 << 21,
-        /// <summary>
-        ///     framework logs
-        /// </summary>
-        FrameWork = 1 << 22,
         /// <summary>
         ///     game entrance
         /// </summary>

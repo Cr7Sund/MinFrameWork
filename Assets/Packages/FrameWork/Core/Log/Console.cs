@@ -2,6 +2,12 @@ using System;
 
 namespace Cr7Sund
 {
+    public enum DefaultLogChannel
+    {
+        FrameWork = 1 << 1,
+    }
+    
+    
     public static class Console
     {
         private static IInternalLog _logger;
@@ -10,7 +16,7 @@ namespace Cr7Sund
         public static void Init(IInternalLog logger)
         {
             _logger = logger;
-            _logger.Init();
+            _logger.Init(DefaultLogChannel.FrameWork);
         }
 
         public static void Info(string message)
