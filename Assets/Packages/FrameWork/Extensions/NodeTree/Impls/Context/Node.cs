@@ -470,8 +470,7 @@ namespace Cr7Sund.NodeTree.Impl
                     $"can not remove node at : {child.LoadState} State", NodeTreeExceptionType.INVALID_NODESTATE));
             }
             AssertUtil.IsTrue(ChildNodes.Contains(child), NodeTreeExceptionType.REMOVE_NO_EXISTED);
-
-
+            
             var childNode = child as Node;
             childNode.StartUnload(shouldUnload);
 
@@ -493,10 +492,10 @@ namespace Cr7Sund.NodeTree.Impl
                     childNode.Deject();
                 }
                 childNode._removePromise = child.UnloadAsync(child)
-                    .Catch((ex) =>
+                    .ContinueWith(() =>
                     {
                         RemoveChildInternal(childNode, shouldUnload);
-                        return child;
+                        return Promise<INode>.Resolved(childNode);
                     }); // if unload fail, we still remove from node tree
             }
             else

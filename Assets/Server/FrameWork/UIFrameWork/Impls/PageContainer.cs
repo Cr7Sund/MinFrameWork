@@ -145,9 +145,8 @@ namespace Cr7Sund.Server.UI.Impl
                 // if there is a exception in transition (this can be handled rejected if you want ) 
                 if (exitPage != null)
                 {
-                    return RemovePage(enterPage, exitPage)
-                            .Then(_ => OpenSequence(enterPage, exitPage))
-                            .Then(() => Promise<INode>.Resolved(node));
+                    return OpenSequence(enterPage, exitPage)
+                            .ContinueWith(() => RemovePage(enterPage, exitPage));
                 }
                 else
                 {

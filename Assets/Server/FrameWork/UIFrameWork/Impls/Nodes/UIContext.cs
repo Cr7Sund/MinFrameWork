@@ -30,7 +30,7 @@ namespace Cr7Sund.Server.UI.Impl
             InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<IPoolBinder>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.UITimer);
-            InjectionBinder.Unbind<InternalLogger>(ServerBindDefine.UILogger);
+            InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.UILogger);
         }
 
     }

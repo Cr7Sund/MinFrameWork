@@ -155,7 +155,7 @@ namespace Cr7Sund.Server.UI.Impl
         protected override void OnDeject()
         {
             base.OnDeject();
-            _context.InjectionBinder.Injector.Uninject(this);
+            _context.InjectionBinder.Injector.Uninject(View);
             _context.InjectionBinder.Injector.Uninject(Controller);
         }
 
