@@ -1,0 +1,3 @@
+[submodule "Assets/Packages/Plugins/LogPipeline"]
+	path = Assets/Packages/Plugins/LogPipeline
+	url = https://github.com/Cr7Sund/LogPipeline.git
