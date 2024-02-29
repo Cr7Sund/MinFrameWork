@@ -16,7 +16,7 @@ namespace Cr7Sund.Game.GameLogic
 
         protected override void InitGameEnv()
         {
-            Debug.Info("EditorMainController Start");
+            Debug.Debug("EditorMainController Start");
         }
 
         protected override IPromise HandleHotfix()

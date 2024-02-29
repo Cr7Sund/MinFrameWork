@@ -113,10 +113,12 @@ namespace Cr7Sund.Package.Impl
             Id = Promise.NextId();
         }
 
+#if UNITY_INCLUDE_TESTS
         public PromisedT Test_GetResolveValue()
         {
             return _resolveValue;
         }
+#endif
 
         #region IPromiseInfo Implementation
         public IPromise<PromisedT> WithName(object name)
@@ -596,10 +598,9 @@ namespace Cr7Sund.Package.Impl
         public void Reject(Exception ex)
         {
             RejectWithoutDebug(ex);
-            // only output error when you don't achieve onRejected
             Console.Error(ex);
         }
-        
+
         public void RejectWithoutDebug(Exception ex)
         {
             AssertUtil.NotNull(ex);
@@ -769,7 +770,20 @@ namespace Cr7Sund.Package.Impl
             Console.Error(ex);
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
-        
+
+        public static IPromise<PromisedT> Rejected(Enum errorCode, string message)
+        {
+            Exception ex = new MyException(errorCode);
+            Console.Error(ex, message);
+            return _resolvePromise.Rejected<PromisedT>(ex);
+        }
+        public static IPromise<PromisedT> Rejected<T0>(Enum errorCode, string message, T0 property0)
+        {
+            Exception ex = new MyException(errorCode);
+            Console.Error(ex, message, property0);
+            return _resolvePromise.Rejected<PromisedT>(ex);
+        }
+
         public static IPromise<PromisedT> RejectedWithoutDebug(Exception ex)
         {
             return _resolvePromise.Rejected<PromisedT>(ex);

@@ -19,7 +19,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStart()
         {
             base.OnStart();
-            Debug.Info("Load scene one");
+            Debug.Debug("Load scene one");
 
             StartValue +=2;
         }
@@ -27,7 +27,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnEnable()
         {
             base.OnEnable();
-            Debug.Info("Enable scene one");
+            Debug.Debug("Enable scene one");
 
 
             EnableCount++;
@@ -36,7 +36,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnDisable()
         {
             base.OnDisable();
-            Debug.Info("Disable scene one");
+            Debug.Debug("Disable scene one");
 
             EnableCount--;
         }
@@ -44,7 +44,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStop()
         {
             base.OnStop();
-            Debug.Info("Stop scene one");
+            Debug.Debug("Stop scene one");
 
             StartValue--;
         }

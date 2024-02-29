@@ -35,7 +35,7 @@ namespace Cr7Sund.ServerTest.UI
             }
 
 
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
             RunScene();
 
             sceneInjectBinder.Injector.Inject(_pageContainer);

@@ -23,7 +23,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnStart()
         {
             base.OnStart();
-            Debug.Info("Load ui three");
+            Debug.Debug("Load ui three");
 
             StartValue++;
 
@@ -32,7 +32,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            Debug.Info("Enable ui three");
+            Debug.Debug("Enable ui three");
 
             EnableCount++;
         }
@@ -40,7 +40,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnDisable()
         {
             base.OnDisable();
-            Debug.Info("Disable ui three");
+            Debug.Debug("Disable ui three");
 
             EnableCount--;
         }
@@ -48,7 +48,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnStop()
         {
             base.OnStop();
-            Debug.Info("Stop ui three");
+            Debug.Debug("Stop ui three");
 
             StartValue--;
         }

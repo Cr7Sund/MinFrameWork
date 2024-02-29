@@ -18,7 +18,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnStart()
         {
             base.OnStart();
-            Debug.Info("Load ui two");
+            Debug.Debug("Load ui two");
 
             StartValue++;
 
@@ -27,7 +27,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            Debug.Info("Enable ui two");
+            Debug.Debug("Enable ui two");
 
             EnableCount++;
         }
@@ -35,7 +35,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnDisable()
         {
             base.OnDisable();
-            Debug.Info("Disable ui two");
+            Debug.Debug("Disable ui two");
 
             EnableCount--;
         }
@@ -43,7 +43,7 @@ namespace Cr7Sund.Game.UI
         protected override void OnStop()
         {
             base.OnStop();
-            Debug.Info("Stop ui two");
+            Debug.Debug("Stop ui two");
 
             StartValue--;
         }

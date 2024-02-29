@@ -34,6 +34,7 @@ MonoBehaviour:
     - com.codewriter.npm-package-loader
     - com.github-glitchenzo.nugetforunity
     - com.openupm
+    - com.serilog.sinks.unity3d
     m_IsDefault: 0
     m_Capabilities: 0
     m_ConfigSource: 4

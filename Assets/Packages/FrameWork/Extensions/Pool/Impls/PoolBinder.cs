@@ -124,10 +124,12 @@ namespace Cr7Sund.Package.Impl
             }
         }
 
+#if UNITY_INCLUDE_TESTS
         public int Test_GetPoolCount()
         {
             return _bindings.Count;
         }
+#endif
     }
 
     public static class PoolBinderExtension

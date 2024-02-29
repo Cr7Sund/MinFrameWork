@@ -5,6 +5,8 @@ namespace Cr7Sund.Server.Tests
 {
     public class SampleGameContext : GameContext
     {
+        protected override string Channel => "SampleGame";
+
         protected override void OnMappedBindings()
         {
             base.OnMappedBindings();

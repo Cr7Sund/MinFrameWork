@@ -29,7 +29,7 @@ namespace Cr7Sund.UGUI.Impls
         {
             if (!_componentContainers.ContainsKey(key))
             {
-                Console.Error($"Panel {name} don't bind {key}");
+                Console.Error("Panel {Name} don't bind {Key}", name, key);
                 return default;
             }
             return _componentContainers[key] as T;

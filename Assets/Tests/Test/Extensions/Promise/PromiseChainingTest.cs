@@ -23,7 +23,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             intResult = 0;
             floatResult = 0f;
             command = new ExampleCommand();
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
         }
 
         [Test]

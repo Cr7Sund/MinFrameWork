@@ -18,7 +18,6 @@ namespace Cr7Sund.Selector.Impl
         private bool _dispose;
 
 
-
         internal IPromise<INode> Dispose()
         {
             if (!_dispose)

@@ -1,0 +1,98 @@
+using System;
+using Serilog;
+using Serilog.Configuration;
+using Serilog.Events;
+using System.Net.Sockets;
+using System.Text;
+using Serilog.Core;
+using Serilog.Formatting.Display;
+
+namespace Cr7Sund.Logger
+{
+    /// <summary>
+    ///     Extends Serilog configuration to write events to the network.
+    /// </summary>
+    public static partial class NetSinkExtensions
+    {
+        private const string DefaultOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
+
+        /// <summary>
+        /// Adds a sink that sends log events as UDP packages over the network.
+        /// </summary>
+        /// <param name="sinkConfiguration">
+        /// Logger sink configuration.
+        /// </param>
+        /// <param name="remoteAddress">
+        /// The IP address or hostname of the remote host or multicast group to which the UDP
+        /// client should sent the log events, e.g. "10.0.0.100" or "www.log-receiver.com".
+        /// </param>
+        /// <param name="remotePort">
+        /// The TCP port of the remote host or multicast group to which the UDP client should sent
+        /// the logging event.
+        /// </param>
+        /// <param name="family">
+        /// Either <see cref="AddressFamily.InterNetwork"/> for IPv4 or
+        /// <see cref="AddressFamily.InterNetworkV6"/> for IPv6, specifying the addressing scheme
+        /// of the socket.
+        /// </param>
+        /// <param name="localPort">
+        /// The TCP port from which the UDP client will communicate. The default is 0 and will
+        /// cause the UDP client not to bind to a local port.
+        /// </param>
+        /// <param name="enableBroadcast">
+        /// Whether the <see cref="UdpClient"/> may send broadcast packets.
+        /// </param>
+        /// <param name="restrictedToMinimumLevel">
+        /// The minimum level for events passed through the sink. The default is
+        /// <see cref="LevelAlias.Minimum"/>.
+        /// </param>
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
+        /// </param>
+        /// <param name="outputTemplate">
+        /// A message template describing the format used to write to the sink. The default is
+        /// "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}".
+        /// </param>
+        /// <param name="formatProvider">
+        /// Supplies culture-specific formatting information, or null.
+        /// </param>
+        /// <param name="encoding">
+        /// The string encoding sent over the network. The default is <see cref="Encoding.UTF8"/>.
+        /// </param>
+        /// <returns>
+        /// Logger configuration, allowing configuration to continue.
+        /// </returns>
+        public static LoggerConfiguration UDP(
+            this LoggerSinkConfiguration sinkConfiguration,
+            string remoteAddress,
+            int remotePort,
+            AddressFamily family,
+            int localPort = 0,
+            bool enableBroadcast = false,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch levelSwitch = null,
+            string outputTemplate = DefaultOutputTemplate,
+            IFormatProvider formatProvider = null,
+            Encoding encoding = null)
+        {
+            if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
+            encoding ??= Encoding.UTF8;
+
+            // var formatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
+            var formatter = new JsonTextFormatter();
+            try
+            {
+                var client = new UDPClientProxy(localPort, family, enableBroadcast);
+                var sink = new BatchingSink(new UDPSink(client, remoteAddress, remotePort, formatter, encoding));
+                return sinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError("Unable to create UDP sink: {0}");
+                UnityEngine.Debug.LogException(e);
+                return sinkConfiguration.Sink(new NullSink(), LevelAlias.Maximum, null);
+            }
+        }
+
+    }
+}

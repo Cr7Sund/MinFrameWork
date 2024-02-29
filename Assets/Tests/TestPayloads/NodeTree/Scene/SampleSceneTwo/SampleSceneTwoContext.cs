@@ -5,6 +5,8 @@ namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleSceneTwoContext : SceneContext
     {
+        protected override string Channel => "SampleSceneTwo";
+
         protected override void OnMappedBindings()
         {
         }

@@ -2,15 +2,17 @@
     "name": "Cr7Sund.LogPlatforms",
     "rootNamespace": "",
     "references": [
-        "GUID:8115196194fe8c24d9712ae8127af0f9",
-        "GUID:fe13ff8c968d49d48ba40db5a43374e8"
+        "GUID:8115196194fe8c24d9712ae8127af0f9"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "ZstdNet.dll"
+        "ZstdNet.dll",
+        "Serilog.dll",
+        "Serilog.Sinks.File.dll",
+        "Serilog.Sinks.PeriodicBatching.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],

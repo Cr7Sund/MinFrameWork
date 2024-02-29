@@ -16,7 +16,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
             SimplePromise.simulatePromiseSecond = new Promise<int>();
             SimplePromise.simulatePromise = new Promise();
 
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
         }
 
         [TearDown]

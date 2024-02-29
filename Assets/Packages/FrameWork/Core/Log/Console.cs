@@ -2,12 +2,6 @@ using System;
 
 namespace Cr7Sund
 {
-    public enum DefaultLogChannel
-    {
-        FrameWork = 1 << 1,
-    }
-    
-    
     public static class Console
     {
         private static IInternalLog _logger;
@@ -16,10 +10,19 @@ namespace Cr7Sund
         public static void Init(IInternalLog logger)
         {
             _logger = logger;
-            _logger.Init(DefaultLogChannel.FrameWork);
+        }
+
+        public static void Dispose()
+        {
+            _logger?.Dispose();
         }
 
         public static void Info(string message)
+        {
+            _logger.Info(message);
+        }
+
+        public static void Info(Enum channel, string message)
         {
             _logger.Info(message);
         }
@@ -34,9 +37,29 @@ namespace Cr7Sund
             _logger.Error(prefix, e);
         }
 
-        public static void Error(Exception e)
+        public static void Error<T0>(Exception e, string prefix, T0 propertyValue0)
         {
-            _logger.Error(e);
+            _logger.Error(e, prefix, propertyValue0);
+        }
+
+        public static void Error(Exception e, string message)
+        {
+            _logger.Error(e, message);
+        }
+
+        public static void Error<T0>(string message, T0 propertyValue0)
+        {
+            _logger.Error(message, propertyValue0);
+        }
+
+        public static void Error<T0, T1>(string message, T0 propertyValue0, T1 propertyValue1)
+        {
+            _logger.Error(message, propertyValue0, propertyValue1);
+        }
+
+        public static void Error<T0, T1, T2>(string message, T0 propertyValue0, T1 propertyValue1, T2 propertyValue2)
+        {
+            _logger.Error(message, propertyValue0, propertyValue1, propertyValue2);
         }
 
         public static void Fatal(string message)
@@ -49,14 +72,24 @@ namespace Cr7Sund
             _logger.Fatal(e);
         }
 
-        public static void Fatal(string prefix, Exception e)
+        public static void Fatal(Exception e, string prefix)
         {
-            _logger.Fatal(prefix, e);
+            _logger.Fatal(e, prefix);
         }
 
         public static void Warn(string message)
         {
             _logger.Warn(message);
+        }
+
+        public static void Warn<T0>(string message, T0 propertyValue0)
+        {
+            _logger.Warn(message, propertyValue0);
+        }
+
+        public static void Error(Exception ex)
+        {
+            _logger.Error(ex);
         }
     }
 }

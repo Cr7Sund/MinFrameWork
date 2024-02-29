@@ -59,6 +59,7 @@
     "dotnet.defaultSolution": "MinFrameWork.sln",
     "cSpell.words": [
         "Addressables",
+        "Appender",
         "Callstacks",
         "Doesnt",
         "Impls",
@@ -72,6 +73,7 @@
         "Prefs",
         "Resovled",
         "Scriptable",
+        "Serilog",
         "Triggerable",
         "UGUI",
         "UIROOT",

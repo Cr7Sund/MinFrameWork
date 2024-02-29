@@ -10,7 +10,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
         [SetUp]
         public void SetUp()
         {
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
         }
         
         // 2.2.1
@@ -19,7 +19,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             [SetUp]
             public void SetUp()
             {
-                Console.Init(new InternalLogger());
+                Console.Init(InternalLoggerFactory.Create());
             }
             
             // 2.2.1.1
@@ -169,7 +169,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             [SetUp]
             public void SetUp()
             {
-                Console.Init(new InternalLogger());
+                Console.Init(InternalLoggerFactory.Create());
             }
             
             // 2.2.3.1
@@ -242,7 +242,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             [SetUp]
             public void SetUp()
             {
-                Console.Init(new InternalLogger());
+                Console.Init(InternalLoggerFactory.Create());
             }
             
             // 2.2.6.1
@@ -338,7 +338,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             [SetUp]
             public void SetUp()
             {
-                Console.Init(new InternalLogger());
+                Console.Init(InternalLoggerFactory.Create());
             }
             // 2.2.7.3
             [Test]
@@ -508,7 +508,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                 [SetUp]
                 public void SetUp()
                 {
-                    Console.Init(new InternalLogger());
+                    Console.Init(InternalLoggerFactory.Create());
                 }
                 
                 [Test]

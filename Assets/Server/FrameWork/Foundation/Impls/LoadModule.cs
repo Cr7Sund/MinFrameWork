@@ -44,8 +44,8 @@ namespace Cr7Sund.Server.Impl
             if (!_parentNode.IsStarted)
             {
                 UnFreeze();
-                return Promise<INode>.Rejected(new MyException(
-                    $"NodeModule.AddNode: Do not allow AddNode while ParentNode.Started is false! NodeName: {key}"));
+                return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_addNode,
+                    "NodeModule.AddNode: Do not allow AddNode while ParentNode.Started is false! NodeName: {Key}", key);
             }
             // if (!_parentNode.IsActive)
             // allowed load a bundle of node which mean the parent node maybe not enabled
@@ -64,7 +64,7 @@ namespace Cr7Sund.Server.Impl
                 }
                 if (assetNode.NodeState == NodeState.Ready)
                 {
-                    Console.Warn($"NodeModule.AddNode: the asset is already on the nodeTree. NodeName: {key}");
+                    Console.Warn("NodeModule.AddNode: the asset is already on the nodeTree. NodeName: {Key}", key);
                     UnFreeze();
                     return assetNode.LoadStatus;
                 }
@@ -108,24 +108,25 @@ namespace Cr7Sund.Server.Impl
 
             if (!_parentNode.IsStarted)
             {
-                return Promise<INode>.Rejected(new MyException($"NodeModule.PreLoadNode: Do not allow PreLoadNode while parent node's Started is false! NodeName: {key}"));
+                return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_preloadNode,
+                "NodeModule.PreLoadNode: Do not allow PreLoadNode while parent node's Started is false! NodeName: {Key}", key);
             }
 
             if (_treeNodes.TryGetValue(key, out var assetNode))
             {
                 if (assetNode.NodeState == NodeState.Removed)
                 {
-                    Console.Warn(($"NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {key} "));
+                    Console.Warn("NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {Key} ", key);
                     return assetNode.RemoveStatus;
                 }
                 if (assetNode.NodeState == NodeState.Removing)
                 {
-                    Console.Warn($"NodeModule.PreLoadNode: the asset is removing.(which mean it has also already load) NodeName: {key} ");
+                    Console.Warn("NodeModule.PreLoadNode: the asset is removing.(which mean it has also already load) NodeName: {Key} ", key);
                     return assetNode.RemoveStatus;
                 }
                 if (assetNode.NodeState == NodeState.Preloading)
                 {
-                    Console.Warn($"NodeModule.PreLoadNode: the asset is preloading! NodeName: {key} ");
+                    Console.Warn("NodeModule.PreLoadNode: the asset is preloading! NodeName: {Key} ", key);
                     if (!overwrite)
                     {
                         return assetNode.LoadStatus;
@@ -138,22 +139,22 @@ namespace Cr7Sund.Server.Impl
                 }
                 if (assetNode.IsLoading())
                 {
-                    Console.Warn($"NodeModule.PreLoadNode: the asset is loading! NodeName: {key} ");
+                    Console.Warn("NodeModule.PreLoadNode: the asset is loading! NodeName: {Key} ", key);
                     return assetNode.LoadStatus;
                 }
                 if (assetNode.NodeState == NodeState.Adding)
                 {
-                    Console.Warn($"NodeModule.PreLoadNode: the asset is adding! NodeName: {key} ");
+                    Console.Warn("NodeModule.PreLoadNode: the asset is adding! NodeName: {Key} ", key);
                     return assetNode.AddStatus;
                 }
                 if (assetNode.NodeState == NodeState.Preloaded)
                 {
-                    Console.Warn($"NodeModule.PreLoadNode: the asset is preloaded! NodeName: {key} ");
+                    Console.Warn("NodeModule.PreLoadNode: the asset is preloaded! NodeName: {Key} ", key);
                     return assetNode.LoadStatus;
                 }
                 if (assetNode.NodeState == NodeState.Ready)
                 {
-                    Console.Warn($"NodeModule.PreLoadNode: the asset is already on the nodeTree. NodeName: {key} ");
+                    Console.Warn("NodeModule.PreLoadNode: the asset is already on the nodeTree. NodeName: {Key} ", key);
                     return assetNode.AddStatus;
                 }
                 if (assetNode.NodeState == NodeState.Unloading)
@@ -191,21 +192,21 @@ namespace Cr7Sund.Server.Impl
             if (!_parentNode.IsStarted)
             {
                 UnFreeze();
-                return Promise<INode>.Rejected(new MyException(
-                    $"NodeModule.RemoveNode: Do not allow unload while parentNode.Started is false! NodeName: {key}"));
+                return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_unloadNode,
+                    "NodeModule.RemoveNode: Do not allow unload while parentNode.Started is false! NodeName: {Key}", key);
             }
             if (_treeNodes.TryGetValue(key, out var assetNode))
             {
                 if (assetNode.NodeState == NodeState.Unloaded)
                 {
                     UnFreeze();
-                    Console.Warn($"try to remove an unloaded node: {assetNode.Key}");
+                    Console.Warn("try to remove an unloaded node: {assetNode.Key}");
                     return assetNode.UnloadStatus;
                 }
                 if (assetNode.NodeState == NodeState.Unloading)
                 {
                     UnFreeze();
-                    Console.Warn($"try to remove an unloading node: {assetNode.Key}");
+                    Console.Warn("try to remove an unloading node: {assetNode.Key}");
                     return assetNode.UnloadStatus;
                 }
                 if (assetNode.IsLoading())
@@ -216,7 +217,7 @@ namespace Cr7Sund.Server.Impl
                 }
                 if (assetNode.NodeState == NodeState.Adding)
                 {
-                    Console.Warn($"NodeModule.RemoveNode: the asset is adding , but is not loading! NodeName: {key} ");
+                    Console.Warn("NodeModule.RemoveNode: the asset is adding , but is not loading! NodeName: {Key} ", key);
                     assetNode.AddStatus.Cancel();
                 }
 
@@ -231,8 +232,8 @@ namespace Cr7Sund.Server.Impl
             }
 
             UnFreeze();
-            return Promise<INode>.Rejected(new MyException(
-                $"NodeModule.RemoveNode: Unhandled occasion...RemoveNode Fail.. NodeName: {key}"));
+            return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_addNode,
+                "NodeModule.RemoveNode: Unhandled occasion...RemoveNode Fail.. NodeName: {Key}", key);
         }
         internal IPromise<INode> SwitchNode(IAssetKey key)
         {
@@ -390,8 +391,8 @@ namespace Cr7Sund.Server.Impl
             if (!overwrite)
             {
                 UnFreeze();
-                return Promise<INode>.Rejected(new MyException(
-                    $"NodeModule.AddNode: the asset is removing. NodeName: {assetNode.Key}"));
+                return Promise<INode>.Rejected(FoundationExceptionType.is_removing_addNode,
+                     "NodeModule.AddNode: the asset is removing. NodeName: {Key}", assetNode.Key);
             }
             else
             {
@@ -407,8 +408,8 @@ namespace Cr7Sund.Server.Impl
             if (!overwrite)
             {
                 UnFreeze();
-                return Promise<INode>.Rejected(new MyException(
-                    $"NodeModule.AddNode: the asset is unloading. NodeName: {assetNode.Key}"));
+                return Promise<INode>.Rejected(FoundationExceptionType.is_unloading_addNode,
+                 "NodeModule.AddNode: the asset is unloading. NodeName: {Key}", assetNode.Key);
             }
             else
             {
@@ -435,7 +436,7 @@ namespace Cr7Sund.Server.Impl
             _treeNodes.Remove(node.Key);
             return Promise<INode>.RejectedWithoutDebug(ex);
         }
-       
+
         protected virtual void DispatchSwitch(IAssetKey curNode, IAssetKey lastNode)
         {
         }

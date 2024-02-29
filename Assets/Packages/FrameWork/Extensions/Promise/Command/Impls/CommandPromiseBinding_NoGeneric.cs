@@ -306,7 +306,6 @@ namespace Cr7Sund.Package.Impl
         {
             BindingStatus = CommandBindingStatus.Default;
             ResolveRelease();
-            Console.Error(e);
         }
 
         private void ResolveRelease()

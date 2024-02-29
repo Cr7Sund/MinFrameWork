@@ -20,7 +20,7 @@ namespace Cr7Sund.PackageTest.EventBus
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
 
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
             injectionBinder.Injector.Inject(eventBus);
         }
 

@@ -18,7 +18,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (Exception e)
                 {
-                    Console.Error($"{GetType().FullName}.OnUpdate Error: \n", e);
+                    Console.Error(e, "{TypeName}.OnUpdate Error: ", GetType().FullName);
                     throw;
                 }
             }

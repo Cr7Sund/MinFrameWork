@@ -176,11 +176,12 @@ namespace Cr7Sund.Package.Impl
             return Then(_ => Any<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
 
-
+#if UNITY_INCLUDE_TESTS
         public IBaseCommand Test_GetCommand()
         {
             return _command;
         }
+#endif
 
         protected void SequenceProgress(float progress)
         {

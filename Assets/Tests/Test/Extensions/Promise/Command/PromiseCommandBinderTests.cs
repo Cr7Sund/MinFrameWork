@@ -26,7 +26,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(commandBinder);
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
 
 
             _commandPromiseBinder = new CommandPromiseBinder<int>();

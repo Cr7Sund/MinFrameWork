@@ -101,8 +101,8 @@ namespace Cr7Sund.NodeTree.Impl
         {
             if (child.LoadState != LoadState.Default)
             {
-                return Promise<INode>.Rejected(new MyException(
-                    $"Expected Default state , but it's {child.LoadState}"));
+                return Promise<INode>.Rejected(NodeTreeExceptionType.default_state,
+                    $"Expected Default state , but it's {LoadState}", child.LoadState);
             }
 
             var childNode = child as Node;
@@ -381,13 +381,13 @@ namespace Cr7Sund.NodeTree.Impl
             }
             if (child.LoadState == LoadState.Unloading)
             {
-                return Promise<INode>.Rejected(new MyException(
-                    $"can not add node when unloading", NodeTreeExceptionType.INVALID_NODESTATE));
+                return Promise<INode>.Rejected(NodeTreeExceptionType.INVALID_NODESTATE,
+                    "can not add node when unloading");
             }
             if (child.LoadState == LoadState.Fail)
             {
-                return Promise<INode>.Rejected(new MyException(
-                    $"can not add node when already fail", NodeTreeExceptionType.INVALID_NODESTATE));
+                return Promise<INode>.Rejected(NodeTreeExceptionType.INVALID_NODESTATE,
+                    "can not add node when already fail");
             }
 
             var childNode = child as Node;
@@ -466,11 +466,11 @@ namespace Cr7Sund.NodeTree.Impl
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
             if (child.LoadState != LoadState.Loaded)
             {
-                Promise<INode>.Rejected(new MyException(
-                    $"can not remove node at : {child.LoadState} State", NodeTreeExceptionType.INVALID_NODESTATE));
+                return Promise<INode>.Rejected(NodeTreeExceptionType.INVALID_NODESTATE,
+                     "can not remove node at : {LoadState} State", child.LoadState);
             }
             AssertUtil.IsTrue(ChildNodes.Contains(child), NodeTreeExceptionType.REMOVE_NO_EXISTED);
-            
+
             var childNode = child as Node;
             childNode.StartUnload(shouldUnload);
 
@@ -613,7 +613,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             OnDeject();
             _context.InjectionBinder.Injector.Uninject(this);
-            
+
             _context.RemoveComponents();
         }
         /// <summary>

@@ -18,7 +18,7 @@ namespace Cr7Sund.Server.Impl
 {
     public abstract class GameContext : CrossContext
     {
-
+        protected abstract string Channel { get; }
         public GameContext() : base()
         {
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
@@ -27,7 +27,7 @@ namespace Cr7Sund.Server.Impl
         public sealed override void AddComponents(INode self)
         {
             var assetLoader = AssetLoaderFactory.CreateLoader();
-            var logger = InternalLoggerFactory.Create(LogChannel.GameLogic);
+            var logger = InternalLoggerFactory.Create(Channel);
 
             // Cross Context
             // --- --- 

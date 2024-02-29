@@ -19,7 +19,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStart()
         {
             base.OnStart();
-            Debug.Info("Load ui four");
+            Debug.Debug("Load ui four");
 
             StartValue++;
 
@@ -28,7 +28,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnEnable()
         {
             base.OnEnable();
-            Debug.Info("Enable ui four");
+            Debug.Debug("Enable ui four");
 
             EnableCount++;
         }
@@ -36,7 +36,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnDisable()
         {
             base.OnDisable();
-            Debug.Info("Disable ui four");
+            Debug.Debug("Disable ui four");
 
             EnableCount--;
         }
@@ -44,7 +44,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStop()
         {
             base.OnStop();
-            Debug.Info("Stop ui four");
+            Debug.Debug("Stop ui four");
 
             StartValue--;
         }

@@ -110,10 +110,12 @@ namespace Cr7Sund.Package.Impl
             BindingStatus = CommandBindingStatus.Default;
         }
 
+#if UNITY_INCLUDE_TESTS
         public List<ICommandPromise<PromisedT>> Test_GetPromiseList()
         {
             return PromiseList;
         }
+#endif
 
         ICommandPromiseBinding<PromisedT> ICommandPromiseBinding<PromisedT>.Then<T>()
         {
@@ -424,7 +426,6 @@ namespace Cr7Sund.Package.Impl
         {
             BindingStatus = CommandBindingStatus.Default;
             ResolveRelease();
-            Console.Error(e);
         }
 
         private void ResolveRelease()

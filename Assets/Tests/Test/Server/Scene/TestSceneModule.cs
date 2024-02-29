@@ -29,7 +29,7 @@ namespace Cr7Sund.ServerTest.Scene
             _gameNode = GameDirector.Construct<SampleGameBuilder>();
             var injectionBinder = _gameNode.Context.InjectionBinder;
 
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
             _gameNode.Run();
 
             injectionBinder.Injector.Inject(_sceneModule);

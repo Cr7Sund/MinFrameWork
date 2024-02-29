@@ -11,12 +11,15 @@
         Event
     }
 
-    public enum LogType : byte
-    {
-        /// <summary> 代码日志 </summary>
-        Code = 1,
 
-        /// <summary> 埋点日志 </summary>
-        Event = 1 << 1
+
+    public enum LogSinkType
+    {
+        Local,
+        Console,
+        File,
+        DB,
+        Net,
+        ELK,
     }
 }

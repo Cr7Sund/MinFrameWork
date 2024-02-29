@@ -25,7 +25,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    Console.Error($"{GetType().FullName}.OnStart Error: \n", e);
+                    Console.Error(e, "{TypeName}.OnStart Error: ", GetType().FullName);
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    Console.Error($"{GetType().FullName}.OnStop Error: \n", e);
+                    Console.Error(e, "{TypeName}.OnStop Error: ", GetType().FullName);
                 }
             }
 
@@ -67,7 +67,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    Console.Error($"{GetType().FullName}.OnEnable Error: \n", e);
+                    Console.Error(e, "{@TypeName}.OnEnable Error: ", GetType().FullName);
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch (System.Exception e)
                 {
-                    Console.Error($"{GetType().FullName}.OnDisable Error: \n", e);
+                    Console.Error(e, "{TypeName}.OnDisable Error: ", GetType().FullName);
                 }
             }
             IsActive = false;

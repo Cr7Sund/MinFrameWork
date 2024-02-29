@@ -11,14 +11,14 @@ namespace Cr7Sund.Server.Scene.Impl
 {
     public abstract class SceneContext : CrossContext
     {
+        protected abstract string Channel { get; }
         public sealed override void AddComponents(INode self)
         {
             var assetLoader = AssetLoaderFactory.CreateLoader();
             var sceneLoader = AssetLoaderFactory.CreateSceneLoader();
             var sceneContainer = new SceneContainer();
             sceneContainer.Init(self.Key.Key);
-            var logger = new InternalLogger();
-            logger.Init(LogChannel.SceneLogic);
+            var logger = InternalLoggerFactory.Create(Channel);
 
             // Cross Context
             // --- --- 

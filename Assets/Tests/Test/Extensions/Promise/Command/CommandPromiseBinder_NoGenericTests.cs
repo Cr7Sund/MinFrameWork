@@ -24,7 +24,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
             injectionBinder.Bind<IInjectionBinder>().To(injectionBinder);
             injectionBinder.Bind<IPoolBinder>().To(poolBinder);
             injectionBinder.Bind<ICommandBinder>().To(new CommandBinder());
-            Console.Init(new InternalLogger());
+            Console.Init(InternalLoggerFactory.Create());
 
 
             _commandPromiseBinder = new CommandPromiseBinder();
@@ -196,7 +196,6 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
 
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOne>()

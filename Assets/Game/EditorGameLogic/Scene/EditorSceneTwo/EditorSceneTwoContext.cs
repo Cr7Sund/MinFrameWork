@@ -4,6 +4,8 @@ namespace Cr7Sund.Game.Scene
 {
     public class EditorSceneTwoContext : SceneContext
     {
+        protected override string Channel => "EditorSceneTwo";
+
         protected override void OnMappedBindings()
         {
         }

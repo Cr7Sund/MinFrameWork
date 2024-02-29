@@ -11,12 +11,13 @@ namespace Cr7Sund.Server.UI.Impl
 {
     public class UIContext : CrossContext
     {
+        protected virtual string Channel { get => "UI"; }
         public sealed override void AddComponents(INode node)
         {
             // Local In GameNode or GameController
             // --- --- 
             var assetLoader = AssetLoaderFactory.CreateLoader();
-            var logger = InternalLoggerFactory.Create(LogChannel.UILogic);
+            var logger = InternalLoggerFactory.Create(Channel);
 
             InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.UILogger).AsCrossContext();
 

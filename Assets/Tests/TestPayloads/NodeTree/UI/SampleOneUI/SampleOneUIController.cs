@@ -19,7 +19,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStart()
         {
             base.OnStart();
-            Debug.Info("Load ui one");
+            Debug.Debug("Load ui one");
 
             StartValue++;
 
@@ -28,7 +28,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnEnable()
         {
             base.OnEnable();
-            Debug.Info("Enable ui one");
+            Debug.Debug("Enable ui one");
 
             EnableCount++;
         }
@@ -36,7 +36,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnDisable()
         {
             base.OnDisable();
-            Debug.Info("Disable ui one");
+            Debug.Debug("Disable ui one");
 
             EnableCount--;
         }
@@ -44,7 +44,7 @@ namespace Cr7Sund.PackageTest.IOC
         protected override void OnStop()
         {
             base.OnStop();
-            Debug.Info("Stop ui one");
+            Debug.Debug("Stop ui one");
 
             StartValue--;
         }

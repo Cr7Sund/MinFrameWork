@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "com.unity.addressables": "1.21.19",
+    "com.github-glitchenzo.nugetforunity": "4.0.2",
+    "com.unity.addressables": "1.21.20",
     "com.unity.ide.rider": "3.0.27",
     "com.unity.ide.visualstudio": "2.0.22",
     "com.unity.profiling.core": "1.0.2",
@@ -39,8 +40,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.github-glitchenzo.nugetforunity": "4.0.2"
+    "com.unity.modules.xr": "1.0.0"
   },
   "scopedRegistries": [
     {
@@ -49,7 +49,8 @@
       "scopes": [
         "com.codewriter.npm-package-loader",
         "com.github-glitchenzo.nugetforunity",
-        "com.openupm"
+        "com.openupm",
+        "com.serilog.sinks.unity3d"
       ]
     }
   ]
