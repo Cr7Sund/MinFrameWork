@@ -12,10 +12,7 @@
         "ZstdNet.dll",
         "Serilog.dll",
         "Serilog.Sinks.File.dll",
-        "Serilog.Sinks.PeriodicBatching.dll",
-        "Serilog.Formatting.Elasticsearch.dll",
-        "Serilog.Sinks.Elasticsearch.dll",
-        "Elasticsearch.Net.dll"
+        "Serilog.Sinks.PeriodicBatching.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],
