@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="A5OTelkN6WRSNJo3iayh" name="NodeLifeTime">
-        <mxGraphModel dx="2250" dy="1246" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="2293" dy="1261" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -136,7 +136,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="Push Sync Transition" id="yaJfF2sz0SlJrVwHLT6X">
-        <mxGraphModel dx="1926" dy="293" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="1849" dy="210" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="xb9v_Jw2e8wc7UPpi7bk-0"/>
                 <mxCell id="xb9v_Jw2e8wc7UPpi7bk-1" parent="xb9v_Jw2e8wc7UPpi7bk-0"/>
@@ -321,7 +321,7 @@
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="v1H2IiBCZJvduMhR8lHe-0" value="&lt;h1&gt;OnEnable&lt;/h1&gt;&lt;div&gt;正常业务逻辑，OnEnable 应该在动画前播放，通常会做些界面设置&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;strokeWidth=1;opacity=90;" parent="xb9v_Jw2e8wc7UPpi7bk-1" vertex="1">
+                <mxCell id="v1H2IiBCZJvduMhR8lHe-0" value="&lt;h1&gt;OnEnable&lt;/h1&gt;&lt;div&gt;正常业务逻辑，OnEnable 应该在动画前播放，通常会做些界面设置&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;因为Page 逻辑和NodeTree 不一致，所以OnEnable 放在Transition中&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;strokeWidth=1;opacity=90;" parent="xb9v_Jw2e8wc7UPpi7bk-1" vertex="1">
                     <mxGeometry x="-630" y="496" width="190" height="120" as="geometry"/>
                 </mxCell>
                 <mxCell id="v1H2IiBCZJvduMhR8lHe-1" value="&lt;h1&gt;IsTransition&lt;/h1&gt;&lt;div&gt;Page 只有一个，所以IsTransition 会报错&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;每一步除了失败操作，还有超时操作（记得清除）。&lt;/div&gt;&lt;div&gt;不应该让一个Page 堵死。&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;销毁也要处理&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;strokeWidth=1;opacity=90;" parent="xb9v_Jw2e8wc7UPpi7bk-1" vertex="1">
@@ -334,7 +334,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="Transition" id="fvK-jFqlEWxTIj0VyOJF">
-        <mxGraphModel dx="2060" dy="345" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="1956" dy="304" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="5sjxAcTJfH2NXp1Xmc26-0"/>
                 <mxCell id="5sjxAcTJfH2NXp1Xmc26-1" parent="5sjxAcTJfH2NXp1Xmc26-0"/>
@@ -523,7 +523,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="Pop Sync Transition" id="3L1PQ8n6ZeQ45P-_x7st">
-        <mxGraphModel dx="2367" dy="293" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="3634" dy="760" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="Bboa2iQWSk7z7130gBdZ-0"/>
                 <mxCell id="Bboa2iQWSk7z7130gBdZ-1" parent="Bboa2iQWSk7z7130gBdZ-0"/>

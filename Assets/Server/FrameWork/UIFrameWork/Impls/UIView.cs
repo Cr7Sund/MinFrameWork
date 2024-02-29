@@ -153,6 +153,10 @@ namespace Cr7Sund.Server.UI.Impl
             SetActive(false);
         }
 
+        public void Disable()
+        {
+        }
+
         public void Stop()
         {
             foreach (var item in _transitionDict)

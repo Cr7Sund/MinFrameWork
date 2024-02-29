@@ -5,6 +5,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
 using UnityEngine;
+using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -97,15 +98,24 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override IPromise<INode> OnPreloadAsync(INode content)
         {
+            var uiKey = content.Key as UIKey;
+            IPromise preparePromise = null;
+            IPromise loadPromise = null;
+
+            preparePromise = Controller.Prepare(uiKey.Intent);
             if (Application.isPlaying)
             {
                 _assetPromise = _assetLoader.LoadAsync<Object>(content.Key);
-                return _assetPromise.Then(_ => Promise<INode>.Resolved(content));
+                loadPromise = _assetPromise.Then(_ => { });
             }
             else
             {
-                return base.OnPreloadAsync(content);
+                loadPromise = base.OnPreloadAsync(content)
+                                  .Then(_ => { });
             }
+
+            return Promise.All(preparePromise, loadPromise)
+                    .Then(() => Promise<INode>.Resolved(content));
         }
 
         protected override IPromise<INode> OnLoadAsync(INode content)
@@ -119,6 +129,8 @@ namespace Cr7Sund.Server.UI.Impl
             preparePromise = Controller.Prepare(uiKey.Intent);
             if (Application.isPlaying)
             {
+                AssertUtil.IsNull(_assetPromise, UIExceptionType.empty_page_animSource);
+
                 _assetPromise = uiKey.LoadAsync ? _assetLoader.LoadAsync<Object>(uiKey)
                                                   : _assetLoader.Load<Object>(uiKey);
                 loadPromise = _assetPromise.Then(_ => { });
@@ -197,9 +209,8 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override void OnDisable()
         {
-            // call after transition
-            // and always be called after Start
-            // VM.Disable();
+
+            View.Disable();
         }
 
         protected override void OnStop()

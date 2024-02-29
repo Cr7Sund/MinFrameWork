@@ -22,7 +22,7 @@ namespace Cr7Sund.Server.UI.Impl
 
 
         public UIKey(string key, Type ctrlType, Type viewType,
-             object intent = null, bool playAnimation = false, bool stack = true, bool loadAsync = true, bool hideFirst = false)
+             object intent = null, bool playAnimation = true, bool stack = true, bool loadAsync = true, bool hideFirst = false)
         {
             Key = key;
             _ctrlType = ctrlType;

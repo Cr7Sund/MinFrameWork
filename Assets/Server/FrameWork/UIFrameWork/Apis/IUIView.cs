@@ -31,6 +31,7 @@ namespace Cr7Sund.Server.UI.Api
         void BeforeExit();
         IPromise ExitRoutine(bool push, IUINode partnerView, bool playAnimation);
         void AfterExit();
+        void Disable();
         void Stop();
     }
 }
