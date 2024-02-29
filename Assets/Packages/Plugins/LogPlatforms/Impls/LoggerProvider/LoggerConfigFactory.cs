@@ -1,6 +1,9 @@
 using Serilog;
 using UnityEngine.Profiling;
 using Cr7Sund.Logger;
+using Serilog.Formatting;
+using Serilog.Sinks.Elasticsearch;
+using System;
 
 #if ELASTIC_SEARCH
 using Serilog.Sinks.Elasticsearch;
@@ -42,9 +45,9 @@ namespace Cr7Sund.Logger
             }
             if ((logSinkType & LogSinkType.File) == LogSinkType.File)
             {
-                loggerConfiguration = loggerConfiguration.WriteTo.File("logs/log.txt",
-                                   outputTemplate: OutputTemplate,
-                                   shared: true,
+                ITextFormatter formatter = new Serilog.Formatting.Elasticsearch.ExceptionAsObjectJsonFormatter(renderMessageTemplate: true);
+                loggerConfiguration = loggerConfiguration.WriteTo.File(formatter, "logs/log.txt",
+                                     shared: true,
                                     fileSizeLimitBytes: 524288000,
                                     rollingInterval: RollingInterval.Day,
                                     retainedFileCountLimit: 2,
@@ -58,9 +61,15 @@ namespace Cr7Sund.Logger
             }
             if ((logSinkType & LogSinkType.ELK) == LogSinkType.ELK)
             {
-#if ELASTIC_SEARCH
-                loggerConfiguration = loggerConfiguration.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200")));
-#endif
+                // #if ELASTIC_SEARCH
+                loggerConfiguration = loggerConfiguration.WriteTo.Elasticsearch(
+                    new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+                    {
+                        DetectElasticsearchVersion = false,
+                        AutoRegisterTemplate = true,
+                        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6
+                    });
+                // #endif
             }
 
 

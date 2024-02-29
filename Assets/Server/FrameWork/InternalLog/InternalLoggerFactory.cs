@@ -18,7 +18,7 @@ namespace Cr7Sund
             //  = new UnityEditorLogProvider();
 
 
-            logProvider.Init(LogSinkType.File | LogSinkType.Net, logChannel.ToString());
+            logProvider.Init(LogSinkType.File | LogSinkType.Net | LogSinkType.ELK, logChannel.ToString());
             // logProvider.Init(LogSinkType.File);
 
             logger._logProvider = logProvider;
