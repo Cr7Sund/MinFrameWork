@@ -72,7 +72,7 @@ namespace Cr7Sund.Logger
 
         public void Error(Exception e)
         {
-            Log(LogLevel.Error, string.Empty, e);
+            Log(LogLevel.Error, e.Message, e);
         }
 
         public void Fatal(string message)
@@ -82,7 +82,7 @@ namespace Cr7Sund.Logger
 
         public void Fatal(Exception e)
         {
-            Log(LogLevel.Error, string.Empty, e);
+            Log(LogLevel.Error, e.Message, e);
         }
 
         public void Fatal(Exception e, string prefix)
