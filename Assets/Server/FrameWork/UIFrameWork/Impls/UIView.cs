@@ -251,7 +251,6 @@ namespace Cr7Sund.Server.UI.Impl
                 return _animationContainer.GetDefaultPageTransition(push, enter)
                     .Then(transitionBehaviour =>
                     {
-                        _transitionDict.Add(animation, transitionBehaviour);
                         return PlayTransition(partnerPage, transitionBehaviour);
                     });
             }

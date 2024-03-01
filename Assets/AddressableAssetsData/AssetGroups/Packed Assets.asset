@@ -32,11 +32,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: de53dcf8dd81e594cb2b8b5ba5274f34
-    m_Address: Assets/Preresources/Config/UI/UITransitionConfig.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aa91df563bef74946bd0b1421d0d3224
     m_Address: Assets/Preresources/Config/UI/Page/PagePopEnterAnimation.asset
     m_ReadOnly: 0

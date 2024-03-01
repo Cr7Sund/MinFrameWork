@@ -1,5 +1,6 @@
 
 
+using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Package.Api;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace Cr7Sund.Server.Api
 {
     public interface IConfigContainer : IInitialize
     {
-        IPromise<T> GetConfigAsync<T>(IAssetKey assetKey) where T : Object;
+        IAssetPromise GetConfigAsync(IAssetKey assetKey);
         T GetConfig<T>(IAssetKey assetKey) where T : Object;
     }
 }

@@ -62,7 +62,7 @@ namespace Cr7Sund.Server.Impl
             var gameConfig = _assetLoader.LoadSync<UIConfig>(ConfigDefines.UIConfig);
             foreach (var item in gameConfig.ConfigDefines)
             {
-                _configModule.GetConfig<Object>(item);
+                _configModule.GetConfigAsync(item);
             }
         }
 

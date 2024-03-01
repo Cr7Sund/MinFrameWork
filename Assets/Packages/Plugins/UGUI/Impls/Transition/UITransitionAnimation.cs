@@ -39,7 +39,7 @@ namespace Cr7Sund.UGUI.Impls
 
         public bool IsValid(IAssetKey partnerUI)
         {
-            if (HasConfig())
+            if (!HasConfig())
             {
                 return false;
             }
@@ -47,7 +47,7 @@ namespace Cr7Sund.UGUI.Impls
             // If the partner identifier is not registered, the animation is always valid.
             if (string.IsNullOrEmpty(_partnerPageIdentifierRegex))
             {
-                return true;
+                return false;
             }
 
             if (string.IsNullOrEmpty(partnerUI.Key))

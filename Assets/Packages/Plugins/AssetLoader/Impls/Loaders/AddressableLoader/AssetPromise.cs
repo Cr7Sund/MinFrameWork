@@ -1,5 +1,4 @@
 using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Impl;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
@@ -32,5 +31,20 @@ namespace Cr7Sund.AssetLoader.Impl
                 return default(T);
             }
         }
+
+        // public IPromise<T> ConvertPromise<T>() where T : Object
+        // {
+        //     if (Handler.Status == AsyncOperationStatus.Succeeded)
+        //     {
+        //         return Promise<T>.Resolved(Handler.Result as T);
+        //     }
+        //     else
+        //     {
+        //         return Then((result) =>
+        //         {
+        //             return result as T;
+        //         });
+        //     }
+        // }
     }
 }

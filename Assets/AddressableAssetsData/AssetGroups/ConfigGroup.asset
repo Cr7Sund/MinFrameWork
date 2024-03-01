@@ -27,6 +27,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de53dcf8dd81e594cb2b8b5ba5274f34
+    m_Address: Assets/Preresources/Config/UI/UITransitionConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e1998269fb3078b4aa459ddd4f8e7ed1, type: 2}
   m_SchemaSet:

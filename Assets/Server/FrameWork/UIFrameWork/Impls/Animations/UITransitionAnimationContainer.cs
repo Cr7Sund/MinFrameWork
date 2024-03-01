@@ -35,8 +35,12 @@ namespace Cr7Sund.Server.UI.Impl
 
         public IPromise<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter)
         {
-            return _configModule.GetConfigAsync<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig)
-                    .Then(setting => setting.GetDefaultPageTransitionAnimation(push, enter));
+            return _configModule.GetConfigAsync(ConfigDefines.UITransitionConfig)
+                    .Then(value =>
+                    {
+                        var setting = value as UIScreenNavigatorSettings;
+                        return setting.GetDefaultPageTransitionAnimation(push, enter);
+                    });
         }
 
         public void UnloadAnimation(UITransitionAnimation animation)

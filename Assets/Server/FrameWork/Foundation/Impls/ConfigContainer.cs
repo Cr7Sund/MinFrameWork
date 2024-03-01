@@ -25,15 +25,17 @@ namespace Cr7Sund.Server.Impl
             }
         }
 
-        public IPromise<T> GetConfigAsync<T>(IAssetKey assetKey) where T : Object
+        public IAssetPromise GetConfigAsync(IAssetKey assetKey) 
         {
             if (_containers.ContainsKey(assetKey.Key))
             {
-                return Promise<T>.Resolved(_containers[assetKey.Key].GetResult<T>());
+                return _containers[assetKey.Key];
             }
             else
             {
-                return _assetLoader.LoadAsync<T>(assetKey) as IPromise<T>;
+                var promise = _assetLoader.LoadAsync<Object>(assetKey);
+                _containers.Add(assetKey.Key, promise);
+                return promise;
             }
         }
 
@@ -45,7 +47,9 @@ namespace Cr7Sund.Server.Impl
             }
             else
             {
-                return _assetLoader.LoadSync<T>(assetKey) as T;
+                var promise = _assetLoader.LoadAsync<T>(assetKey);
+                _containers.Add(assetKey.Key, promise);
+                return promise.GetResult<T>();
             }
         }
 
