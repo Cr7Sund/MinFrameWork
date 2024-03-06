@@ -1,4 +1,3 @@
-using System;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using NUnit.Framework;

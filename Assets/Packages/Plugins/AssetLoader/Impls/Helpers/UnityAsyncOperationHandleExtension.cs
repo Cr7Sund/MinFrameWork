@@ -17,9 +17,9 @@ namespace Cr7Sund.AssetLoader
                 return;
             }
 
-            addressableHandle.Completed += x =>
+            addressableHandle.Completed += handler =>
             {
-                OnCompleted(x, setter);
+                OnCompleted(handler, setter);
             };
         }
 

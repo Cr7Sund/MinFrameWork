@@ -32,7 +32,7 @@ namespace Cr7Sund.Package.Impl
                 binding = GetRawBinding();
                 var reflected = new ReflectedClass();
                 MapPreferredConstructor(reflected, binding, type);
-                MapPostConstructors(reflected, binding, type);
+                // MapPostConstructors(reflected, binding, type);
                 MapFields(reflected, binding, type);
                 binding.Bind(type).To(reflected);
 
