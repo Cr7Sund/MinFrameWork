@@ -182,6 +182,17 @@ namespace Cr7Sund.Server.Impl
             _focusNode.GetCurStatus().Resolve(_focusNode);
         }
 
+        public virtual void Dispose()
+        {
+            foreach (var item in _treeNodes)
+            {
+                item.Value.Dispose();
+            }
+
+            _treeNodes.Clear();
+            _focusNode = null;
+        }
+
         internal IPromise<INode> UnloadNode(IAssetKey key)
         {
             return UnloadNodeInternal(key, true);
@@ -343,14 +354,6 @@ namespace Cr7Sund.Server.Impl
             return unloadNode;
         }
 
-        private IPromise<INode> OnFailUnLoadedNode(INode node, System.Exception ex)
-        {
-
-            UnFreeze();
-            DispatchAddEnd(node.Key);
-            return Promise<INode>.RejectedWithoutDebug(ex);
-        }
-
         private IPromise<INode> PreloadNodeFromStart(IAssetKey key)
         {
             var newNode = CreateNode(key);
@@ -463,6 +466,8 @@ namespace Cr7Sund.Server.Impl
         {
             _eventBus.RemoveObserver(handler);
         }
+
+
         #endregion
     }
 }

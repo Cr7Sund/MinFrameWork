@@ -3,7 +3,7 @@
 using UnityEngine;
 using Cr7Sund.AssetLoader.Api;
 
-namespace Cr7Sund.Server.Utils
+namespace Cr7Sund.AssetLoader
 {
     public static class AssetLoaderExtension
     {

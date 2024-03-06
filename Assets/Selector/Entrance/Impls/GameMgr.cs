@@ -21,21 +21,22 @@ namespace Cr7Sund.Selector.Impl
             {
                 case GameStatus.Started:
                     {
-                        Console.Fatal("GameMgr::Start  Game already started...");
+                        EntranceConsole.Fatal("GameMgr::Start  Game already started...");
                         break;
                     }
                 case GameStatus.Restarting:
                     {
-                        Console.Fatal("GameMgr::Start  Game is currently restarting...");
+                        EntranceConsole.Fatal("GameMgr::Start  Game is currently restarting...");
                         break;
                     }
                 case GameStatus.Closing:
                     {
-                        Console.Fatal("GameMgr::Start  Game is currently closing...");
+                        EntranceConsole.Fatal("GameMgr::Start  Game is currently closing...");
                         break;
                     }
                 case GameStatus.Closed:
                     {
+                        EntranceConsole.Info("GameMgr::Start...");
                         DoStart();
                         _status = GameStatus.Started;
                         break;
@@ -52,9 +53,11 @@ namespace Cr7Sund.Selector.Impl
                 case GameStatus.Started:
                     {
                         _status = GameStatus.Restarting;
+                        EntranceConsole.Warn("GameMgr::Restart  Close game first....");
                         var shutdownPromise = DoClose();
                         shutdownPromise.Then(_ =>
                         {
+                            EntranceConsole.Info("GameMgr::ReStart...");
                             DoStart();
                             _status = GameStatus.Started;
                         });
@@ -62,16 +65,17 @@ namespace Cr7Sund.Selector.Impl
                     }
                 case GameStatus.Restarting:
                     {
-                        Console.Warn("GameMgr::Restart  Game is currently restarting....");
+                        EntranceConsole.Warn("GameMgr::Restart  Game is currently restarting....");
                         return null;
                     }
                 case GameStatus.Closing:
                     {
-                        Console.Warn("GameMgr::Restart  Game is currently closing....");
+                        EntranceConsole.Warn("GameMgr::Restart  Game is currently closing....");
                         return null;
                     }
                 case GameStatus.Closed:
                     {
+                        EntranceConsole.Info("GameMgr::ReStart...");
                         DoStart();
                         _status = GameStatus.Started;
                         return null;
@@ -87,6 +91,7 @@ namespace Cr7Sund.Selector.Impl
             {
                 case GameStatus.Started:
                     {
+                        EntranceConsole.Fatal("GameMgr::Close");
                         _status = GameStatus.Closing;
                         var shutdownPromise = DoClose();
                         shutdownPromise.Then(a => _status = GameStatus.Closed);
@@ -94,17 +99,17 @@ namespace Cr7Sund.Selector.Impl
                     }
                 case GameStatus.Restarting:
                     {
-                        Console.Fatal("GameMgr::Close  Game is currently closing while restarting");
+                        EntranceConsole.Fatal("GameMgr::Close  Game is currently closing while restarting");
                         return null;
                     }
                 case GameStatus.Closing:
                     {
-                        Console.Fatal("GameMgr::Close  Game is currently closing");
+                        EntranceConsole.Fatal("GameMgr::Close  Game is currently closing");
                         return null;
                     }
                 case GameStatus.Closed:
                     {
-                        Console.Fatal("GameMgr::Close  Game has not been started yet...");
+                        EntranceConsole.Fatal("GameMgr::Close  Game has not been started yet...");
                         return null;
                     }
                 default:

@@ -115,26 +115,9 @@ namespace Cr7Sund.Package.Impl
 
         public void Unbind(object key, object name)
         {
-            if (_bindings.TryGetValue(key, out var list))
+            if (TryUnbindInternally(key, name, out var binding))
             {
-                name = name == null ? BindingConst.NULLOIDNAME : name;
-
-                for (int i = list.Count - 1; i >= 0; i--)
-                {
-                    IBinding item = list[i];
-                    if (item.Name.Equals(name))
-                    {
-                        OnUnbind(item);
-
-                        list.RemoveAt(i);
-
-                        if (list.Count == 0)
-                        {
-                            _bindings.Remove(key);
-                        }
-                        break;
-                    }
-                }
+                OnUnbind(binding);
             }
         }
 
@@ -244,10 +227,6 @@ namespace Cr7Sund.Package.Impl
         {
         }
 
-        protected virtual void OnUnbind(IBinding binding)
-        {
-        }
-
         public void CopyFrom(IBinder fromBinder)
         {
             var implBinder = fromBinder as Binder;
@@ -264,6 +243,39 @@ namespace Cr7Sund.Package.Impl
         {
 
         }
+
+        public virtual bool TryUnbindInternally(object key, object name, out IBinding result)
+        {
+            result = null;
+
+            if (_bindings.TryGetValue(key, out var list))
+            {
+                name = name == null ? BindingConst.NULLOIDNAME : name;
+
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    IBinding item = list[i];
+                    if (item.Name.Equals(name))
+                    {
+                        result = item;
+                        list.RemoveAt(i);
+
+                        if (list.Count == 0)
+                        {
+                            _bindings.Remove(key);
+                        }
+                        break;
+                    }
+                }
+            }
+            return result != null;
+        }
+
+        protected virtual void OnUnbind(IBinding binding)
+        {
+
+        }
+
         #endregion
 
     }

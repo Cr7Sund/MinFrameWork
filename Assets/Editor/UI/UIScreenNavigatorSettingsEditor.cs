@@ -61,6 +61,9 @@ namespace Cr7Sund.UGUI.Editor
                                                  $"{PageConfigPath}/{nameof(config.PagePopExitAnimation)}.asset");
                         config.PagePopExitAnimation = simpleTransitionAnimationObject;
                     }
+
+                    EditorUtility.SetDirty(target);
+                    AssetDatabase.SaveAssetIfDirty(target);
                 };
             });
 

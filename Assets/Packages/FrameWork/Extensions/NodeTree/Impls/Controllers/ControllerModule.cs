@@ -125,7 +125,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
             }
 
-            _context.InjectionBinder.Injector.Uninject(controller);
+            _context.InjectionBinder.Injector.Deject(controller);
             return _lsControllers.Remove(controller);
         }
 
@@ -286,7 +286,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             foreach (var ctrl in _lsControllers)
             {
-                _context.InjectionBinder.Injector.Uninject(ctrl);
+                _context.InjectionBinder.Injector.Deject(ctrl);
             }
         }
 

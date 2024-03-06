@@ -1,7 +1,4 @@
-﻿using System;
-using Cr7Sund.FrameWork.Util;
-
-namespace Cr7Sund.Server.UI.Impl
+﻿namespace Cr7Sund.Server.UI.Impl
 {
     public static class UICreator
     {

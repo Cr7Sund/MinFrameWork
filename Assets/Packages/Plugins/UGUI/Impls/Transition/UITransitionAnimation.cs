@@ -2,7 +2,6 @@ using System;
 using System.Text.RegularExpressions;
 using Cr7Sund.UGUI.Apis;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Cr7Sund.UGUI.Impls
 {
@@ -10,17 +9,13 @@ namespace Cr7Sund.UGUI.Impls
     public class UITransitionAnimation
     {
         [SerializeField] private string _partnerPageIdentifierRegex;
-
         [SerializeField] private UIAnimationAssetType _assetType;
-
         [SerializeField]
         [EnabledIf(nameof(_assetType), (int)UIAnimationAssetType.MonoBehaviour)]
         private UITransitionAnimationBehaviour _animationBehaviour;
-
         [SerializeField]
         [EnabledIf(nameof(_assetType), (int)UIAnimationAssetType.ScriptableObject)]
         private AssetKey _animationAsset;
-
         private Regex _partnerSheetIdentifierRegexCache;
 
         public string PartnerPageIdentifierRegex
@@ -28,14 +23,13 @@ namespace Cr7Sund.UGUI.Impls
             get => _partnerPageIdentifierRegex;
             set => _partnerPageIdentifierRegex = value;
         }
-
         public UIAnimationAssetType AssetType
         {
             get => _assetType;
-            set => _assetType = value;
         }
         public UITransitionAnimationBehaviour AnimationBehaviour { get => _animationBehaviour;  }
         public AssetKey AnimationAsset { get => _animationAsset;  }
+
 
         public bool IsValid(IAssetKey partnerUI)
         {

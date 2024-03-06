@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.FrameWork.Util;
 using UnityEngine;
@@ -27,12 +27,33 @@ namespace Cr7Sund.AssetLoader.Impl
         {
             IsInit = false;
 
-            var promiseList = _controlIdToHandles.Values.ToArray();
-            for (int i = promiseList.Length - 1; i >= 0; i--)
+            if (_controlIdToHandles.Count > 0)
             {
-                IAssetPromise value = promiseList[i];
-                UnloadAssetPromise(value);
+                Console.Warn("still exist {Count} left", _controlIdToHandles.Count);
+                if (MacroDefine.IsEditor)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var item in _controlIdToHandles)
+                    {
+                        sb.Append(item.Value.Key);
+                        sb.Append(", ");
+                    }
+                    Console.Warn("List Below {Msg}", sb.ToString());
+                }
             }
+
+            foreach (IAssetPromise assetPromise in _controlIdToHandles.Values)
+            {
+                if (assetPromise.IsInstantiate)
+                {
+                    Addressables.ReleaseInstance(assetPromise.GetResult<GameObject>());
+                }
+                else
+                {
+                    Addressables.Release(assetPromise.Handler);
+                }
+            }
+
             _nextControlId = 0;
             _controlIdToHandles.Clear();
         }
@@ -53,13 +74,36 @@ namespace Cr7Sund.AssetLoader.Impl
         {
             return LoadInternal<T>(key.Key, false);
         }
-      
+
         public IAssetPromise LoadAsync<T>(IAssetKey key) where T : Object
         {
             return LoadInternal<T>(key.Key, true);
         }
-      
-        public void Unload<T>(IAssetPromise assetPromise) where T : Object
+
+        public IAssetPromise InstantiateAsync(IAssetKey key)
+        {
+            return InstantiateInternal(key.Key, true);
+        }
+
+        public IAssetPromise Instantiate(IAssetKey key)
+        {
+            return InstantiateInternal(key.Key, false);
+        }
+
+
+        public void Unload(IAssetPromise value)
+        {
+            if (value.IsInstantiate)
+            {
+                ReleaseInstance(value);
+            }
+            else
+            {
+                UnloadPromise(value);
+            }
+        }
+
+        private void UnloadPromise(IAssetPromise assetPromise)
         {
             if (!_controlIdToHandles.ContainsKey(assetPromise.ControlId))
             {
@@ -70,18 +114,8 @@ namespace Cr7Sund.AssetLoader.Impl
             _controlIdToHandles.Remove(assetPromise.ControlId);
             Addressables.Release(assetPromise.Handler);
         }
-      
-        public IAssetPromise InstantiateAsync(IAssetKey key)
-        {
-            return InstantiateInternal(key.Key, true);
-        }
-      
-        public IAssetPromise Instantiate(IAssetKey key)
-        {
-            return InstantiateInternal(key.Key, false);
-        }
 
-        public void ReleaseInstance(IAssetPromise assetPromise)
+        private void ReleaseInstance(IAssetPromise assetPromise)
         {
             if (!_controlIdToHandles.ContainsKey(assetPromise.ControlId))
             {
@@ -106,7 +140,7 @@ namespace Cr7Sund.AssetLoader.Impl
 
             return setter;
         }
-      
+
         private IAssetPromise InstantiateInternal(string key, bool isAsync)
         {
             AsyncOperationHandle<GameObject> addressableHandle = Addressables.InstantiateAsync(key);
@@ -119,17 +153,6 @@ namespace Cr7Sund.AssetLoader.Impl
             addressableHandle.ToPromise(setter);
             return setter;
         }
-       
-        private void UnloadAssetPromise(IAssetPromise value)
-        {
-            if (value.IsInstantiate)
-            {
-                ReleaseInstance(value);
-            }
-            else
-            {
-                Unload<Object>(value);
-            }
-        }
+
     }
 }

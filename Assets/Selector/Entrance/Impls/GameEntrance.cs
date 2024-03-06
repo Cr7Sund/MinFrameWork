@@ -8,27 +8,26 @@ namespace Cr7Sund.Selector.Impl
         static void OnBeforeSplashScreen()
         {
             EntranceConsole.Init(InternalLoggerFactory.Create("GameEntrance"));
-            Console.Init(InternalLoggerFactory.Create("FrameWork"));
 
-            EntranceConsole.Info("Before SplashScreen is shown and before the first scene is loaded.");
+            EntranceConsole.Debug("Before SplashScreen is shown and before the first scene is loaded.");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void OnBeforeSceneLoad()
         {
-            EntranceConsole.Info("First scene loading: Before Awake is called.");
+            EntranceConsole.Debug("First scene loading: Before Awake is called.");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void OnAfterSceneLoad()
         {
-            EntranceConsole.Info("First scene loaded: After Awake is called.");
+            EntranceConsole.Debug("First scene loaded: After Awake is called.");
         }
 
         [RuntimeInitializeOnLoadMethod]
         static void OnRuntimeInitialized()
         {
-            EntranceConsole.Info("Runtime initialized: First scene loaded: After Awake is called.");
+            EntranceConsole.Debug("Runtime initialized: First scene loaded: After Awake is called.");
 
             if (GameMgr.Instance.Status == Api.GameStatus.Started)
             {
@@ -39,5 +38,6 @@ namespace Cr7Sund.Selector.Impl
                 GameMgr.Instance.Start();
             }
         }
+
     }
 }

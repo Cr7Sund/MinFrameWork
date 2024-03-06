@@ -46,7 +46,7 @@ namespace Cr7Sund.UGUI.Impls
         public override void SetTime(int time)
         {
             time = Mathf.Max(0, time - _delay);
-            var progress = _duration <= 0 ? 1.0f : Mathf.Clamp01(time / _duration);
+            float progress = _duration <= 0 ? 1.0f : Mathf.Clamp01(time / (float)_duration);
             progress = Easings.Interpolate(progress, _easeType);
             var position = Vector3.Lerp(_beforePosition, _afterPosition, progress);
             var scale = Vector3.Lerp(_beforeScale, _afterScale, progress);

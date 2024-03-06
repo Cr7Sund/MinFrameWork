@@ -1,12 +1,11 @@
 using Cr7Sund.AssetLoader.Impl;
-using Cr7Sund.GameLogic;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Selector.Apis;
 using UnityEngine;
 using Cr7Sund.Config;
-using Cr7Sund.Server.Utils;
+using Cr7Sund.AssetLoader;
 
 namespace Cr7Sund.Selector.Impl
 {
@@ -18,22 +17,12 @@ namespace Cr7Sund.Selector.Impl
         private bool _dispose;
 
 
-        internal IPromise<INode> Dispose()
-        {
-            if (!_dispose)
-            {
-                _dispose = true;
-                return _gameLogic?.Destroy();
-            }
-
-            return Promise<INode>.Resolved(null);
-        }
+        #region  Unity LifeCycles
 
         private void Awake()
         {
-            _gameLogic = CreateGameLogic();
-            _updateCorrector = new TimeCorrector();
-            _lateUpdateCorrector = new TimeCorrector();
+            InitFrameWork();
+
         }
         private void Start()
         {
@@ -42,18 +31,12 @@ namespace Cr7Sund.Selector.Impl
 
         void OnEnable()
         {
-            UnityEngine.Application.logMessageReceived += MyCallback;
         }
 
         void OnDisable()
         {
-            UnityEngine.Application.logMessageReceived -= MyCallback;
         }
 
-        private void MyCallback(string condition, string stacktrace, UnityEngine.LogType type)
-        {
-            stacktrace = string.Empty;
-        }
 
         private void Update()
         {
@@ -68,17 +51,44 @@ namespace Cr7Sund.Selector.Impl
         private void OnApplicationQuit()
         {
             Dispose();
+            EntranceConsole.Dispose();
+
+            Console.Info("Exit Game!!!");
+        }
+
+
+        #endregion
+
+        #region Custom Launcher
+
+        private void InitFrameWork()
+        {
+            Console.Init(InternalLoggerFactory.Create("FrameWork"));
+
+            _gameLogic = CreateGameLogic();
+            _updateCorrector = new TimeCorrector();
+            _lateUpdateCorrector = new TimeCorrector();
         }
 
         private IGameLogic CreateGameLogic()
         {
-            using (var configLoader = AssetLoaderFactory.CreateLoader())
+            var configLoader = AssetLoaderFactory.CreateLoader();
+            var gameConfig = configLoader.LoadSync<GameConfig>(ConfigDefines.GameConfig);
+            var gameLogic = gameConfig.CreateLogic();
+            return gameLogic;
+        }
+
+        internal IPromise<INode> Dispose()
+        {
+            if (!_dispose)
             {
-                var gameConfig = configLoader.LoadSync<GameConfig>(ConfigDefines.GameConfig);
-                var gameLogic = gameConfig.CreateLogic();
-                return gameLogic;
+                _dispose = true;
+                return _gameLogic?.Destroy();
             }
 
+            Console.Dispose();
+            return Promise<INode>.Resolved(null);
         }
+        #endregion
     }
 }

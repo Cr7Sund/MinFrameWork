@@ -1,4 +1,3 @@
-using System;
 
 namespace Cr7Sund.Selector.Impl
 {
@@ -14,13 +13,26 @@ namespace Cr7Sund.Selector.Impl
         public static void Dispose()
         {
             _logger?.Dispose();
-            EntranceConsole.Dispose();
-            Console.Dispose();
+        }
+
+        public static void Debug(string message)
+        {
+            _logger.Debug(message);
         }
 
         public static void Info(string message)
         {
             _logger.Info(message);
+        }
+
+        public static void Fatal(string message)
+        {
+            _logger.Fatal(message);
+        }
+
+        public static void Warn(string message)
+        {
+            _logger.Warn(message);
         }
     }
 }

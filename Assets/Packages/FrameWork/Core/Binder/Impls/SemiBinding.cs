@@ -80,7 +80,7 @@ namespace Cr7Sund.Package.Impl
             }
             else
             {
-                if(Contains(o)) return this;
+                if (Contains(o)) return this;
 
                 if (_size >= _objectValue.Length)
                 {
@@ -134,6 +134,14 @@ namespace Cr7Sund.Package.Impl
         {
             _size = 0;
             _capacity = 0;
+            foreach (var item in _objectValue)
+            {
+                if (item is IDisposable disposable)
+                {
+                    disposable?.Dispose();
+                }
+            }
+            
             _objectValue = _emptyArray;
         }
 

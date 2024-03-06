@@ -33,8 +33,6 @@ namespace Cr7Sund.Server.Impl
 
         public IPromise<INode> Destroy()
         {
-            Deject();
-
             return UnloadAsync(this).Then(node =>
             {
                 SetActive(false);

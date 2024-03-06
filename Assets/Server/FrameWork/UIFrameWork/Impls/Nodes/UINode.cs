@@ -5,19 +5,13 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
 using UnityEngine;
-using Cr7Sund.FrameWork.Util;
+using Cr7Sund.Server.Api;
 
 namespace Cr7Sund.Server.UI.Impl
 {
     public class UINode : UpdateNode, IUINode
     {
-        [Inject] private IAssetLoader _assetLoader;
-
-        private IAssetPromise _assetPromise;
-        // Unload
-        // GetInstance
-        // Preload
-        // private IPanelContainer _panelContainer;
+        [Inject] private IAssetInstanceContainer _uiContainer;
 
         public IUIView View { get; private set; }
         public string PageId { get; set; }
@@ -105,8 +99,8 @@ namespace Cr7Sund.Server.UI.Impl
             preparePromise = Controller.Prepare(uiKey.Intent);
             if (Application.isPlaying)
             {
-                _assetPromise = _assetLoader.LoadAsync<Object>(content.Key);
-                loadPromise = _assetPromise.Then(_ => { });
+                var assetPromise = _uiContainer.GetAssetAsync(content.Key);
+                loadPromise = assetPromise.Then(_ => { });
             }
             else
             {
@@ -123,35 +117,37 @@ namespace Cr7Sund.Server.UI.Impl
             var uiNode = content as UINode;
             var uiKey = uiNode.Key as UIKey;
 
-            IPromise preparePromise = null;
-            IPromise loadPromise = null;
-
-            preparePromise = Controller.Prepare(uiKey.Intent);
-            if (Application.isPlaying)
+            if (_uiContainer.ContainsAsset(Key))
             {
-                AssertUtil.IsNull(_assetPromise, UIExceptionType.empty_page_animSource);
-
-                _assetPromise = uiKey.LoadAsync ? _assetLoader.LoadAsync<Object>(uiKey)
-                                                  : _assetLoader.Load<Object>(uiKey);
-                loadPromise = _assetPromise.Then(_ => { });
+                var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync<GameObject>(uiKey)
+                                                               : _uiContainer.CreateInstance<GameObject>(uiKey);
+                return assetPromise.Then(_ => Promise<INode>.Resolved(content));
             }
             else
             {
-                loadPromise = base.OnLoadAsync(content)
-                                  .Then(_ => { });
-            }
+                IPromise loadPromise = null;
+                IPromise preparePromise = Controller.Prepare(uiKey.Intent);
 
-            return Promise.All(preparePromise, loadPromise)
-                .Then(() => Promise<INode>.Resolved(content));
+                if (Application.isPlaying)
+                {
+                    var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync<GameObject>(uiKey)
+                                                       : _uiContainer.CreateInstance<GameObject>(uiKey);
+                    loadPromise = assetPromise.Then(_ => { });
+                }
+                else
+                {
+                    loadPromise = base.OnLoadAsync(content)
+                                     .Then(_ => { });
+                }
+
+                return Promise.All(preparePromise, loadPromise)
+                    .Then(() => Promise<INode>.Resolved(content));
+            }
         }
 
         protected override IPromise<INode> OnUnloadAsync(INode content)
         {
-            if (Application.isPlaying)
-            {
-                _assetLoader.Unload<Object>(_assetPromise);
-            }
-
+            _uiContainer.Unload(Key);
             return base.OnUnloadAsync(content);
         }
 
@@ -167,8 +163,8 @@ namespace Cr7Sund.Server.UI.Impl
         protected override void OnDeject()
         {
             base.OnDeject();
-            _context.InjectionBinder.Injector.Uninject(View);
-            _context.InjectionBinder.Injector.Uninject(Controller);
+            _context.InjectionBinder.Injector.Deject(View);
+            _context.InjectionBinder.Injector.Deject(Controller);
         }
 
         protected override void OnInit()
@@ -180,9 +176,9 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override void OnStart()
         {
-            if (Application.isPlaying)
+            if (_uiContainer.TryGetInstance<GameObject>(Key, out var go))
             {
-                View.Start(_assetPromise.GetResult<Object>(), Parent);
+                View.Start(go, Parent);
             }
 
             // only call once

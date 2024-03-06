@@ -45,7 +45,7 @@ namespace Cr7Sund.NodeTree.Impl
 
         public sealed override void Deject()
         {
-            if (IsInjected)
+            if (!IsInjected)
                 return;
 
             base.Deject();

@@ -6,6 +6,7 @@ using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.NodeTree.Api;
+using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.Scene.Impl
 {
@@ -16,13 +17,13 @@ namespace Cr7Sund.Server.Scene.Impl
         {
             var assetLoader = AssetLoaderFactory.CreateLoader();
             var sceneLoader = AssetLoaderFactory.CreateSceneLoader();
-            var sceneContainer = new SceneContainer();
+            var sceneContainer = new SceneInstanceContainer();
             sceneContainer.Init(self.Key.Key);
             var logger = InternalLoggerFactory.Create(Channel);
 
             // Cross Context
             // --- --- 
-            InjectionBinder.Bind<ISceneContainer>().To(sceneContainer).AsCrossContext();
+            InjectionBinder.Bind<IInstanceContainer>().To(sceneContainer).ToName(ServerBindDefine.SceneInstancePool).AsCrossContext();
 
             // Local In GameNode or GameController
             // --- --- 
@@ -38,13 +39,14 @@ namespace Cr7Sund.Server.Scene.Impl
 
         public sealed override void RemoveComponents()
         {
+            InjectionBinder.Unbind<IInstanceContainer>(ServerBindDefine.SceneInstancePool);
+
             InjectionBinder.Unbind<ISceneNode>();
             InjectionBinder.Unbind<ISceneLoader>();
             InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<IPoolBinder>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.SceneTimer);
             InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.SceneLogger);
-
             OnUnMappedBindings();
         }
 

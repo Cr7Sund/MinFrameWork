@@ -32,7 +32,7 @@ namespace Cr7Sund.Package.Impl
                 {
                     if (CrossContextBinder != null)
                     {
-                        Unbind(key, binding.Name);
+                        TryUnbindInternally(key, binding.Name, out var result);
                         CrossContextBinder.ResolveBinding(binding, key, oldName);
                     }
                     else //We are a CrossContextBinder
@@ -45,6 +45,24 @@ namespace Cr7Sund.Package.Impl
                     base.ResolveBinding(binding, key, oldName);
                 }
             }
+        }
+
+        public override bool TryUnbindInternally(object key, object name, out IBinding result)
+        {
+            if (base.TryUnbindInternally(key, name, out result))
+            {
+                return true;
+            }
+
+            if (CrossContextBinder != null && CrossContextBinder is Binder crossContextBinder)
+            {
+                if (crossContextBinder.TryUnbindInternally(key, name, out result))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected override IInjector GetInjectorForBinding(IInjectionBinding binding)

@@ -31,6 +31,6 @@ namespace Cr7Sund.Package.Api
         ///     Note that Uninject can only clean public fields ...therefore only
         ///     setters will be uninjected...not injections provided via constructor injection
         /// </summary>
-        void Uninject(object target);
+        void Deject(object target);
     }
 }

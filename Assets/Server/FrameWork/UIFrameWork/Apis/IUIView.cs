@@ -1,7 +1,6 @@
 using System;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Package.Api;
-using Cr7Sund.UGUI.Apis;
 using UnityEngine;
 
 /**
@@ -23,7 +22,7 @@ namespace Cr7Sund.Server.UI.Api
         /// </summary>
         public float TransitionAnimationProgress { get; }
 
-        void Start(UnityEngine.Object asset, INode parent);
+        void Start(GameObject asset, INode parent);
         void Enable(INode parent);
         void BeforeEnter();
         IPromise EnterRoutine(bool push, IUINode partnerView, bool playAnimation);

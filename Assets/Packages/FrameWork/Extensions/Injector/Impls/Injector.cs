@@ -13,6 +13,12 @@ namespace Cr7Sund.Package.Impl
         private int _depth;
         private const int MAX_DEPTH = 100;
 
+        public IPoolBinder PoolBinder { get; set; }
+        public IInjectorFactory Factory { get; set; }
+        public IInjectionBinder Binder { get; set; }
+        public IReflectionBinder Reflector { get; set; }
+
+
         public Injector()
         {
             _reflectionBinder = new InjectorReflectionBinder();
@@ -22,10 +28,7 @@ namespace Cr7Sund.Package.Impl
             Reflector = _reflectionBinder;
             PoolBinder = _poolBinder;
         }
-        public IPoolBinder PoolBinder { get; set; }
-        public IInjectorFactory Factory { get; set; }
-        public IInjectionBinder Binder { get; set; }
-        public IReflectionBinder Reflector { get; set; }
+
 
         public object Instantiate(IInjectionBinding binding)
         {
@@ -100,10 +103,14 @@ namespace Cr7Sund.Package.Impl
                 {
                     pool.ReturnInstance(instance);
                 }
+                else if (instance is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
             }
         }
 
-        public void Uninject(object target)
+        public void Deject(object target)
         {
             failIf(Binder == null, InjectionExceptionType.NO_BINDER_UnINJECT);
             failIf(Reflector == null, InjectionExceptionType.NO_REFLECTOR_UNINJECT);
@@ -117,7 +124,7 @@ namespace Cr7Sund.Package.Impl
 
             var reflection = Reflector.Get(t);
 
-            PerformUninjection(target, reflection);
+            PerformDejection(target, reflection);
         }
 
         private object InjectInternal(object target)
@@ -146,7 +153,7 @@ namespace Cr7Sund.Package.Impl
             return target;
         }
 
-        private void PerformUninjection(object target, IReflectedClass reflection)
+        private void PerformDejection(object target, IReflectedClass reflection)
         {
             for (int i = 0; i < reflection.Fields.Length; i++)
             {

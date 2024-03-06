@@ -16,42 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 8372cf0f83435864f9cb7341776e2ee4
-  m_SerializeEntries:
-  - m_GUID: a3db19aa019f3b14ba066eb2676a6b11
-    m_Address: SampleOnePanel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c218eb4b3bb876e469e5180b5581e731
-    m_Address: SampleThreePanel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b663a1a4a18e5064dbba8b6d4156c9cc
-    m_Address: SampleTwoPanel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: aa91df563bef74946bd0b1421d0d3224
-    m_Address: Assets/Preresources/Config/UI/Page/PagePopEnterAnimation.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7dcddce7d5bc981489f0a466ec79db5f
-    m_Address: Assets/Preresources/Config/UI/Page/PagePushExitAnimation.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 37b71c67e8b7d4249a55af2ce0371cd6
-    m_Address: Assets/Preresources/Config/UI/Page/PagePopExitAnimation.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e3dc25e2d20452648acbf4ef381642b7
-    m_Address: Assets/Preresources/Config/UI/Page/PagePushEnterAnimation.asset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e1998269fb3078b4aa459ddd4f8e7ed1, type: 2}
   m_SchemaSet:

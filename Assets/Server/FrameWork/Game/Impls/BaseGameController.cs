@@ -1,22 +1,14 @@
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Config;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Scene.Apis;
-using Cr7Sund.Server.Utils;
-using UnityEngine;
+using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.Impl
 {
     public abstract class BaseGameController : UpdateController
     {
-        [Inject] private ISceneModule _sceneModule;
-        [Inject] private IConfigContainer _configModule;
-        [Inject] IAssetLoader _assetLoader;
-        [Inject(ServerBindDefine.GameTimer)] IPromiseTimer _gameTimer;
+        [Inject(ServerBindDefine.GameTimer)] private IPromiseTimer _gameTimer;
         [Inject(ServerBindDefine.GameLogger)] protected IInternalLog Debug;
 
         protected sealed override void OnStart()
@@ -48,8 +40,6 @@ namespace Cr7Sund.Server.Impl
 
         private void GameEnvInit()
         {
-            InitConfig();
-
             // InitSDK(); 
             // NetModule.Init();
             // InitHardware(); //_languageModule, Notch
@@ -57,14 +47,6 @@ namespace Cr7Sund.Server.Impl
 
         }
 
-        private void InitConfig()
-        {
-            var gameConfig = _assetLoader.LoadSync<UIConfig>(ConfigDefines.UIConfig);
-            foreach (var item in gameConfig.ConfigDefines)
-            {
-                _configModule.GetConfigAsync(item);
-            }
-        }
 
         private void GameStart()
         {

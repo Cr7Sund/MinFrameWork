@@ -160,7 +160,6 @@ namespace Cr7Sund.ServerTest.Scene
         public void AddPreloadScene()
         {
 
-
             _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
             _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 

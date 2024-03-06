@@ -391,6 +391,12 @@ namespace Cr7Sund.Server.UI.Impl
 
         #endregion
 
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            _pageContainers.Clear();
+        }
 
     }
 }

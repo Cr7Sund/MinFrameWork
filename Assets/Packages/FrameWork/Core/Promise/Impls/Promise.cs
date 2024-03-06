@@ -130,6 +130,11 @@ namespace Cr7Sund.Package.Impl
         public virtual void Dispose()
         {
             ClearHandlers();
+            if (_resolveValue is IDisposable disposable)
+            {
+                disposable?.Dispose();
+            }
+
             Name = string.Empty;
             _resolveValue = default;
             CurState = PromiseState.Pending;

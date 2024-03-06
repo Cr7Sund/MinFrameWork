@@ -11,7 +11,6 @@ namespace Cr7Sund.Server.Scene.Impl
     public class SceneNode : ModuleNode, ISceneNode
     {
         [Inject] private ISceneLoader _sceneLoader;
-        [Inject] private ISceneContainer _sceneContainer;
         [Inject] private PageContainer _pageContainer;
         [Inject(ServerBindDefine.SceneTimer)] private IPromiseTimer _sceneTimer;
 

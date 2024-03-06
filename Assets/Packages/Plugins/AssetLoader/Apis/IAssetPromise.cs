@@ -12,7 +12,8 @@ namespace Cr7Sund.AssetLoader.Api
         bool IsInstantiate { get; }
 
         T GetResult<T>() where T : Object;
+        T GetResultSync<T>() where T : Object;
+        IPromise<T> GetConvertPromise<T>()where T : Object;
     }
-
 
 }

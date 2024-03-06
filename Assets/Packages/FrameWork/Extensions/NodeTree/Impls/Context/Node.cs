@@ -306,7 +306,11 @@ namespace Cr7Sund.NodeTree.Impl
 
         private void ReleaseCollection(Stack<INode> stack, Stack<INode> resultQueue)
         {
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+            if (!IsInjected) return;
+
+            var contextInjectionBinder = _context.InjectionBinder;
+            
+            var poolBinder = contextInjectionBinder.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<INode>>();
             var queuePool = poolBinder.GetOrCreate<Stack<INode>>();
 
@@ -487,13 +491,13 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     child.Stop();
                 }
-                if (childNode.IsInjected)
-                {
-                    childNode.Deject();
-                }
                 childNode._removePromise = child.UnloadAsync(child)
                     .ContinueWith(() =>
                     {
+                        if (childNode.IsInjected)
+                        {
+                            childNode.Deject();
+                        }
                         RemoveChildInternal(childNode, shouldUnload);
                         return Promise<INode>.Resolved(childNode);
                     }); // if unload fail, we still remove from node tree
@@ -612,7 +616,7 @@ namespace Cr7Sund.NodeTree.Impl
             IsInjected = false;
 
             OnDeject();
-            _context.InjectionBinder.Injector.Uninject(this);
+            _context.InjectionBinder.Injector.Deject(this);
 
             _context.RemoveComponents();
         }

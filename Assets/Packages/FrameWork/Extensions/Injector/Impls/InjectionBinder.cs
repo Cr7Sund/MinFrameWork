@@ -7,7 +7,7 @@ namespace Cr7Sund.Package.Impl
     public class InjectionBinder : Binder, IInjectionBinder
     {
         public IInjector Injector { get; set; }
-        
+
 
         public InjectionBinder()
         {
@@ -94,6 +94,17 @@ namespace Cr7Sund.Package.Impl
         public virtual IInjectionBinding GetBinding(Type type, object name)
         {
             return base.GetBinding(type, name) as IInjectionBinding;
+        }
+
+        protected override void OnUnbind(IBinding binding)
+        {
+            if (binding is IInjectionBinding injectionBinding)
+            {
+                if (injectionBinding.Type != InjectionBindingType.POOL)
+                {
+                    injectionBinding.Dispose();
+                }
+            }
         }
         #endregion
 

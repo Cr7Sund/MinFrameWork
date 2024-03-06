@@ -18,5 +18,7 @@ namespace Cr7Sund.Server.Impl
         unhandled_removeNode,
         // try to unload parent node is no started
         parent_no_start_unloadNode,
+        // try to create a go from an invalid scene
+        create_from_invalidScene,
     }
 }

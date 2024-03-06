@@ -12,18 +12,17 @@ using Cr7Sund.Server.Scene.Impl;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
 using Cr7Sund.FrameWork.Util;
-using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Api;
+using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.UI.Impl
 {
     public class UIView : IUIView
     {
-        public const string UI_ROOT_NAME = "UIROOT";
-
         [Inject(ServerBindDefine.UITimer)] private IPromiseTimer _uiTimer;
         [Inject] private IUITransitionAnimationContainer _animationContainer;
-        [Inject] private ISceneContainer _sceneContainer;
+        [Inject(ServerBindDefine.GameInstancePool)] private IInstanceContainer _gameContainer;
         private int _sortingOrder;
         private UIPanel _uiPanel;
         private CanvasGroup _canvasGroup;
@@ -48,22 +47,20 @@ namespace Cr7Sund.Server.UI.Impl
         public RectTransform RectTransform { get => _rectTransform; }
         public float TransitionAnimationProgress { get; private set; }
 
-        public void Start(Object asset, INode parent)
+        public void Start(GameObject go, INode parent)
         {
             //Instantiate
             AssertUtil.IsNull(_rectTransform, UIExceptionType.instantiate_UI_repeat);
 
             _parentTransform = GetParentTrans(parent);
 
-            var go = GameObject.Instantiate(asset, _parentTransform) as GameObject;
             _uiPanel = go.GetComponent<UIPanel>();
+            go.transform.SetParent(_parentTransform);
 
-            var gameObject = _uiPanel.gameObject;
-
-            _rectTransform = (RectTransform)gameObject.transform;
+            _rectTransform = (RectTransform)go.transform;
             _canvasGroup = _uiPanel.GetUIComponent<CanvasGroup>(nameof(CanvasGroup));
             _canvas = _uiPanel.GetUIComponent<Canvas>(nameof(Canvas));
-            _identifier = gameObject.name.Replace("(Clone)", string.Empty);
+            _identifier = go.name.Replace("(Clone)", string.Empty);
         }
 
         public void Enable(INode parent)
@@ -237,7 +234,8 @@ namespace Cr7Sund.Server.UI.Impl
             }
             else if (parent is SceneNode sceneNode)
             {
-                return _sceneContainer.CreateInstanceWithComponent<RectTransform>(UI_ROOT_NAME);
+                return _gameContainer.LoadInstance(
+                            ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME).transform as RectTransform;
             }
 
             return null;

@@ -1,9 +1,10 @@
-﻿using Cr7Sund.Package.Api;  
-using Cr7Sund.NodeTree.Api;  
+﻿using Cr7Sund.Package.Api;
+using Cr7Sund.NodeTree.Api;
+using System;
 
 namespace Cr7Sund.Server.Api
 {
-    public interface ILoadModule
+    public interface ILoadModule : IDisposable
     {
         //  remove a node with the specified asset key
         IPromise<INode> RemoveNode(IAssetKey assetKey);

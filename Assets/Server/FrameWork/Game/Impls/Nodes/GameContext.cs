@@ -13,6 +13,7 @@ using Cr7Sund.Server.UI.Api;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.AssetLoader.Impl;
 using Cr7Sund.NodeTree.Api;
+using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -37,12 +38,13 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Bind<PageContainer>().To<PageContainer>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IConfigContainer>().To<ConfigContainer>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IUITransitionAnimationContainer>().To<UITransitionAnimationContainer>().AsSingleton().AsCrossContext();
-
+            InjectionBinder.Bind<IInstanceContainer>().To<GameInstanceContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.GameInstancePool);
+            InjectionBinder.Bind<IAssetInstanceContainer>().To<UIPanelContainer>().AsSingleton().AsCrossContext();
+            InjectionBinder.Bind<IAssetLoader>().To(assetLoader).AsCrossContext().ToName(ServerBindDefine.GameLoader);
             // Local In GameNode or GameController
             // --- --- 
             InjectionBinder.Bind<IGameNode>().To(self);
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            InjectionBinder.Bind<IAssetLoader>().To(assetLoader);
             InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.GameTimer);
             InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.GameLogger);
 
@@ -57,10 +59,12 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Unbind<PageContainer>();
             InjectionBinder.Unbind<IConfigContainer>();
             InjectionBinder.Unbind<IUITransitionAnimationContainer>();
+            InjectionBinder.Unbind<IInstanceContainer>(ServerBindDefine.GameInstancePool);
+            InjectionBinder.Unbind<IAssetInstanceContainer>();
+            InjectionBinder.Unbind<IAssetLoader>(ServerBindDefine.GameLoader);
 
             InjectionBinder.Unbind<IGameNode>();
             InjectionBinder.Unbind<IPoolBinder>();
-            InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.GameTimer);
             InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.GameLogger);
 
