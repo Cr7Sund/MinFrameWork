@@ -12,6 +12,7 @@ namespace Cr7Sund
             var logProvider = Logger.LogProviderFactory.Create();
             logProvider.Init(logSinkType, logChannel);
             _logProvider = logProvider;
+            _miniumLogLevel = LogLevel.Trace;
         }
 
         public void Dispose()
