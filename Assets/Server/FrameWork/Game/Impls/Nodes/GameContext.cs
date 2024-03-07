@@ -28,7 +28,7 @@ namespace Cr7Sund.Server.Impl
         public sealed override void AddComponents(INode self)
         {
             var assetLoader = AssetLoaderFactory.CreateLoader();
-            var logger = InternalLoggerFactory.Create(Channel);
+            var logger = new LoggerProxy(Channel);
 
             // Cross Context
             // --- --- 

@@ -1,14 +1,25 @@
 using System;
-using UnityEngine;
 
-namespace Cr7Sund.Logger
+namespace Cr7Sund
 {
     public class LoggerProxy : IInternalLog
     {
-        public ILogProvider _logProvider;
+        public Logger.ILogProvider _logProvider;
         private LogLevel _miniumLogLevel;
 
+        public LoggerProxy(string logChannel)
+        {
+            var logProvider = Logger.LogProviderFactory.Create();
+            logProvider.Init(LogSinkType.File | LogSinkType.Net | LogSinkType.LogPlatform, logChannel);
+            _logProvider = logProvider;
+        }
 
+        public void Dispose()
+        {
+            _logProvider?.Dispose();
+        }
+
+        #region  Proxy
         private void Log(LogLevel logLevel, string prefix, Exception ex)
         {
             if (logLevel >= _miniumLogLevel)
@@ -57,9 +68,6 @@ namespace Cr7Sund.Logger
             }
         }
 
-
-
-        #region Public
         public void Error(string message)
         {
             Log(LogLevel.Error, message);
@@ -98,10 +106,6 @@ namespace Cr7Sund.Logger
         public void Info<T0, T1, T2>(string message, T0 propertyValue0, T1 propertyValue1, T2 propertyValue2)
         {
             Log(LogLevel.Info, message, propertyValue0, propertyValue1, propertyValue2);
-        }
-
-        public void Init(string logChannel)
-        {
         }
 
         public void Warn(string message)
@@ -145,11 +149,7 @@ namespace Cr7Sund.Logger
 
         }
 
-        public void Dispose()
-        {
-            _logProvider?.Dispose();
-        }
-
         #endregion
+
     }
 }

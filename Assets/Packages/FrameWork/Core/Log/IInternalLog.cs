@@ -3,8 +3,6 @@ namespace Cr7Sund
 {
     public interface IInternalLog : IDisposable
     {
-        void Init(string logChannel);
-
         void Debug(string message);
         void Debug<T0>(string message, T0 propertyValue0);
         void Info(string message);

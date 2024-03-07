@@ -20,6 +20,34 @@ namespace Cr7Sund.PackageTest.Log
         [Performance]
         public void TestUnityLog()
         {
+            Measure.Method(() =>
+                {
+                    UnityEngine.Debug.LogWarning("hello message");
+                })
+                .WarmupCount(warmupCount)
+                .MeasurementCount(executeCount)
+                .GC()
+                .Run();
+        }
+
+        [Test]
+        [Performance]
+        public void TestSerialLog()
+        {
+            Measure.Method(() =>
+                {
+                    Console.Warn("hello Msg");
+                })
+                .WarmupCount(warmupCount)
+                .MeasurementCount(executeCount)
+                .GC()
+                .Run();
+        }
+
+        [Test]
+        [Performance]
+        public void TestUnityLogWithFormat()
+        {
             string message = "world";
             Measure.Method(() =>
                 {
@@ -33,7 +61,7 @@ namespace Cr7Sund.PackageTest.Log
 
         [Test]
         [Performance]
-        public void TestFormatLog()
+        public void TestSerialLogWithFormat()
         {
             string message = "world";
             Measure.Method(() =>
