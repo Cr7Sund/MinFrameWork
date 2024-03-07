@@ -19,7 +19,7 @@ namespace Cr7Sund.Server.Scene.Impl
             var sceneLoader = AssetLoaderFactory.CreateSceneLoader();
             var sceneContainer = new SceneInstanceContainer();
             sceneContainer.Init(self.Key.Key);
-            var logger = new LoggerProxy(Channel);
+            var logger = InternalLoggerFactory.Create(Channel);
 
             // Cross Context
             // --- --- 

@@ -7,10 +7,10 @@ namespace Cr7Sund
         public Logger.ILogProvider _logProvider;
         private LogLevel _miniumLogLevel;
 
-        public LoggerProxy(string logChannel)
+        public LoggerProxy(LogSinkType logSinkType, string logChannel)
         {
             var logProvider = Logger.LogProviderFactory.Create();
-            logProvider.Init(LogSinkType.File | LogSinkType.Net | LogSinkType.LogPlatform, logChannel);
+            logProvider.Init(logSinkType, logChannel);
             _logProvider = logProvider;
         }
 

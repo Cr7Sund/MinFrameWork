@@ -18,7 +18,7 @@ namespace Cr7Sund.Server.UI.Impl
             // Local In GameNode or GameController
             // --- --- 
             var assetLoader = AssetLoaderFactory.CreateLoader();
-            var logger = new LoggerProxy(Channel);
+            var logger = InternalLoggerFactory.Create(Channel);
 
             InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.UILogger).AsCrossContext();
 
