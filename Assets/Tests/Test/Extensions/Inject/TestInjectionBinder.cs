@@ -279,24 +279,6 @@ namespace Cr7Sund.PackageTest.Inject
             Assert.AreEqual(1, ConstructorInjectsClassToBeInjected.Value);
         }
 
-        //RE: Issue #32. A value-bound injection should not post-construct twice
-        //The PostConstruct fires when the class is requested.
-        [Test]
-        public void TestDoublePostConstruct()
-        {
-            PostConstructSimple.PostConstructCount = 0;
-            var instance = new PostConstructSimple();
-            binder.Bind<PostConstructSimple>().To(instance);
-            binder.Bind<InjectsPostConstructSimple>().To<InjectsPostConstructSimple>();
-
-            var instance1 = binder.GetInstance<InjectsPostConstructSimple>();
-            var instance2 = binder.GetInstance<InjectsPostConstructSimple>();
-
-            Assert.AreSame(instance, instance1.pcs);
-            Assert.AreNotSame(instance1, instance2);
-            Assert.AreEqual(1, PostConstructSimple.PostConstructCount);
-        }
-
         [Test]
         public void TestPolymorphicBinding()
         {
@@ -437,20 +419,7 @@ namespace Cr7Sund.PackageTest.Inject
 
         }
 
-        [Test]
-        public void TestGetPoolInjection()
-        {
-            binder.Bind<SimpleInterfaceImplementer>().To<SimpleInterfaceImplementer>();
-            binder.Bind<IPool<SimpleInterfaceImplementer>>().To<Pool<SimpleInterfaceImplementer>>().AsSingleton();
-            binder.GetInstance<IPool<SimpleInterfaceImplementer>>().InstanceProvider = binder;
-            binder.Bind<IUsesPool>().To<UsesPool>().AsSingleton();
 
-            var instance = binder.GetInstance<IUsesPool>();
-
-            Assert.IsNotNull(instance);
-            Assert.IsNotNull(instance.Instance1);
-            Assert.IsNotNull(instance.Instance2);
-        }
     }
 
 

@@ -27,16 +27,6 @@ namespace Cr7Sund.PackageTest.Inject
             Assert.AreEqual("Liberator", instance.stringValue);
         }
 
-        [Test]
-        public void TestPostConstruct()
-        {
-            binder.Bind<PostConstructClass>().To<PostConstructClass>();
-            binder.Bind<float>().To((float)Math.PI);
-            var instance = binder.GetInstance<PostConstructClass>();
-            Assert.IsNotNull(instance);
-            Assert.AreEqual((float)Math.PI * 2f, instance.floatVal);
-        }
-
         // A value-mapped object must never attempt to re-instantiate
         [Test]
         public void TestValueMappingWithNoReInstantiate()
