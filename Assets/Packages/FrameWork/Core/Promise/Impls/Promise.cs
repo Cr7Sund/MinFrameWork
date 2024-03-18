@@ -7,6 +7,12 @@ namespace Cr7Sund.Package.Impl
 {
     public class Promise<PromisedT> : IPromise<PromisedT>
     {
+        #region Static Fields
+        private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
+        private static readonly Queue<List<ResolveHandler<PromisedT>>> _resolveListPool = new Queue<List<ResolveHandler<PromisedT>>>();
+        private static readonly Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
+        private static readonly Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
+        #endregion
 
         #region Fields
         /// <summary>
@@ -34,8 +40,6 @@ namespace Cr7Sund.Package.Impl
         private Action<Exception> _rejectHandler;
         private Action<float> _progressHandler;
 
-
-        private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
         #endregion
 
         #region Properties
@@ -670,7 +674,17 @@ namespace Cr7Sund.Package.Impl
 
         protected void AddRejectHandler(Action<Exception> onRejected, IRejectable rejectable)
         {
-            _rejectHandlers ??= new List<RejectHandler>();
+            if (_rejectHandlers == null)
+            {
+                if (_rejectListPool.Count == 0)
+                {
+                    _rejectHandlers = new List<RejectHandler>();
+                }
+                else
+                {
+                    _rejectHandlers = _rejectListPool.Dequeue();
+                }
+            }
 
             _rejectHandlers.Add(new RejectHandler
             {
@@ -681,8 +695,17 @@ namespace Cr7Sund.Package.Impl
 
         private void AddResolveHandler(Action<PromisedT> onResolved, IRejectable rejectable)
         {
-            _resolveHandlers ??= new List<ResolveHandler<PromisedT>>();
-
+            if (_resolveHandlers == null)
+            {
+                if (_resolveListPool.Count == 0)
+                {
+                    _resolveHandlers = new List<ResolveHandler<PromisedT>>();
+                }
+                else
+                {
+                    _resolveHandlers = _resolveListPool.Dequeue();
+                }
+            }
             _resolveHandlers.Add(new ResolveHandler<PromisedT>
             {
                 Callback = onResolved,
@@ -692,8 +715,17 @@ namespace Cr7Sund.Package.Impl
 
         private void AddProgressHandler(Action<float> onProgress, IRejectable rejectable)
         {
-            _progressHandlers ??= new List<ProgressHandler>();
-
+            if (_progressHandlers == null)
+            {
+                if (_progressListPool.Count == 0)
+                {
+                    _progressHandlers = new List<ProgressHandler>();
+                }
+                else
+                {
+                    _progressHandlers = _progressListPool.Dequeue();
+                }
+            }
             _progressHandlers.Add(new ProgressHandler
             {
                 Callback = onProgress,
@@ -706,7 +738,7 @@ namespace Cr7Sund.Package.Impl
         {
             if (_rejectHandlers != null)
             {
-                for (int i = 0; i < _rejectHandlers.Count; i++)
+                for (int i = 0, count = _rejectHandlers.Count; i < count; i++)
                 {
                     var handler = _rejectHandlers[i];
                     InvokeHandler(handler.Callback, handler.Rejectable, ex);
@@ -721,7 +753,7 @@ namespace Cr7Sund.Package.Impl
         {
             if (_progressHandlers != null)
             {
-                for (int i = 0; i < _progressHandlers.Count; i++)
+                for (int i = 0, count = _progressHandlers.Count; i < count; i++)
                 {
                     var handler = _progressHandlers[i];
                     InvokeHandler(handler.Callback, handler.Rejectable, progress);
@@ -734,7 +766,7 @@ namespace Cr7Sund.Package.Impl
         {
             if (_resolveHandlers != null)
             {
-                for (int i = 0; i < _resolveHandlers.Count; i++)
+                for (int i = 0, count = _resolveHandlers.Count; i < count; i++)
                 {
                     var handler = _resolveHandlers[i];
                     InvokeHandler(handler.Callback, handler.Rejectable, value);
@@ -749,6 +781,22 @@ namespace Cr7Sund.Package.Impl
             _rejectHandlers?.Clear();
             _resolveHandlers?.Clear();
             _progressHandlers?.Clear();
+
+            _rejectHandlers = null;
+            _resolveHandlers = null;
+            _progressHandlers = null;
+            if (_resolveHandlers != null)
+            {
+                _resolveListPool.Enqueue(_resolveHandlers);
+            }
+            if (_rejectHandlers != null)
+            {
+                _rejectListPool.Enqueue(_rejectHandlers);
+            }
+            if (_progressHandlers != null)
+            {
+                _progressListPool.Enqueue(_progressHandlers);
+            }
         }
 
         protected void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)

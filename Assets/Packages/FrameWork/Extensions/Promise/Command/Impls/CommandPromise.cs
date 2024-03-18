@@ -264,6 +264,10 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
+            if (!IsOnceOff)
+            {
+                base.ClearHandlers();
+            }
             Release();
         }
 

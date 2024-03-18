@@ -96,9 +96,9 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         }
 
         [Test]
-        public void command_binder_simple_asOnce_asPool()
+        public void command_binder_simple__asPool()
         {
-            _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
+            _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .Then<SimpleCommandTwoGeneric>()
                 .Then<SimpleCommandOneGeneric>()
                 .Then<SimpleCommandTwoGeneric>()
