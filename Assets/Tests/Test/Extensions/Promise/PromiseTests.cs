@@ -1793,5 +1793,21 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             Assert.AreEqual(expectedException, actualException);
         }
+
+        public void resole_pool_action()
+        {
+            // setup
+            var firstPromise = new Promise<int>();
+            firstPromise.Then(_ => { });
+            firstPromise.Resolve(2);
+
+            int size = Promise<int>.Test_GetResolveListPoolCount();
+            var promise = new Promise<int>();
+            promise.Then(_ => { });
+            Assert.AreEqual(size - 1, Promise<int>.Test_GetResolveListPoolCount());
+
+            promise.Resolve(2);
+            Assert.AreEqual(size, Promise<int>.Test_GetResolveListPoolCount());
+        }
     }
 }

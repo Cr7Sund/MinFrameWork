@@ -9,9 +9,7 @@ namespace Cr7Sund.Package.Impl
     {
         #region Static Fields
         private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
-        private static readonly Queue<List<ResolveHandler<PromisedT>>> _resolveListPool = new Queue<List<ResolveHandler<PromisedT>>>();
-        private static readonly Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
-        private static readonly Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
+        private static ReusablePool<ListPoolNode<ResolveHandler<PromisedT>>> _resolveListPool;
         #endregion
 
         #region Fields
@@ -22,24 +20,22 @@ namespace Cr7Sund.Package.Impl
         /// <summary>
         ///     Error handlers.
         /// </summary>
-        protected List<RejectHandler> _rejectHandlers;
+        protected ListPoolNode<RejectHandler> _rejectHandlers;
         /// <summary>
         ///     Completed handlers that accept no value.
         /// </summary>
-        protected List<ResolveHandler<PromisedT>> _resolveHandlers;
+        protected ListPoolNode<ResolveHandler<PromisedT>> _resolveHandlers;
         /// <summary>
         ///     Progress handlers.
         /// </summary>
-        protected List<ProgressHandler> _progressHandlers;
+        protected ListPoolNode<ProgressHandler> _progressHandlers;
         /// <summary>
         ///     The value when the promises is resolved.
         /// </summary>
         protected PromisedT _resolveValue;
-
         private Action<PromisedT> _resolveHandler;
         private Action<Exception> _rejectHandler;
         private Action<float> _progressHandler;
-
         #endregion
 
         #region Properties
@@ -51,40 +47,6 @@ namespace Cr7Sund.Package.Impl
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
 
-
-        public Action<PromisedT> ResolveHandler
-        {
-            get
-            {
-                if (_resolveHandler == null)
-                {
-                    _resolveHandler = Resolve;
-                }
-                return _resolveHandler;
-            }
-        }
-        public Action<Exception> RejectHandler
-        {
-            get
-            {
-                if (_rejectHandler == null)
-                {
-                    _rejectHandler = RejectWithoutDebug;
-                }
-                return _rejectHandler;
-            }
-        }
-        public Action<float> ProgressHandler
-        {
-            get
-            {
-                if (_progressHandler == null)
-                {
-                    _progressHandler = ReportProgress;
-                }
-                return _progressHandler;
-            }
-        }
         #endregion
 
         public Promise()
@@ -103,7 +65,7 @@ namespace Cr7Sund.Package.Impl
         {
             try
             {
-                resolver(ResolveHandler, RejectHandler);
+                resolver(Resolve, RejectWithoutDebug);
             }
             catch (Exception ex)
             {
@@ -117,12 +79,7 @@ namespace Cr7Sund.Package.Impl
             Id = Promise.NextId();
         }
 
-#if UNITY_INCLUDE_TESTS
-        public PromisedT Test_GetResolveValue()
-        {
-            return _resolveValue;
-        }
-#endif
+
 
         #region IPromiseInfo Implementation
         public IPromise<PromisedT> WithName(object name)
@@ -225,8 +182,8 @@ namespace Cr7Sund.Package.Impl
                 }
             }
 
-            ActionHandlers(resultPromise, resultPromise.ResolveHandler, RejectHandler);
-            ProgressHandlers(resultPromise, resultPromise.ProgressHandler);
+            ActionHandlers(resultPromise, resultPromise.Resolve, RejectHandler);
+            ProgressHandlers(resultPromise, resultPromise.ReportProgress);
 
             return resultPromise;
         }
@@ -285,7 +242,7 @@ namespace Cr7Sund.Package.Impl
             }
             else
             {
-                rejectHandler = resultPromise.RejectHandler;
+                rejectHandler = resultPromise.RejectWithoutDebug;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -332,7 +289,7 @@ namespace Cr7Sund.Package.Impl
                 {
                     onResolved(v)
                         .Progress(progress => resultPromise.ReportProgress(progress))
-                        .Then(resultPromise.ResolveHandler, resultPromise.RejectHandler);
+                        .Then(resultPromise.Resolve, resultPromise.RejectWithoutDebug);
                 };
             }
             else
@@ -352,7 +309,7 @@ namespace Cr7Sund.Package.Impl
             }
             else
             {
-                rejectHandler = resultPromise.RejectHandler;
+                rejectHandler = resultPromise.RejectWithoutDebug;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -411,10 +368,10 @@ namespace Cr7Sund.Package.Impl
             void ResolveHandler(PromisedT v)
             {
                 onResolved(v)
-                    .Progress(resultPromise.ProgressHandler)
+                    .Progress(resultPromise.ReportProgress)
                     .Then(
                         // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
-                        resultPromise.ResolveHandler, resultPromise.RejectHandler);
+                        resultPromise.Resolve, resultPromise.RejectWithoutDebug);
             }
 
             Action<Exception> rejectHandler;
@@ -426,8 +383,8 @@ namespace Cr7Sund.Package.Impl
                     {
                         onRejected(ex)
                             .Then(
-                                resultPromise.ResolveHandler,
-                                resultPromise.RejectHandler
+                                resultPromise.Resolve,
+                                resultPromise.RejectWithoutDebug
                             );
                     }
                     catch (Exception callbackEx)
@@ -438,7 +395,7 @@ namespace Cr7Sund.Package.Impl
             }
             else
             {
-                rejectHandler = resultPromise.RejectHandler;
+                rejectHandler = resultPromise.RejectWithoutDebug;
             }
 
             ActionHandlers(resultPromise, ResolveHandler, rejectHandler);
@@ -510,7 +467,7 @@ namespace Cr7Sund.Package.Impl
             var promise = GetRawPromise<PromisedT>();
             promise.WithName(Name);
 
-            Then(promise.ResolveHandler);
+            Then(promise.Resolve);
             Catch(e =>
             {
                 // Something different from continue with
@@ -676,13 +633,13 @@ namespace Cr7Sund.Package.Impl
         {
             if (_rejectHandlers == null)
             {
-                if (_rejectListPool.Count == 0)
+                if (!Promise._rejectListPool.TryPop(out var result))
                 {
-                    _rejectHandlers = new List<RejectHandler>();
+                    _rejectHandlers = new ListPoolNode<RejectHandler>();
                 }
                 else
                 {
-                    _rejectHandlers = _rejectListPool.Dequeue();
+                    _rejectHandlers = result;
                 }
             }
 
@@ -697,13 +654,16 @@ namespace Cr7Sund.Package.Impl
         {
             if (_resolveHandlers == null)
             {
-                if (_resolveListPool.Count == 0)
+                if (_resolveHandlers == null)
                 {
-                    _resolveHandlers = new List<ResolveHandler<PromisedT>>();
-                }
-                else
-                {
-                    _resolveHandlers = _resolveListPool.Dequeue();
+                    if (!_resolveListPool.TryPop(out var result))
+                    {
+                        _resolveHandlers = new ListPoolNode<ResolveHandler<PromisedT>>();
+                    }
+                    else
+                    {
+                        _resolveHandlers = result;
+                    }
                 }
             }
             _resolveHandlers.Add(new ResolveHandler<PromisedT>
@@ -717,13 +677,13 @@ namespace Cr7Sund.Package.Impl
         {
             if (_progressHandlers == null)
             {
-                if (_progressListPool.Count == 0)
+                if (!Promise._progressListPool.TryPop(out var result))
                 {
-                    _progressHandlers = new List<ProgressHandler>();
+                    _progressHandlers = new ListPoolNode<ProgressHandler>();
                 }
                 else
                 {
-                    _progressHandlers = _progressListPool.Dequeue();
+                    _progressHandlers = result;
                 }
             }
             _progressHandlers.Add(new ProgressHandler
@@ -782,21 +742,22 @@ namespace Cr7Sund.Package.Impl
             _resolveHandlers?.Clear();
             _progressHandlers?.Clear();
 
-            _rejectHandlers = null;
-            _resolveHandlers = null;
-            _progressHandlers = null;
             if (_resolveHandlers != null)
             {
-                _resolveListPool.Enqueue(_resolveHandlers);
+                _resolveListPool.TryPush(_resolveHandlers);
             }
             if (_rejectHandlers != null)
             {
-                _rejectListPool.Enqueue(_rejectHandlers);
+                Promise._rejectListPool.TryPush(_rejectHandlers);
             }
             if (_progressHandlers != null)
             {
-                _progressListPool.Enqueue(_progressHandlers);
+                Promise._progressListPool.TryPush(_progressHandlers);
             }
+
+            _rejectHandlers = null;
+            _resolveHandlers = null;
+            _progressHandlers = null;
         }
 
         protected void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)
@@ -1142,19 +1103,19 @@ namespace Cr7Sund.Package.Impl
                                 float sliceLength = 1f / count;
                                 promise.ReportProgress(sliceLength * (v + itemSequence));
                             })
-                            .Then(newPromise.ResolveHandler,
+                            .Then(newPromise.Resolve,
                                 _ =>
                                 {
                                     float sliceLength = 1f / count;
                                     promise.ReportProgress(sliceLength * itemSequence);
 
                                     fn()
-                                        .Then(newPromise.ResolveHandler)
-                                        .Catch(newPromise.RejectHandler);
+                                        .Then(newPromise.Resolve)
+                                        .Catch(newPromise.RejectWithoutDebug);
                                 });
                         return newPromise;
                     })
-                .Then(promise.ResolveHandler)
+                .Then(promise.Resolve)
                 .Catch(ex =>
                 {
                     promise.ReportProgress(1f);
@@ -1164,6 +1125,20 @@ namespace Cr7Sund.Package.Impl
             return promise;
         }
         #endregion
+        #endregion
+
+        #region  UnityTest
+#if UNITY_INCLUDE_TESTS
+        public PromisedT Test_GetResolveValue()
+        {
+            return _resolveValue;
+        }
+
+        public static int Test_GetResolveListPoolCount()
+        {
+            return _resolveListPool.Size;
+        }
+#endif
         #endregion
     }
 

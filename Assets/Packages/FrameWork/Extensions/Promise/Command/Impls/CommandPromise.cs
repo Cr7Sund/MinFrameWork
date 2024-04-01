@@ -18,6 +18,10 @@ namespace Cr7Sund.Package.Impl
         private Action<PromisedT> _executeHandler;
         private Action<float> _sequenceProgressHandler;
         private Action<float> _commandProgressHandler;
+        private Action<PromisedT> _resolveHandler;
+        private Action<Exception> _rejectHandler;
+        private Action<float> _progressHandler;
+
         private List<IBasePromise> _promisePoolList;
 
 
@@ -69,7 +73,39 @@ namespace Cr7Sund.Package.Impl
                 return _commandProgressHandler;
             }
         }
-
+        public Action<PromisedT> ResolveHandler
+        {
+            get
+            {
+                if (_resolveHandler == null)
+                {
+                    _resolveHandler = Resolve;
+                }
+                return _resolveHandler;
+            }
+        }
+        public Action<Exception> RejectHandler
+        {
+            get
+            {
+                if (_rejectHandler == null)
+                {
+                    _rejectHandler = RejectWithoutDebug;
+                }
+                return _rejectHandler;
+            }
+        }
+        public Action<float> ProgressHandler
+        {
+            get
+            {
+                if (_progressHandler == null)
+                {
+                    _progressHandler = ReportProgress;
+                }
+                return _progressHandler;
+            }
+        }
 
 
         #region IPromiseCommand Implementation
@@ -264,11 +300,9 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
-            if (!IsOnceOff)
-            {
-                base.ClearHandlers();
-            }
+
             Release();
+            base.Dispose();
         }
 
         protected override Promise<T> GetRawPromise<T>()

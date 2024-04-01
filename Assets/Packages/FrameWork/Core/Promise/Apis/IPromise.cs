@@ -9,8 +9,6 @@ namespace Cr7Sund.Package.Api
     /// </summary>
     public interface IPromise<PromisedT> : IPendingPromise<PromisedT>, IBasePromise
     {
-        Action<PromisedT> ResolveHandler { get; }
-
         /// <summary>
         /// Sets the name of the promise, useful for debugging.
         /// </summary>

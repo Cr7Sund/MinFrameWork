@@ -9,6 +9,10 @@ namespace Cr7Sund.Package.Api
     public interface ICommandPromise : IPromise, ISequence, IPoolable, IResetable
     {
         /// <summary>
+        /// Gets the handler for the reject action.
+        /// </summary>
+        Action<Exception> RejectHandler{get;}
+        /// <summary>
         /// Gets the handler for the execute action.
         /// </summary>
         Action ExecuteHandler { get; }

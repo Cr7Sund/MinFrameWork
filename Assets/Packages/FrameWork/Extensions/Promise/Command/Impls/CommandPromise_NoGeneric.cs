@@ -13,6 +13,10 @@ namespace Cr7Sund.Package.Impl
         public Action<Exception> ErrorHandler;
 
         private IBaseCommand _command;
+        private Action _resolveHandler;
+        private Action<Exception> _rejectHandler;
+        private Action<float> _progressHandler;
+        private Action<Exception> _exceptionResolveHandler;
         private Action _executeHandler;
         private Action<float> _sequenceProgressHandler;
         private Action<float> _commandProgressHandler;
@@ -23,6 +27,50 @@ namespace Cr7Sund.Package.Impl
         public int SequenceID { get; set; }
         public bool IsRetain { get; private set; }
         public bool IsOnceOff { get; set; }
+        public Action ResolveHandler
+        {
+            get
+            {
+                if (_resolveHandler == null)
+                {
+                    _resolveHandler = Resolve;
+                }
+                return _resolveHandler;
+            }
+        }
+        public Action<Exception> RejectHandler
+        {
+            get
+            {
+                if (_rejectHandler == null)
+                {
+                    _rejectHandler = RejectWithoutDebug;
+                }
+                return _rejectHandler;
+            }
+        }
+        public Action<float> ProgressHandler
+        {
+            get
+            {
+                if (_progressHandler == null)
+                {
+                    _progressHandler = ReportProgress;
+                }
+                return _progressHandler;
+            }
+        }
+        public Action<Exception> ExceptionResolveHandler
+        {
+            get
+            {
+                if (_exceptionResolveHandler == null)
+                {
+                    _exceptionResolveHandler = _ => Resolve();
+                }
+                return _exceptionResolveHandler;
+            }
+        }
         public Action ExecuteHandler
         {
             get
@@ -71,11 +119,8 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
-            if (!IsOnceOff)
-            {
-                base.ClearHandlers();
-            }
             Release();
+            base.Dispose();
         }
 
         protected override void ClearHandlers()
@@ -118,6 +163,8 @@ namespace Cr7Sund.Package.Impl
                 resultPromise = new CommandPromise();
                 InitNoValuePromise(resultPromise);
             }
+
+            AssertUtil.IsTrue(resultPromise.CurState == PromiseState.Pending);
             return resultPromise;
         }
 

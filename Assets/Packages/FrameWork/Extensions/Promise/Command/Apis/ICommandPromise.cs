@@ -11,7 +11,9 @@ namespace Cr7Sund.Package.Api
         Action<PromisedT> ExecuteHandler { get; }
         Action<float> SequenceProgressHandler { get; }
         Action<float> CommandProgressHandler { get; }
-
+        Action<Exception> RejectHandler { get; }
+        Action<float> ProgressHandler { get; }
+        
         /// <summary>
         /// Chains a new command provided by type.
         /// </summary>

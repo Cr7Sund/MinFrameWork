@@ -3,8 +3,6 @@ namespace Cr7Sund.Package.Api
 {
     public interface IBasePromise : IDisposable
     {
-        Action<Exception> RejectHandler { get; }
-        Action<float> ProgressHandler { get; }
         PromiseState CurState { get; }
         
         /// <summary>

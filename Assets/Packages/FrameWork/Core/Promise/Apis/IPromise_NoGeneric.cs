@@ -9,11 +9,6 @@ namespace Cr7Sund.Package.Api
     public interface IPromise : IPendingPromise, IBasePromise
     {
         /// <summary>
-        /// Gets the handler for resolution.
-        /// </summary>
-        Action ResolveHandler { get; }
-
-        /// <summary>
         /// Sets the name of the promise, useful for debugging.
         /// </summary>
         IPromise WithName(object name);
