@@ -383,10 +383,10 @@ namespace Cr7Sund.Server.Impl
         {
             _focusNode = assetNode;
 
-            System.Func<System.Exception, IPromise<INode>> OnRejected = (ex) => OnFailLoadedNode(assetNode, ex);
             return _parentNode
                 .AddChildAsync(assetNode)
-                .Then(OnAddLoadedNode, OnRejected);
+                .Then(OnAddLoadedNode)
+                .Catch((ex) => OnFailLoadedNode(assetNode, ex));
         }
 
         private IPromise<INode> AddNodeFromRemoving(INode assetNode, bool overwrite)
@@ -432,12 +432,12 @@ namespace Cr7Sund.Server.Impl
                     return Promise<INode>.Resolved(node);
                 });
         }
-        private IPromise<INode> OnFailLoadedNode(INode node, System.Exception ex)
+        private INode OnFailLoadedNode(INode node, System.Exception ex)
         {
             UnFreeze();
             DispatchAddEnd(node.Key);
             _treeNodes.Remove(node.Key);
-            return Promise<INode>.RejectedWithoutDebug(ex);
+            return  node;
         }
 
         protected virtual void DispatchSwitch(IAssetKey curNode, IAssetKey lastNode)

@@ -26,7 +26,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
 
             var pendingPromise2 = new Promise<object>();
             Assert.AreEqual(PromiseState.Pending, pendingPromise2.CurState);
-            pendingPromise2.Reject(new Exception());
+            pendingPromise2.RejectWithoutDebug(new Exception());
             Assert.AreEqual(PromiseState.Rejected, pendingPromise2.CurState);
         }
 
@@ -76,7 +76,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             {
                 LogAssert.ignoreFailingMessages = true;
                 var rejectedPromise = new Promise<object>();
-                rejectedPromise.Reject(new Exception());
+                rejectedPromise.RejectWithoutDebug(new Exception());
 
                 var promiseException = Assert.Throws<MyException>(() => rejectedPromise.Resolve(new object()));
                 Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
@@ -98,9 +98,9 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     ++handled;
                 });
 
-                rejectedPromise.Reject(reason);
+                rejectedPromise.RejectWithoutDebug(reason);
 
-                var promiseException = Assert.Throws<MyException>(() => rejectedPromise.Reject(new Exception()));
+                var promiseException = Assert.Throws<MyException>(() => rejectedPromise.RejectWithoutDebug(new Exception()));
                 Assert.AreEqual(PromiseExceptionType.Valid_REJECTED_STATE, promiseException.Type);
                 Assert.AreEqual(1, handled);
             }

@@ -103,7 +103,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 .Then(v => promiseB, null)
                 .Progress(v => promiseC.ReportProgress(0.2f + 0.8f * v))
                 .Then(v => promiseC.Resolve(v))
-                .Catch(ex => promiseC.Reject(ex))
+                .Catch(ex => promiseC.RejectWithoutDebug(ex))
                 ;
 
             promiseA.ReportProgress(0.5f);
@@ -161,7 +161,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         {
             LogAssert.ignoreFailingMessages = true;
             var promise = new Promise<int>();
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             var promiseException = Assert.Throws<MyException>(() => promise.ReportProgress(1f));
             Assert.AreEqual(PromiseExceptionType.Valid_PROGRESS_STATE, promiseException.Type);
@@ -192,10 +192,10 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 });
 
             var exception = new Exception();
-            promiseA.Reject(exception);
-            promiseC.Reject(exception);
-            promiseB.Reject(exception);
-            promiseD.Reject(exception);
+            promiseA.RejectWithoutDebug(exception);
+            promiseC.RejectWithoutDebug(exception);
+            promiseB.RejectWithoutDebug(exception);
+            promiseD.RejectWithoutDebug(exception);
 
             Assert.AreEqual(expectedProgress.Length, currentStep);
         }

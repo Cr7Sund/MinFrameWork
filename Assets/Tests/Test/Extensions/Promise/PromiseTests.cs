@@ -55,9 +55,9 @@ namespace Cr7Sund.PackageTest.PromiseTest
             LogAssert.ignoreFailingMessages = true;
             var promise = new Promise<int>();
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
-            var promiseException = Assert.Throws<MyException>(() => promise.Reject(new Exception()));
+            var promiseException = Assert.Throws<MyException>(() => promise.RejectWithoutDebug(new Exception()));
             Assert.AreEqual(PromiseExceptionType.Valid_REJECTED_STATE, promiseException.Type);
         }
 
@@ -68,7 +68,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             promise.Resolve(5);
 
-            var promiseException = Assert.Throws<MyException>(() => promise.Reject(new Exception()));
+            var promiseException = Assert.Throws<MyException>(() => promise.RejectWithoutDebug(new Exception()));
             Assert.AreEqual(PromiseExceptionType.Valid_REJECTED_STATE, promiseException.Type);
         }
 
@@ -78,7 +78,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             LogAssert.ignoreFailingMessages = true;
             var promise = new Promise<int>();
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             var promiseException = Assert.Throws<MyException>(() => promise.Resolve(5));
             Assert.AreEqual(PromiseExceptionType.Valid_RESOLVED_STATE, promiseException.Type);
@@ -163,7 +163,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 ++completed;
             });
 
-            promise.Reject(ex);
+            promise.RejectWithoutDebug(ex);
 
             Assert.AreEqual(1, completed);
         }
@@ -188,7 +188,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 Assert.AreEqual(2, ++completed);
             });
 
-            promise.Reject(ex);
+            promise.RejectWithoutDebug(ex);
 
             Assert.AreEqual(2, completed);
         }
@@ -200,7 +200,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             var promise = new Promise<int>();
 
             var ex = new Exception();
-            promise.Reject(ex);
+            promise.RejectWithoutDebug(ex);
 
             int completed = 0;
             promise.Catch(e =>
@@ -230,7 +230,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             promise.Then(v => throw new Exception("This shouldn't happen"));
 
-            promise.Reject(new Exception("Rejection!"));
+            promise.RejectWithoutDebug(new Exception("Rejection!"));
         }
 
         [Test]
@@ -619,7 +619,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 int errors = 0;
                 all.Catch(e => ++errors);
 
-                promise1.Reject(new Exception("Error!"));
+                promise1.RejectWithoutDebug(new Exception("Error!"));
                 promise2.Resolve(2);
 
                 Assert.AreEqual(1, errors);
@@ -642,7 +642,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 int errors = 0;
                 all.Catch(e => ++errors);
 
-                promise1.Reject(new Exception("Error!"));
+                promise1.RejectWithoutDebug(new Exception("Error!"));
                 promise2.Resolve(true);
 
                 Assert.AreEqual(1, errors);
@@ -666,7 +666,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 all.Catch(e => ++errors);
 
                 promise1.Resolve(2);
-                promise2.Reject(new Exception("Error!"));
+                promise2.RejectWithoutDebug(new Exception("Error!"));
 
                 Assert.AreEqual(1, errors);
             });
@@ -689,7 +689,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 all.Catch(e => ++errors);
 
                 promise1.Resolve(2);
-                promise2.Reject(new Exception("Error!"));
+                promise2.RejectWithoutDebug(new Exception("Error!"));
 
                 Assert.AreEqual(1, errors);
             });
@@ -711,8 +711,8 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 int errors = 0;
                 all.Catch(e => { ++errors; });
 
-                promise1.Reject(new Exception("Error!"));
-                promise2.Reject(new Exception("Error!"));
+                promise1.RejectWithoutDebug(new Exception("Error!"));
+                promise2.RejectWithoutDebug(new Exception("Error!"));
 
                 Assert.AreEqual(1, errors);
             });
@@ -734,8 +734,8 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 int errors = 0;
                 all.Catch(e => ++errors);
 
-                promise1.Reject(new Exception("Error!"));
-                promise2.Reject(new Exception("Error!"));
+                promise1.RejectWithoutDebug(new Exception("Error!"));
+                promise2.RejectWithoutDebug(new Exception("Error!"));
 
                 Assert.AreEqual(1, errors);
             });
@@ -877,7 +877,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     ++errors;
                 });
 
-            promise.Reject(ex);
+            promise.RejectWithoutDebug(ex);
 
             Assert.AreEqual(1, errors);
         }
@@ -992,7 +992,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     ++errors;
                 });
 
-            promise.Reject(ex);
+            promise.RejectWithoutDebug(ex);
 
             Assert.AreEqual(1, errors);
         }
@@ -1099,8 +1099,8 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
                 var exception2 = new Exception();
                 var exception1 = new Exception();
-                promise1.Reject(exception1);
-                promise2.Reject(exception2);
+                promise1.RejectWithoutDebug(exception1);
+                promise2.RejectWithoutDebug(exception2);
 
                 Assert.AreEqual(typeof(PromiseGroupException), ex.GetType());
                 Assert.AreEqual(exception1, ((PromiseGroupException)ex).Exceptions[0]);
@@ -1126,7 +1126,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     .Catch(e => ex = e);
 
                 var exception = new Exception();
-                promise1.Reject(exception);
+                promise1.RejectWithoutDebug(exception);
                 promise2.Resolve(expected);
 
                 Assert.IsNull(ex);
@@ -1153,7 +1153,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
 
                 var exception = new Exception();
-                promise2.Reject(exception);
+                promise2.RejectWithoutDebug(exception);
                 promise1.Resolve(expected);
 
                 Assert.IsNull(ex);
@@ -1217,7 +1217,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     .Catch(e => ex = e);
 
                 var expected = new Exception();
-                promise1.Reject(expected);
+                promise1.RejectWithoutDebug(expected);
 
                 Assert.AreEqual(expected, ex);
             });
@@ -1239,7 +1239,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     .Catch(e => ex = e);
 
                 var expected = new Exception();
-                promise2.Reject(expected);
+                promise2.RejectWithoutDebug(expected);
 
                 Assert.AreEqual(expected, ex);
             });
@@ -1266,7 +1266,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     .Catch(e => ex = e);
 
                 var expected = new Exception();
-                promise2.Reject(expected);
+                promise2.RejectWithoutDebug(expected);
 
                 Assert.AreEqual(expected, ex);
             });
@@ -1560,7 +1560,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             promise.Finally(() => ++callback);
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(1, callback);
         }
@@ -1598,7 +1598,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 .Finally(() => ++callback)
                 .Catch(_ => ++callback);
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(2, callback);
         }
@@ -1617,7 +1617,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                 })
                 .Then(() => ++callback);
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(2, callback);
         }
@@ -1640,7 +1640,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     ++callback;
                 });
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(2, callback);
         }
@@ -1705,7 +1705,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     ++callback;
                 });
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(2, callback);
         }
@@ -1730,7 +1730,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     ++callback;
                 });
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(2, callback);
         }
@@ -1755,7 +1755,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
                     ++callback;
                 });
 
-            promise.Reject(new Exception());
+            promise.RejectWithoutDebug(new Exception());
 
             Assert.AreEqual(2, callback);
         }

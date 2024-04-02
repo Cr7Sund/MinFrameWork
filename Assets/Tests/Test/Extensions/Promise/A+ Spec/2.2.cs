@@ -68,7 +68,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     ++errors;
                 });
 
-                promise.Reject(e);
+                promise.RejectWithoutDebug(e);
 
                 Assert.AreEqual(0, resolved);
                 Assert.AreEqual(1, errors);
@@ -96,7 +96,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     ++errors;
                 });
 
-                promise.Reject(e);
+                promise.RejectWithoutDebug(e);
 
                 Assert.AreEqual(0, resolved);
                 Assert.AreEqual(1, errors);
@@ -190,7 +190,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     }
                 );
 
-                promise.Reject(rejectedReason);
+                promise.RejectWithoutDebug(rejectedReason);
 
                 Assert.True(errored);
             }
@@ -224,7 +224,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     ex => ++errored
                 );
 
-                promise.Reject(rejectedReason);
+                promise.RejectWithoutDebug(rejectedReason);
 
                 Assert.AreEqual(1, errored);
             }
@@ -326,7 +326,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     Assert.AreEqual(3, ++order);
                 });
 
-                promise.Reject(new Exception());
+                promise.RejectWithoutDebug(new Exception());
 
                 Assert.AreEqual(3, order);
             }
@@ -383,7 +383,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                     ++promise2CatchHandler;
                 });
 
-                promise1.Reject(e);
+                promise1.RejectWithoutDebug(e);
 
                 Assert.AreEqual(1, promise2CatchHandler);
             }
@@ -585,7 +585,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
                         ++errorHandledForPromise2;
                     });
 
-                    promise1.Reject(new Exception());
+                    promise1.RejectWithoutDebug(new Exception());
 
                     Assert.AreEqual(1, errorHandledForPromise2);
                 }

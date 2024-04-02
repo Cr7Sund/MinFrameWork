@@ -300,7 +300,6 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
-
             Release();
             base.Dispose();
         }

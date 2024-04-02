@@ -5,11 +5,12 @@ using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
 namespace Cr7Sund.Package.Impl
 {
-    public class Promise<PromisedT> : IPromise<PromisedT>
+    public class Promise<PromisedT> : IPromise<PromisedT>, IPromiseTaskSource<PromisedT>, IPoolNode<Promise<PromisedT>>
     {
         #region Static Fields
         private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
         private static ReusablePool<ListPoolNode<ResolveHandler<PromisedT>>> _resolveListPool;
+        private static ReusablePool<Promise<PromisedT>> _taskPool;
         #endregion
 
         #region Fields
@@ -33,20 +34,18 @@ namespace Cr7Sund.Package.Impl
         ///     The value when the promises is resolved.
         /// </summary>
         protected PromisedT _resolveValue;
-        private Action<PromisedT> _resolveHandler;
-        private Action<Exception> _rejectHandler;
-        private Action<float> _progressHandler;
+        private Promise<PromisedT> _nextNode;
         #endregion
 
         #region Properties
         public int Id
         {
-            get;
+            get; set;
         }
-
         public object Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
-
+        public ref Promise<PromisedT> NextNode => ref _nextNode;
+        public bool IsRecycled { get; set; }
         #endregion
 
         public Promise()
@@ -79,6 +78,14 @@ namespace Cr7Sund.Package.Impl
             Id = Promise.NextId();
         }
 
+        public static Promise<PromisedT> Create()
+        {
+            if (!_taskPool.TryPop(out var promise))
+            {
+                promise = new Promise<PromisedT>();
+            }
+            return promise;
+        }
 
 
         #region IPromiseInfo Implementation
@@ -90,15 +97,21 @@ namespace Cr7Sund.Package.Impl
 
         public virtual void Dispose()
         {
-            ClearHandlers();
             if (_resolveValue is IDisposable disposable)
             {
                 disposable?.Dispose();
             }
-
+            ClearHandlers();
             Name = string.Empty;
             _resolveValue = default;
             CurState = PromiseState.Pending;
+            Id = -1;
+        }
+
+        public virtual void TryReturn()
+        {
+            Dispose();
+            _taskPool.TryPush(this);
         }
         #endregion
 
@@ -539,7 +552,10 @@ namespace Cr7Sund.Package.Impl
             {
                 throw new MyException(PromiseExceptionType.Valid_RESOLVED_STATE);
             }
-
+            if (IsRecycled)
+            {
+                throw new Exception("can resolve twice, since it has been recycled");
+            }
             _resolveValue = value;
             CurState = PromiseState.Resolved;
 
@@ -549,6 +565,12 @@ namespace Cr7Sund.Package.Impl
             }
 
             InvokeResolveHandlers(value);
+        }
+
+        public async PromiseTask<PromisedT> ResolveAsync(PromisedT value)
+        {
+            Resolve(value);
+            return await AsTask();
         }
 
         public void ReportProgress(float progress)
@@ -573,6 +595,10 @@ namespace Cr7Sund.Package.Impl
             if (CurState != PromiseState.Pending)
             {
                 throw new MyException(PromiseExceptionType.Valid_REJECTED_STATE);
+            }
+            if (IsRecycled)
+            {
+                throw new Exception("can reject twice, since it has been recycled");
             }
 
             _rejectionException = ex;
@@ -599,6 +625,76 @@ namespace Cr7Sund.Package.Impl
             ClearHandlers();
         }
 
+        #endregion
+
+        #region ITaskSource
+        public PromisedT GetResult(short token)
+        {
+            var returnResult = _resolveValue;
+            if (_rejectionException != null)
+            {
+                // PLAN handle cancel
+                var tmpEx = _rejectionException;
+                TryReturn();
+                throw tmpEx;
+            }
+
+            TryReturn();
+            return returnResult;
+        }
+
+        public PromiseTaskStatus GetStatus(short token)
+        {
+            return CurState.ToTaskStatus();
+        }
+
+        void IPromiseTaskSource.GetResult(short token)
+        {
+            if (_rejectionException != null)
+            {
+                // PLAN handle cancel
+                var tmpEx = _rejectionException;
+                TryReturn();
+
+                throw tmpEx;
+            }
+            TryReturn();
+
+        }
+
+        public PromiseTaskStatus UnsafeGetStatus()
+        {
+            return CurState.ToTaskStatus();
+        }
+
+        public void OnCompleted(Action continuation, short token)
+        {
+            AddResolveHandler(_ => continuation?.Invoke(), this);
+            AddRejectHandler(_ => continuation?.Invoke(), this);
+        }
+
+        public async PromiseTask<PromisedT> AsTask()
+        {
+            if (this.IsRecycled)
+            {
+                throw new System.Exception("cant await twice since it has been recycled");
+            }
+            switch (CurState)
+            {
+                case PromiseState.Pending:
+                    return await new PromiseTask<PromisedT>(this, 0);
+                case PromiseState.Rejected:
+                default:
+                    var tmpEx = _rejectionException;
+                    TryReturn();
+                    throw new Exception(string.Empty, tmpEx);
+                //throw tmpEx;
+                case PromiseState.Resolved:
+                    var tmpValue = _resolveValue;
+                    TryReturn();
+                    return await new PromiseTask<PromisedT>(tmpValue, 0);
+            }
+        }
         #endregion
 
         #region private methods
@@ -631,6 +727,10 @@ namespace Cr7Sund.Package.Impl
 
         protected void AddRejectHandler(Action<Exception> onRejected, IRejectable rejectable)
         {
+            if (IsRecycled)
+            {
+                throw new Exception("can not add reject handler again, since it has been recycled");
+            }
             if (_rejectHandlers == null)
             {
                 if (!Promise._rejectListPool.TryPop(out var result))
@@ -652,6 +752,10 @@ namespace Cr7Sund.Package.Impl
 
         private void AddResolveHandler(Action<PromisedT> onResolved, IRejectable rejectable)
         {
+            if (IsRecycled)
+            {
+                throw new Exception("can not add resolve handler, since it has been recycled");
+            }
             if (_resolveHandlers == null)
             {
                 if (_resolveHandlers == null)
@@ -675,6 +779,10 @@ namespace Cr7Sund.Package.Impl
 
         private void AddProgressHandler(Action<float> onProgress, IRejectable rejectable)
         {
+            if (IsRecycled)
+            {
+                throw new Exception("can not add progress handler, since it has been recycled");
+            }
             if (_progressHandlers == null)
             {
                 if (!Promise._progressListPool.TryPop(out var result))
@@ -1133,7 +1241,10 @@ namespace Cr7Sund.Package.Impl
         {
             return _resolveValue;
         }
-
+        public static int Test_GetPoolCount()
+        {
+            return _taskPool.Size;
+        }
         public static int Test_GetResolveListPoolCount()
         {
             return _resolveListPool.Size;

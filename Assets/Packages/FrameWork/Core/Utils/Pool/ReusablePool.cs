@@ -43,7 +43,7 @@ namespace Cr7Sund.FrameWork.Util
         {
             if (item.IsRecycled)
             {
-                throw new Exception("item is alread recycled");
+                throw new Exception("item is already recycled");
             }
 
             if (size < MaxPoolSize)

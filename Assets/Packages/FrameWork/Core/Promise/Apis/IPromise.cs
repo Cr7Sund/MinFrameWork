@@ -189,5 +189,7 @@ namespace Cr7Sund.Package.Api
         /// Progress callbacks will be called whenever the promise owner reports progress towards the resolution of the promise.
         /// </summary>
         IPromise<PromisedT> Progress(Action<float> onProgress);
+
+        PromiseTask<PromisedT> AsTask();
     }
 }
