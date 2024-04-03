@@ -23,7 +23,7 @@ namespace Cr7Sund.Game.GameLogic
         protected override void InitGameEnv()
         {
             InitConfig();
-            
+            InitUI();
             Debug.Debug("EditorMainController Start");
         }
 
@@ -46,8 +46,14 @@ namespace Cr7Sund.Game.GameLogic
             {
                 _configModule.GetConfig<UnityEngine.Object>(item);
             }
-            _gameInstanceContainer.LoadInstance(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
+
         }
+
+        private void InitUI()
+        {
+            _gameInstanceContainer.Instantiate(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
+        }
+        
         #endregion
 
         #region  Exit Game

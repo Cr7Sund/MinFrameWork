@@ -141,7 +141,7 @@ namespace Cr7Sund.Package.Impl
                     disposable?.Dispose();
                 }
             }
-            
+
             _objectValue = _emptyArray;
         }
 
@@ -193,4 +193,6 @@ namespace Cr7Sund.Package.Impl
         }
         #endregion
     }
+
+
 }

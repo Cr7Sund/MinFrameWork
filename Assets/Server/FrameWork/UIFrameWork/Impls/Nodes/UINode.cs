@@ -99,7 +99,7 @@ namespace Cr7Sund.Server.UI.Impl
             preparePromise = Controller.Prepare(uiKey.Intent);
             if (Application.isPlaying)
             {
-                var assetPromise = _uiContainer.GetAssetAsync(content.Key);
+                var assetPromise = _uiContainer.LoadAssetAsync(content.Key);
                 loadPromise = assetPromise.Then(_ => { });
             }
             else
@@ -119,9 +119,13 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (_uiContainer.ContainsAsset(Key))
             {
-                var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync<GameObject>(uiKey)
-                                                               : _uiContainer.CreateInstance<GameObject>(uiKey);
-                return assetPromise.Then(_ => Promise<INode>.Resolved(content));
+                var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync(uiKey)
+                                                   : _uiContainer.CreateInstance(uiKey);
+                return assetPromise.Then(asset =>
+                {
+                    View.OnLoad((GameObject)asset);
+                    return content;
+                });
             }
             else
             {
@@ -130,9 +134,9 @@ namespace Cr7Sund.Server.UI.Impl
 
                 if (Application.isPlaying)
                 {
-                    var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync<GameObject>(uiKey)
-                                                       : _uiContainer.CreateInstance<GameObject>(uiKey);
-                    loadPromise = assetPromise.Then(_ => { });
+                    var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync(uiKey)
+                                                       : _uiContainer.CreateInstance(uiKey);
+                    loadPromise = assetPromise.Then(asset => View.OnLoad((GameObject)asset));
                 }
                 else
                 {
@@ -176,12 +180,8 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override void OnStart()
         {
-            if (_uiContainer.TryGetInstance<GameObject>(Key, out var go))
-            {
-                View.Start(go, Parent);
-            }
-
             // only call once
+            View.Start(Parent);
             Controller.Start();
         }
 

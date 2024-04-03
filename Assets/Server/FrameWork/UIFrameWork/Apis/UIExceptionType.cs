@@ -37,6 +37,10 @@ namespace Cr7Sund.Server.UI.Api
         /// <summary>
         /// try to instantiate ui repeatedly
         /// </summary>
-        instantiate_UI_repeat
+        instantiate_UI_repeat,
+        /// <summary>
+        /// try to instantiate ui with no parents 
+        /// </summary>
+        null_UI_parent
     }
 }

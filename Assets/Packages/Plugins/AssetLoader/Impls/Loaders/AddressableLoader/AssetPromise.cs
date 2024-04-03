@@ -56,7 +56,7 @@ namespace Cr7Sund.AssetLoader.Impl
                 throw new MyException(AssetLoaderExceptionType.no_done_State);
             }
         }
-        public T GetResultSync<T>() where T : Object
+        public T ForceGetResult<T>() where T : Object
         {
             if (CurState == PromiseState.Rejected)
             {

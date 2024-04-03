@@ -4,7 +4,7 @@ using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.Server.UI.Impl
 {
-    public class UIPanelContainer : BaseAssetInstanceContainer, IAssetInstanceContainer
+    public class UIPanelContainer : BaseUniqueInstanceContainer, IAssetInstanceContainer
     {
         [Inject(ServerBindDefine.GameLoader)] private IAssetLoader _assetLoader;
         protected override IAssetLoader Loader => _assetLoader;

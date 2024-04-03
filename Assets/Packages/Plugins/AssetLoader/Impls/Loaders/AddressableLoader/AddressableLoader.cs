@@ -80,16 +80,6 @@ namespace Cr7Sund.AssetLoader.Impl
             return LoadInternal<T>(key.Key, true);
         }
 
-        public IAssetPromise InstantiateAsync(IAssetKey key)
-        {
-            return InstantiateInternal(key.Key, true);
-        }
-
-        public IAssetPromise Instantiate(IAssetKey key)
-        {
-            return InstantiateInternal(key.Key, false);
-        }
-
 
         public void Unload(IAssetPromise value)
         {

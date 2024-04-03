@@ -5,7 +5,7 @@ namespace Cr7Sund
         /// <summary>
         /// Update
         /// </summary>
-        /// <param name="millisecond">流逝时间, 单位：毫秒</param>
+        /// <param name="millisecond">elapsed seconds (milliseconds)</param>
         void Update(int millisecond);
     }
 }

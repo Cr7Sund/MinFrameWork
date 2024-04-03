@@ -11,7 +11,7 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         /// Sets the name of the promise, useful for debugging.
         /// </summary>
-        IPromise WithName(object name);
+        IPromise WithName(string name);
 
         /// <summary>
         /// Completes the promise.

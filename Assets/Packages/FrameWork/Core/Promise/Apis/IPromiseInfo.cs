@@ -13,6 +13,6 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     Human-readable name for the promise.
         /// </summary>
-        object Name { get; }
+        string Name { get; }
     }
 }

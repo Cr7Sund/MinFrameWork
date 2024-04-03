@@ -47,20 +47,24 @@ namespace Cr7Sund.Server.UI.Impl
         public RectTransform RectTransform { get => _rectTransform; }
         public float TransitionAnimationProgress { get; private set; }
 
-        public void Start(GameObject go, INode parent)
+        public void OnLoad(GameObject go)
         {
             //Instantiate
             AssertUtil.IsNull(_rectTransform, UIExceptionType.instantiate_UI_repeat);
 
-            _parentTransform = GetParentTrans(parent);
-
             _uiPanel = go.GetComponent<UIPanel>();
-            go.transform.SetParent(_parentTransform);
+            _identifier = go.name.Replace("(Clone)", string.Empty);
 
             _rectTransform = (RectTransform)go.transform;
             _canvasGroup = _uiPanel.GetUIComponent<CanvasGroup>(nameof(CanvasGroup));
             _canvas = _uiPanel.GetUIComponent<Canvas>(nameof(Canvas));
-            _identifier = go.name.Replace("(Clone)", string.Empty);
+        }
+
+        public void Start(INode parent)
+        {
+            AssertUtil.NotNull(parent, UIExceptionType.null_UI_parent);
+            _parentTransform = GetParentTrans(parent);
+            _uiPanel.transform.SetParent(_parentTransform);
         }
 
         public void Enable(INode parent)
@@ -234,7 +238,7 @@ namespace Cr7Sund.Server.UI.Impl
             }
             else if (parent is SceneNode sceneNode)
             {
-                return _gameContainer.LoadInstance(
+                return _gameContainer.GetInstance(
                             ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME).transform as RectTransform;
             }
 

@@ -21,8 +21,8 @@ namespace Cr7Sund.Server.UI.Api
         ///     Progress of the transition animation.
         /// </summary>
         public float TransitionAnimationProgress { get; }
-
-        void Start(GameObject asset, INode parent);
+        void OnLoad(GameObject asset);
+        void Start(INode parent);
         void Enable(INode parent);
         void BeforeEnter();
         IPromise EnterRoutine(bool push, IUINode partnerView, bool playAnimation);

@@ -64,7 +64,7 @@ namespace Cr7Sund.Package.Impl
 
         #region Properties
         public int Id { get; private set; }
-        public object Name { get; protected set; }
+        public string Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
         public ref Promise NextNode => ref _nextNode;
         public bool IsRecycled { get; set; }
@@ -112,7 +112,7 @@ namespace Cr7Sund.Package.Impl
         }
 
         #region IPromiseInfo Implementation
-        public IPromise WithName(object name)
+        public IPromise WithName(string name)
         {
             Name = name;
             return this;

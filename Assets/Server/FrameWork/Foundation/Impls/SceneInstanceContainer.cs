@@ -6,12 +6,12 @@ using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.Server.Impl
 {
-    public class SceneInstanceContainer : InstanceContainer, ISceneInstanceContainer
+    public class SceneInstanceContainer : BaseInstancesContainer, ISceneInstanceContainer
     {
         [Inject] IAssetLoader _assetLoader;
 
 
-        protected override IAssetLoader _loader => _assetLoader;
+        protected override IAssetLoader Loader => _assetLoader;
         public string SceneName { get; private set; }
 
 

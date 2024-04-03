@@ -13,10 +13,6 @@ namespace Cr7Sund.AssetLoader
             return loadPromise.GetResult<T>();
         }
 
-        public static T InstantiateSync<T>(this IAssetLoader assetLoader, IAssetKey assetKey) where T : Object
-        {
-            var loadPromise = assetLoader.Instantiate(assetKey);
-            return loadPromise.GetResult<T>();
-        }
+
     }
 }

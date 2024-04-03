@@ -6,6 +6,7 @@ using Cr7Sund.Server.Scene.Apis;
 using UnityEngine;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.Server.UI.Impl;
+using Cr7Sund.Server.Apis;
 namespace Cr7Sund.Server.Scene.Impl
 {
     public class SceneNode : ModuleNode, ISceneNode
@@ -13,6 +14,7 @@ namespace Cr7Sund.Server.Scene.Impl
         [Inject] private ISceneLoader _sceneLoader;
         [Inject] private PageContainer _pageContainer;
         [Inject(ServerBindDefine.SceneTimer)] private IPromiseTimer _sceneTimer;
+
 
         public SceneNode(IAssetKey assetKey) : base(assetKey)
         {
@@ -65,7 +67,7 @@ namespace Cr7Sund.Server.Scene.Impl
             else
             {
                 return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
-                                   .Then(() => _controllerModule.LoadAsync(content));
+                                   .Then(()=>_controllerModule.LoadAsync(content));
             }
         }
 

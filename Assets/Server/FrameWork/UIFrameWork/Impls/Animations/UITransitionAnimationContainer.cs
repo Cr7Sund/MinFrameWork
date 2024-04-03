@@ -29,7 +29,7 @@ namespace Cr7Sund.Server.UI.Impl
                 case UIAnimationAssetType.MonoBehaviour:
                     return Promise<IUITransitionAnimationBehaviour>.Resolved(animation.AnimationBehaviour);
                 case UIAnimationAssetType.ScriptableObject:
-                    var assetPromise = GetAssetAsync(animation.AnimationAsset);
+                    var assetPromise = LoadAssetAsync(animation.AnimationAsset);
                     return assetPromise
                                .Then(asset => asset as IUITransitionAnimationBehaviour);
                 default:

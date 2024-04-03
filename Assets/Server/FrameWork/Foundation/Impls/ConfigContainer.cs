@@ -18,7 +18,7 @@ namespace Cr7Sund.Server.Impl
 
         public IAssetPromise GetConfigAsync(IAssetKey assetKey)
         {
-            return base.GetAssetAsync(assetKey);
+            return base.LoadAssetAsync(assetKey);
         }
 
     }

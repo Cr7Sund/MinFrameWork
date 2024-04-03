@@ -7,11 +7,13 @@ namespace Cr7Sund.Server.Apis
 {
     public interface IInstanceContainer : IDisposable
     {
-        public GameObject CreateInstance(string name, params Type[] components);
-        public GameObject CreateInstance(string name, IAssetPromise assetPromise);
-        public T CreateInstanceWithComponent<T>(string name) where T : Object;
-        public GameObject LoadInstance(IAssetKey assetKey, string name);
-        IAssetPromise LoadInstanceAsync(IAssetKey assetKey, string name);
+        public GameObject Create(string name, params Type[] components);
+        public ComponentT Create<ComponentT>(string name) where ComponentT : Object;
+        public IAssetPromise Instantiate(IAssetKey assetKey, string name) ;
+        public IAssetPromise InstantiateAsync(IAssetKey assetKey, string name) ;
+        public GameObject GetInstance(IAssetKey assetKey, string name);
+
         void ReturnInstance(string name);
+        void ReturnInstance(string name, IAssetKey assetKey);
     }
 }
