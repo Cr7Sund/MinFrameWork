@@ -1,0 +1,46 @@
+name: UniTest 🎮
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test my project 🧪
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+          submodules: recursive
+
+      # Cache
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+
+      # Test
+      - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        id: myTestStep
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+      
+      #Code Coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Coverage results
+          path: ${{ steps.myTestStep.outputs.coveragePath }}
+     
+      # Qodana
+      - uses: JetBrains/qodana-action@v2023.3
+        env:
+          QODANA_TOKEN: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJvcmdhbml6YXRpb24iOiJBTFdkTCIsInByb2plY3QiOiJwNG93byIsInRva2VuIjoicDluOHYifQ.6ma32qvOSiAEjuWQ25xkzA_3gRgHBnW2ynHKfrU2bLc

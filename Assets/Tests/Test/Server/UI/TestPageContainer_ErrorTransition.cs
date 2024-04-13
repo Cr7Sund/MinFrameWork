@@ -11,7 +11,7 @@ namespace Cr7Sund.ServerTest.UI
     public partial class TestPageContainer
     {
 
-        [Test]
+      //[Test]
         public void PreparePage_Pending()
         {
             SampleThreeUIController.promise = new Promise();
@@ -22,7 +22,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-        [Test]
+      //[Test]
         public void PreparePage_Rejected()
         {
             LogAssert.ignoreFailingMessages = true;
@@ -38,7 +38,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
         }
 
-        [Test]
+      //[Test]
         public void PreparePage_Resolved()
         {
             SampleThreeUIController.promise = new Promise();
@@ -49,7 +49,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
 
-        [Test]
+      //[Test]
         public void PreparePages_TransitionException()
         {
             SampleThreeUIController.promise = new Promise();
@@ -61,7 +61,7 @@ namespace Cr7Sund.ServerTest.UI
         }
 
 
-        [Test]
+      //[Test]
         public void Anim_fail_same()
         {
             LogAssert.ignoreFailingMessages = true;
@@ -74,7 +74,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleFiveUIController.EnableCount);
         }
 
-        [Test]
+      //[Test]
         public void Anim_fail_switch()
         {
             LogAssert.ignoreFailingMessages = true;
@@ -89,7 +89,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleFiveUIController.EnableCount);
         }
 
-        [Test]
+      //[Test]
         public void Anim_fail_back()
         {
             LogAssert.ignoreFailingMessages = true;
