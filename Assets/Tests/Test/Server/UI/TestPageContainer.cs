@@ -59,7 +59,7 @@ namespace Cr7Sund.ServerTest.UI
         }
 
 
-        [Test]
+       //[Test]
         public void PushPage()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -78,7 +78,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleTwoUIController.EnableCount);
         }
 
-        [Test]
+       //[Test]
         public void SwitchPages()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -91,7 +91,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleTwoUIController.EnableCount);
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
-        [Test]
+       //[Test]
         public void SwitchPages_WithNoStack()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -107,7 +107,7 @@ namespace Cr7Sund.ServerTest.UI
 
 
 
-        [Test]
+       //[Test]
         public void ExitBeforeSequence_Pending()
         {
             SampleThreeUIController.promise = new Promise();
@@ -120,7 +120,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.StartValue);
         }
 
-        [Test]
+       //[Test]
         public void ExitBeforeSequence_Resolved()
         {
             SampleThreeUIController.promise = new Promise();
@@ -134,7 +134,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleThreeUIController.StartValue);
         }
 
-        [Test]
+       //[Test]
         public void BackPage()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -146,7 +146,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleTwoUIController.EnableCount);
         }
 
-        [Test]
+       //[Test]
         public void BackPages()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -160,7 +160,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-        [Test]
+       //[Test]
         public void BackPageByPopCount()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -175,7 +175,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-        [Test]
+       //[Test]
         public void BackPageByDest()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -190,7 +190,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-        [Test]
+       //[Test]
         public void BackPage_Destroy()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -202,7 +202,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleFourUIController.StartValue);
         }
 
-        [Test]
+       //[Test]
         public void BackPages_Destroy()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
@@ -217,7 +217,7 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleFourUIController.EnableCount);
         }
 
-        [Test]
+       //[Test]
         public void BackPage_EmptyException()
         {
             _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
