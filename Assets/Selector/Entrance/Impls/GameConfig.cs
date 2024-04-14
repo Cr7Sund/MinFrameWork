@@ -28,7 +28,6 @@ namespace Cr7Sund.Config
                 if (type != null)
                 {
                     var gameLogic = Activator.CreateInstance(type) as GameLogic.GameLogic;
-                    gameLogic.Init();
                     return gameLogic;
                 }
             }

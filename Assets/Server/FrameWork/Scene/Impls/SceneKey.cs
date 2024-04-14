@@ -7,7 +7,7 @@ namespace Cr7Sund.Server.Scene.Impl
 {
     public delegate SceneBuilder CreateSceneBuilderDelegate();
 
-    public struct SceneKey : ISceneKey
+    public class SceneKey : ISceneKey
     {
         private readonly Type _builderType;
 
@@ -32,5 +32,20 @@ namespace Cr7Sund.Server.Scene.Impl
         public SceneBuilder Create() => Activator.CreateInstance(_builderType) as SceneBuilder;
         public static implicit operator string(SceneKey sceneKey) => sceneKey.Key;
         public override string ToString() => Key;
+
+        public override bool Equals(object obj)
+        {
+            if (obj is IAssetKey assetKey)
+            {
+                return Key.Equals(assetKey.Key);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Key.GetHashCode();
+        }
     }
 }

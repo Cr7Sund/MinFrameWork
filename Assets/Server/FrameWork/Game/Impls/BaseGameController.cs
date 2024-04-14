@@ -1,8 +1,5 @@
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
-using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -11,20 +8,22 @@ namespace Cr7Sund.Server.Impl
         [Inject(ServerBindDefine.GameTimer)] private IPromiseTimer _gameTimer;
         [Inject(ServerBindDefine.GameLogger)] protected IInternalLog Debug;
 
-        protected sealed override void OnStart()
+        protected sealed override async PromiseTask OnStart()
         {
-            OnSplashClosed();
+           await OnSplashClosed();
         }
 
-        protected sealed override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            GameStart();
+            await GameStart();
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
             GameOver();
             // PLAN UnBind Invoke dispose
+
+            await base.OnStop();
         }
 
         protected override void OnUpdate(int millisecond)
@@ -33,25 +32,15 @@ namespace Cr7Sund.Server.Impl
         }
 
         #region  Login
-        private void OnSplashClosed()
+        private async PromiseTask OnSplashClosed()
         {
-            GameEnvInit();
+            await InitGameEnv();
         }
 
-        private void GameEnvInit()
+        private async PromiseTask GameStart()
         {
-            // InitSDK(); 
-            // NetModule.Init();
-            // InitHardware(); //_languageModule, Notch
-            InitGameEnv();
-
-        }
-
-
-        private void GameStart()
-        {
-            HandleHotfix()
-                .Then(RunLoginScene);
+            await HandleHotfix();
+            await RunLoginScene();
         }
 
         protected virtual void GameOver()
@@ -59,10 +48,9 @@ namespace Cr7Sund.Server.Impl
             Console.Info("Game Over");
         }
 
-        protected abstract void InitGameEnv();
-        protected abstract IPromise HandleHotfix();
-        protected abstract IPromise<INode> RunLoginScene();
-
+        protected abstract PromiseTask InitGameEnv();
+        protected abstract PromiseTask HandleHotfix();
+        protected abstract PromiseTask RunLoginScene();
 
         #endregion
     }

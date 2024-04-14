@@ -98,6 +98,14 @@ namespace Cr7Sund.FrameWork.Util
             }
         }
 
+        public static void IsNull(object anObject)
+        {
+            if (anObject != null)
+            {
+                throw new MyException($"expected value is  null, but it is not null");
+            }
+        }
+
         public static void IsNull<TEnum>(object anObject, TEnum errorCode) where TEnum : Enum
         {
             if (anObject != null)
@@ -271,7 +279,6 @@ namespace Cr7Sund.FrameWork.Util
             }
         }
 
-
         public static void AreNotEqual<TEnum>(object expected, object actual, TEnum errorCode) where TEnum : Enum
         {
             if (EqualWithoutBoxing(expected, actual))
@@ -295,6 +302,7 @@ namespace Cr7Sund.FrameWork.Util
                 return o1.Equals(o2);
             }
         }
+
         #endregion
     }
 }

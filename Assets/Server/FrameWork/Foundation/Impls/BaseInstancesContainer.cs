@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.AssetLoader.Impl;
 using Cr7Sund.Collection.Generic;
 using Cr7Sund.FrameWork.Util;
-using Cr7Sund.Server.Apis;
+using Cr7Sund.Server.Api;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class BaseInstancesContainer : BaseAssetContainer, IInstanceContainer
+    public abstract class BaseInstancesContainer : BaseAssetContainer, IInstancesContainer
     {
         private Dictionary<string, GameObject> _instanceContainers = new();
-        private readonly Dictionary<IAssetKey, UnsafeUnOrderList<IAssetPromise>> _instantiatePromises = new();
+        private readonly Dictionary<IAssetKey, UnsafeUnOrderList<GameObject>> _instantiatePromises = new();
 
 
 
@@ -41,73 +39,60 @@ namespace Cr7Sund.Server.Impl
             return instance.GetComponent<ComponentT>();
         }
 
-
-        public IAssetPromise Instantiate(IAssetKey assetKey, string name)
+        public async PromiseTask<T> Instantiate<T>(IAssetKey assetKey, string name) where T : Object
         {
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
             {
-                int count = instances.Count;
                 foreach (var item in instances)
                 {
-                    if (item.Name == name)
+                    if (item.name == name)
                     {
-                        return item;
+                        return item as T;
                     }
                 }
             }
 
-            if (_instanceContainers.ContainsKey(name))
-            {
-                return AssetPromise.Rejected(new MyException("DuplicateName")) as IAssetPromise;
-            }
+            // there exist same game object instantiate not by asset
+            AssertUtil.IsFalse(_instanceContainers.ContainsKey(name));
 
-
-            var asset = LoadAsset(assetKey).ForceGetResult<Object>(); // resolved
+            var asset = await base.LoadAsset<T>(assetKey); // resolved
             var instance = InstantiateAsset(asset, name);
-            var instancePromise = new AssetPromise();
-            var promiseList = new UnsafeUnOrderList<IAssetPromise>();
+            if (!_instantiatePromises.TryGetValue(assetKey, out var promiseList))
+            {
+                promiseList = new UnsafeUnOrderList<GameObject>();
+                _instantiatePromises.Add(assetKey, promiseList);
+            }
+            promiseList.AddLast(instance as GameObject);
 
-            instancePromise.WithName(name);
-            instancePromise.Resolve(instance);
-
-            promiseList.AddLast(instancePromise);
-            _instantiatePromises.Add(assetKey, promiseList);
-
-            return instancePromise;
+            return instance;
         }
 
-        public IAssetPromise InstantiateAsync(IAssetKey assetKey, string name)
+        public async PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name) where T : Object
         {
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
             {
-                int count = instances.Count;
                 foreach (var item in instances)
                 {
-                    if (item.Name == name)
+                    if (item.name == name)
                     {
-                        return item;
+                        return item as T;
                     }
                 }
             }
 
-            if (_instanceContainers.ContainsKey(name))
+            // there exist same game object instantiate not by asset
+            AssertUtil.IsFalse(_instanceContainers.ContainsKey(name));
+
+            var asset = await base.LoadAssetAsync<T>(assetKey);
+            var instance = InstantiateAsset(asset, name);
+            if (!_instantiatePromises.TryGetValue(assetKey, out var promiseList))
             {
-                return AssetPromise.Rejected(new MyException("DuplicateName")) as IAssetPromise;
+                promiseList = new UnsafeUnOrderList<GameObject>();
+                _instantiatePromises.Add(assetKey, promiseList);
             }
+            promiseList.AddLast(instance as GameObject);
 
-            var instancePromise = new AssetPromise();
-            instancePromise.WithName(name);
-            var promiseList = new UnsafeUnOrderList<IAssetPromise>();
-            promiseList.AddLast(instancePromise);
-            _instantiatePromises.Add(assetKey, promiseList);
-
-            LoadAssetAsync(assetKey).Then((asset) =>
-            {
-                var instance = InstantiateAsset(asset, name);
-                instancePromise.Resolve(instance);
-            });
-
-            return instancePromise;
+            return instance;
         }
 
         public GameObject GetInstance(IAssetKey assetKey, string name)
@@ -144,41 +129,51 @@ namespace Cr7Sund.Server.Impl
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
             {
                 int count = instances.Count;
-                IAssetPromise targetPromise = null;
+                GameObject target = null;
                 foreach (var item in instances)
                 {
-                    if (item.Name == name)
+                    if (item.name == name)
                     {
-                        targetPromise = item;
+                        target = item;
                         break;
                     }
                 }
 
-                _instantiatePromises[assetKey].Remove(targetPromise);
+                _instantiatePromises[assetKey].Remove(target);
             }
             if (_instantiatePromises[assetKey].Count == 0)
             {
                 base.Unload(assetKey);
+                _instantiatePromises.Remove(assetKey);
             }
         }
 
-        public override void Dispose()
+        public override void UnloadAll()
         {
             foreach (var item in _instanceContainers)
             {
                 GameObject.Destroy(item.Value);
             }
+            _instanceContainers.Clear();
 
             foreach (var item in _instantiatePromises)
             {
                 foreach (var instance in item.Value)
                 {
-                    instance.Dispose();
+                    GameObject.Destroy(instance);
                 }
+                base.Unload(item.Key);
                 item.Value.Clear();
             }
+            _instantiatePromises.Clear();
+
+            base.UnloadAll();
+        }
+
+        public override void Dispose()
+        {
             base.Dispose();
-            _instanceContainers.Clear();
+            AssertUtil.LessOrEqual(_instanceContainers.Count, 0);
         }
 
         protected abstract void MoveInstanceToScene(GameObject instance);
@@ -192,7 +187,6 @@ namespace Cr7Sund.Server.Impl
             _instanceContainers.Add(name, instance as GameObject);
             return instance;
         }
-
 
     }
 }

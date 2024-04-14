@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cr7Sund.AssetLoader.Api;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
 using Object = UnityEngine.Object;
 
@@ -8,52 +10,38 @@ namespace Cr7Sund.Server.Impl
 {
     public abstract class BaseAssetContainer : IAssetContainer
     {
-        private Dictionary<IAssetKey, IAssetPromise> _containers = new();
+        private Dictionary<IAssetKey, Object> _containers = new();
 
         protected abstract IAssetLoader Loader { get; }
 
-
-        public IAssetPromise LoadAsset(IAssetKey assetKey)
+        public async PromiseTask<T> LoadAsset<T>(IAssetKey assetKey) where T : Object
         {
-            if (_containers.ContainsKey(assetKey))
+            if (!_containers.ContainsKey(assetKey))
             {
-                _containers[assetKey].ForceGetResult<Object>();
-                return _containers[assetKey];
+                var asset = await Loader.Load<T>(assetKey);
+                _containers.Add(assetKey, asset);
             }
-            else
-            {
-                var promise = Loader.Load<Object>(assetKey);
-                _containers.Add(assetKey, promise);
-                return promise;
-            }
+
+            return _containers[assetKey] as T;
         }
 
-        public IAssetPromise LoadAssetAsync(IAssetKey assetKey)
+        public async PromiseTask<T> LoadAssetAsync<T>(IAssetKey assetKey) where T : Object
         {
-            if (_containers.ContainsKey(assetKey))
+            if (!_containers.ContainsKey(assetKey))
             {
-                return _containers[assetKey];
+                var asset = await Loader.LoadAsync<T>(assetKey);
+                _containers.Add(assetKey, asset);
             }
-            else
-            {
-                var promise = Loader.LoadAsync<Object>(assetKey);
-                _containers.Add(assetKey, promise);
-                return promise;
-            }
+
+            return _containers[assetKey] as T;
         }
 
-        [Obsolete]
-        public T GetAssetSync<T>(IAssetKey assetKey) where T : Object
+        public void RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation)
         {
             if (_containers.ContainsKey(assetKey))
             {
-                return _containers[assetKey].ForceGetResult<T>();
-            }
-            else
-            {
-                var promise = Loader.Load<T>(assetKey);
-                _containers.Add(assetKey, promise);
-                return promise.ForceGetResult<T>();
+                Loader.RegisterCancelLoad(assetKey, cancellation);
+                _containers.Remove(assetKey);
             }
         }
 
@@ -61,23 +49,24 @@ namespace Cr7Sund.Server.Impl
         {
             if (_containers.ContainsKey(key))
             {
-                Loader.Unload(_containers[key]);
+                Loader.Unload(key);
                 _containers.Remove(key);
             }
         }
 
-        public bool ContainsAsset(IAssetKey key) => _containers.ContainsKey(key);
-
-        public virtual void Dispose()
+        public virtual void UnloadAll()
         {
             foreach (var item in _containers)
             {
-                Loader.Unload(item.Value);
+                Loader.Unload(item.Key);
             }
-
             _containers.Clear();
         }
 
+        public virtual void Dispose()
+        {
+            AssertUtil.LessOrEqual(_containers.Count, 0);
+        }
 
     }
 }

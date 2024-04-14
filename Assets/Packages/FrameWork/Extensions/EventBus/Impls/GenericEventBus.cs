@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.EventBus.Api;
+using Cr7Sund.Package.Impl;
 
 namespace Cr7Sund.Package.EventBus.Impl
 {
@@ -12,7 +13,7 @@ namespace Cr7Sund.Package.EventBus.Impl
 	/// If you want to be able to raise events that are targeted to specific objects and that can have source objects, use <see cref="GenericEventBus{TBaseEvent}"/> instead.
 	/// </summary>
 	/// <typeparam name="TBaseEvent"><para>The base type all events must inherit/implement.</para> If you don't want to restrict event types to a base type, use <see cref="object"/> as the base type.</typeparam>
-	public class GenericEventBus<TBaseEvent> : IDisposable where TBaseEvent : IEventData
+	public abstract class GenericEventBus<TBaseEvent> : IDisposable where TBaseEvent : IEventData
 	{
 
 		protected readonly Queue<QueuedEvent> QueuedEvents = new Queue<QueuedEvent>(32);
@@ -24,7 +25,7 @@ namespace Cr7Sund.Package.EventBus.Impl
 		private uint _currentRaiseRecursionDepth;
 		private uint _depth;
 		private readonly List<uint> _raiseRecursionsConsumed = new List<uint>();
-		[Inject] private IPoolBinder _poolBinder;
+		protected abstract IPoolBinder poolBinder{get;}
 
 
 		/// <summary>
@@ -83,7 +84,7 @@ namespace Cr7Sund.Package.EventBus.Impl
 			}
 
 			OnAfterRaiseEvent();
-			_poolBinder?.Get<TEvent>()?.ReturnInstance(tEvent);
+			poolBinder?.Return<TEvent>(tEvent);
 
 			return wasConsumed;
 		}

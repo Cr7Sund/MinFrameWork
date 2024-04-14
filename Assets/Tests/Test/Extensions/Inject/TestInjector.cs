@@ -4,7 +4,7 @@ using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
-namespace Cr7Sund.PackageTest.Inject
+namespace Cr7Sund.PackageTest.IOC
 {
     internal class TestInjector
     {

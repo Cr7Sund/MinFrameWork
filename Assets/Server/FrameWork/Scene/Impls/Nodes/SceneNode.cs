@@ -1,100 +1,90 @@
 ﻿using Cr7Sund.Package.Api;
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
 using UnityEngine;
-using Cr7Sund.Package.Impl;
-using Cr7Sund.Server.UI.Impl;
-using Cr7Sund.Server.Apis;
+using Cr7Sund.Server.UI.Api;
+
 namespace Cr7Sund.Server.Scene.Impl
 {
     public class SceneNode : ModuleNode, ISceneNode
     {
         [Inject] private ISceneLoader _sceneLoader;
-        [Inject] private PageContainer _pageContainer;
         [Inject(ServerBindDefine.SceneTimer)] private IPromiseTimer _sceneTimer;
-
+        [Inject] IPageModule _pageModule;
 
         public SceneNode(IAssetKey assetKey) : base(assetKey)
         {
         }
 
-
         protected override void OnInit()
         {
             base.OnInit();
+            CreateUITransitionBarrier();
         }
 
-
-        public IPromise ActiveScene()
+        public async override PromiseTask OnEnable()
         {
-            if (Application.isPlaying)
-            {
-                return _sceneLoader.ActiveSceneAsync(Key);
-            }
-            else
-            {
-                return Promise.Resolved();
-            }
+            await base.OnEnable();
+            await ActiveScene();
         }
 
-        protected override IPromise<INode> OnPreloadAsync(INode content)
+        public async override PromiseTask OnStop()
         {
-            var sceneNode = content as SceneNode;
-            var sceneKey = (SceneKey)sceneNode.Key;
+            await base.OnStop();
+            await _pageModule.CloseAll();
+        }
 
-            if (sceneKey.IsVirtualScene)
+        protected override async PromiseTask OnPreloadAsync()
+        {
+            var sceneKey = (SceneKey)Key;
+
+            if (!sceneKey.IsVirtualScene)
             {
-                return base.OnPreloadAsync(content);
-            }
-            else
-            {
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, false)
-                                   .Then(() => _controllerModule.LoadAsync(content));
+                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, false);
             }
         }
 
-        protected override IPromise<INode> OnLoadAsync(INode content)
+        protected override async PromiseTask OnLoadAsync()
         {
-            var sceneNode = content as SceneNode;
-            var sceneKey = (SceneKey)sceneNode.Key;
+            var sceneKey = (SceneKey)Key;
 
-            if (sceneKey.IsVirtualScene)
+            if (!sceneKey.IsVirtualScene)
             {
-                return base.OnLoadAsync(content);
-            }
-            else
-            {
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
-                                   .Then(()=>_controllerModule.LoadAsync(content));
+                await _sceneLoader.LoadSceneAsync(sceneKey);
             }
         }
 
-        protected override IPromise<INode> OnUnloadAsync(INode content)
+        protected override PromiseTask OnUnloadAsync()
         {
-            var sceneNode = content as SceneNode;
-            var sceneKey = (SceneKey)sceneNode.Key;
+            var sceneKey = (SceneKey)Key;
 
             if (!sceneKey.IsVirtualScene)
             {
                 _sceneLoader.UnloadScene(sceneKey);
             }
 
-            return base.OnUnloadAsync(content);
+            return base.OnUnloadAsync();
         }
 
-        protected void CreateUITransitionBarrier()
+        private PromiseTask ActiveScene()
+        {
+            if (MacroDefine.IsMainThread && Application.isPlaying)
+            {
+                return _sceneLoader.ActiveSceneAsync(Key);
+            }
+            else
+            {
+                return PromiseTask.CompletedTask;
+            }
+        }
+
+        private void CreateUITransitionBarrier()
         {
             _sceneTimer.Schedule((timeData) =>
             {
-                _pageContainer.TimeOut(timeData.elapsedTime);
+                _pageModule.TimeOut(timeData.elapsedTime);
             });
-        }
-
-        protected override void OnDispose()
-        {
-            base.OnDispose();
         }
     }
 }

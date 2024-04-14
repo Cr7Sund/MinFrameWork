@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.PackageTest.IOC
@@ -15,36 +16,35 @@ namespace Cr7Sund.PackageTest.IOC
         }
 
 
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
             Debug.Debug("Load ui two");
+            await base.OnStart();
 
             StartValue++;
 
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
-            Debug.Debug("Enable ui two");
+            await base.OnEnable();
 
+            Debug.Debug("Enable ui two");
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
+            await base.OnDisable();
             Debug.Debug("Disable ui two");
 
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop ui two");
-
+            await base.OnStop();
             StartValue--;
         }
     }

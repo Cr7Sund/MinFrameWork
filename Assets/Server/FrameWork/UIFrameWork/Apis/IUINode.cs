@@ -19,20 +19,20 @@ namespace Cr7Sund.Server.UI.Api
 
 
         // Method called before exiting the view
-        IPromise BeforeExit(bool push, IUINode partnerView);
+        PromiseTask BeforeExit(bool push, IUINode partnerView);
 
         // Method called before entering the view
-        IPromise BeforeEnter(bool push, IUINode partnerView);
+        PromiseTask BeforeEnter(bool push, IUINode partnerView);
 
         // Method called when exiting the view
-        IPromise Exit(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation);
 
         // Method called when entering the view
-        IPromise Enter(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation);
 
         // Method called after exiting the view
-        IPromise AfterExit(bool push, IUINode enterPage);
+        PromiseTask AfterExit(bool push, IUINode enterPage);
         // Method called after entering the view
-        IPromise AfterEnter(bool push, IUINode enterPage);
+        PromiseTask AfterEnter(bool push, IUINode enterPage);
     }
 }

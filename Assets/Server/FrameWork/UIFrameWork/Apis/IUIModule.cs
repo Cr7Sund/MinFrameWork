@@ -1,14 +1,14 @@
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Server.Api;
-
 namespace Cr7Sund.Server.UI.Api
 {
-    public interface IUIContainer : ILoadModule
+    public interface IUIModule
     {
         /// <summary>
         /// current ui containers stack count
         /// </summary>
         int OperateNum { get; }
+
+        PromiseTask CloseAll();
+        void TimeOut(int elapsedTime);
     }
 
 }

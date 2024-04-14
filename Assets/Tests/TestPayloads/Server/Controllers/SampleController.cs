@@ -1,25 +1,23 @@
-using Cr7Sund.NodeTree.Api;
-using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
+using System.Threading;
 using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.Server.Tests
 {
     public class SampleController : BaseGameController
     {
-        protected override IPromise HandleHotfix()
+        protected override PromiseTask HandleHotfix()
         {
-            return Promise.Resolved();
+            return PromiseTask.CompletedTask;
         }
 
-        protected override void InitGameEnv()
+        protected override async PromiseTask InitGameEnv()
         {
+            await PromiseTask.CompletedTask;
         }
 
-        protected override IPromise<INode> RunLoginScene()
+        protected override PromiseTask RunLoginScene()
         {
-            return Promise<INode>.Resolved(null);
+            return PromiseTask.CompletedTask;
         }
     }
 }

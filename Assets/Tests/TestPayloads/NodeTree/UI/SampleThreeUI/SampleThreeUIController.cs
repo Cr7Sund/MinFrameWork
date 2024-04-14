@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.UI.Impl;
 
@@ -12,15 +13,15 @@ namespace Cr7Sund.PackageTest.IOC
 
         public static IPromise promise;
 
-        protected override IPromise OnPrepare(object intent = null)
+        protected override PromiseTask OnPrepare(object intentProPro)
         {
             if (Rejected)
             {
-                throw new System.Exception();
+                throw new System.Exception("hello exception");
             }
             else
             {
-                return promise;
+                return promise.AsNewTask();
             }
         }
         public static void Init()
@@ -30,34 +31,34 @@ namespace Cr7Sund.PackageTest.IOC
         }
 
 
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
+            await base.OnStart();
             Debug.Debug("Load ui three");
 
             StartValue++;
 
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
+            await base.OnEnable();
             Debug.Debug("Enable ui three");
 
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
+            await base.OnDisable();
             Debug.Debug("Disable ui three");
 
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
+            await base.OnStop();
             Debug.Debug("Stop ui three");
 
             StartValue--;

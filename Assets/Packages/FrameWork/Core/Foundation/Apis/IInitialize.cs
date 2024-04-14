@@ -1,11 +1,11 @@
-﻿namespace Cr7Sund
+﻿using System;
+
+namespace Cr7Sund
 {
-    public interface IInitialize
+    public interface IInitialize : IDisposable
     {
         bool IsInit { get; }
 
-        
         void Init();
-        void Dispose();
     }
 }

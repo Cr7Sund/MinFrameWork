@@ -19,6 +19,10 @@ namespace Cr7Sund.Server.UI.Api
         /// </summary>
         NO_LEFT_BACK,
         /// <summary>
+        /// cant back  when pop count is less than zero 
+        /// </summary>
+        INVALID_POP_COUNT,
+        /// <summary>
         /// cant hide again in transition
         /// </summary>
         HIDE_IN_TRANSITION,

@@ -156,5 +156,7 @@ namespace Cr7Sund.Package.Api
         /// </summary>
         IPromise Progress(Action<float> onProgress);
         PromiseTask AsTask();
+        PromiseTask AsNewTask();
+        void TryReturn();
     }
 }

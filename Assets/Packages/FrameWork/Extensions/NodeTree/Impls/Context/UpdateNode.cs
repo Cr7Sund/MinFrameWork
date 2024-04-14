@@ -66,13 +66,13 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-
         public void Update(int elapse)
         {
             if (!IsStarted || !IsActive)
                 return;
 
-            for (int i = 0; i < _updateList.Count; i++)
+            int updateListCount = _updateList.Count;
+            for (int i = 0; i < updateListCount; i++)
             {
                 _updateList[i].Update(elapse);
             }
@@ -85,7 +85,8 @@ namespace Cr7Sund.NodeTree.Impl
             if (!IsStarted || !IsActive)
                 return;
 
-            for (int i = 0; i < _lateUpdatesList.Count; i++)
+            int count = _lateUpdatesList.Count;
+            for (int i = 0; i < count; i++)
             {
                 _updateList[i].LateUpdate(elapse);
             }

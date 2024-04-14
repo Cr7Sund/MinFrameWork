@@ -20,7 +20,7 @@ namespace Cr7Sund.Patterns
             IsInit = true;
         }
 
-        public virtual void Dispose()
+        public  virtual void Dispose()
         {
             IsInit = false;
             Singleton<T>.instance = default(T);

@@ -9,10 +9,9 @@ namespace Cr7Sund.AssetLoader.Api
         AsyncOperationHandle Handler { get; }
         string Key { get; }
         int ControlId { get; }
-        bool IsInstantiate { get; }
 
         T GetResult<T>() where T : Object;
-        T ForceGetResult<T>() where T : Object;
+        PromiseTask<T> ForceGetResult<T>() where T : Object;
         IPromise<T> GetConvertPromise<T>()where T : Object;
     }
 

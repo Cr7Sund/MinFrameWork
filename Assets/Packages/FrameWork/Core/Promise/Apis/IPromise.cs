@@ -176,7 +176,7 @@ namespace Cr7Sund.Package.Api
         /// The state of the returning promise will be based on the new non-value promise, not the preceding (rejected or resolved) promise.
         /// </summary>
         IPromise ContinueWith(Action onComplete);
-        
+
         /// <summary>
         /// Adds a callback that chains a value promise (optionally converting to a different value type).
         /// ContinueWith callbacks will always be called, even if any preceding promise is rejected or encounters an error.
@@ -191,5 +191,8 @@ namespace Cr7Sund.Package.Api
         IPromise<PromisedT> Progress(Action<float> onProgress);
 
         PromiseTask<PromisedT> AsTask();
+        PromiseTask<PromisedT> AsNewTask();
+        PromiseTask ToNewTask();
+        void TryReturn();
     }
 }

@@ -1,5 +1,3 @@
-using Cr7Sund.Package.Api;
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Selector.Apis;
 using Cr7Sund.Server.Impl;
 
@@ -7,35 +5,38 @@ namespace Cr7Sund.GameLogic
 {
     public abstract class GameLogic : IGameLogic
     {
-        private GameNode _node;
+        protected GameNode _gameNode;
 
 
         public void Init()
         {
             GameBuilder builder = CreateBuilder();
-            _node = GameDirector.Construct(builder);
+            _gameNode = GameDirector.Construct(builder);
 
             OnInit();
         }
 
-        public void Start()
+        public async PromiseTask Run()
         {
-            _node?.Run();
+            await _gameNode.Run();
         }
 
         public void Update(int millisecond)
         {
-            _node?.Update(millisecond);
+            _gameNode?.Update(millisecond);
         }
 
         public void LateUpdate(int millisecond)
         {
-            _node?.LateUpdate(millisecond);
+            _gameNode?.LateUpdate(millisecond);
         }
 
-        public IPromise<INode> Destroy()
+        public async PromiseTask DestroyAsync()
         {
-            return _node?.Destroy();
+            if (_gameNode != null)
+            {
+                await _gameNode.DestroyAsync();
+            }
         }
 
         protected virtual void OnInit()

@@ -19,11 +19,6 @@ namespace Cr7Sund.UGUI.Impls
         public bool IsInit { get; }
         public StringBehaviourDictionary ComponentContainers { get => _componentContainers; }
 
-        public void Dispose()
-        {
-
-            throw new System.NotImplementedException();
-        }
 
         public T GetUIComponent<T>(string key) where T : Behaviour
         {
@@ -56,6 +51,10 @@ namespace Cr7Sund.UGUI.Impls
         public void Init()
         {
 
+        }
+
+        public void Dispose()
+        {
         }
 
     }

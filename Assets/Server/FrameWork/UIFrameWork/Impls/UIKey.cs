@@ -14,11 +14,12 @@ namespace Cr7Sund.Server.UI.Impl
         public readonly bool LoadAsync;
         public readonly bool HideFirst;
 
-
-        public IAssetKey exitPage { get; set; }
+        // --- internal content ---
         public string Key { get; set; }
-        public bool IsPush { get; internal set; }
         public bool ShowAfter { get; set; }
+        // --- internal content ---
+        internal IAssetKey exitPageKey { get; set; }
+        internal bool IsPush { get; set; }
 
 
         public UIKey(string key, Type ctrlType, Type viewType,
@@ -41,6 +42,21 @@ namespace Cr7Sund.Server.UI.Impl
         public override string ToString()
         {
             return Key.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is IAssetKey assetKey)
+            {
+                return Key.Equals(assetKey.Key);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Key.GetHashCode();
         }
     }
 }

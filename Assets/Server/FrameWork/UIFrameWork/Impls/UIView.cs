@@ -1,5 +1,4 @@
 using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.UGUI.Apis;
 using Cr7Sund.UGUI.Impls;
@@ -7,14 +6,11 @@ using UnityEngine;
 using Cr7Sund.Server.Utils;
 using System;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Impl;
 using System.Collections.Generic;
-using Object = UnityEngine.Object;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -22,7 +18,7 @@ namespace Cr7Sund.Server.UI.Impl
     {
         [Inject(ServerBindDefine.UITimer)] private IPromiseTimer _uiTimer;
         [Inject] private IUITransitionAnimationContainer _animationContainer;
-        [Inject(ServerBindDefine.GameInstancePool)] private IInstanceContainer _gameContainer;
+        [Inject(ServerBindDefine.GameInstancePool)] private IInstancesContainer _gameContainer;
         private int _sortingOrder;
         private UIPanel _uiPanel;
         private CanvasGroup _canvasGroup;
@@ -74,7 +70,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void BeforeEnter()
         {
-            if (!Application.isPlaying)
+            if (!MacroDefine.IsMainThread || !Application.isPlaying)
             {
                 return;
             }
@@ -87,26 +83,24 @@ namespace Cr7Sund.Server.UI.Impl
             _canvasGroup.alpha = 0.0f;
         }
 
-        public virtual IPromise EnterRoutine(bool push, IUINode partnerPage, bool playAnimation)
+        public virtual async PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation)
         {
-            if (!Application.isPlaying)
+            if (!MacroDefine.IsMainThread || !Application.isPlaying)
             {
-                return Promise.Resolved();
+                return;
             }
 
             _canvasGroup.alpha = 1.0f;
 
             if (playAnimation)
             {
-                return TransitionRoutine(push, true, partnerPage);
+                await TransitionRoutine(push, true, partnerPage);
             }
-
-            return Promise.Resolved();
         }
 
         public void AfterEnter()
         {
-            if (!Application.isPlaying)
+            if (!MacroDefine.IsMainThread || !Application.isPlaying)
             {
                 return;
             }
@@ -117,7 +111,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void BeforeExit()
         {
-            if (!Application.isPlaying)
+            if (!MacroDefine.IsMainThread || !Application.isPlaying)
             {
                 return;
             }
@@ -127,24 +121,22 @@ namespace Cr7Sund.Server.UI.Impl
             _canvasGroup.alpha = 1.0f;
         }
 
-        public IPromise ExitRoutine(bool push, IUINode partnerPage, bool playAnimation)
+        public async PromiseTask ExitRoutine(bool push, IUINode partnerPage, bool playAnimation)
         {
-            if (!Application.isPlaying)
+            if (!MacroDefine.IsMainThread || !Application.isPlaying)
             {
-                return Promise.Resolved();
+                return;
             }
 
             if (playAnimation)
             {
-                return TransitionRoutine(push, false, partnerPage);
+                await TransitionRoutine(push, false, partnerPage);
             }
-
-            return Promise.Resolved();
         }
 
         public void AfterExit()
         {
-            if (!Application.isPlaying)
+            if (!MacroDefine.IsMainThread || !Application.isPlaying)
             {
                 return;
             }
@@ -194,8 +186,6 @@ namespace Cr7Sund.Server.UI.Impl
             var siblingIndex = 0;
             for (var i = 0; i < parent.ChildCount; i++)
             {
-                var parentNode = parent as Node;
-                var childPage = parentNode[i] as UINode;
                 siblingIndex = i;
 
                 // if (SortingOrder >= childPage.View.SortingOrder)
@@ -245,45 +235,40 @@ namespace Cr7Sund.Server.UI.Impl
             return null;
         }
 
-        private IPromise TransitionRoutine(bool push, bool enter, IUINode partnerPage)
+        private async PromiseTask TransitionRoutine(bool push, bool enter, IUINode partnerPage)
         {
             UITransitionAnimation animation = _uiPanel.GetAnimation(push, enter, partnerPage?.Key);
             if (animation == null)
             {
-                return _animationContainer.GetDefaultPageTransition(push, enter)
-                    .Then(transitionBehaviour =>
-                    {
-                        return PlayTransition(partnerPage, transitionBehaviour);
-                    });
+                var transitionBehaviour = await _animationContainer.GetDefaultPageTransition(push, enter);
+                await PlayTransition(partnerPage, transitionBehaviour);
+                return;
             }
 
             if (_transitionDict.ContainsKey(animation))
             {
-                return PlayTransition(partnerPage, _transitionDict[animation]);
+                await PlayTransition(partnerPage, _transitionDict[animation]);
             }
             else
             {
-                var animBehaviourPromise = _animationContainer.GetAnimationBehaviour(animation);
-                return animBehaviourPromise.Then(transitionBehaviour =>
-                {
-                    _transitionDict.Add(animation, transitionBehaviour);
-                    return PlayTransition(partnerPage, transitionBehaviour);
-                });
+                var transitionBehaviour = await _animationContainer.GetAnimationBehaviour(animation);
+                _transitionDict.Add(animation, transitionBehaviour);
+                await PlayTransition(partnerPage, transitionBehaviour);
             }
         }
 
-        private IPromise PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour)
+        private PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour)
         {
             if (transitionBehaviour.Duration > 0.0f)
             {
                 transitionBehaviour.SetPartner(partnerPage?.View.RectTransform);
                 transitionBehaviour.Setup(_rectTransform);
                 return _uiTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime))
-                             .Progress(TransitionProgressReporter);
+                             .Progress(TransitionProgressReporter).AsTask();
             }
             else
             {
-                return Promise.Resolved();
+                return PromiseTask.CompletedTask;
             }
         }
 

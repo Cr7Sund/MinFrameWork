@@ -1,20 +1,49 @@
 ﻿using Cr7Sund.Package.Api;
 namespace Cr7Sund.NodeTree.Api
 {
-    public interface INode : ILifeTime, ILoadAsync<INode>, IInjectable, IRunnable, IInitialize, ILoading
+    public interface INode : ILifeTime, ILoadAsync, IInjectable, IRunnable, IInitialize, IDestroy, ILoading
     {
         IContext Context { get; }
-        INode Parent { get; }
-        IPromise<INode> AddStatus { get; }
-        IPromise<INode> RemoveStatus { get; }
+        INode Parent { get; set; }
+        IPromise AddStatus { get; set; }
+        IPromise RemoveStatus { get; set; }
         NodeState NodeState { get; }
         IAssetKey Key { get; }
         int ChildCount { get; }
 
-        IPromise<INode> PreLoadChild(INode child);
-        IPromise<INode> AddChildAsync(INode child);
-        IPromise<INode> UnloadChildAsync(INode child);
-        IPromise<INode> RemoveChildAsync(INode child);
-        IPromise<INode> GetCurStatus();
+        PromiseTask PreLoadChild(INode child);
+        PromiseTask AddChildAsync(INode child, bool overwrite = false);
+        PromiseTask UnloadChildAsync(INode child, bool overwrite = false);
+        PromiseTask RemoveChildAsync(INode child, bool overwrite = false);
+        INode GetChild(int index);
+
+
+        #region  Load
+
+        PromiseTask LoadAsync();
+        PromiseTask PreLoadAsync();
+        PromiseTask UnloadAsync();
+        void CancelLoad();
+        void CancelUnload();
+
+        void SetAdding();
+        void StartPreload();
+        void EndPreload();
+        void SetReady();
+        void StartUnload(bool shouldUnload);
+        void EndUnLoad(bool unload);
+
+        #endregion
+
+        #region  LifeCycle
+
+        PromiseTask SetActive(bool active);
+        PromiseTask OnStart();
+        PromiseTask OnEnable();
+        PromiseTask OnDisable();
+        PromiseTask OnStop();
+
+        #endregion
+
     }
 }

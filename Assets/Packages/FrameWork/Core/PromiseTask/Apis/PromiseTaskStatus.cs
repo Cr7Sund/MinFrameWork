@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Cr7Sund
 {
@@ -18,6 +19,7 @@ namespace Cr7Sund
     {
         /// <summary>status != Pending.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public static bool IsCompleted(this PromiseTaskStatus status)
         {
             return status != PromiseTaskStatus.Pending;

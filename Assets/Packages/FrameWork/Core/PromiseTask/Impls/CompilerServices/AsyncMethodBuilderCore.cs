@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System;
+using System.Diagnostics;
 
 namespace Cr7Sund.CompilerServices
 {
@@ -187,6 +188,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         private void Run()
         {
             stateMachine.MoveNext();

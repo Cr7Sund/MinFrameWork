@@ -6,7 +6,7 @@ namespace Cr7Sund.Selector.Api
     internal interface IGameMgr
     {
         void Start();
-        IPromise<INode> Close();
-        IPromise<INode> Restart();
+        PromiseTask Close();
+        PromiseTask Restart();
     }
 }

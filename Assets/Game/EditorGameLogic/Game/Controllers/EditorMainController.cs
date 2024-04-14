@@ -1,13 +1,10 @@
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Config;
 using Cr7Sund.Game.Scene;
-using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Apis;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
+using UnityEngine;
 
 namespace Cr7Sund.Game.GameLogic
 {
@@ -15,53 +12,64 @@ namespace Cr7Sund.Game.GameLogic
     {
         [Inject] private ISceneModule _sceneModule;
         [Inject] private IConfigContainer _configModule;
-        [Inject(ServerBindDefine.GameInstancePool)] IInstanceContainer _gameInstanceContainer;
+        [Inject(ServerBindDefine.GameInstancePool)] IInstancesContainer _gameInstanceContainer;
 
 
-        #region  Login
-
-        protected override void InitGameEnv()
+        #region Login
+        protected override async PromiseTask InitGameEnv()
         {
-            InitConfig();
+            await InitConfig();
             InitUI();
             Debug.Debug("EditorMainController Start");
         }
 
-        protected override IPromise HandleHotfix()
+        protected override PromiseTask HandleHotfix()
         {
-            return Promise.Resolved();
+            return PromiseTask.CompletedTask;
         }
 
-        protected override IPromise<INode> RunLoginScene()
+        protected override async PromiseTask RunLoginScene()
         {
-            return _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
+            // var handler = Addressables.LoadAssetAsync<Object>(SampleUIKeys.SampleOneUI.Key);
+            // var assetPromise = new AssetPromise();
+            // assetPromise.Then(asset =>
+            // {
+            //     GameObject.Instantiate(asset);
+            // });
+            // handler.ToPromise<Object>(assetPromise);
+            // await assetPromise.AsNewTask();
+            await _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
         }
 
-        private void InitConfig()
+        private async PromiseTask InitConfig()
         {
             // PLAN add asset loader res count checking
             // Or pass the access to the assetLoader directly
-            var gameConfig = _configModule.GetConfig<UIConfig>(ConfigDefines.UIConfig);
+            var gameConfig = await _configModule.GetConfig<UIConfig>(ConfigDefines.UIConfig);
             foreach (var item in gameConfig.ConfigDefines)
             {
-                _configModule.GetConfig<UnityEngine.Object>(item);
+                await _configModule.GetConfig<UnityEngine.Object>(item);
             }
 
         }
 
         private void InitUI()
         {
-            _gameInstanceContainer.Instantiate(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
+            _gameInstanceContainer.Instantiate<Object>(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
         }
-        
         #endregion
 
-        #region  Exit Game
+        #region Exit Game
         protected override void GameOver()
         {
             base.GameOver();
 
         }
         #endregion
+
+        protected override void OnUpdate(int millisecond)
+        {
+            base.OnUpdate(millisecond);
+        }
     }
 }

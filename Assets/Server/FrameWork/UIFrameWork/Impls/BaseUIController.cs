@@ -1,17 +1,14 @@
-﻿using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
-using Cr7Sund.NodeTree.Impl;
+﻿using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.Impl;
 
-
 namespace Cr7Sund.Server.UI.Impl
 {
-     public abstract class BaseUIController : BaseController, IUIController
+    public abstract class BaseUIController : BaseController, IUIController
      {
           [Inject(ServerBindDefine.UILogger)] protected IInternalLog Debug;
 
-          public virtual IPromise Prepare(object intent = null)
+          public virtual PromiseTask Prepare(object intent = null)
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -25,12 +22,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise WillPushEnter()
+          public PromiseTask WillPushEnter()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -44,12 +42,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise DidPushEnter()
+          public PromiseTask DidPushEnter()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -63,12 +62,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise WillPushExit()
+          public PromiseTask WillPushExit()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -82,12 +82,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise DidPushExit()
+          public PromiseTask DidPushExit()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -101,12 +102,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise WillPopEnter()
+          public PromiseTask WillPopEnter()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -120,12 +122,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise DidPopEnter()
+          public PromiseTask DidPopEnter()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -139,12 +142,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise WillPopExit()
+          public PromiseTask WillPopExit()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -158,12 +162,13 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
-          public IPromise DidPopExit()
+          public PromiseTask DidPopExit()
           {
                if (MacroDefine.NoCatchMode)
                {
@@ -177,56 +182,57 @@ namespace Cr7Sund.Server.UI.Impl
                     }
                     catch (System.Exception e)
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         throw;
                     }
                }
           }
 
           #region overload methods
 
-          protected virtual IPromise OnPrepare(object intent)
+          protected virtual PromiseTask OnPrepare(object intent)
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPushEnter()
+          protected virtual PromiseTask OnWillPushEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPushEnter()
+          protected virtual PromiseTask OnDidPushEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPushExit()
+          protected virtual PromiseTask OnWillPushExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPushExit()
+          protected virtual PromiseTask OnDidPushExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPopEnter()
+          protected virtual PromiseTask OnWillPopEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPopEnter()
+          protected virtual PromiseTask OnDidPopEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPopExit()
+          protected virtual PromiseTask OnWillPopExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPopExit()
+          protected virtual PromiseTask OnDidPopExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
           #endregion

@@ -1,7 +1,6 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Cr7Sund;
 
 namespace Cr7Sund.CompilerServices
 {
@@ -32,12 +31,12 @@ namespace Cr7Sund.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
+        [DebuggerHidden]
         public static PromiseTaskMethodBuilder<T> Create()
             => new PromiseTaskMethodBuilder<T>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
+        [DebuggerHidden]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
             where TStateMachine : IAsyncStateMachine
         {

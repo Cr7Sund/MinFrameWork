@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.UI.Impl;
 
@@ -16,36 +17,35 @@ namespace Cr7Sund.PackageTest.IOC
         }
 
 
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
             Debug.Debug("Load ui one");
+            await base.OnStart();
 
             StartValue++;
 
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
             Debug.Debug("Enable ui one");
-
+            await base.OnEnable();
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
+            await base.OnDisable();
+
             Debug.Debug("Disable ui one");
 
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop ui one");
-
+            await base.OnStop();
             StartValue--;
         }
     }

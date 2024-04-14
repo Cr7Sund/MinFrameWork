@@ -1,13 +1,14 @@
 using Cr7Sund.PackageTest.IOC;
-using Cr7Sund.FrameWork.Util;
-using Cr7Sund.NodeTree.Api;
-using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Cr7Sund.PackageTest.NodeTree
 {
     public class UpdateNodeTest
     {
+        public static readonly CancellationTokenSource UnitCancellation = new CancellationTokenSource();
+
         private SampleUpdateNode _node;
 
 
@@ -26,15 +27,15 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void AddChild()
+        public async Task AddChild()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleUpdateNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
 
             // Assert
             Assert.AreEqual(1, _node.UpdateChildCount);
@@ -43,18 +44,18 @@ namespace Cr7Sund.PackageTest.NodeTree
 
 
         [Test]
-        public void UpdateChild()
+        public async Task UpdateChild()
         {
             // Arrange
             var child1 = new SampleChildUpdateNode();
             var child2 = new SampleChildUpdateNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Start();
-            _node.Enable();
+            await _node.Start();
+            await _node.Enable();
             _node.Update(2);
 
             // Assert
@@ -63,18 +64,18 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void LateUpdateChild()
+        public async Task LateUpdateChild()
         {
             // Arrange
             var child1 = new SampleChildUpdateNode();
             var child2 = new SampleChildUpdateNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Start();
-            _node.Enable();
+            await _node.Start();
+            await _node.Enable();
             _node.LateUpdate(2);
 
             // Assert
@@ -83,15 +84,15 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void Update_NotStart()
+        public async Task Update_NotStart()
         {
             // Arrange
             var child1 = new SampleChildUpdateNode();
             var child2 = new SampleChildUpdateNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Update(2);
 
             // Assert
@@ -100,15 +101,15 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void LateUpdate_NotStart()
+        public async Task LateUpdate_NotStart()
         {
             // Arrange
             var child1 = new SampleChildUpdateNode();
             var child2 = new SampleChildUpdateNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.LateUpdate(2);
 
             // Assert

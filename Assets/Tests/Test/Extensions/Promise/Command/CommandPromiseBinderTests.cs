@@ -238,15 +238,14 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void race_is_resolved_when_promise_is_rejected_firstly()
         {
-            LogAssert.ignoreFailingMessages = true;
-            
+            LogAssert.Expect(UnityEngine.LogType.Error, "The method or operation is not implemented.");
+
             _commandPromiseBinder.Bind(SomeEnum.ONE)
                 .ThenRace<
                     SimpleAsyncCommandOneGeneric,
                     SimpleAsyncCommandSecondGeneric>()
                 .Then<SimpleCommandOneGeneric>();
 
-            LogAssert.Expect(UnityEngine.LogType.Error, new Regex("System.NotImplementedException"));
             _commandPromiseBinder.ReactTo(SomeEnum.ONE, 5);
             SimplePromise.simulatePromiseOne.Reject(new NotImplementedException());
             SimplePromise.simulatePromiseSecond.Resolve(3);

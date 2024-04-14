@@ -1,62 +1,36 @@
 ﻿using System;
-using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 namespace Cr7Sund.NodeTree.Impl
 {
-    public abstract class AsyncLoadable<T> : ILoadAsync<T>
+    public abstract class AsyncLoadable : ILoadAsync
     {
-        private IPromise<T> _loadPromise;
-        private IPromise<T> _unloadPromise;
-        private Action<T> _loadedHandler;
-        private Action<T> _preloadedHandler;
-        private Action<T> _unloadedHandler;
-        private Action<Exception> _exceptionHandler;
-
-        public IPromise<T> LoadStatus
-        {
-            get
-            {
-                return _loadPromise;
-            }
-        }
-
-        public IPromise<T> UnloadStatus
-        {
-            get
-            {
-                return _unloadPromise;
-            }
-        }
         public LoadState LoadState { get; private set; }
 
 
-        public AsyncLoadable()
-        {
-            _unloadedHandler = _Unloaded;
-            _loadedHandler = _Loaded;
-            _preloadedHandler = _Preloaded;
-            _exceptionHandler = _HandleException;
-        }
-        public IPromise<T> LoadAsync(T value)
+        public virtual async PromiseTask LoadAsync()
         {
             if (LoadState == LoadState.Loading
-             || LoadState == LoadState.Unloading
-             || LoadState == LoadState.Loaded)
+             || LoadState == LoadState.Unloading)
             {
                 throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.LOAD_VALID_STATE);
             }
 
-            // handle override promise externally
-
             LoadState = LoadState.Loading;
-            _loadPromise = OnLoadAsync(value);
-            _loadPromise?.Then(onResolved: _loadedHandler, onRejected: _exceptionHandler);
-
-            return _loadPromise;
+            try
+            {
+                await OnLoadAsync();
+                _Loaded();
+            }
+            catch (Exception ex)
+            {
+                _HandleException(ex);
+                throw;
+            }
         }
-        public IPromise<T> PreLoadAsync(T value)
+
+        public virtual async PromiseTask PreLoadAsync()
         {
             if (LoadState == LoadState.Loading
                 || LoadState == LoadState.Unloading
@@ -67,12 +41,19 @@ namespace Cr7Sund.NodeTree.Impl
             }
 
             LoadState = LoadState.Loading;
-            _loadPromise = OnPreloadAsync(value);
-            _loadPromise?.Then(onResolved: _preloadedHandler, onRejected: _exceptionHandler);
-
-            return _loadPromise;
+            try
+            {
+                await OnPreloadAsync();
+                _Preloaded();
+            }
+            catch (Exception ex)
+            {
+                _HandleException(ex);
+                throw;
+            }
         }
-        public IPromise<T> UnloadAsync(T value)
+
+        public virtual async PromiseTask UnloadAsync()
         {
             if (LoadState == LoadState.Default
             || LoadState == LoadState.Unloading
@@ -84,33 +65,42 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (LoadState == LoadState.Loading)
             {
-                _unloadPromise?.Resolve(value);
+                throw new MyException($"Please handle loading situation outside ",
+                      NodeTreeExceptionType.UNLOAD_VALID_STATE);
             }
 
             LoadState = LoadState.Unloading;
-            _unloadPromise = OnUnloadAsync(value);
-            _unloadPromise?.Then(onResolved: _unloadedHandler, onRejected: _exceptionHandler);
-
-            return _unloadPromise;
+            try
+            {
+                await OnUnloadAsync();
+                _Unloaded();
+            }
+            catch (Exception ex)
+            {
+                _HandleException(ex);
+                throw;
+            }
         }
-        public IPromise<T> CancelLoad()
+
+        public virtual void Dispose()
         {
-            AssertUtil.NotNull(LoadStatus, NodeTreeExceptionType.CANCEL_NOT_LOADED);
+            // default
+            AssertUtil.IsTrue(LoadState == LoadState.Unloaded);
 
-            LoadStatus.Cancel();
-            return LoadStatus.Then(UnloadAsync);
+            LoadState = LoadState.Default;
         }
-        private void _Loaded(T value)
+
+        private void _Loaded()
         {
             LoadState = LoadState.Loaded;
             OnLoaded();
         }
-        private void _Preloaded(T value)
+        private void _Preloaded()
         {
             LoadState = LoadState.Loaded;
             OnPreLoaded();
         }
-        private void _Unloaded(T value)
+        private void _Unloaded()
         {
             LoadState = LoadState.Unloaded;
             OnUnloaded();
@@ -125,8 +115,8 @@ namespace Cr7Sund.NodeTree.Impl
         protected virtual void OnPreLoaded() { }
         protected virtual void OnUnloaded() { }
         protected virtual void OnCatch(Exception e) { }
-        protected abstract IPromise<T> OnLoadAsync(T content);
-        protected abstract IPromise<T> OnPreloadAsync(T content);
-        protected abstract IPromise<T> OnUnloadAsync(T content);
+        protected virtual PromiseTask OnLoadAsync() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnPreloadAsync() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnUnloadAsync() { return PromiseTask.CompletedTask; }
     }
 }

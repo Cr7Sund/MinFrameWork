@@ -4,6 +4,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
 using UnityEngine.TestTools;
+using System.Threading.Tasks;
 using System;
 
 namespace Cr7Sund.PackageTest.NodeTree
@@ -19,35 +20,34 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void TestLoadAsync()
+        public async Task TestLoadAsync()
         {
             // Arrange
             var sampleLoadable = new ResolveAsyncLoadable();
 
             // Act
-            sampleLoadable.LoadAsync();
+            await sampleLoadable.LoadAsync();
 
             // Assert
-            Assert.AreEqual(LoadState.Loaded, sampleLoadable.State);
-            Assert.IsNotNull(sampleLoadable.LoadStatus);
+            Assert.AreEqual(LoadState.Loaded, sampleLoadable.LoadState);
         }
 
         [Test]
-        public void TestLoadAndUnloadCompleted()
+        public async Task TestLoadAndUnloadCompleted()
         {
             // Arrange
             var sampleLoadable = new ResolveAsyncLoadable();
 
             // Act
-            sampleLoadable.LoadAsync();
-            sampleLoadable.UnloadAsync();
+            await sampleLoadable.LoadAsync();
+            await sampleLoadable.UnloadAsync();
 
             // Assert
-            Assert.AreEqual(LoadState.Unloaded, sampleLoadable.State);
+            Assert.AreEqual(LoadState.Unloaded, sampleLoadable.LoadState);
         }
 
         [Test]
-        public void TestLoadRejected()
+        public async Task TestLoadRejected()
         {
             LogAssert.ignoreFailingMessages = true;
 
@@ -55,37 +55,57 @@ namespace Cr7Sund.PackageTest.NodeTree
             var sampleLoadable = new RejectableAsyncLoadable();
 
             // Act
-            sampleLoadable.LoadAsync();
+            try
+            {
+                await sampleLoadable.LoadAsync();
+            }
+            catch
+            {
+            }
 
             // Assert
-            Assert.AreEqual(LoadState.Fail, sampleLoadable.State);
+            Assert.AreEqual(LoadState.Fail, sampleLoadable.LoadState);
         }
 
         [Test]
-        public void TestLoadException()
+        public async Task TestLoadException()
         {
             // Arrange
             var sampleLoadable = new SampleAsyncLoadableWithException();
 
             // Act
-            TestDelegate testDelegate = () => sampleLoadable.LoadAsync();
+            MyException ex = null;
+            try
+            {
+                await sampleLoadable.LoadAsync();
+            }
+            catch (MyException e)
+            {
+                ex = e;
+            }
 
             // Assert
-            Assert.Throws<MyException>(testDelegate);
-            Assert.AreEqual(LoadState.Loading, sampleLoadable.State);
+            Assert.NotNull(ex);
+            Assert.AreEqual(LoadState.Fail, sampleLoadable.LoadState);
         }
 
         [Test]
-        public void TestUnloadAsync_Exception()
+        public async Task TestUnloadAsync_Exception()
         {
             // Arrange
             var sampleLoadable = new ResolveAsyncLoadable();
 
             // Act
-            TestDelegate handler = () => sampleLoadable.UnloadAsync();
-
+            MyException ex = null;
+            try
+            {
+                await sampleLoadable.UnloadAsync();
+            }
+            catch (MyException e)
+            {
+                ex = e;
+            }
             // Assert
-            var ex = Assert.Throws<MyException>(handler);
             Assert.AreEqual(NodeTreeExceptionType.UNLOAD_VALID_STATE, ex.Type);
         }
 

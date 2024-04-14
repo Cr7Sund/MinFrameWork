@@ -1,11 +1,15 @@
-﻿namespace Cr7Sund
+﻿using System.Threading;
+
+namespace Cr7Sund
 {
     public interface IRunnable
     {
-        bool IsStarted { get; }
+        bool IsStarted { get;  set; }
 
+        PromiseTask Start();
+        PromiseTask Stop();
 
-        void Start();
-        void Stop();
+        void RegisterAddTask(CancellationToken cancellationToken);
+        void RegisterRemoveTask(CancellationToken cancellationToken);
     }
 }

@@ -1,32 +1,38 @@
+using System;
 using Cr7Sund.AssetLoader.Impl;
-using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Selector.Apis;
 using UnityEngine;
 using Cr7Sund.Config;
-using Cr7Sund.AssetLoader;
 
 namespace Cr7Sund.Selector.Impl
 {
-    public class GameLauncher : MonoBehaviour
+    public class GameLauncher : MonoBehaviour, IDestroyAsync
     {
         private IGameLogic _gameLogic;
         private TimeCorrector _updateCorrector;
         private TimeCorrector _lateUpdateCorrector;
         private bool _dispose;
-
+        
 
         #region  Unity LifeCycles
 
         private void Awake()
         {
             InitFrameWork();
-
         }
+
         private void Start()
         {
-            _gameLogic.Start();
+            try
+            {
+                _gameLogic.Run();
+            }
+            catch (Exception e)
+            {
+                Console.Error(e);
+                throw;
+            }
         }
 
         void OnEnable()
@@ -36,7 +42,6 @@ namespace Cr7Sund.Selector.Impl
         void OnDisable()
         {
         }
-
 
         private void Update()
         {
@@ -50,44 +55,47 @@ namespace Cr7Sund.Selector.Impl
 
         private void OnApplicationQuit()
         {
-            Dispose();
+            DestroyAsync();
             EntranceConsole.Dispose();
 
             Console.Info("Exit Game!!!");
         }
 
-
         #endregion
 
         #region Custom Launcher
 
-        private void InitFrameWork()
+        private async PromiseTask InitFrameWork()
         {
             Console.Init(InternalLoggerFactory.Create("FrameWork"));
 
-            _gameLogic = CreateGameLogic();
+            _gameLogic = await CreateGameLogic();
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
+
+            _gameLogic.Init();
         }
 
-        private IGameLogic CreateGameLogic()
+        private async PromiseTask<GameLogic.GameLogic> CreateGameLogic()
         {
             var configLoader = AssetLoaderFactory.CreateLoader();
-            var gameConfig = configLoader.LoadSync<GameConfig>(ConfigDefines.GameConfig);
+            var gameConfig = await configLoader.Load<GameConfig>(ConfigDefines.GameConfig);
             var gameLogic = gameConfig.CreateLogic();
             return gameLogic;
         }
 
-        internal IPromise<INode> Dispose()
+        public async PromiseTask DestroyAsync()
         {
             if (!_dispose)
             {
                 _dispose = true;
-                return _gameLogic?.Destroy();
+                if (_gameLogic != null)
+                {
+                    await _gameLogic.DestroyAsync();
+                }
             }
 
             Console.Dispose();
-            return Promise<INode>.Resolved(null);
         }
         #endregion
     }

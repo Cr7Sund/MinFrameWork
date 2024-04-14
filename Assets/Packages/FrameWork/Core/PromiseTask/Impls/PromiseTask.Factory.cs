@@ -8,7 +8,7 @@ namespace Cr7Sund
     {
         public static PromiseTask<T> FromException(Exception ex)
         {
-            // PLAN: Handle Cancele
+            // PLAN: Handle Cancel
             //if (ex is OperationCanceledException oce)
             //{
             //    return FromCanceled<T>(oce.CancellationToken);

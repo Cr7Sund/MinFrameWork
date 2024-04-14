@@ -4,6 +4,7 @@ namespace Cr7Sund.Server.Impl
     {
         #region Global(game)
         public const string GameLoader = "GameAssetLoader";
+        public const string GameEventBus = "GameEventBus";
         #endregion
 
         #region  UI
@@ -33,7 +34,8 @@ namespace Cr7Sund.Server.Impl
         /// don destroy on load
         /// </summary>
         public const string GameInstancePool = "GameInstancePool";
-        public const string SceneInstancePool = "SceneInstancePool";
+        public const string UIPanelContainer = "UIPanelContainer";
+
         #endregion
     }
 }

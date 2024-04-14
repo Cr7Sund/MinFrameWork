@@ -1,77 +1,65 @@
 using System.Collections.Generic;
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.AssetLoader.Impl;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class BaseUniqueInstanceContainer : BaseAssetContainer, IAssetInstanceContainer
+    public abstract class BaseUniqueInstanceContainer : BaseAssetContainer, IUniqueInstanceContainer
     {
-        private Dictionary<string, IAssetPromise> _instancePromises = new();
+        private Dictionary<IAssetKey, GameObject> _instancePromises = new();
 
 
-        public IAssetPromise CreateInstance(IAssetKey assetKey)
+        public async PromiseTask<T> CreateInstance<T>(IAssetKey assetKey) where T : Object
         {
-            if (_instancePromises.ContainsKey(assetKey.Key))
+            if (_instancePromises.ContainsKey(assetKey))
             {
-                return _instancePromises[assetKey.Key];
+                return _instancePromises[assetKey] as T;
             }
 
-            var instancePromise = new AssetPromise();
-            _instancePromises.Add(assetKey.Key, instancePromise);
-
-            LoadAsset(assetKey).Then((asset) =>
-            {
-                var instance = InstantiateAsset(asset);
-                instancePromise.Resolve(instance);
-            });
-
-
-            return instancePromise;
+            var asset = await LoadAsset<T>(assetKey);
+            var instance = InstantiateAsset(asset);
+            _instancePromises.Add(assetKey, instance as GameObject);
+            return instance;
         }
 
-        public IAssetPromise CreateInstanceAsync(IAssetKey assetKey)
+        public async PromiseTask<T> CreateInstanceAsync<T>(IAssetKey assetKey) where T : Object
         {
-            if (_instancePromises.ContainsKey(assetKey.Key))
+            if (_instancePromises.ContainsKey(assetKey))
             {
-                return _instancePromises[assetKey.Key];
+                return _instancePromises[assetKey] as T;
             }
 
-            var instancePromise = new AssetPromise();
-            _instancePromises.Add(assetKey.Key, instancePromise);
-
-            LoadAssetAsync(assetKey).Then((asset) =>
-            {
-                var instance = InstantiateAsset(asset);
-                instancePromise.Resolve(instance);
-            });
-
-
-            return instancePromise;
+            var asset = await LoadAssetAsync<T>(assetKey);
+            var instance = InstantiateAsset(asset);
+            _instancePromises.Add(assetKey, instance as GameObject);
+            return instance;
         }
 
-
-        public override void Unload(IAssetKey key)
+        public override void Unload(IAssetKey assetKey)
         {
-            if (_instancePromises.ContainsKey(key.Key))
+            if (_instancePromises.ContainsKey(assetKey))
             {
-                _instancePromises[key.Key].Dispose();
-                _instancePromises.Remove(key.Key);
+                GameObject.Destroy(_instancePromises[assetKey]);
+                base.Unload(assetKey);
+                _instancePromises.Remove(assetKey);
             }
-            base.Unload(key);
+        }
+
+        public override void UnloadAll()
+        {
+            foreach (var item in _instancePromises)
+            {
+                GameObject.Destroy(item.Value);
+                base.Unload(item.Key);
+            }
+            _instancePromises.Clear();
         }
 
         public override void Dispose()
         {
-            foreach (var item in _instancePromises)
-            {
-                item.Value.Dispose(); // assetPromise will handle GameObject Destroy
-            }
-
-            base.Dispose();
-            _instancePromises.Clear();
+            AssertUtil.LessOrEqual(_instancePromises.Count, 0);
         }
 
         private T InstantiateAsset<T>(T asset) where T : Object
@@ -81,6 +69,5 @@ namespace Cr7Sund.Server.Impl
 
             return instance;
         }
-
     }
 }

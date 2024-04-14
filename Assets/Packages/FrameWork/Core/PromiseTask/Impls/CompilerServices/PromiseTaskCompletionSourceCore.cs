@@ -1,7 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Cr7Sund.CompilerServices
@@ -128,7 +128,7 @@ namespace Cr7Sund.CompilerServices
                 else
                 {
 #if DEBUG
-                    this.error = new ExceptionHolder            (ExceptionDispatchInfo.Capture(ex));
+                    this.error = new ExceptionHolder(ExceptionDispatchInfo.Capture(ex));
 #else
                     this.error = ex;
 #endif
@@ -150,7 +150,7 @@ namespace Cr7Sund.CompilerServices
             {
                 // setup result
                 hasUnhandledError = true;
-                error = new OperationCanceledException(cancellationToken);
+                error = new OperationCanceledException();
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
@@ -330,7 +330,7 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Completes with a successful result.</summary>
         /// <param name="result">The result.</param>
-
+        [DebuggerHidden]
         public bool TrySetResult(TResult result)
         {
             if (Interlocked.Increment(ref completedCount) == 1)
@@ -364,7 +364,7 @@ namespace Cr7Sund.CompilerServices
                 else
                 {
 #if DEBUG
-                    this.error = new ExceptionHolder            (ExceptionDispatchInfo.Capture(ex));
+                    this.error = new ExceptionHolder(ExceptionDispatchInfo.Capture(ex));
 #else
                     this.error = ex;
 #endif
@@ -386,7 +386,7 @@ namespace Cr7Sund.CompilerServices
             {
                 // setup result
                 hasUnhandledError = true;
-                error = new OperationCanceledException(cancellationToken);
+                error = new OperationCanceledException();
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {

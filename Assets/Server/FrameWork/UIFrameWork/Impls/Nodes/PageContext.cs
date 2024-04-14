@@ -5,14 +5,15 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.NodeTree.Api;
+using Cr7Sund.Server.UI.Api;
 
 namespace Cr7Sund.Server.UI.Impl
 {
-    public class UIContext : CrossContext
+    public class PageContext : CrossContext
     {
         protected virtual string Channel { get => "UI"; }
 
-        
+
         public sealed override void AddComponents(INode node)
         {
             // Local In GameNode or GameController
@@ -24,7 +25,8 @@ namespace Cr7Sund.Server.UI.Impl
 
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.UITimer);
-            InjectionBinder.Bind<IAssetLoader>().To(assetLoader);
+            InjectionBinder.Bind<IUINode>().To(node);
+            InjectionBinder.Bind<IPanelModule>().To<PanelModule>().AsSingleton();
         }
 
         public sealed override void RemoveComponents()
@@ -33,7 +35,8 @@ namespace Cr7Sund.Server.UI.Impl
 
             InjectionBinder.Unbind<IPoolBinder>();
             InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.UITimer);
-            InjectionBinder.Unbind<IAssetLoader>();
+            InjectionBinder.Unbind<IUINode>();
+            InjectionBinder.Unbind<IPanelModule>();
         }
 
     }

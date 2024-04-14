@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.TestTools;
 
-namespace Cr7Sund.PackageTest.Inject
+namespace Cr7Sund.PackageTest.IOC
 {
     [TestFixture]
     public class TestinjectionBinder : IPrebuildSetup, IPostBuildCleanup

@@ -1,53 +1,55 @@
-﻿using System.Reflection;
-using Cr7Sund.PackageTest.IOC;
+﻿using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Server.Impl;
 using NUnit.Framework;
+using System.Threading.Tasks;
+using System.Threading;
 namespace Cr7Sund.PackageTest.NodeTree
 {
     [TestFixture]
-    [TestOf(typeof(Node))]
     public class NodeTest
     {
+        public static readonly CancellationTokenSource UnitCancellation = new CancellationTokenSource();
+
         private SampleNode _node;
         [SetUp]
         public void SetUp()
         {
+            Console.Init(InternalLoggerFactory.Create());
             _node = new SampleNode();
             var context = new SampleRootContext();
             context.AddComponents(_node);
             _node.AssignContext(context);
+
         }
 
 
         [Test]
-        public void AddChild()
+        public async Task AddChild()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
 
             // Assert
             Assert.AreEqual(2, _node.ChildCount);
         }
 
         [Test]
-        public void AddChild_DefaultState()
+        public async Task AddChild_DefaultState()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
-
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
 
             // Assert
             Assert.IsFalse(_node.IsInit);
@@ -63,18 +65,16 @@ namespace Cr7Sund.PackageTest.NodeTree
             Assert.IsFalse(child2.IsStarted);
         }
 
-
-
         [Test]
-        public void AddChild_Init()
+        public async Task AddChild_Init()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
 
             // Assert
@@ -84,17 +84,17 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void AddChild_Start()
+        public async Task AddChild_Start()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Start();
+            await _node.Start();
 
             // Assert
             Assert.IsTrue(_node.IsStarted);
@@ -103,18 +103,18 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void AddChild_Enable()
+        public async Task AddChild_Enable()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Start();
-            _node.Enable();
+            await _node.Start();
+            await _node.Enable();
 
             // Assert
             Assert.IsTrue(_node.IsActive);
@@ -123,17 +123,17 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void AddChild_Enable_Not_Start()
+        public async Task AddChild_Enable_Not_Start()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Enable();
+            await _node.Enable();
 
             Assert.IsFalse(_node.IsActive);
             Assert.IsFalse(child1.IsActive);
@@ -141,7 +141,7 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void ActiveChild_BeforeAdd()
+        public async Task ActiveChild_BeforeAdd()
         {
             // Arrange
             var child1 = new SampleNode();
@@ -149,10 +149,10 @@ namespace Cr7Sund.PackageTest.NodeTree
 
             // Act
             _node.Init();
-            _node.Start();
-            _node.Enable();
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.Start();
+            await _node.Enable();
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
 
             // Assert
             Assert.IsTrue(_node.IsInit);
@@ -169,75 +169,79 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void RemoveChild()
+        public async Task DisableChild()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
-            _node.RemoveChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
+            await _node.RemoveChildAsync(child2);
 
             Assert.AreEqual(1, _node.ChildCount);
         }
 
 
         [Test]
-        public void RemoveAllChild()
+        public async Task RemoveAllChild()
         {
+            _node.Init();
+            await _node.Start();
+            await _node.Enable();
+
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
-            _node.RemoveChildAsync(child2);
-            _node.RemoveChildAsync(child1);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
+            await _node.RemoveChildAsync(child2);
+            await _node.RemoveChildAsync(child1);
 
             Assert.AreEqual(0, _node.ChildCount);
         }
 
 
         [Test]
-        public void RemoveChild_State()
+        public async Task RemoveChild_State()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Start();
-            _node.Enable();
-            _node.RemoveChildAsync(child2);
-            _node.RemoveChildAsync(child1);
+            await _node.Start();
+            await _node.Enable();
+            await _node.RemoveChildAsync(child2);
+            await _node.RemoveChildAsync(child1);
 
             // Assert
-   
+
             Assert.IsFalse(child1.IsActive);
             Assert.IsFalse(child2.IsActive);
         }
 
         [Test]
-        public void UnloadChild_State()
+        public async Task UnloadAllChild()
         {
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
             _node.Init();
-            _node.Start();
-            _node.Enable();
-            _node.UnloadChildAsync(child2);
-            _node.UnloadChildAsync(child1);
+            await _node.Start();
+            await _node.Enable();
+            await _node.UnloadChildAsync(child2);
+            await _node.UnloadChildAsync(child1);
 
             // Assert
             Assert.IsFalse(child1.IsStarted);
@@ -247,24 +251,30 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
-        public void DisposeAll()
+        public async Task UnloadAllNode()
         {
+            _node.Init();
+            await _node.LoadAsync();
+
             // Arrange
             var child1 = new SampleNode();
             var child2 = new SampleNode();
 
             // Act
-            _node.AddChildAsync(child1);
-            _node.AddChildAsync(child2);
-            _node.Init();
-            _node.Start();
-            _node.Enable();
-            _node.Dispose();
+            await _node.AddChildAsync(child1);
+            await _node.AddChildAsync(child2);
+            await _node.Start();
+            await _node.Enable();
+            await _node.UnloadChildAsync(child1);
+            await _node.UnloadChildAsync(child2);
+
+            await DestroyRootNode(_node);
 
             // Assert
             Assert.IsFalse(_node.IsInit);
             Assert.IsFalse(_node.IsActive);
             Assert.IsFalse(_node.IsStarted);
+            Assert.AreEqual(_node.LoadState, LoadState.Unloaded);
 
             Assert.IsFalse(child1.IsInit);
             Assert.IsFalse(child1.IsActive);
@@ -273,21 +283,49 @@ namespace Cr7Sund.PackageTest.NodeTree
             Assert.IsFalse(child2.IsInit);
             Assert.IsFalse(child2.IsActive);
             Assert.IsFalse(child2.IsStarted);
+
+            _node.Dispose();
+            Assert.AreEqual(_node.LoadState, LoadState.Default);
         }
         [Test]
-        public void EmptyCrossContext()
+        public async Task EmptyCrossContext()
         {
-
+            MyException ex = null;
             // Arrange
             var emptyCrossContextNode = new SampleNode();
-
             var child1 = new SampleNode();
 
             // Act
-            TestDelegate handler = () => emptyCrossContextNode.AddChildAsync(child1);
+            try
+            {
+                await emptyCrossContextNode.AddChildAsync(child1);
+            }
+            catch (MyException e)
+            {
+                ex = e;
+            }
 
-            var ex = Assert.Throws<MyException>(handler);
             Assert.AreEqual(ex.Type, NodeTreeExceptionType.EMPTY_CROSS_CONTEXT);
+        }
+
+        private async PromiseTask DestroyRootNode(Node root)
+        {
+            if (!root.IsInit) return;
+            if (root.IsActive)
+            {
+                await root.SetActive(false);
+            }
+            if (root.IsStarted)
+            {
+                await root.Stop();
+            }
+
+            if (root.LoadState == LoadState.Loading || root.LoadState == LoadState.Loaded)
+            {
+                await root.UnloadAsync();
+            }
+
+            root.Destroy();
         }
     }
 }

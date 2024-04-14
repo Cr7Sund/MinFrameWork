@@ -8,5 +8,10 @@ namespace Cr7Sund.Server.Tests
         {
             return new SampleGameBuilder();
         }
+
+        public Package.Api.IInjector GetContextInjector()
+        {
+            return _gameNode.Context.InjectionBinder.Injector;
+        }
     }
 }

@@ -1,9 +1,8 @@
-﻿using Cr7Sund.Package.Api;
-using Cr7Sund.FrameWork.Util;
+﻿using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Scene.Apis;
+
 namespace Cr7Sund.Server.Impl
 {
     public class GameNode : ModuleNode, IGameNode
@@ -12,34 +11,56 @@ namespace Cr7Sund.Server.Impl
         {
 
         }
-        
+
         public GameNode() : this(null)
         {
 
         }
 
-        public void Run()
+        public async PromiseTask Run()
         {
             AssertUtil.NotNull(_context, NodeTreeExceptionType.EMPTY_CONTEXT);
 
             Inject();
             Init();
-            LoadAsync(this).Then(_ =>
-            {
-                Start();
-                SetActive(true);
-            });
+            await LoadAsync();
+
+            await Start();
+            await SetActive(true);
         }
 
-        public IPromise<INode> Destroy()
+        protected override void OnUpdate(int milliseconds)
         {
-            return UnloadAsync(this).Then(node =>
-            {
-                SetActive(false);
-                Stop();
-                Dispose();
-                return node;
-            });
+            base.OnUpdate(milliseconds);
         }
+
+        // protected void CreateUITransitionBarrier()
+        // {
+        //     _sceneTimer.Schedule((timeData) =>
+        //     {
+        //         _pageContainer.TimeOut(timeData.elapsedTime);
+        //     });
+        // }
+        public async PromiseTask DestroyAsync()
+        {
+            if (!IsInit) return;
+            if (IsActive)
+            {
+                await SetActive(false);
+            }
+            if (IsStarted)
+            {
+                await Stop();
+            }
+
+            if (LoadState == LoadState.Loading || LoadState == LoadState.Loaded)
+            {
+                await UnloadAsync();
+            }
+
+            Dispose();
+        }
+
     }
+
 }

@@ -3,7 +3,7 @@ using System;
 namespace Cr7Sund
 {
     [Serializable]
-    public struct AssetKey : IAssetKey
+    public class AssetKey : IAssetKey
     {
         public string FullName;
 
@@ -19,6 +19,21 @@ namespace Cr7Sund
         public bool IsValid()
         {
             return string.IsNullOrEmpty(Key);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is IAssetKey assetKey)
+            {
+                return Key.Equals(assetKey.Key);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Key.GetHashCode();
         }
     }
 }

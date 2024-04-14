@@ -3,7 +3,6 @@ using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
@@ -16,19 +15,24 @@ namespace Cr7Sund.AssetLoader.Impl
         public AsyncOperationHandle Handler { get; }
         public string Key { get; }
         public int ControlId { get; }
-        public bool IsInstantiate { get; }
 
-        public AssetPromise()
+        public AssetPromise(PromiseState promiseState = PromiseState.Pending) : base(promiseState)
         {
 
         }
 
-        public AssetPromise(AsyncOperationHandle handler, string key, int controlId, bool isInstantiate)
+        public AssetPromise(AsyncOperationHandle handler, string key, int controlId)
         {
             Handler = handler;
             Key = key;
             ControlId = controlId;
-            IsInstantiate = isInstantiate;
+        }
+
+
+        public AssetPromise(string key, int controlId)
+        {
+            Key = key;
+            ControlId = controlId;
         }
 
         public T GetResult<T>() where T : Object
@@ -56,21 +60,18 @@ namespace Cr7Sund.AssetLoader.Impl
                 throw new MyException(AssetLoaderExceptionType.no_done_State);
             }
         }
-        public T ForceGetResult<T>() where T : Object
+        public async PromiseTask<T> ForceGetResult<T>() where T : Object
         {
             if (CurState == PromiseState.Rejected)
             {
                 throw new NotImplementedException();
             }
-            if (Handler.IsDone)
-            {
-                return Handler.Result as T;
-            }
-            else
+            if (!Handler.IsDone)
             {
                 Handler.WaitForCompletion();
-                return Handler.Result as T;
+                await ToNewTask();
             }
+            return Handler.Result as T;
         }
 
         protected override Promise<ConvertedT> GetRawPromise<ConvertedT>()
@@ -79,7 +80,7 @@ namespace Cr7Sund.AssetLoader.Impl
             {
                 AssertUtil.NotNull(Handler);
 
-                return new AssetPromise(Handler, Key, ControlId, IsInstantiate) as Promise<ConvertedT>;
+                return new AssetPromise(Handler, Key, ControlId) as Promise<ConvertedT>;
             }
 
             return base.GetRawPromise<ConvertedT>();
@@ -90,6 +91,11 @@ namespace Cr7Sund.AssetLoader.Impl
             return Then(asset => Promise<T>.Resolved(asset as T));
         }
 
+        public override void Cancel()
+        {
+            base.Cancel();
+            // Handler.Cancel();
+        }
         public override void Dispose()
         {
             base.Dispose();

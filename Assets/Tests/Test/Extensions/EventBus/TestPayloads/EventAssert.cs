@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cr7Sund.Package.EventBus.Impl;
 using Cr7Sund.Package.EventBus.Api;
 using NUnit.Framework;
 using UnityEngine.TestTools.Constraints;
@@ -8,7 +7,7 @@ using Is = NUnit.Framework.Is;
 
 namespace Cr7Sund.PackageTest.EventBus
 {
-	public static class EventAssert
+    public static class EventAssert
 	{
 		public static void AssertDoesNotAllocate(Action action)
 		{

@@ -1,14 +1,10 @@
-using Cr7Sund.Package.Api;
-using Cr7Sund.NodeTree.Api;
-
 namespace Cr7Sund.Selector.Apis
 {
-    public interface IGameLogic
+    public interface IGameLogic : IDestroyAsync
     {
         void Init();
-        void Start();
+        PromiseTask Run();
         void Update(int millisecond);
         void LateUpdate(int millisecond);
-        IPromise<INode> Destroy();
     }
 }

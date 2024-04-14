@@ -5,23 +5,23 @@ namespace Cr7Sund.Server.UI.Api
     public interface IUIController : ILifeTime, IRunnable
     {
         // Called before view crate and do some async work
-        public IPromise Prepare(object intent = null);
+        public PromiseTask Prepare(object intent = null);
 
         // Called just before this page is displayed by the Push transition.
-        public IPromise WillPushEnter();
+        public PromiseTask WillPushEnter();
         // Called just after this page is displayed by the Push transition.
-        public IPromise DidPushEnter();
+        public PromiseTask DidPushEnter();
         // Called just before this page is hidden by the Push transition.
-        public IPromise WillPushExit();
+        public PromiseTask WillPushExit();
         // Called just after this page is hidden by the Push transition.
-        public IPromise DidPushExit();
+        public PromiseTask DidPushExit();
         // Called just before this page is displayed by the Pop transition.
-        public IPromise WillPopEnter();
+        public PromiseTask WillPopEnter();
         // Called just after this page is displayed by the Pop transition.
-        public IPromise DidPopEnter();
+        public PromiseTask DidPopEnter();
         // Called just before this page is hidden by the Pop transition.
-        public IPromise WillPopExit();
+        public PromiseTask WillPopExit();
         // Called just after this page is hidden by the Pop transition.
-        public IPromise DidPopExit();
+        public PromiseTask DidPopExit();
     }
 }

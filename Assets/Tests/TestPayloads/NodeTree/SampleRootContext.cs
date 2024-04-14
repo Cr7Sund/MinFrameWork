@@ -14,7 +14,7 @@ namespace Cr7Sund.PackageTest.IOC
         }
         public override void AddComponents(INode self)
         {
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsCrossContext();
+            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton().AsCrossContext();
         }
 
         public override void RemoveComponents()

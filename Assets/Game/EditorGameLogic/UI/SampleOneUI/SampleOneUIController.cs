@@ -1,3 +1,5 @@
+using System.Threading;
+using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.Game.UI
@@ -7,47 +9,40 @@ namespace Cr7Sund.Game.UI
         public static int StartValue;
         public static int EnableCount;
 
-        [Inject] private PageContainer _pageContainer;
+        [Inject] private IPageModule _pageContainer;
 
-        
         public static void Init()
         {
             StartValue = 0;
             EnableCount = 0;
         }
 
-
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
-            
             Debug.Debug("Load ui one {StartValue}", StartValue);
-
+            await base.OnStart();
             StartValue++;
 
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
             Debug.Debug("Enable ui one");
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
             Debug.Debug("Disable ui one");
-
+            await base.OnDisable();
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop ui one");
-
+            await base.OnStop();
             StartValue--;
         }
     }

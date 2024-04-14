@@ -25,10 +25,10 @@ namespace Cr7Sund.Server.UI.Api
         void Start(INode parent);
         void Enable(INode parent);
         void BeforeEnter();
-        IPromise EnterRoutine(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask EnterRoutine(bool push, IUINode partnerView, bool playAnimation);
         void AfterEnter();
         void BeforeExit();
-        IPromise ExitRoutine(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask ExitRoutine(bool push, IUINode partnerView, bool playAnimation);
         void AfterExit();
         void Disable();
         void Stop();

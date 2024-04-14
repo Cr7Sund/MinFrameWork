@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
+using System.Diagnostics;
 namespace Cr7Sund.Package.Impl
 {
     public class Promise : IPromise, IPromiseTaskSource, IPoolNode<Promise>
@@ -495,6 +496,7 @@ namespace Cr7Sund.Package.Impl
         #endregion
 
         #region IPendingPromise
+        [DebuggerHidden]
         public void Resolve()
         {
             if (CurState != PromiseState.Pending)
@@ -514,7 +516,7 @@ namespace Cr7Sund.Package.Impl
 
             InvokeResolveHandlers();
         }
-       
+
         public async PromiseTask ResolveAsync()
         {
             Resolve();
@@ -562,14 +564,7 @@ namespace Cr7Sund.Package.Impl
 
         public void Cancel()
         {
-            CurState = PromiseState.Pending;
-
-            if (Promise.EnablePromiseTracking)
-            {
-                Promise.PendingPromises.Remove(this);
-            }
-
-            ClearHandlers();
+            Reject(new OperationCanceledException());
         }
         #endregion
 
@@ -626,18 +621,40 @@ namespace Cr7Sund.Package.Impl
             {
                 case PromiseState.Pending:
                     await new PromiseTask(this, 0);
-                    break;
+                    return;
                 case PromiseState.Rejected:
                 default:
                     var tmpEx = _rejectionException;
                     TryReturn();
-                    throw new Exception(string.Empty, tmpEx);
+                    throw new Exception(tmpEx.Message, tmpEx);
                 case PromiseState.Resolved:
                     TryReturn();
-                    await new PromiseTask();
-                    break;
+                    await PromiseTask.CompletedTask;
+                    return;
             }
         }
+
+        public PromiseTask AsNewTask()
+        {
+            if (this.IsRecycled)
+            {
+                throw new System.Exception("cant await recycle task, check the original promise status");
+            }
+            switch (CurState)
+            {
+                case PromiseState.Pending:
+                    var newPromise = Promise.Create();
+                    AddResolveHandler(newPromise.Resolve, newPromise);
+                    return new PromiseTask(newPromise, 0);
+                case PromiseState.Rejected:
+                default:
+                    var tmpEx = _rejectionException;
+                    throw new Exception(tmpEx.Message, tmpEx);
+                case PromiseState.Resolved:
+                    return PromiseTask.CompletedTask;
+            }
+        }
+
         #endregion
 
         #region private methods
@@ -769,6 +786,7 @@ namespace Cr7Sund.Package.Impl
         }
 
         // Invoke all resolve handlers
+        [DebuggerHidden]
         private void InvokeResolveHandlers()
         {
             if (_resolveHandlers != null)
@@ -806,6 +824,7 @@ namespace Cr7Sund.Package.Impl
             _progressHandlers = null;
         }
 
+        [DebuggerHidden]
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)
         {
             AssertUtil.NotNull(callback);

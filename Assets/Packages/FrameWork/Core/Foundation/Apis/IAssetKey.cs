@@ -1,8 +1,11 @@
+using System;
+
 namespace Cr7Sund
 {
-    public interface IAssetKey
+    public interface IAssetKey 
     {
         public string Key { get; }
+
     }
 
 }

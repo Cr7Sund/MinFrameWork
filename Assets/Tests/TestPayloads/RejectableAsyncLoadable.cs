@@ -3,25 +3,28 @@ using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
+using System.Threading;
 namespace Cr7Sund.FrameWork.Test
 {
     public class RejectableAsyncLoadable : AsyncLoadable
     {
         public const string exMsg = "throw exception";
 
-        protected override IPromise OnLoadAsync()
+        protected override PromiseTask OnLoadAsync()
         {
-            return Promise.RejectedWithoutDebug(new Exception(exMsg));
+            throw new Exception(exMsg);
         }
 
-        protected override IPromise OnUnloadAsync()
+        protected override PromiseTask OnUnloadAsync()
         {
-            return Promise.RejectedWithoutDebug(new Exception("qw"));
+            throw new Exception("qw");
         }
 
         protected override void OnCatch(Exception e)
         {
             Assert.AreEqual(exMsg, e.Message);
         }
+
+
     }
 }

@@ -11,15 +11,14 @@ namespace Cr7Sund.Server.Impl
         protected override IAssetLoader Loader => _assetLoader;
 
 
-        public T GetConfig<T>(IAssetKey assetKey) where T : Object
+        public async PromiseTask<T> GetConfig<T>(IAssetKey assetKey) where T : Object
         {
-            return base.GetAssetSync<T>(assetKey);
+            return await base.LoadAsset<T>(assetKey);
         }
 
-        public IAssetPromise GetConfigAsync(IAssetKey assetKey)
+        public void RemoveConfigAsync(IAssetKey assetKey)
         {
-            return base.LoadAssetAsync(assetKey);
+            base.Unload(assetKey);
         }
-
     }
 }

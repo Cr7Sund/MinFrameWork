@@ -1,12 +1,10 @@
-using Cr7Sund.Package.Api;
-using Cr7Sund.FrameWork.Util;
-using Cr7Sund.NodeTree.Api;
+using System.Threading;
 
 namespace Cr7Sund.NodeTree.Impl
 {
     public class ModuleNode : UpdateNode
     {
-        protected IControllerModule _controllerModule;
+        protected ControllerModule _controllerModule;
 
 
         public ModuleNode(IAssetKey assetKey) : base(assetKey)
@@ -19,15 +17,22 @@ namespace Cr7Sund.NodeTree.Impl
             _controllerModule = controllerModule;
         }
 
-
-        protected override IPromise<INode> OnLoadAsync(INode content)
+        public override async PromiseTask PreLoadAsync()
         {
-            return base.OnLoadAsync(content).Then(_controllerModule.LoadAsync);
+            await base.PreLoadAsync();
+            await _controllerModule.PreLoadAsync();
         }
 
-        protected override IPromise<INode> OnUnloadAsync(INode content)
+        public override async PromiseTask LoadAsync()
         {
-            return base.OnUnloadAsync(content).Then(_controllerModule.UnloadAsync);
+            await base.LoadAsync();
+            await _controllerModule.LoadAsync();
+        }
+
+        public override async PromiseTask UnloadAsync()
+        {
+            await base.UnloadAsync();
+            await _controllerModule.UnloadAsync();
         }
 
         public sealed override void Inject()
@@ -39,7 +44,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             // it should be OnInject
             // but we need to force it will be invoked 
-            ((ControllerModule)_controllerModule).AssignContext(_context);
+            _controllerModule.AssignContext(_context);
             _controllerModule.Inject();
         }
 
@@ -55,32 +60,24 @@ namespace Cr7Sund.NodeTree.Impl
             _controllerModule.Deject();
         }
 
-        protected override void OnStart()
+        public override PromiseTask OnStart()
         {
-            base.OnStart();
-
-            _controllerModule.Start();
+            return _controllerModule.Start();
         }
 
-        protected override void OnStop()
+        public override async PromiseTask OnStop()
         {
-            base.OnStop();
-
-            _controllerModule.Stop();
+            await _controllerModule.Stop();
         }
 
-        protected override void OnEnable()
+        public override PromiseTask OnEnable()
         {
-            base.OnEnable();
-
-            _controllerModule.Enable();
+            return _controllerModule.Enable();
         }
 
-        protected override void OnDisable()
+        public override PromiseTask OnDisable()
         {
-            base.OnDisable();
-
-            _controllerModule.Disable();
+            return _controllerModule.Disable();
         }
 
         protected override void OnUpdate(int milliseconds)
@@ -97,9 +94,16 @@ namespace Cr7Sund.NodeTree.Impl
             _controllerModule.LateUpdate(milliseconds);
         }
 
-        protected override void OnDispose()
+        public override void RegisterAddTask(CancellationToken cancellationToken)
         {
-            base.OnDispose();
+            base.RegisterAddTask(cancellationToken);
+            _controllerModule.RegisterAddTask(cancellationToken);
+        }
+
+        public override void RegisterRemoveTask(CancellationToken cancellationToken)
+        {
+            base.RegisterRemoveTask(cancellationToken);
+            _controllerModule.RegisterRemoveTask(cancellationToken);
         }
     }
 }

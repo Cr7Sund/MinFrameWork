@@ -118,7 +118,6 @@ namespace Cr7Sund.Package.Impl
             }
 
             return this;
-
         }
 
         public IManagedList Remove(object[] list)

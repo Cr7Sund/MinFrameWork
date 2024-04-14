@@ -38,6 +38,7 @@ namespace Cr7Sund
 #endif
         }
 
+        [DebuggerHidden]
         void IPromiseTaskSource.GetResult(short token)
         {
             if (!calledGet)

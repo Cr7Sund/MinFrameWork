@@ -46,46 +46,35 @@ namespace Cr7Sund.Selector.Impl
             }
         }
 
-        public IPromise<INode> Restart()
+        public async PromiseTask Restart()
         {
             switch (_status)
             {
                 case GameStatus.Started:
-                    {
-                        _status = GameStatus.Restarting;
-                        EntranceConsole.Warn("GameMgr::Restart  Close game first....");
-                        var shutdownPromise = DoClose();
-                        shutdownPromise.Then(_ =>
-                        {
-                            EntranceConsole.Info("GameMgr::ReStart...");
-                            DoStart();
-                            _status = GameStatus.Started;
-                        });
-                        return shutdownPromise;
-                    }
+                    _status = GameStatus.Restarting;
+                    EntranceConsole.Warn("GameMgr::Restart  Close game first....");
+                    await DoClose();
+                    EntranceConsole.Info("GameMgr::ReStart...");
+                    DoStart();
+                    _status = GameStatus.Started;
+                    return;
                 case GameStatus.Restarting:
-                    {
-                        EntranceConsole.Warn("GameMgr::Restart  Game is currently restarting....");
-                        return null;
-                    }
+                    EntranceConsole.Warn("GameMgr::Restart  Game is currently restarting....");
+                    return;
                 case GameStatus.Closing:
-                    {
-                        EntranceConsole.Warn("GameMgr::Restart  Game is currently closing....");
-                        return null;
-                    }
+                    EntranceConsole.Warn("GameMgr::Restart  Game is currently closing....");
+                    return;
                 case GameStatus.Closed:
-                    {
-                        EntranceConsole.Info("GameMgr::ReStart...");
-                        DoStart();
-                        _status = GameStatus.Started;
-                        return null;
-                    }
+                    EntranceConsole.Info("GameMgr::ReStart...");
+                    DoStart();
+                    _status = GameStatus.Started;
+                    return;
                 default:
-                    return null;
+                    return;
             }
         }
 
-        public IPromise<INode> Close()
+        public async PromiseTask Close()
         {
             switch (_status)
             {
@@ -93,27 +82,27 @@ namespace Cr7Sund.Selector.Impl
                     {
                         EntranceConsole.Fatal("GameMgr::Close");
                         _status = GameStatus.Closing;
-                        var shutdownPromise = DoClose();
-                        shutdownPromise.Then(a => _status = GameStatus.Closed);
-                        return shutdownPromise;
+                        await DoClose();
+                        _status = GameStatus.Closed;
+                        return;
                     }
                 case GameStatus.Restarting:
                     {
                         EntranceConsole.Fatal("GameMgr::Close  Game is currently closing while restarting");
-                        return null;
+                        return;
                     }
                 case GameStatus.Closing:
                     {
                         EntranceConsole.Fatal("GameMgr::Close  Game is currently closing");
-                        return null;
+                        return;
                     }
                 case GameStatus.Closed:
                     {
                         EntranceConsole.Fatal("GameMgr::Close  Game has not been started yet...");
-                        return null;
+                        return;
                     }
                 default:
-                    return null;
+                    return;
             }
         }
 
@@ -124,12 +113,12 @@ namespace Cr7Sund.Selector.Impl
             Object.DontDestroyOnLoad(_go);
         }
 
-        private IPromise<INode> DoClose()
+        private async PromiseTask DoClose()
         {
             _status = GameStatus.Closing;
-            var destroyPromise = _launch.Dispose();
+            await _launch.DestroyAsync();
             Dispose();
-            return destroyPromise;
         }
+
     }
 }
