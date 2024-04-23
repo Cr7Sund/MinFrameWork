@@ -1,9 +1,9 @@
 using System.Threading;
 using Cr7Sund.Server.Impl;
 
-namespace Cr7Sund.Server.Tests
+namespace Cr7Sund.Server.Test
 {
-    public class SampleController : BaseGameController
+    public class SampleGameController : BaseGameController
     {
         protected override PromiseTask HandleHotfix()
         {

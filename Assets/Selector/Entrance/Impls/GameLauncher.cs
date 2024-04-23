@@ -13,26 +13,18 @@ namespace Cr7Sund.Selector.Impl
         private TimeCorrector _updateCorrector;
         private TimeCorrector _lateUpdateCorrector;
         private bool _dispose;
-        
+
 
         #region  Unity LifeCycles
 
-        private void Awake()
+        private async void Awake()
         {
-            InitFrameWork();
+            await InitFrameWork();
         }
 
-        private void Start()
+        private async void Start()
         {
-            try
-            {
-                _gameLogic.Run();
-            }
-            catch (Exception e)
-            {
-                Console.Error(e);
-                throw;
-            }
+            await _gameLogic.Run();
         }
 
         void OnEnable()
@@ -45,17 +37,17 @@ namespace Cr7Sund.Selector.Impl
 
         private void Update()
         {
-            _gameLogic.Update(_updateCorrector.GetCorrectedTime());
+            _gameLogic?.Update(_updateCorrector.GetCorrectedTime());
         }
 
         private void LateUpdate()
         {
-            _gameLogic.LateUpdate(_lateUpdateCorrector.GetCorrectedTime());
+            _gameLogic?.LateUpdate(_lateUpdateCorrector.GetCorrectedTime());
         }
 
-        private void OnApplicationQuit()
+        private async void OnApplicationQuit()
         {
-            DestroyAsync();
+            await DestroyAsync();
             EntranceConsole.Dispose();
 
             Console.Info("Exit Game!!!");
@@ -72,7 +64,6 @@ namespace Cr7Sund.Selector.Impl
             _gameLogic = await CreateGameLogic();
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
-
             _gameLogic.Init();
         }
 

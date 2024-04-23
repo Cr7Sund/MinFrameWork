@@ -12,7 +12,7 @@ namespace Cr7Sund.Game.GameLogic
 
         protected override async PromiseTask OnEnable()
         {
-            await _sceneModule.AddScene(SceneKeys.EditorSceneKeyTwo);
+            await _sceneModule.AddScene(SceneKeys.EditorAddictiveSceneKeyOne);
         }
 
     }

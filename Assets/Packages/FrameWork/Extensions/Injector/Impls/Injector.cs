@@ -141,7 +141,6 @@ namespace Cr7Sund.Package.Impl
             {
                 return target;
             }
-
             _depth++;
             failIf(_depth > MAX_DEPTH, InjectionExceptionType.INJECT_DEPTH_LIMIT, t, target);
 
@@ -181,8 +180,10 @@ namespace Cr7Sund.Package.Impl
             for (int i = 0; i < reflection.Fields.Length; i++)
             {
                 var pair = reflection.Fields[i];
+                float depth = _depth;
                 object value = GetValueInjection(pair.Item1, pair.Item2, target);
                 InjectValueIntoPoint(value, target, pair.Item3);
+                _depth = _depth > depth ? _depth - 1 : _depth;
             }
         }
 

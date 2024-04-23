@@ -8,10 +8,10 @@ namespace Cr7Sund.NodeTree.Impl
         public LoadState LoadState { get; private set; }
 
 
-        public virtual async PromiseTask LoadAsync()
+        public async PromiseTask LoadAsync()
         {
             if (LoadState == LoadState.Loading
-             || LoadState == LoadState.Unloading)
+                || LoadState == LoadState.Unloading)
             {
                 throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.LOAD_VALID_STATE);
@@ -30,13 +30,13 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public virtual async PromiseTask PreLoadAsync()
+        public async PromiseTask PreLoadAsync()
         {
             if (LoadState == LoadState.Loading
                 || LoadState == LoadState.Unloading
                 || LoadState == LoadState.Loaded)
             {
-                throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
+                throw new MyException($"Cant PreLoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.LOAD_VALID_STATE);
             }
 
@@ -56,17 +56,17 @@ namespace Cr7Sund.NodeTree.Impl
         public virtual async PromiseTask UnloadAsync()
         {
             if (LoadState == LoadState.Default
-            || LoadState == LoadState.Unloading
-            || LoadState == LoadState.Unloaded)
+                         || LoadState == LoadState.Unloading
+                         || LoadState == LoadState.Unloaded)
             {
-                throw new MyException($"Cant UnloadAsync On State: {LoadState}  Loadable: {this} ",
+                throw new MyException($"Cant UnLoadAsync On State {LoadState} Loadable: {this} ",
                     NodeTreeExceptionType.UNLOAD_VALID_STATE);
             }
 
             if (LoadState == LoadState.Loading)
             {
                 throw new MyException($"Please handle loading situation outside ",
-                      NodeTreeExceptionType.UNLOAD_VALID_STATE);
+                    NodeTreeExceptionType.UNLOAD_VALID_STATE);
             }
 
             LoadState = LoadState.Unloading;
@@ -85,7 +85,8 @@ namespace Cr7Sund.NodeTree.Impl
         public virtual void Dispose()
         {
             // default
-            AssertUtil.IsTrue(LoadState == LoadState.Unloaded);
+            AssertUtil.IsTrue(LoadState == LoadState.Unloaded
+            || LoadState == LoadState.Default);
 
             LoadState = LoadState.Default;
         }

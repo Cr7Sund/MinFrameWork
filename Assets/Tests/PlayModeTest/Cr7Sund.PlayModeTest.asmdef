@@ -9,7 +9,8 @@
         "Cr7Sund.FrameWork.Core",
         "Cr7Sund.Test.Payloads",
         "Cr7Sund.FrameWork.Extension",
-        "Cr7Sund.Touch"
+        "Cr7Sund.Touch",
+        "Cr7Sund.Tests.Payloads"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

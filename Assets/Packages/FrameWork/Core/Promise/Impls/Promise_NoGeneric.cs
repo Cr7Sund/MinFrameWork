@@ -40,7 +40,6 @@ namespace Cr7Sund.Package.Impl
             add { _unhandledException += value; }
             remove { _unhandledException -= value; }
         }
-
         #endregion
 
         #region Fields
@@ -61,6 +60,7 @@ namespace Cr7Sund.Package.Impl
         ///     The exception when the promise is rejected.
         /// </summary>
         private Exception _rejectionException;
+        private Action _registerAction;
         #endregion
 
         #region Properties
@@ -96,7 +96,7 @@ namespace Cr7Sund.Package.Impl
             }
         }
 
-        private Promise(PromiseState initialState) : this()
+        protected Promise(PromiseState initialState) : this()
         {
             CurState = initialState;
             Id = NextId();
@@ -108,6 +108,10 @@ namespace Cr7Sund.Package.Impl
             if (!_taskPool.TryPop(out var result))
             {
                 result = new Promise();
+            }
+            else
+            {
+                result.Id = NextId();
             }
             return result;
         }
@@ -121,10 +125,15 @@ namespace Cr7Sund.Package.Impl
 
         public virtual void Dispose()
         {
-            ClearHandlers();
+            // can be called when invoke resolve handlers
+            AssertUtil.IsNull(_resolveHandlers);
+            AssertUtil.IsNull(_rejectHandlers);
+            AssertUtil.IsNull(_progressHandlers);
             Name = string.Empty;
             CurState = PromiseState.Pending;
             Id = -1;
+            _rejectionException = null;
+            _registerAction = null;
         }
 
         public virtual void TryReturn()
@@ -132,7 +141,6 @@ namespace Cr7Sund.Package.Impl
             Dispose();
             _taskPool.TryPush(this);
         }
-
         #endregion
 
         #region IPromise
@@ -569,6 +577,7 @@ namespace Cr7Sund.Package.Impl
         #endregion
 
         #region ITaskSource
+        [DebuggerHidden]
         public void GetResult(short token)
         {
             if (_rejectionException != null)
@@ -581,12 +590,12 @@ namespace Cr7Sund.Package.Impl
 
             TryReturn();
         }
-
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
             return CurState.ToTaskStatus();
         }
-
+        [DebuggerHidden]
         void IPromiseTaskSource.GetResult(short token)
         {
             if (_rejectionException != null)
@@ -594,23 +603,21 @@ namespace Cr7Sund.Package.Impl
                 // PLAN handle cancel
                 var tmpEx = _rejectionException;
                 TryReturn();
-
                 throw tmpEx;
             }
             TryReturn();
         }
-
+        [DebuggerHidden]
         public PromiseTaskStatus UnsafeGetStatus()
         {
             return CurState.ToTaskStatus();
         }
-
+        [DebuggerHidden]
         public void OnCompleted(Action continuation, short token)
         {
-            AddResolveHandler(continuation, this);
-            AddRejectHandler(_ => continuation?.Invoke(), this);
+            _registerAction = continuation;
         }
-
+        [DebuggerHidden]
         public async PromiseTask AsTask()
         {
             if (this.IsRecycled)
@@ -645,6 +652,7 @@ namespace Cr7Sund.Package.Impl
                 case PromiseState.Pending:
                     var newPromise = Promise.Create();
                     AddResolveHandler(newPromise.Resolve, newPromise);
+                    AddRejectHandler(newPromise.RejectWithoutDebug, newPromise);
                     return new PromiseTask(newPromise, 0);
                 case PromiseState.Rejected:
                 default:
@@ -654,7 +662,6 @@ namespace Cr7Sund.Package.Impl
                     return PromiseTask.CompletedTask;
             }
         }
-
         #endregion
 
         #region private methods
@@ -770,6 +777,7 @@ namespace Cr7Sund.Package.Impl
             }
 
             ClearHandlers();
+            _registerAction?.Invoke();
         }
 
         //Invoke all progress handlers.
@@ -799,6 +807,7 @@ namespace Cr7Sund.Package.Impl
             }
 
             ClearHandlers();
+            _registerAction?.Invoke();
         }
 
         protected virtual void ClearHandlers()
@@ -982,12 +991,13 @@ namespace Cr7Sund.Package.Impl
             return ResolvedPromise.SequenceInternal(fns);
         }
 
-#if UNITY_INCLUDE_TESTS
-        public static int GetPendingPromiseCount()
+        public static int Test_GetPendingPromiseCount()
         {
+            #if UNITY_EDITOR
             return PendingPromises.Count;
+            #endif
+            return 0;
         }
-#endif
 
         public static void ClearPending()
         {
@@ -1035,7 +1045,7 @@ namespace Cr7Sund.Package.Impl
         {
             var promisesArray = promises.ToArray();
             AssertUtil.Greater(promisesArray.Length, 0,
-                 PromiseExceptionType.EMPTY_PROMISE_ANY);
+                PromiseExceptionType.EMPTY_PROMISE_ANY);
 
             int remainingCount = promisesArray.Length;
             float[] progress = new float[remainingCount];
@@ -1233,8 +1243,8 @@ namespace Cr7Sund.Package.Impl
         }
         #endregion
 
-        #region  UnityTest
-#if UNITY_INCLUDE_TESTS
+        #region UnityTest
+#if UNITY_EDITOR
 
         public static int Test_GetResolveListPoolCount()
         {
@@ -1243,6 +1253,10 @@ namespace Cr7Sund.Package.Impl
         public static int Test_GetPoolCount()
         {
             return _taskPool.Size;
+        }
+        public void Test_ClearHandlers()
+        {
+            this.ClearHandlers();
         }
 #endif
         #endregion

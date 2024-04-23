@@ -16,6 +16,7 @@ namespace Cr7Sund
 
         public PromiseTaskStatus Status
         {
+            [DebuggerHidden]
             get
             {
                 return (source == null) ? PromiseTaskStatus.Succeeded : source.GetStatus(token);

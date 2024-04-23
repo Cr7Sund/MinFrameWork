@@ -38,45 +38,11 @@ namespace Cr7Sund.Server.UI.Impl
 
             await SwitchNode(uiKey);
         }
-
-        protected override async PromiseTask OnAdded(IAssetKey assetKey)
+        
+        public async PromiseTask CloseAll()
         {
-            await OpenSequence(assetKey);
+            await UnloadAllNodes();
         }
-
-        protected override async PromiseTask OnRemoved(IAssetKey key)
-        {
-            await CloseSequence(key);
-        }
-
-        private async PromiseTask CloseSequence(IAssetKey exitKey)
-        {
-            var exitPage = GetViewByKey<UINode>(exitKey);
-            if (exitPage == null)
-            {
-                return;
-            }
-
-            IUINode enterPage = null;
-            // IUINode enterPage=  UINode.CreateBlackScreen();
-            var exitPageUIKey = exitPage.Key as UIKey;
-
-            await exitPage.BeforeExit(true, enterPage);
-            await exitPage.Exit(true, enterPage, exitPageUIKey.PlayAnimation);
-            await exitPage.AfterExit(true, enterPage);
-        }
-
-        private async PromiseTask OpenSequence(IAssetKey enterKey)
-        {
-            var enterPageUIKey = enterKey as UIKey;
-            var exitPage = GetViewByKey<UINode>(enterPageUIKey.exitPageKey);
-            var enterPage = GetViewByKey<UINode>(enterKey);
-
-            await enterPage.BeforeEnter(true, exitPage);
-            await enterPage.Enter(true, exitPage, enterPageUIKey.PlayAnimation);
-            await enterPage.AfterEnter(true, exitPage);
-        }
-
 
         #region Load
         protected override void DispatchSwitch(IAssetKey curUI, IAssetKey lastUI)
@@ -112,15 +78,12 @@ namespace Cr7Sund.Server.UI.Impl
         }
         protected override INode CreateNode(IAssetKey key)
         {
-            var uINode = UICreator.Create((UIKey)key);
+            var uINode = UICreator.CreatePanelNode((UIKey)key);
             uINode.AssignContext(new PanelContext());
             return uINode;
         }
         #endregion
 
-        public async PromiseTask CloseAll()
-        {
-            await UnloadAllNodes();
-        }
+
     }
 }

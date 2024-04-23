@@ -2,8 +2,8 @@
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
-using UnityEngine;
 using Cr7Sund.Server.UI.Api;
+using System.Threading;
 
 namespace Cr7Sund.Server.Scene.Impl
 {
@@ -29,12 +29,6 @@ namespace Cr7Sund.Server.Scene.Impl
             await ActiveScene();
         }
 
-        public async override PromiseTask OnStop()
-        {
-            await base.OnStop();
-            await _pageModule.CloseAll();
-        }
-
         protected override async PromiseTask OnPreloadAsync()
         {
             var sceneKey = (SceneKey)Key;
@@ -43,6 +37,7 @@ namespace Cr7Sund.Server.Scene.Impl
             {
                 await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, false);
             }
+            await base.OnPreloadAsync();
         }
 
         protected override async PromiseTask OnLoadAsync()
@@ -51,25 +46,33 @@ namespace Cr7Sund.Server.Scene.Impl
 
             if (!sceneKey.IsVirtualScene)
             {
-                await _sceneLoader.LoadSceneAsync(sceneKey);
+                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad);
             }
+            await base.OnLoadAsync();
         }
 
-        protected override PromiseTask OnUnloadAsync()
+        protected async override PromiseTask OnUnloadAsync()
         {
-            var sceneKey = (SceneKey)Key;
+            await _pageModule.CloseAll();
 
+            var sceneKey = (SceneKey)Key;
             if (!sceneKey.IsVirtualScene)
             {
                 _sceneLoader.UnloadScene(sceneKey);
             }
+            await base.OnUnloadAsync();
+        }
 
-            return base.OnUnloadAsync();
+        public override void RegisterAddTask(CancellationToken cancellationToken)
+        {
+            base.RegisterAddTask(cancellationToken);
+            _sceneLoader.RegisterCancelLoad(Key, cancellationToken);
         }
 
         private PromiseTask ActiveScene()
         {
-            if (MacroDefine.IsMainThread && Application.isPlaying)
+            var sceneKey = Key as SceneKey;
+            if (!sceneKey.IsVirtualScene)
             {
                 return _sceneLoader.ActiveSceneAsync(Key);
             }

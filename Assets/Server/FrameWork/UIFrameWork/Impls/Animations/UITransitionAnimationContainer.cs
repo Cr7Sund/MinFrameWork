@@ -15,7 +15,7 @@ namespace Cr7Sund.Server.UI.Impl
     public class UITransitionAnimationContainer : BaseAssetContainer, IUITransitionAnimationContainer
     {
         [Inject] private IConfigContainer _configContainer;
-        [Inject(ServerBindDefine.GameLoader)] private IAssetLoader _assetLoader;
+        [Inject] private IAssetLoader _assetLoader;
 
         protected override IAssetLoader Loader => _assetLoader;
 
@@ -37,7 +37,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public async PromiseTask<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter)
         {
-            var settings = await _configContainer.GetConfig<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig);
+            var settings = await _configContainer.LoadAssetAsync<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig);
             return settings.GetDefaultPageTransitionAnimation(push, enter);
         }
 

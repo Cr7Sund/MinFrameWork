@@ -103,6 +103,9 @@ namespace Cr7Sund.PackageTest.IOC
         }
         private static IPromise<int> DownloadAsync()
         {
+#if UNITY_EDITOR
+            ((Promise<int>)SimplePromise.simulatePromiseOne).Test_ClearHandlers();
+            #endif
             SimplePromise.simulatePromiseOne?.Dispose();
 
             return SimplePromise.simulatePromiseOne;
@@ -141,7 +144,7 @@ namespace Cr7Sund.PackageTest.IOC
         }
     }
 
-    public class SimpleAsyncConvertCommand:AsyncCommand<int,float>
+    public class SimpleAsyncConvertCommand : AsyncCommand<int, float>
     {
         public override IPromise<float> OnExecuteAsync(int aggValue)
         {

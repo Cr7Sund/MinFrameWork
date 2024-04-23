@@ -1,4 +1,3 @@
-using System.Threading;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 
@@ -22,13 +21,12 @@ namespace Cr7Sund.Game.UI
             Debug.Debug("Load ui one {StartValue}", StartValue);
             await base.OnStart();
             StartValue++;
-
         }
 
         protected override async PromiseTask OnEnable()
         {
+            await _pageContainer.PushPage(EditorUIKeys.SampleTwoUI);
             Debug.Debug("Enable ui one");
-            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
             EnableCount++;
         }
 

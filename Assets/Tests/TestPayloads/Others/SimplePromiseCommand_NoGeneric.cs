@@ -88,6 +88,9 @@ namespace Cr7Sund.PackageTest.IOC
         }
         private static IPromise DownloadAsync()
         {
+            #if UNITY_EDITOR
+            ((Promise)SimplePromise.simulatePromise).Test_ClearHandlers();
+            #endif
             SimplePromise.simulatePromise?.Dispose();
             return SimplePromise.simulatePromise;
         }

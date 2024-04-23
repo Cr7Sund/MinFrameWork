@@ -5,28 +5,32 @@ using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 using NUnit.Framework;
-using Cr7Sund.Server.Tests;
+using Cr7Sund.Server.Test;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Cr7Sund.ServerTest.UI
 {
     public partial class TestPageContainer
     {
-        private IPageModule _pageContainer;
+        private PageModule _pageContainer;
+        private SampleGameLogic _gameLogic;
+        private SceneModule _sceneModule;
+        private TestGameRoot _gameRoot;
 
         [SetUp]
         public async Task SetUp()
         {
             Console.Init(InternalLoggerFactory.Create());
 
-            var gameLogic = new SampleGameLogic();
-            gameLogic.Init();
-            await gameLogic.Run();
+            _gameLogic = new SampleGameLogic();
+            _gameLogic.Init();
+            await _gameLogic.Run();
 
-            var _sceneModule = new SceneModule();
-            gameLogic.GetContextInjector().Inject(_sceneModule);
-            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            var sceneNode = _sceneModule.TestGetViewByKey<SceneNode>(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneModule = new SceneModule();
+            _gameLogic.GetContextInjector().Inject(_sceneModule);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
+            var sceneNode = _sceneModule.TestGetViewByKey<SceneNode>(SampleSceneKeys.SampleSceneKeyTwo);
             var sceneInjectBinder = sceneNode.Context.InjectionBinder;
 
             _pageContainer = new PageModule();
@@ -41,8 +45,31 @@ namespace Cr7Sund.ServerTest.UI
             SampleFivePanel.AnimPromise = Promise.Resolved();
             SampleThreeUIController.Rejected = false;
             SampleFivePanel.Rejected = false;
+            SampleThreePanel.Rejected = false;
+            SampleThreePanel.promise = Promise.Resolved();
+
+            if (Application.isPlaying)
+            {
+                var gameRoot = new GameObject("testRoot", typeof(TestGameRoot));
+                _gameRoot = gameRoot.GetComponent<TestGameRoot>();
+                _gameRoot.Init(_gameLogic);
+            }
+
         }
 
+        [TearDown]
+        public async Task TearDown()
+        {
+            await _pageContainer.CloseAll();
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _gameLogic.DestroyAsync();
+            if (Application.isPlaying)
+            {
+                GameObject.Destroy(_gameRoot.gameObject);
+            }
+
+
+        }
 
         [Test]
         public async Task PushPage()
@@ -179,7 +206,6 @@ namespace Cr7Sund.ServerTest.UI
         {
             await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
             await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
-
             Assert.AreEqual(1, SampleFourUIController.StartValue);
             await _pageContainer.BackPage(SampleUIKeys.SampleOneUI);
 

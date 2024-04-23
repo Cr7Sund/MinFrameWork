@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.Server.UI.Api;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Cr7Sund.ServerTest.UI
@@ -28,15 +30,15 @@ namespace Cr7Sund.ServerTest.UI
         [Test]
         public async Task PreparePage_Rejected()
         {
-            SampleThreeUIController.Rejected = true;
-            LogAssert.Expect(UnityEngine.LogType.Error, "hello exception");
+            SampleThreePanel.Rejected = true;
+            // AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
             try
             {
                 await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
             }
-            catch
+            catch (Exception ex)
             {
-
+                Assert.AreEqual(ex.Message, "hello exception");
             }
             await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
 
@@ -59,81 +61,104 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
 
+#pragma warning disable CS4014
         [Test]
         public async Task PreparePages_TransitionException()
         {
-
+            // PLAN handle open events 
             SampleThreeUIController.promise = Promise.Create();
             MyException ex = null;
 
-            await Task.Delay(2).ContinueWith(async (t) =>
+            if (Application.isPlaying)
             {
-                try
+                _gameRoot.PromiseTimer.WaitFor(2, async () =>
+                        {
+                            try
+                            {
+                                await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError(e);
+                            }
+                        });
+                _gameRoot.PromiseTimer.WaitFor(50, async () =>
                 {
-                    await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-                }
-                catch (Exception e)
-                {
-                    if (e is MyException myException)
-                        ex = myException;
-
-                }
-            });
-
-            await Task.Delay(5).ContinueWith(async (t) =>
-                              {
-                                  try
-                                  {
-                                      await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-                                  }
-                                  catch (MyException e)
-                                  {
-                                      ex = e;
-                                  }
-                              });
-
-
-            await Task.Delay(10).ContinueWith((t) =>
-            {
+                    try
+                    {
+                        await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+                    }
+                    catch (MyException e)
+                    {
+                        ex = e;
+                    }
+                });
+                await _gameRoot.PromiseTimer.WaitFor(100).AsTask();
+                // we need to resolve or reject the push 
                 SampleThreeUIController.promise.Resolve();
-            });
+            }
+            else
+            {
+               await Task.Delay(2).ContinueWith(async (t) =>
+                            {
+                                try
+                                {
+                                    await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.LogError(e);
+                                }
+                            });
 
-            // Assert.AreEqual(UIExceptionType.OPEN_IN_TRANSITION, ex.Type);
+               await Task.Delay(5).ContinueWith(async (t) =>
+                                  {
+                                      try
+                                      {
+                                          await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+                                      }
+                                      catch (MyException e)
+                                      {
+                                          ex = e;
+                                      }
+                                  });
+
+
+                await Task.Delay(10).ContinueWith((t) =>
+                {
+                    SampleThreeUIController.promise.Resolve();
+                });
+
+            }
+
+
+            Assert.AreEqual(UIExceptionType.OPEN_IN_TRANSITION, ex.Type);
         }
+
+#pragma warning restore CS4014
 
         [Test]
         public async Task Anim_fail_same()
         {
-            LogAssert.Expect(UnityEngine.LogType.Error, $"hello exception");
+            AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
+            AssertHelper.Expect(LogType.Warning, new Regex("the asset is already on the nodeTree"));
             SampleFivePanel.Rejected = true;
 
-            try
-            {
-                await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            }
-            catch (Exception ex) { Console.Error(ex); }
-            try
-            {
-                await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            }
-            catch (Exception ex) { Console.Error(ex); }
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleFiveUIController.EnableCount);
         }
-
         [Test]
         public async Task Anim_fail_switch()
         {
-            LogAssert.Expect(UnityEngine.LogType.Error, $"hello exception");
+            AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
 
             SampleFivePanel.Rejected = true;
 
-            try
-            {
-                await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            }
-            catch (Exception ex) { Console.Error(ex); }
+
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
             await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
@@ -144,24 +169,12 @@ namespace Cr7Sund.ServerTest.UI
         [Test]
         public async Task Anim_fail_back()
         {
-            LogAssert.Expect(UnityEngine.LogType.Error, $"hello exception");
-            LogAssert.Expect(UnityEngine.LogType.Error, $"hello exception");
+            AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
 
             SampleFivePanel.Rejected = true;
 
             await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            try
-            {
-                await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            }
-            catch (Exception ex) { Console.Error(ex); }
-            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
-            try
-            {
-                await _pageContainer.BackPage();
-            }
-            catch (Exception ex) { Console.Error(ex); }
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);

@@ -52,7 +52,7 @@ namespace Cr7Sund
             throw exception;
 #endif
         }
-
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
             return PromiseTaskStatus.Faulted;
@@ -72,6 +72,11 @@ namespace Cr7Sund
         {
             if (!calledGet)
             {
+#if DEBUG
+                Console.Error(exception.SourceException);
+#else
+                Console.Error(exception);
+#endif
                 //UniTaskScheduler.PublishUnobservedTaskException(exception.SourceException);
             }
         }

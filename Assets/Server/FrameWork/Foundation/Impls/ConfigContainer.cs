@@ -6,7 +6,7 @@ namespace Cr7Sund.Server.Impl
 {
     public class ConfigContainer : BaseAssetContainer, IConfigContainer
     {
-        [Inject(ServerBindDefine.GameLoader)] private IAssetLoader _assetLoader;
+        [Inject] private IAssetLoader _assetLoader;
 
         protected override IAssetLoader Loader => _assetLoader;
 

@@ -15,10 +15,9 @@ namespace Cr7Sund.Server.UI.Impl
         public readonly bool HideFirst;
 
         // --- internal content ---
-        public string Key { get; set; }
-        public bool ShowAfter { get; set; }
+        public string Key { get; }
         // --- internal content ---
-        internal IAssetKey exitPageKey { get; set; }
+        internal IUINode exitPage { get; set; }
         internal bool IsPush { get; set; }
 
 
@@ -34,6 +33,7 @@ namespace Cr7Sund.Server.UI.Impl
             Stack = stack;
             LoadAsync = loadAsync;
             HideFirst = hideFirst;
+
         }
 
         public IUIController CreateCtrl() => Activator.CreateInstance(_ctrlType) as IUIController;

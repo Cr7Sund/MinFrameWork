@@ -112,7 +112,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         [Test]
         public void predicate_is_removed_from_timer_after_exception_is_thrown()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var testObject = new PromiseTimer();
 
             int runCount = 0;
@@ -160,7 +160,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         [Test]
         public void when_promise_is_cancelled_by_user_reject_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var testObject = new PromiseTimer();
             Exception caughtException = null;
 
@@ -183,7 +183,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         [Test]
         public void when_predicate_throws_exception_reject_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var testObject = new PromiseTimer();
 
             var expectedException = new Exception();
@@ -243,7 +243,7 @@ namespace Cr7Sund.PackageTest.PromiseTimerTest
         [Test]
         public void all_promises_are_updated_when_a_pending_promise_is_canceled_during_update()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var testObject = new PromiseTimer();
 
             int p1Updates = 0;

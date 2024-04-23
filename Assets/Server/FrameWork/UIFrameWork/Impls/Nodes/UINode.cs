@@ -1,19 +1,20 @@
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
-using UnityEngine;
 using Cr7Sund.Server.Api;
 using Cr7Sund.FrameWork.Util;
 using Object = UnityEngine.Object;
 using System.Threading;
 using Cr7Sund.Server.Impl;
+using System;
 
 namespace Cr7Sund.Server.UI.Impl
 {
-    public class UINode : UpdateNode, IUINode
+    public abstract class UINode : UpdateNode, IUINode
     {
         [Inject(ServerBindDefine.UIPanelContainer)] private IUniqueInstanceContainer _uiContainer;
         [Inject] private IPanelModule _panelModule;
+        [Inject(ServerBindDefine.UILogger)] protected IInternalLog _log;
 
         public IUIView View { get; private set; }
         public string PageId { get; set; }
@@ -21,7 +22,7 @@ namespace Cr7Sund.Server.UI.Impl
         public IUIController Controller { get; private set; }
 
 
-        private UINode(IAssetKey assetKey) : base(assetKey)
+        protected UINode(IAssetKey assetKey) : base(assetKey)
         {
 
         }
@@ -35,8 +36,6 @@ namespace Cr7Sund.Server.UI.Impl
 
         public PromiseTask BeforeExit(bool push, IUINode enterPage)
         {
-            IsTransitioning = true;
-
             View.BeforeExit();
 
             if (push)
@@ -47,8 +46,6 @@ namespace Cr7Sund.Server.UI.Impl
 
         public PromiseTask BeforeEnter(bool push, IUINode enterPage)
         {
-            IsTransitioning = true;
-
             View.BeforeEnter();
 
             if (push)
@@ -59,106 +56,73 @@ namespace Cr7Sund.Server.UI.Impl
 
         public async PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation)
         {
+            if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
+            {
+                View.Enable(Parent);
+            }
             await Controller.Enable();
             await View.EnterRoutine(push, partnerView, playAnimation);
         }
 
         public async PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation)
         {
-            try
-            {
-                await Controller.Disable();
-                await View.ExitRoutine(push, partnerView, playAnimation);
-            }
-            catch (System.Exception ex)
-            {
-                Console.Error(ex);
-                throw;
-            }
+            View.Disable();
+            await Controller.Disable();
+            await View.ExitRoutine(push, partnerView, playAnimation);
         }
 
-        public PromiseTask AfterEnter(bool push, IUINode exitPage)
+        public async PromiseTask AfterEnter(bool push, IUINode exitPage)
         {
-            IsTransitioning = false;
             View.AfterEnter();
 
             if (push)
-                return Controller.DidPushEnter();
+                await Controller.DidPushEnter();
             else
-                return Controller.DidPopEnter();
+                await Controller.DidPopEnter();
+
         }
 
-        public PromiseTask AfterExit(bool push, IUINode enterPage)
+        public async PromiseTask AfterExit(bool push, IUINode enterPage)
         {
-            IsTransitioning = false;
             View.AfterExit();
 
             if (push)
-                return Controller.DidPushExit();
+                await Controller.DidPushExit();
             else
-                return Controller.DidPopExit();
-        }
-
-        public override async PromiseTask PreLoadAsync()
-        {
-            if (LoadState == LoadState.Loading
-                || LoadState == LoadState.Unloading
-                || LoadState == LoadState.Loaded)
-            {
-                throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
-                    NodeTreeExceptionType.LOAD_VALID_STATE);
-            }
-
-            var uiKey = Key as UIKey;
-            var prepareTask = Controller.Prepare(uiKey.Intent);
-            var preloadTask = base.PreLoadAsync();
-
-            await prepareTask;
-            await preloadTask;
-        }
-
-        public override async PromiseTask LoadAsync()
-        {
-            if (LoadState == LoadState.Loading
-                || LoadState == LoadState.Unloading)
-            {
-                throw new MyException($"Cant LoadAsync On State {LoadState} Loadable: {this} ",
-                    NodeTreeExceptionType.LOAD_VALID_STATE);
-            }
-
-            var uiKey = Key as UIKey;
-            try
-            {
-                if (LoadState != LoadState.Loaded) //already preload
-                {
-                    await Controller.Prepare(uiKey.Intent);
-                }
-                await base.LoadAsync();
-            }
-            catch
-            {
-                await base.LoadAsync();
-                throw;
-            }
+                await Controller.DidPopExit();
         }
 
         protected override async PromiseTask OnPreloadAsync()
         {
-            if (Application.isPlaying)
+            var uiKey = Key as UIKey;
+            var prepareTask = Controller.Prepare(uiKey.Intent);
+            if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
                 await _uiContainer.LoadAssetAsync<Object>(Key);
             }
+            await prepareTask;
         }
 
         protected override async PromiseTask OnLoadAsync()
         {
             AssertUtil.IsFalse(LoadState == LoadState.Loaded); // handle different situation outside
 
-            if (MacroDefine.IsMainThread && Application.isPlaying)
+            var uiKey = Key as UIKey;
+            var prepareTask = Controller.Prepare(uiKey.Intent);
+
+            if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
                 var instance = await _uiContainer.CreateInstanceAsync<Object>(Key);
-                View.OnLoad(instance as GameObject);
+                // Attention : the below chain load task is called from addressables
+                await View.OnLoad(instance as UnityEngine.GameObject);
+                await prepareTask;
             }
+            else
+            {
+                await View.OnLoad(null);
+                await prepareTask;
+            }
+
         }
 
         protected override PromiseTask OnUnloadAsync()
@@ -202,24 +166,56 @@ namespace Cr7Sund.Server.UI.Impl
 
         public override async PromiseTask OnStart()
         {
-            if (MacroDefine.IsMainThread && Application.isPlaying)
+            try
             {
-                View.Start(Parent);
+                if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
+                {
+                    View.Start(Parent);
+                }
+                await Controller.Start();
             }
-            await Controller.Start();
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
         }
 
         public override async PromiseTask OnEnable()
         {
-            // call after transition
-            // and always be called after Start
-            // VM.Enable();
+            UIKey enterUIKey = Key as UIKey;
+            bool isPush = enterUIKey.IsPush;
+            IUINode exitPage = enterUIKey.exitPage;
 
-            if (MacroDefine.IsMainThread && Application.isPlaying)
+            try
             {
-                View.Enable(Parent);
+                IsTransitioning = true;
+
+                await BeforeEnter(isPush, exitPage);
+                await Enter(isPush, exitPage, enterUIKey.PlayAnimation);
+                await AfterEnter(push: isPush, exitPage);
             }
-            await base.OnEnable();
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
+            finally
+            {
+                IsTransitioning = false;
+            }
         }
 
         protected override void OnUpdate(int milliseconds)
@@ -230,21 +226,57 @@ namespace Cr7Sund.Server.UI.Impl
 
         public override async PromiseTask OnDisable()
         {
-            View.Disable();
-            await base.OnDisable();
+            UIKey exitUIkey = Key as UIKey;
+            bool isPush = exitUIkey.IsPush;
+            IUINode enterPage = exitUIkey.exitPage;
+
+            try
+            {
+                IsTransitioning = true;
+
+                await BeforeExit(isPush, enterPage);
+                await Exit(isPush, enterPage, exitUIkey.PlayAnimation);
+                await AfterExit(isPush, enterPage);
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
+            finally
+            {
+                IsTransitioning = false;
+            }
         }
 
         public override async PromiseTask OnStop()
         {
-            View.Stop();
-            await Controller.Stop();
-
-            await _panelModule.CloseAll();
+            try
+            {
+                View.Stop();
+                await Controller.Stop();
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
         }
 
         protected override void OnDispose()
         {
-            // duplicate
             View.Dispose();
         }
         #endregion

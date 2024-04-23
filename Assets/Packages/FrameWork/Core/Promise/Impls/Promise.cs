@@ -36,13 +36,14 @@ namespace Cr7Sund.Package.Impl
         /// </summary>
         protected PromisedT _resolveValue;
         private Promise<PromisedT> _nextNode;
+        private Action _registerAction;
         #endregion
 
         #region Properties
         public int Id
         {
             get;
-            set;
+            private set;
         }
         public string Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
@@ -102,19 +103,25 @@ namespace Cr7Sund.Package.Impl
 
         public virtual void Dispose()
         {
-            if (_resolveValue is IDisposable disposable
-                && disposable != this)
-            {
-                disposable?.Dispose();
-            }
-            ClearHandlers();
+            // Don't do that , since we only reference the value 
+            // if (_resolveValue is IDisposable disposable
+            //     && disposable != this)
+            // {
+            //     disposable?.Dispose();
+            // }
+            AssertUtil.IsNull(_resolveHandlers);
+            AssertUtil.IsNull(_rejectHandlers);
+            AssertUtil.IsNull(_progressHandlers);
             Name = string.Empty;
             _resolveValue = default;
             CurState = PromiseState.Pending;
-            // Id = -1;
+            _rejectionException = null;
+            _registerAction = null;
+            _resolveValue = default;
+            Id = -1;
         }
 
-        public virtual void TryReturn()
+        public void TryReturn()
         {
             Dispose();
             _taskPool.TryPush(this);
@@ -660,7 +667,6 @@ namespace Cr7Sund.Package.Impl
                 throw tmpEx;
             }
             TryReturn();
-
         }
 
         public PromiseTaskStatus UnsafeGetStatus()
@@ -706,6 +712,7 @@ namespace Cr7Sund.Package.Impl
                 case PromiseState.Pending:
                     var newPromise = Promise<PromisedT>.Create();
                     AddResolveHandler(newPromise.Resolve, newPromise);
+                    AddRejectHandler(newPromise.RejectWithoutDebug, newPromise);
                     return new PromiseTask<PromisedT>(newPromise, 0);
                 case PromiseState.Rejected:
                 default:
@@ -714,28 +721,6 @@ namespace Cr7Sund.Package.Impl
                 case PromiseState.Resolved:
                     var tmpValue = _resolveValue;
                     return new PromiseTask<PromisedT>(tmpValue, 0);
-            }
-        }
-
-        public PromiseTask ToNewTask()
-        {
-            if (this.IsRecycled)
-            {
-                throw new System.Exception("cant await recycle task, check the original promise status");
-            }
-            switch (CurState)
-            {
-                case PromiseState.Pending:
-                    var newPromise = Promise.Create();
-                    AddResolveHandler(_ => newPromise.Resolve(), newPromise);
-                    AddRejectHandler(newPromise.Reject, newPromise);
-                    return new PromiseTask(newPromise, 0);
-                case PromiseState.Rejected:
-                default:
-                    var tmpEx = _rejectionException;
-                    throw new Exception(tmpEx.Message, tmpEx);
-                case PromiseState.Resolved:
-                    return new PromiseTask(0);
             }
         }
         #endregion
@@ -855,6 +840,7 @@ namespace Cr7Sund.Package.Impl
             }
 
             ClearHandlers();
+            _registerAction?.Invoke();
         }
 
         //Invoke all progress handlers.
@@ -882,8 +868,8 @@ namespace Cr7Sund.Package.Impl
                 }
             }
             ClearHandlers();
+            _registerAction?.Invoke();
         }
-
 
         protected virtual void ClearHandlers()
         {
@@ -934,16 +920,10 @@ namespace Cr7Sund.Package.Impl
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
 
-        public static IPromise<PromisedT> Rejected(Enum errorCode, string message)
+        public static IPromise<PromisedT> Rejected(Enum errorCode)
         {
             Exception ex = new MyException(errorCode);
-            Console.Error(ex, message);
-            return _resolvePromise.Rejected<PromisedT>(ex);
-        }
-        public static IPromise<PromisedT> Rejected<T0>(Enum errorCode, string message, T0 property0)
-        {
-            Exception ex = new MyException(errorCode);
-            Console.Error(ex, message, property0);
+            Console.Error(ex);
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
 
@@ -1277,7 +1257,6 @@ namespace Cr7Sund.Package.Impl
         #endregion
 
         #region UnityTest
-#if UNITY_INCLUDE_TESTS
         public PromisedT Test_GetResolveValue()
         {
             return _resolveValue;
@@ -1290,7 +1269,10 @@ namespace Cr7Sund.Package.Impl
         {
             return _resolveListPool.Size;
         }
-#endif
+        public void Test_ClearHandlers()
+        {
+            ClearHandlers();
+        }
         #endregion
     }
 

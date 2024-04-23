@@ -224,6 +224,7 @@ GameObject:
   - component: {fileID: 2271419524865356704}
   - component: {fileID: 6758275779279339043}
   - component: {fileID: 2055209849133466427}
+  - component: {fileID: 2513919671228810686}
   m_Layer: 5
   m_Name: SampleThreePanel
   m_TagString: Untagged
@@ -327,3 +328,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74a5409d73b356f47baccc08423bb6c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pushEnterAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _pushExitAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _popEnterAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _popExitAnimations:
+    _partnerPageIdentifierRegex: 
+    _assetType: 0
+    _animationBehaviour: {fileID: 0}
+    _animationAsset:
+      FullName: 
+  _componentContainers:
+    _keys:
+    - CanvasGroup
+    - Canvas
+    _values:
+    - {fileID: 2513919671228810686}
+    - {fileID: 446987245277077183}
+--- !u!225 &2513919671228810686
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3962950195258794946}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

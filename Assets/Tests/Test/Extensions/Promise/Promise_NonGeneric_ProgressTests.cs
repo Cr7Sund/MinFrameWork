@@ -149,8 +149,8 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_is_thrown_for_progress_after_reject()
         {
-            LogAssert.ignoreFailingMessages = true;
-            
+            AssertHelper.IgnoreFailingMessages();
+
             var promise = new Promise();
             promise.RejectWithoutDebug(new Exception());
 

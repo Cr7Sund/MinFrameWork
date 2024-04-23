@@ -23,12 +23,12 @@ namespace Cr7Sund.Server.Scene.Impl
             // Cross Context
             // --- --- 
             InjectionBinder.Bind<ISceneInstanceContainer>().To(sceneContainer).AsCrossContext();
+            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.SceneTimer);
 
             // Local In GameNode or GameController
             // --- --- 
             InjectionBinder.Bind<ISceneNode>().To(self);
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.SceneTimer);
             InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.SceneLogger);
             InjectionBinder.Bind<IPageModule>().To<PageModule>().AsSingleton().AsCrossContext();
 

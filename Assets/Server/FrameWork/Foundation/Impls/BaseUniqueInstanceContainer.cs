@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
@@ -8,19 +9,70 @@ namespace Cr7Sund.Server.Impl
 {
     public abstract class BaseUniqueInstanceContainer : BaseAssetContainer, IUniqueInstanceContainer
     {
-        private Dictionary<IAssetKey, GameObject> _instancePromises = new();
+        private class InstanceWrapper : IDisposable, IPoolNode<InstanceWrapper>
+        {
+            private static ReusablePool<InstanceWrapper> _pool = new ReusablePool<InstanceWrapper>();
+
+            private GameObject _instance;
+            private int _count;
+            private InstanceWrapper _nextNode;
+
+
+            public ref InstanceWrapper NextNode => ref _nextNode;
+            public bool IsRecycled { get; set; }
+
+
+            public static InstanceWrapper Create(GameObject gameObject)
+            {
+                if (!_pool.TryPop(out var wrapper))
+                {
+                    wrapper = new InstanceWrapper();
+                }
+
+                wrapper._instance = gameObject;
+                wrapper._count++;
+                return wrapper;
+            }
+
+            public T GetResult<T>() where T : Object
+            {
+                T result = _instance as T;
+                _count++;
+                return result;
+            }
+
+            public bool TryDestroy()
+            {
+                _count--;
+                if (_count == 0)
+                {
+                    GameObject.Destroy(_instance);
+                    Dispose();
+                    _pool.TryPush(this);
+                }
+                return _count == 0;
+            }
+
+            public void Dispose()
+            {
+                AssertUtil.AreEqual(_count, 0);
+                _instance = default;
+            }
+        }
+
+        private Dictionary<IAssetKey, InstanceWrapper> _instancePromises = new();
 
 
         public async PromiseTask<T> CreateInstance<T>(IAssetKey assetKey) where T : Object
         {
             if (_instancePromises.ContainsKey(assetKey))
             {
-                return _instancePromises[assetKey] as T;
+                return _instancePromises[assetKey].GetResult<T>();
             }
 
             var asset = await LoadAsset<T>(assetKey);
             var instance = InstantiateAsset(asset);
-            _instancePromises.Add(assetKey, instance as GameObject);
+            _instancePromises.Add(assetKey, InstanceWrapper.Create(instance as GameObject));
             return instance;
         }
 
@@ -28,12 +80,12 @@ namespace Cr7Sund.Server.Impl
         {
             if (_instancePromises.ContainsKey(assetKey))
             {
-                return _instancePromises[assetKey] as T;
+                return _instancePromises[assetKey].GetResult<T>();
             }
 
             var asset = await LoadAssetAsync<T>(assetKey);
             var instance = InstantiateAsset(asset);
-            _instancePromises.Add(assetKey, instance as GameObject);
+            _instancePromises.Add(assetKey, InstanceWrapper.Create(instance as GameObject));
             return instance;
         }
 
@@ -41,9 +93,8 @@ namespace Cr7Sund.Server.Impl
         {
             if (_instancePromises.ContainsKey(assetKey))
             {
-                GameObject.Destroy(_instancePromises[assetKey]);
+                _instancePromises[assetKey].TryDestroy();
                 base.Unload(assetKey);
-                _instancePromises.Remove(assetKey);
             }
         }
 
@@ -51,15 +102,18 @@ namespace Cr7Sund.Server.Impl
         {
             foreach (var item in _instancePromises)
             {
-                GameObject.Destroy(item.Value);
+                item.Value.TryDestroy();
                 base.Unload(item.Key);
             }
-            _instancePromises.Clear();
         }
 
         public override void Dispose()
         {
-            AssertUtil.LessOrEqual(_instancePromises.Count, 0);
+            foreach (var item in _instancePromises)
+            {
+                item.Value.Dispose();
+            }
+            _instancePromises.Clear();
         }
 
         private T InstantiateAsset<T>(T asset) where T : Object

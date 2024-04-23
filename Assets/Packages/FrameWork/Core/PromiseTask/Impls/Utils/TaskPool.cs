@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -43,6 +44,7 @@ namespace Cr7Sund
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public bool TryPush(T item)
         {
             if (Interlocked.CompareExchange(ref gate, 1, 0) == 0)

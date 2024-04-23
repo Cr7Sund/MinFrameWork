@@ -6,22 +6,7 @@ namespace Cr7Sund.NodeTree.Impl
     {
         public void LateUpdate(int millisecond)
         {
-            if (MacroDefine.NoCatchMode)
-            {
-                OnLateUpdate(millisecond);
-            }
-            else
-            {
-                try
-                {
-                    OnLateUpdate(millisecond);
-                }
-                catch (Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnLateUpdate Error: ", GetType().FullName);
-                    throw;
-                }
-            }
+            OnLateUpdate(millisecond);
         }
 
         protected abstract void OnLateUpdate(int millisecond);

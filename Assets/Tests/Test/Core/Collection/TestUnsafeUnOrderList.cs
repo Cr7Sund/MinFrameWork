@@ -36,7 +36,7 @@ namespace Cr7Sund.CollectionTest
             list.Remove(2);
 
             TestDelegate handler = () => list.Remove(3);
-            Assert.Throws<IndexOutOfRangeException>(handler);
+            Assert.Throws<InvalidOperationException>(handler);
         }
 
 
@@ -77,6 +77,25 @@ namespace Cr7Sund.CollectionTest
             }
 
             Assert.AreEqual(13, result);
+        }
+
+        [Test]
+        public void Enumerate_Fail()
+        {
+            var list = new UnsafeUnOrderList<int>();
+            list.AddLast(1);
+            list.AddLast(3);
+
+            TestDelegate testDealate = () =>
+            {
+                foreach (var item in list)
+                {
+                    list.Remove(1);
+                }
+            };
+            Assert.Throws<InvalidOperationException>(testDealate);
+
+            // Assert.AreEqual(13, result);
         }
     }
 }

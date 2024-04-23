@@ -237,8 +237,22 @@ namespace Cr7Sund.Package.Impl
                     ResolveBinding(binding, item.Key);
                 }
             }
-
         }
+
+        public void RemoveAll()
+        {
+            foreach (var item in _bindings)
+            {
+                List<IBinding> bindings = item.Value;
+                // foreach (IBinding binding in bindings)
+                // {
+                //     OnUnbind(binding);
+                // }
+                bindings.Clear();
+            }
+            _bindings.Clear();
+        }
+
         public virtual void Dispose()
         {
 

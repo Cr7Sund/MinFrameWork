@@ -11,7 +11,6 @@ namespace Cr7Sund.AssetLoader.Impl
             if (MacroDefine.IsMainThread && Application.isPlaying)
             {
                 var addressableLoader = new AddressableLoader();
-                addressableLoader.Init();
                 return addressableLoader;
             }
             else

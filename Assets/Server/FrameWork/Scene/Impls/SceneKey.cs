@@ -1,6 +1,7 @@
 ﻿using System;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Scene.Apis;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.Server.Scene.Impl
@@ -10,11 +11,25 @@ namespace Cr7Sund.Server.Scene.Impl
     public class SceneKey : ISceneKey
     {
         private readonly Type _builderType;
+        private readonly bool _isVirtualScene;
 
         public LoadSceneMode LoadSceneMode { get; private set; }
         public string Key { get; private set; }
         public bool ActivateOnLoad { get; private set; }
-        public bool IsVirtualScene { get; private set; }
+        public bool IsVirtualScene
+        {
+            get
+            {
+                if (MacroDefine.IsEditor)
+                {
+                    if (!Application.isPlaying)
+                    {
+                        return true;
+                    }
+                }
+                return _isVirtualScene;
+            }
+        }
 
 
         public SceneKey(string key, Type builderType, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, bool isVirtualScene = false)
@@ -25,27 +40,12 @@ namespace Cr7Sund.Server.Scene.Impl
             _builderType = builderType;
             LoadSceneMode = loadMode;
             ActivateOnLoad = activateOnLoad;
-            IsVirtualScene = isVirtualScene;
+            _isVirtualScene = isVirtualScene;
         }
 
 
         public SceneBuilder Create() => Activator.CreateInstance(_builderType) as SceneBuilder;
         public static implicit operator string(SceneKey sceneKey) => sceneKey.Key;
         public override string ToString() => Key;
-
-        public override bool Equals(object obj)
-        {
-            if (obj is IAssetKey assetKey)
-            {
-                return Key.Equals(assetKey.Key);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return Key.GetHashCode();
-        }
     }
 }

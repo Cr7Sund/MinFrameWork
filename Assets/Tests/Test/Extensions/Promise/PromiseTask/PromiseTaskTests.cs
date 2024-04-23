@@ -34,7 +34,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public async Task RejectPromise()
         {
-            // LogAssert.ignoreFailingMessages = true;
+            // AssertHelper.IgnoreFailingMessages();
             // recommend use
             //return await new Exception().ToPromiseTask<int>();
             const string Message = "HelloWorld";

@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;
@@ -15,6 +13,8 @@ namespace Cr7Sund.Server.UI.Impl
         [Inject]
         private ISceneNode _sceneNode;
         private Stack<IUINode> _pageContainers = new Stack<IUINode>(16);
+        private int _startTransTime = -1;
+        private const int _loadTimeOutTime = 5000;
 
         protected override INode _parentNode
         {
@@ -32,7 +32,7 @@ namespace Cr7Sund.Server.UI.Impl
         }
 
 
-        #region  Load
+        #region Load
         public async PromiseTask BackPage()
         {
             await BackPage(1);
@@ -45,19 +45,19 @@ namespace Cr7Sund.Server.UI.Impl
             AssertUtil.Greater(_pageContainers.Count, popCount, UIExceptionType.INVALID_BACK);
 
             int count = 0;
-            var curPage = _pageContainers.Peek();
+            var topPageKey = _pageContainers.Peek().Key;
+
             while (_pageContainers.Count > 0)
             {
                 var top = _pageContainers.Pop();
 
                 if (count >= popCount)
                 {
-                    await PopPage(top.Key, curPage.Key);
+                    await PopPage(top.Key, topPageKey);
                     break;
                 }
                 count++;
             }
-
         }
 
         public async PromiseTask BackPage(IAssetKey popKey)
@@ -65,13 +65,14 @@ namespace Cr7Sund.Server.UI.Impl
             AssertUtil.Greater(OperateNum, 1, UIExceptionType.NO_LEFT_BACK);
             ContainsPopPage(popKey);
 
-            var curPage = _pageContainers.Peek();
+            var topPageKey = _pageContainers.Peek().Key;
+
             while (OperateNum > 0)
             {
                 var top = _pageContainers.Pop();
                 if (top.Key == popKey)
                 {
-                    await PopPage(popKey, curPage?.Key);
+                    await PopPage(top.Key, topPageKey);
                     break;
                 }
             }
@@ -81,30 +82,38 @@ namespace Cr7Sund.Server.UI.Impl
         {
             AssertUtil.IsInstanceOf<SceneNode, UIExceptionType>(_parentNode, UIExceptionType.INVALID_PAGE_PARENT);
 
-            IAssetKey exitKey = GetLastView();
-            var enterKey = uiKey as UIKey;
-            var exitPage = GetViewByKey<UINode>(exitKey);
-            var enterPage = GetViewByKey<UINode>(enterKey);
-            if (IsInTransition)
+            if (IsTransitioning())
             {
                 throw new MyException(UIExceptionType.OPEN_IN_TRANSITION);
             }
 
-            enterKey.exitPageKey = exitKey;
-            enterKey.IsPush = true;
-            enterKey.ShowAfter = exitPage != null && enterKey.HideFirst &&
-                                 enterPage == null;
-
-            if (enterKey.ShowAfter)
+            var enterKey = uiKey as UIKey;
+            var exitKey = GetLastView() as UIKey;
+            if (exitKey == enterKey)
             {
-                var hideFirstPromise = HideFirstSequence(exitKey);
-                var addPromise = AddNode(enterKey);
-                await PromiseTask.WhenAll(hideFirstPromise, addPromise);
-                await OnShowAfter(GetViewByKey<UINode>(enterKey), exitPage);
+                exitKey = null;
+            }
+            var exitPage = GetViewByKey<UINode>(exitKey);
+            enterKey.exitPage = GetViewByKey<UINode>(exitKey);
+            enterKey.IsPush = true;
+
+            bool hideFirst = exitPage != null && enterKey.HideFirst &&
+                                 GetViewByKey<UINode>(enterKey) == null;
+
+            if (hideFirst)
+            {
+                // PLAN : black screen
+
+                await RemovePage(exitKey);
+                await AddNode(enterKey);
             }
             else
             {
                 await AddNode(enterKey);
+                if (exitKey != null)
+                {
+                    await RemovePage(exitKey);
+                }
             }
         }
 
@@ -115,51 +124,15 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override INode CreateNode(IAssetKey key)
         {
-            var uINode = UICreator.Create((UIKey)key);
+            var uINode = UICreator.CreatePageNode((UIKey)key);
             uINode.AssignContext(new PageContext());
             return uINode;
         }
 
-        protected override async PromiseTask OnAdded(IAssetKey enterKey)
+        protected override void OnAdded(IAssetKey enterKey)
         {
-            var enterPageKey = enterKey as UIKey;
-            var exitPageKey = enterPageKey.exitPageKey;
-            var exitPage = GetViewByKey<UINode>(exitPageKey);
             var enterPage = GetViewByKey<UINode>(enterKey);
-
-            if (!enterPageKey.ShowAfter)
-            {
-                AddIntoStack(enterPage);
-
-                // 1. 
-                // OpenSequence including controller's lifetime
-                // we can switch page on controllers' transition( the animation it's waiting too long)
-                // so we need to ensure the internal state that it's done. such as ui stack
-                // and also the controller lifecycle will been called after the transition  
-
-                // 2. something wrong with OpenSequence ?
-                // load already done internal, and the controller have not been called
-                // unload can be called too, and also the controller lifeCycle
-                // Pay attention to the transition lifeCycle since the afterAnimation will not be called
-                // if there is a exception in transition (this can be handled rejected if you want ) 
-                if (exitPage != null)
-                {
-                    try
-                    {
-                        await OpenSequence(enterPage, exitPage);
-                    }
-                    finally
-                    {
-                        await RemovePage(enterPage, exitPage);
-                    }
-
-                }
-                else
-                {
-                    await OpenSequence(enterPage, exitPage);
-                }
-            }
-
+            AddIntoStack(enterPage);
         }
 
         private void AddIntoStack(UINode enterPage)
@@ -177,34 +150,25 @@ namespace Cr7Sund.Server.UI.Impl
             _pageContainers.Push(enterPage);
         }
 
-        private async PromiseTask RemovePage(INode node, UINode exitPage)
+        private async PromiseTask PopPage(IAssetKey destKey, IAssetKey topKey)
         {
-            var exitKey = exitPage.Key as UIKey;
-
-            if (exitKey.Stack)
-            {
-                await RemoveNode(exitPage.Key);
-            }
-            else
-            {
-                await UnloadNode(exitPage.Key);
-            }
-        }
-
-        private async PromiseTask OnShowAfter(UINode enterPage, UINode exitPage)
-        {
-            AddIntoStack(enterPage);
-            await RemovePage(enterPage, exitPage);
-            await ShowAfterSequence(enterPage, exitPage);
-        }
-
-        private async PromiseTask PopPage(IAssetKey uiKey, IAssetKey exitKey)
-        {
-            var enterKey = uiKey as UIKey;
-            enterKey.exitPageKey = exitKey;
+            var enterKey = destKey as UIKey;
+            var exitKey = topKey as UIKey;
+            enterKey.exitPage = GetViewByKey<UINode>(topKey);
             enterKey.IsPush = false;
 
+
+            await RemovePage(exitKey);
             await AddNode(enterKey);
+        }
+
+        private async PromiseTask RemovePage(UIKey exitKey)
+        {
+            if (exitKey != null)
+            {
+                if (exitKey.Stack) await RemoveNode(exitKey);
+                else await UnloadNode(exitKey);
+            }
         }
 
         private IAssetKey GetLastView()
@@ -212,6 +176,12 @@ namespace Cr7Sund.Server.UI.Impl
             return OperateNum > 0 ? _pageContainers.Peek().Key : null;
         }
 
+        private bool IsTransitioning()
+        {
+            if (_focusNode == null) return false;
+            var focusNode = _focusNode as UINode;
+            return _focusNode.NodeState == NodeState.Adding;
+        }
 
         private void ContainsPopPage(IAssetKey popKey)
         {
@@ -230,61 +200,6 @@ namespace Cr7Sund.Server.UI.Impl
                 throw new MyException($"try to back an invalid ui : {popKey} ");
             }
         }
-
-
-        #endregion
-
-
-        #region View Transition Sequence
-
-        private async PromiseTask OpenSequence(IUINode enterPage, IUINode exitPage)
-        {
-            var enterUIKey = enterPage.Key as UIKey;
-            bool isPush = enterUIKey.IsPush;
-
-            await enterPage.BeforeEnter(isPush, exitPage);
-            if (exitPage != null)
-            {
-                var exitUIKey = exitPage.Key as UIKey;
-                await exitPage.BeforeExit(isPush, enterPage);
-                await exitPage.Exit(isPush, enterPage, exitUIKey.PlayAnimation);
-                await exitPage.AfterExit(isPush, enterPage);
-            }
-            await enterPage.Enter(isPush, exitPage, enterUIKey.PlayAnimation);
-            await enterPage.AfterEnter(push: isPush, exitPage);
-        }
-
-        private async PromiseTask HideFirstSequence(IAssetKey exitKey)
-        {
-            if (exitKey == null)
-            {
-                return;
-            }
-
-            IUINode enterPage = null;
-            // IUINode enterPage=  UINode.CreateBlackScreen();
-            var exitUIKey = exitKey as UIKey;
-            var exitPage = GetViewByKey<UINode>(exitUIKey);
-            bool isPush = exitUIKey.IsPush;
-
-            await exitPage.BeforeExit(isPush, enterPage);
-            await exitPage.Exit(isPush, enterPage, exitUIKey.PlayAnimation);
-        }
-
-        private async PromiseTask ShowAfterSequence(IUINode enterPage, IUINode exitPage)
-        {
-            var enterUIKey = enterPage.Key as UIKey;
-            bool isPush = enterUIKey.IsPush;
-
-            await enterPage.BeforeEnter(isPush, exitPage);
-            await enterPage.Enter(isPush, exitPage, enterUIKey.PlayAnimation);
-            if (exitPage != null)
-            {
-                await exitPage.AfterExit(isPush, enterPage);
-            }
-            await enterPage.AfterEnter(isPush, exitPage);
-        }
-
         #endregion
 
         #region Event
@@ -319,15 +234,27 @@ namespace Cr7Sund.Server.UI.Impl
             e.TargetUI = targetUI;
             _eventBus.Dispatch(e);
         }
-
         #endregion
 
+        public void TimeOut(int elapsedTime)
+        {
+            if (!IsTransitioning())
+            {
+                _startTransTime = elapsedTime;
+                return;
+            }
+
+            if (elapsedTime - _startTransTime < _loadTimeOutTime) return;
+
+            _focusNode.CancelCurTask();
+        }
         public override void Dispose()
         {
             base.Dispose();
 
             AssertUtil.LessOrEqual(OperateNum, 0);
             _pageContainers = null;
+            _startTransTime = 0;
         }
 
         public async PromiseTask CloseAll()

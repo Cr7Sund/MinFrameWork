@@ -71,6 +71,10 @@
         /// </summary>
         EMPTY_CROSS_CONTEXT,
         /// <summary>
+        /// try to assign duplicate cross context
+        /// </summary>
+        DUPLICATE_CROSS_CONTEXT,
+        /// <summary>
         /// try to add node witch existed unfulfilled operation
         /// </summary>
         ADD_RECYCLED,

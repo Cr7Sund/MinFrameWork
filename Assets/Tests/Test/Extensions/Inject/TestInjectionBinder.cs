@@ -1,16 +1,14 @@
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
-using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using UnityEngine.TestTools;
 
 namespace Cr7Sund.PackageTest.IOC
 {
     [TestFixture]
-    public class TestinjectionBinder : IPrebuildSetup, IPostBuildCleanup
+    public class TestinjectionBinder 
     {
 
         [SetUp]

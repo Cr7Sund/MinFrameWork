@@ -8,7 +8,6 @@ namespace Cr7Sund.Server.UI.Api
         int OperateNum { get; }
 
         PromiseTask CloseAll();
-        void TimeOut(int elapsedTime);
     }
 
 }

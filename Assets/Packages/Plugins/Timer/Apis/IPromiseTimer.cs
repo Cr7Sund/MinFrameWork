@@ -7,7 +7,13 @@ namespace Cr7Sund.Package.Api
         ///     Resolve the returned promise once the time has elapsed
         /// </summary>
         IPromise WaitFor(int duration);
-
+        /// <summary>
+        /// Resolve the returned promise once the time has elapsed
+        /// </summary>
+        /// <param name="duration"></param>
+        /// <param name="onTimeAction">in time actin</param>
+        /// <returns></returns>
+        IPromise WaitFor(int duration, Action onTimeAction);
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>

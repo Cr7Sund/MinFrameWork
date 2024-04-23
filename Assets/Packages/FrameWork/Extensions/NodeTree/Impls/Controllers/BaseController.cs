@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Cr7Sund.NodeTree.Api;
 
 namespace Cr7Sund.NodeTree.Impl
@@ -8,6 +9,7 @@ namespace Cr7Sund.NodeTree.Impl
         public bool IsStarted { get; set; }
         public bool IsActive { get; set; }
 
+        protected virtual IInternalLog Debug { get => Console.Logger; }
 
         // No preload
         // since it should be existed one, but preload the node is still no created
@@ -15,83 +17,69 @@ namespace Cr7Sund.NodeTree.Impl
         public async PromiseTask Start()
         {
             IsStarted = true;
-            if (MacroDefine.NoCatchMode)
+            try
             {
                 await OnStart();
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Error(e);
+                if (e is OperationCanceledException)
                 {
-                    await OnStart();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnStart Error: ", GetType().FullName);
+                    throw;
                 }
             }
         }
 
         public async PromiseTask Stop()
         {
-            if (MacroDefine.NoCatchMode)
+            IsStarted = false;
+            try
             {
                 await OnStop();
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Error(e);
+                if (e is OperationCanceledException)
                 {
-                    await OnStop();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnStop Error: ", GetType().FullName);
+                    throw;
                 }
             }
-
-            IsStarted = false;
         }
 
         public async PromiseTask Enable()
         {
             IsActive = true;
-
-            if (MacroDefine.NoCatchMode)
+            try
             {
                 await OnEnable();
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Error(e);
+                if (e is OperationCanceledException)
                 {
-                    await OnEnable();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{@TypeName}.OnEnable Error: ", GetType().FullName);
+                    throw;
                 }
             }
         }
 
         public async PromiseTask Disable()
         {
-            if (MacroDefine.NoCatchMode)
+            IsActive = false;
+            try
             {
                 await OnDisable();
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Error(e);
+                if (e is OperationCanceledException)
                 {
-                    await OnDisable();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnDisable Error: ", GetType().FullName);
+                    throw;
                 }
             }
-            IsActive = false;
         }
 
         public virtual void RegisterAddTask(CancellationToken cancellationToken) { }

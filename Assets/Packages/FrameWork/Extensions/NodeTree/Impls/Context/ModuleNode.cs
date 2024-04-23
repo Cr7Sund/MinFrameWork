@@ -17,22 +17,19 @@ namespace Cr7Sund.NodeTree.Impl
             _controllerModule = controllerModule;
         }
 
-        public override async PromiseTask PreLoadAsync()
+        protected override PromiseTask OnPreloadAsync()
         {
-            await base.PreLoadAsync();
-            await _controllerModule.PreLoadAsync();
+            return _controllerModule.PreLoadAsync();
         }
 
-        public override async PromiseTask LoadAsync()
+        protected override PromiseTask OnLoadAsync()
         {
-            await base.LoadAsync();
-            await _controllerModule.LoadAsync();
+            return _controllerModule.LoadAsync();
         }
-
-        public override async PromiseTask UnloadAsync()
+        
+        protected override PromiseTask OnUnloadAsync()
         {
-            await base.UnloadAsync();
-            await _controllerModule.UnloadAsync();
+            return _controllerModule.UnloadAsync();
         }
 
         public sealed override void Inject()

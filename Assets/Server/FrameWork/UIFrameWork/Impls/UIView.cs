@@ -16,7 +16,7 @@ namespace Cr7Sund.Server.UI.Impl
 {
     public class UIView : IUIView
     {
-        [Inject(ServerBindDefine.UITimer)] private IPromiseTimer _uiTimer;
+        [Inject(ServerBindDefine.SceneTimer)] private IPromiseTimer _sceneTimer;
         [Inject] private IUITransitionAnimationContainer _animationContainer;
         [Inject(ServerBindDefine.GameInstancePool)] private IInstancesContainer _gameContainer;
         private int _sortingOrder;
@@ -43,8 +43,10 @@ namespace Cr7Sund.Server.UI.Impl
         public RectTransform RectTransform { get => _rectTransform; }
         public float TransitionAnimationProgress { get; private set; }
 
-        public void OnLoad(GameObject go)
+        public virtual PromiseTask OnLoad(GameObject go)
         {
+            if (!MacroDefine.IsMainThread || !UnityEngine.Application.isPlaying) return PromiseTask.CompletedTask;
+
             //Instantiate
             AssertUtil.IsNull(_rectTransform, UIExceptionType.instantiate_UI_repeat);
 
@@ -54,6 +56,8 @@ namespace Cr7Sund.Server.UI.Impl
             _rectTransform = (RectTransform)go.transform;
             _canvasGroup = _uiPanel.GetUIComponent<CanvasGroup>(nameof(CanvasGroup));
             _canvas = _uiPanel.GetUIComponent<Canvas>(nameof(Canvas));
+
+            return PromiseTask.CompletedTask;
         }
 
         public void Start(INode parent)
@@ -70,7 +74,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void BeforeEnter()
         {
-            if (!MacroDefine.IsMainThread || !Application.isPlaying)
+            if (_rectTransform == null)
             {
                 return;
             }
@@ -85,7 +89,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public virtual async PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation)
         {
-            if (!MacroDefine.IsMainThread || !Application.isPlaying)
+            if (_rectTransform == null)
             {
                 return;
             }
@@ -100,7 +104,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void AfterEnter()
         {
-            if (!MacroDefine.IsMainThread || !Application.isPlaying)
+            if (_rectTransform == null)
             {
                 return;
             }
@@ -111,7 +115,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void BeforeExit()
         {
-            if (!MacroDefine.IsMainThread || !Application.isPlaying)
+            if (_rectTransform == null)
             {
                 return;
             }
@@ -123,7 +127,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public async PromiseTask ExitRoutine(bool push, IUINode partnerPage, bool playAnimation)
         {
-            if (!MacroDefine.IsMainThread || !Application.isPlaying)
+            if (_rectTransform == null)
             {
                 return;
             }
@@ -136,7 +140,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void AfterExit()
         {
-            if (!MacroDefine.IsMainThread || !Application.isPlaying)
+            if (_rectTransform == null)
             {
                 return;
             }
@@ -158,27 +162,24 @@ namespace Cr7Sund.Server.UI.Impl
             }
 
             _transitionDict.Clear();
-
-            if (_rectTransform)
-            {
-                GameObject.Destroy(_rectTransform);
-            }
             _rectTransform = null;
         }
 
         public void Dispose()
         {
-            Stop();
         }
 
         public void Update(int millisecond)
         {
-            _uiTimer.Update(millisecond);
+            _sceneTimer.Update(millisecond);
         }
 
         private void SetActive(bool enabled)
         {
-            RectTransform.gameObject.SetActive(enabled);
+            if (_rectTransform != null)
+            {
+                _rectTransform.gameObject.SetActive(enabled);
+            }
         }
 
         private void SortOrderView(INode parent)
@@ -212,6 +213,7 @@ namespace Cr7Sund.Server.UI.Impl
             //         _canvas.sortingOrder = sortingOrder + siblingIndex;
             //     }
             // }
+
         }
 
         private void SetTransitionProgress(float progress)
@@ -229,7 +231,7 @@ namespace Cr7Sund.Server.UI.Impl
             else if (parent is SceneNode sceneNode)
             {
                 return _gameContainer.GetInstance(
-                            ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME).transform as RectTransform;
+                    ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME).transform as RectTransform;
             }
 
             return null;
@@ -257,18 +259,18 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        private PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour)
+        private async PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour)
         {
             if (transitionBehaviour.Duration > 0.0f)
             {
                 transitionBehaviour.SetPartner(partnerPage?.View.RectTransform);
                 transitionBehaviour.Setup(_rectTransform);
-                return _uiTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime))
-                             .Progress(TransitionProgressReporter).AsTask();
-            }
-            else
-            {
-                return PromiseTask.CompletedTask;
+                // PLAN replace with promise task
+                // 🤔🤔🤔why we use scene(Game) timer?
+                // since remove node will be happened in transition
+                var promise = _sceneTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime))
+                    .Progress(TransitionProgressReporter);
+                await promise.AsTask();
             }
         }
 

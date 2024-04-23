@@ -13,7 +13,10 @@ namespace Cr7Sund
         public static IInternalLog Create(string logChannel)
         {
             var logSinkType = LogSinkType.File | LogSinkType.Net | LogSinkType.LogPlatform;
-            var logger = new LoggerProxy(logSinkType, logChannel);
+            var logProvider = LogProviderFactory.Create();
+            logProvider.Init(logSinkType, logChannel);
+            
+            var logger = new LoggerProxy(logProvider);
             return logger;
         }
 

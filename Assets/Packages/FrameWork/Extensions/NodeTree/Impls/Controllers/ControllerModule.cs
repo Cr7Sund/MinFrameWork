@@ -208,7 +208,8 @@ namespace Cr7Sund.NodeTree.Impl
             if (IsStarted) return;
 
             IsStarted = true;
-            for (int i = 0; i < _childControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
                 await _childControllers[i].Start();
             }
@@ -218,7 +219,9 @@ namespace Cr7Sund.NodeTree.Impl
             if (!IsStarted || IsActive) return;
 
             IsActive = true;
-            for (int i = 0; i < _childControllers.Count; i++)
+            // PLAN Aggregate exceptions 
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
                 await _childControllers[i].Enable();
             }
@@ -252,7 +255,8 @@ namespace Cr7Sund.NodeTree.Impl
         {
             if (!IsStarted) return;
 
-            for (int i = 0; i < _childControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
                 await _childControllers[i].Stop();
             }
@@ -262,7 +266,8 @@ namespace Cr7Sund.NodeTree.Impl
         {
             if (!IsStarted || !IsActive) return;
 
-            for (int i = 0; i < _childControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
                 await _childControllers[i].Disable();
             }
@@ -271,7 +276,8 @@ namespace Cr7Sund.NodeTree.Impl
 
         public void RegisterAddTask(CancellationToken cancellationToken)
         {
-            for (int i = 0; i < _childControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
                 _childControllers[i].RegisterAddTask(cancellationToken);
             }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 
 namespace Cr7Sund.NodeTree.Impl
@@ -6,14 +7,12 @@ namespace Cr7Sund.NodeTree.Impl
 
     public abstract class UpdateNode : Node, IUpdatable, ILateUpdate
     {
-        protected List<UpdateNode> _updateList;
-        protected List<UpdateNode> _lateUpdatesList;
+        protected List<UpdateNode> _updateList = new();
+        protected List<UpdateNode> _lateUpdatesList = new();
 
 
         public UpdateNode(IAssetKey assetKey) : base(assetKey)
         {
-            _updateList = new List<UpdateNode>();
-            _lateUpdatesList = new List<UpdateNode>();
         }
 
 
@@ -29,15 +28,22 @@ namespace Cr7Sund.NodeTree.Impl
             if (child is IUpdatable)
             {
                 var updateNode = child as UpdateNode;
-                if (!_updateList.Contains(updateNode))
-                    _updateList.Add(updateNode);
+                if (MacroDefine.IsDebug)
+                {
+                    AssertUtil.IsFalse(_updateList.Contains(updateNode));
+                }
+                _updateList.Add(updateNode);
             }
 
             if (child is ILateUpdate)
             {
                 var updateNode = child as UpdateNode;
-                if (!_lateUpdatesList.Contains(updateNode))
-                    _lateUpdatesList.Add(updateNode);
+                if (MacroDefine.IsDebug)
+                {
+                    AssertUtil.IsFalse(_lateUpdatesList.Contains(updateNode));
+                }
+
+                _lateUpdatesList.Add(updateNode);
             }
         }
 
@@ -49,7 +55,6 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 return;
             }
-
 
             if (child is IUpdatable)
             {
@@ -72,7 +77,8 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
 
             int updateListCount = _updateList.Count;
-            for (int i = 0; i < updateListCount; i++)
+            // in case remove list on Update
+            for (int i = updateListCount - 1; i >= 0; i--)
             {
                 _updateList[i].Update(elapse);
             }
@@ -86,7 +92,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return;
 
             int count = _lateUpdatesList.Count;
-            for (int i = 0; i < count; i++)
+            for (int i = count - 1; i >= 0; i--)
             {
                 _updateList[i].LateUpdate(elapse);
             }

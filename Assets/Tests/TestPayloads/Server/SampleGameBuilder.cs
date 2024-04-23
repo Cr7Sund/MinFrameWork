@@ -2,7 +2,7 @@ using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Impl;
 
-namespace Cr7Sund.Server.Tests
+namespace Cr7Sund.Server.Test
 {
     public class SampleGameBuilder : GameBuilder
     {
@@ -13,7 +13,7 @@ namespace Cr7Sund.Server.Tests
 
         protected override BaseGameController CreateController()
         {
-            return new SampleController();
+            return new SampleGameController();
         }
 
         protected override GameNode CreateGameNode()

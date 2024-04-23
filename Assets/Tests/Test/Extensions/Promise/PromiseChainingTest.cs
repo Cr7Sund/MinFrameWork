@@ -79,7 +79,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void chaining_value_exception()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             Exception e = null;
             Func<int, int> exceptionHandler = v => throw new Exception("west");
             promise
@@ -135,7 +135,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void handle_rejected_catch_but_break_chain()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             SimplePromise.simulatePromiseOne = new Promise<int>();
 

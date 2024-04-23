@@ -85,6 +85,21 @@ namespace Cr7Sund.Package.Impl
             return WaitUntil(t => t.elapsedTime > duration);
         }
 
+        public IPromise WaitFor(int duration, Action onTimeAction)
+        {
+            AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
+
+            return WaitUntil(t =>
+            {
+                if (t.elapsedTime > duration)
+                {
+                    onTimeAction?.Invoke();
+                    return true;
+                }
+                return false;
+            });
+        }
+
         public IPromise WaitUntil(Func<TimeData, bool> predicate)
         {
             var promise = new Promise();
@@ -164,7 +179,7 @@ namespace Cr7Sund.Package.Impl
 
         public void Dispose()
         {
-            waitings.Clear();
+            AssertUtil.LessOrEqual(waitings.Count, 0);
             curFrame = 0;
             curFrame = 0;
         }

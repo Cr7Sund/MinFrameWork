@@ -192,7 +192,6 @@ namespace Cr7Sund.Package.Api
 
         PromiseTask<PromisedT> AsTask();
         PromiseTask<PromisedT> AsNewTask();
-        PromiseTask ToNewTask();
         void TryReturn();
     }
 }

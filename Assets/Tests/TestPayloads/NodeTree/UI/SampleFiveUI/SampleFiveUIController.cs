@@ -9,13 +9,11 @@ namespace Cr7Sund.PackageTest.IOC
         public static int StartValue;
         public static int EnableCount;
 
-
         public static void Init()
         {
             StartValue = 0;
             EnableCount = 0;
         }
-
 
         protected override async PromiseTask OnStart()
         {
@@ -23,7 +21,6 @@ namespace Cr7Sund.PackageTest.IOC
             await base.OnStart();
 
             StartValue++;
-
         }
 
         protected override async PromiseTask OnEnable()

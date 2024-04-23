@@ -55,7 +55,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new CommandPromise();
             var rejectPromise = promise.Then<ExceptionCommand>() as Promise;
             promise.Resolve();
@@ -65,7 +65,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_break_chain()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new CommandPromise();
 
             promise.Then<SimpleCommandTwo>().Then<ExceptionCommand>().Then<SimpleCommandOne>();

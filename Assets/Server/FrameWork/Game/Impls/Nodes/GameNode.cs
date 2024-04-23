@@ -1,4 +1,5 @@
-﻿using Cr7Sund.FrameWork.Util;
+﻿using System;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Api;
@@ -24,23 +25,10 @@ namespace Cr7Sund.Server.Impl
             Inject();
             Init();
             await LoadAsync();
-
             await Start();
             await SetActive(true);
         }
 
-        protected override void OnUpdate(int milliseconds)
-        {
-            base.OnUpdate(milliseconds);
-        }
-
-        // protected void CreateUITransitionBarrier()
-        // {
-        //     _sceneTimer.Schedule((timeData) =>
-        //     {
-        //         _pageContainer.TimeOut(timeData.elapsedTime);
-        //     });
-        // }
         public async PromiseTask DestroyAsync()
         {
             if (!IsInit) return;
@@ -58,6 +46,7 @@ namespace Cr7Sund.Server.Impl
                 await UnloadAsync();
             }
 
+            Destroy();
             Dispose();
         }
 

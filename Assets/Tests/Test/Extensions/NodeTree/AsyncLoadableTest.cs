@@ -1,11 +1,11 @@
 ﻿using Cr7Sund.FrameWork.Util;
-using Cr7Sund.FrameWork.Test;
+// using Cr7Sund.FrameWork.Test;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 using System.Threading.Tasks;
-using System;
+using Cr7Sund.FrameWork.Test;
 
 namespace Cr7Sund.PackageTest.NodeTree
 {
@@ -49,7 +49,7 @@ namespace Cr7Sund.PackageTest.NodeTree
         [Test]
         public async Task TestLoadRejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             // Arrange
             var sampleLoadable = new RejectableAsyncLoadable();

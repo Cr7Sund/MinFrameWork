@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Cr7Sund
 {
@@ -8,13 +9,24 @@ namespace Cr7Sund
     {
         public static PromiseTask<T> FromException(Exception ex)
         {
-            // PLAN: Handle Cancel
-            //if (ex is OperationCanceledException oce)
-            //{
-            //    return FromCanceled<T>(oce.CancellationToken);
-            //}
+            if (ex is OperationCanceledException oce)
+            {
+               return FromCanceled(oce.CancellationToken);
+            }
 
             return new PromiseTask<T>(new ExceptionResultSource<T>(ex), 0);
+        }
+
+        public static PromiseTask<T> FromCanceled(CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken == CancellationToken.None)
+            {
+                return CanceledUniTaskCache<T>.Task;
+            }
+            else
+            {
+                return new PromiseTask<T>(new CanceledResultSource<T>(cancellationToken), 0);
+            }
         }
 
         public static PromiseTask<T> FromResult(T value)
@@ -38,14 +50,29 @@ namespace Cr7Sund
     {
         public static PromiseTask FromException(Exception ex)
         {
+            if (ex is OperationCanceledException oce)
+            {
+                return FromCanceled(oce.CancellationToken);
+            }
             return new PromiseTask(new ExceptionResultSource(ex), 0);
+        }
+
+        public static PromiseTask FromCanceled(CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken == CancellationToken.None)
+            {
+                return CanceledUniTaskCache.Task;
+            }
+            else
+            {
+                return new PromiseTask(new CanceledResultSource(cancellationToken), 0);
+            }
         }
 
         public static PromiseTask WhenAll(params PromiseTask[] tasks)
         {
             return WhenAll((IEnumerable<PromiseTask>)tasks.ToArray());
         }
-
 
         public static PromiseTask WhenAll(IEnumerable<PromiseTask> tasks)
         {

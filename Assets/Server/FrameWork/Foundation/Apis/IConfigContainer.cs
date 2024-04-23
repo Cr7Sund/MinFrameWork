@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 
 namespace Cr7Sund.Server.Api
 {
-    public interface IConfigContainer : IDisposable
+    public interface IConfigContainer : IAssetContainer, IDisposable
     {
         PromiseTask<T> GetConfig<T>(IAssetKey assetKey) where T : Object;
         void RemoveConfigAsync(IAssetKey assetKey);

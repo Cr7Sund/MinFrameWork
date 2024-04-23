@@ -6,7 +6,7 @@ namespace Cr7Sund.Server.UI.Impl
 {
     public class UIPanelContainer : BaseUniqueInstanceContainer, IUniqueInstanceContainer
     {
-        [Inject(ServerBindDefine.GameLoader)] private IAssetLoader _assetLoader;
+        [Inject] private IAssetLoader _assetLoader;
         protected override IAssetLoader Loader => _assetLoader;
         
     }

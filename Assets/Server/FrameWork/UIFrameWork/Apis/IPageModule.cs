@@ -9,6 +9,8 @@ namespace Cr7Sund.Server.UI.Api
         public PromiseTask BackPage(IAssetKey popKey);
         public PromiseTask BackPage(int popCount);
         public PromiseTask PushPage(IAssetKey uiKey);
+
+        void TimeOut(int elapsedTime);
     }
 
 }

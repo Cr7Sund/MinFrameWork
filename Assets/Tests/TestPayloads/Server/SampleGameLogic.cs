@@ -1,6 +1,6 @@
 using Cr7Sund.Server.Impl;
 
-namespace Cr7Sund.Server.Tests
+namespace Cr7Sund.Server.Test
 {
     public class SampleGameLogic : GameLogic.GameLogic
     {

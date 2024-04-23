@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Cr7Sund.CompilerServices
@@ -7,8 +8,10 @@ namespace Cr7Sund.CompilerServices
     {
         private readonly PromiseTask<T> task;
 
+
         public bool IsCompleted
         {
+            [DebuggerHidden]
             get
             {
                 return task.Status.IsCompleted();
@@ -24,6 +27,7 @@ namespace Cr7Sund.CompilerServices
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         /// <summary>Ends the await on the completed <see cref="System.Threading.Tasks.Task{TResult}"/>.</summary>
         public T GetResult()
         {
@@ -40,6 +44,7 @@ namespace Cr7Sund.CompilerServices
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public void OnCompleted(Action continuation)
         {
             var s = task.source;
@@ -54,6 +59,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         /// <summary>Schedules the continuation onto the <see cref="System.Threading.Tasks.Task"/> associated with this <see cref="TaskAwaiter"/>.</summary>
         /// <param name="continuation">The action to invoke when the await operation completes.</param
         public void UnsafeOnCompleted(Action continuation)

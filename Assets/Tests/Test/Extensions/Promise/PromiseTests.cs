@@ -34,7 +34,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void can_reject_simple_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var ex = new Exception();
             var promise = Promise<int>.Rejected(ex);
@@ -52,7 +52,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_is_thrown_for_reject_after_reject()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             promise.RejectWithoutDebug(new Exception());
@@ -75,7 +75,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_is_thrown_for_resolve_after_reject()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             promise.RejectWithoutDebug(new Exception());
@@ -152,7 +152,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void can_reject_promise_and_trigger_error_handler()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             var ex = new Exception();
@@ -171,7 +171,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void can_reject_promise_and_trigger_multiple_error_handlers_in_order()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             var ex = new Exception();
@@ -196,7 +196,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void can_reject_promise_and_trigger_error_handler_with_registration_after_reject()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             var ex = new Exception();
@@ -225,7 +225,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void then_handler_is_not_invoked_for_rejected_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             promise.Then(v => throw new Exception("This shouldn't happen"));
@@ -236,7 +236,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void chain_multiple_promises_using_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             var chainedPromise1 = Promise<int>.Rejected(new Exception());
             var chainedPromise2 = Promise<int>.Rejected(new Exception());
@@ -263,7 +263,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void chain_multiple_rejected_promises_using_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             var chainedPromise1 = Promise<int>.Rejected(new Exception("First chained promise"));
             var chainedPromise2 = Promise<int>.Rejected(new Exception("Second chained promise"));
@@ -286,7 +286,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void chain_multiple_promises_using_then_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = Promise<int>.Resolved(20);
             var chainedPromise1 = new Promise<int>();
             chainedPromise1.Then(v => v += 1);
@@ -331,7 +331,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void chain_multiple_promises_rejected_using_then_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = Promise<int>.Resolved(20);
             var chainedPromise1 = new Promise<int>();
             chainedPromise1.Then(v => v += 1);
@@ -606,7 +606,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_is_rejected_when_first_promise_is_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -629,7 +629,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_of_multiple_types_is_rejected_when_first_promise_is_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<bool>();
 
@@ -652,7 +652,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_is_rejected_when_second_promise_is_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -675,7 +675,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_of_multiple_types_is_rejected_when_second_promise_is_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<bool>();
 
@@ -698,7 +698,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_is_rejected_when_both_promises_are_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -721,7 +721,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_of_multiple_types_is_rejected_when_both_promises_are_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<bool>();
 
@@ -744,7 +744,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_is_resolved_if_there_are_no_promises()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 var all = Promise<int>.All(Enumerable.Empty<IPromise<int>>());
@@ -765,7 +765,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void combined_promise_is_resolved_when_all_promises_are_already_resolved()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var promise1 = Promise<int>.Resolved(1);
             var promise2 = Promise<int>.Resolved(1);
@@ -814,7 +814,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void all_with_rejected_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             bool resolved = false;
             bool rejected = false;
             Exception caughtException = null;
@@ -862,7 +862,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void rejection_of_source_promise_rejects_transformed_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             var ex = new Exception();
@@ -885,7 +885,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_thrown_during_transform_rejects_transformed_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             const int promisedValue = 15;
@@ -953,7 +953,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_thrown_in_chain_rejects_resulting_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
 
             var ex = new Exception();
@@ -976,7 +976,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void rejection_of_source_promise_rejects_chained_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             var chainedPromise = new Promise<string>();
 
@@ -1040,7 +1040,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void any_is_resolved_when_all_promise_resolved()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1062,7 +1062,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void then_any_is_resolved_when_all_promise_resolved()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1085,7 +1085,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void any_is_rejected_when_all_promise_is_rejected_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1111,7 +1111,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void any_is_rejected_when_first_promise_is_rejected_first_but_exist_Resolve()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1137,7 +1137,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void any_is_rejected_when_second_promise_is_rejected_next_but_exist_Resolve()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1204,7 +1204,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void race_is_rejected_when_first_promise_is_rejected_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1226,7 +1226,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void race_is_rejected_when_second_promise_is_rejected_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1248,7 +1248,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void then_race_is_rejected_when_second_promise_is_rejected_first()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise1 = new Promise<int>();
             var promise2 = new Promise<int>();
 
@@ -1290,7 +1290,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void can_reject_promise_via_reject_function()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var ex = new Exception();
             var promise = new Promise<int>((resolve, reject) =>
             {
@@ -1310,7 +1310,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_thrown_during_resolver_rejects_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var ex = new Exception();
             var promise = new Promise<int>((resolve, reject) => throw ex);
 
@@ -1327,7 +1327,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void unhandled_exception_is_propagated_via_event()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             var ex = new Exception();
             int eventRaised = 0;
@@ -1360,7 +1360,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_in_done_callback_is_propagated_via_event()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             var ex = new Exception();
             int eventRaised = 0;
@@ -1392,7 +1392,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void handled_exception_is_not_propagated_via_event()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             var ex = new Exception();
             int eventRaised = 0;
@@ -1504,7 +1504,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_during_Then_onResolved_triggers_error_handler()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
             int errorCallback = 0;
@@ -1554,7 +1554,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void finally_is_called_after_reject()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
 
@@ -1590,7 +1590,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         //tc39
         public void rejected_chain_rejects_after_finally()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
 
@@ -1606,7 +1606,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void rejected_chain_continues_after_ContinueWith_returning_non_value_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
 
@@ -1625,7 +1625,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void rejected_chain_continues_after_ContinueWith_returning_value_promise()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
             const int expectedValue = 42;
@@ -1689,7 +1689,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         public void exception_in_finally_callback_is_caught_by_chained_catch()
         {
             //NOTE: Also tests that the new exception is passed thru promise chain
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
             var expectedException = new Exception("Expected");
@@ -1714,7 +1714,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         public void exception_in_ContinueWith_callback_returning_non_value_promise_is_caught_by_chained_catch()
         {
             //NOTE: Also tests that the new exception is passed thru promise chain
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
             var expectedException = new Exception("Expected");
@@ -1739,7 +1739,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         public void exception_in_ContinueWith_callback_returning_value_promise_is_caught_by_chained_catch()
         {
             // NOTE: Also tests that the new exception is passed through promise chain
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             int callback = 0;
             var expectedException = new Exception("Expected");
@@ -1763,7 +1763,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_in_reject_callback_is_caught_by_chained_catch()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var expectedException = new Exception("Expected");
             Exception actualException = null;
 
@@ -1780,7 +1780,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void rejected_reject_callback_is_caught_by_chained_catch()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var expectedException = new Exception("Expected");
             Exception actualException = null;
 

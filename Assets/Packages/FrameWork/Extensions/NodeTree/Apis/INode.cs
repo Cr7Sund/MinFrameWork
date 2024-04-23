@@ -1,7 +1,7 @@
 ﻿using Cr7Sund.Package.Api;
 namespace Cr7Sund.NodeTree.Api
 {
-    public interface INode : ILifeTime, ILoadAsync, IInjectable, IRunnable, IInitialize, IDestroy, ILoading
+    public interface INode : ILifeTime, ILoadAsync, IInjectable, IRunnable, IInitialize, IDestroy
     {
         IContext Context { get; }
         INode Parent { get; set; }
@@ -10,7 +10,7 @@ namespace Cr7Sund.NodeTree.Api
         NodeState NodeState { get; }
         IAssetKey Key { get; }
         int ChildCount { get; }
-
+        
         PromiseTask PreLoadChild(INode child);
         PromiseTask AddChildAsync(INode child, bool overwrite = false);
         PromiseTask UnloadChildAsync(INode child, bool overwrite = false);
@@ -18,8 +18,7 @@ namespace Cr7Sund.NodeTree.Api
         INode GetChild(int index);
 
 
-        #region  Load
-
+        #region Load
         PromiseTask LoadAsync();
         PromiseTask PreLoadAsync();
         PromiseTask UnloadAsync();
@@ -28,21 +27,18 @@ namespace Cr7Sund.NodeTree.Api
 
         void SetAdding();
         void StartPreload();
-        void EndPreload();
         void SetReady();
         void StartUnload(bool shouldUnload);
         void EndUnLoad(bool unload);
-
+        void CancelCurTask();
         #endregion
 
-        #region  LifeCycle
-
+        #region LifeCycle
         PromiseTask SetActive(bool active);
         PromiseTask OnStart();
         PromiseTask OnEnable();
         PromiseTask OnDisable();
         PromiseTask OnStop();
-
         #endregion
 
     }

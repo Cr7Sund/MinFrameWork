@@ -1,6 +1,4 @@
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Package.Api;
-using UnityEngine.ResourceManagement.ResourceProviders;
+using System.Threading;
 using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.Server.Impl
@@ -8,9 +6,10 @@ namespace Cr7Sund.Server.Impl
     public interface ISceneLoader
     {
         PromiseTask LoadSceneAsync(IAssetKey key,
-            LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true);
+            LoadSceneMode loadMode, bool activateOnLoad);
         PromiseTask ActiveSceneAsync(IAssetKey key);
         void UnloadScene(IAssetKey key);
+        void RegisterCancelLoad(IAssetKey key, CancellationToken cancellation);
 
     }
 }

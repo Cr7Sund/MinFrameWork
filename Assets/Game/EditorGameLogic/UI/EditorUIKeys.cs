@@ -3,7 +3,7 @@ using Cr7Sund.Server.UI.Impl;
 
 namespace Cr7Sund.Game.UI
 {
-        public partial class SampleUIKeys
+        public partial class EditorUIKeys
         {
                 public static UIKey SampleOneUI = new UIKey("SampleOnePanel",
                         typeof(SampleOneUIController), typeof(SampleOnePanel));

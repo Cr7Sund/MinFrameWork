@@ -44,6 +44,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public void SetResult()
         {
             if (runnerPromise != null)
@@ -53,6 +54,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public void SetException(Exception exception)
         {
             if (runnerPromise != null)
@@ -68,7 +70,8 @@ namespace Cr7Sund.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : INotifyCompletion where TStateMachine : IAsyncStateMachine
         {
-            AsyncMethodBuilderCore<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
+            if (runnerPromise == null)
+                AsyncMethodBuilderCore<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
             awaiter.OnCompleted(runnerPromise.MoveNext);
         }
 
@@ -83,7 +86,8 @@ namespace Cr7Sund.CompilerServices
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ICriticalNotifyCompletion where TStateMachine : IAsyncStateMachine
         {
             // aovid boxed operation (interface to struct)
-            AsyncMethodBuilderCore<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
+            if (runnerPromise == null)
+                AsyncMethodBuilderCore<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
             awaiter.UnsafeOnCompleted(runnerPromise.MoveNext);
         }
 

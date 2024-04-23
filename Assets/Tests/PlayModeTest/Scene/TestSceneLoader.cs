@@ -6,6 +6,7 @@ using Cr7Sund.Server.Impl;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.PackageTest.IOC
 {
@@ -22,13 +23,13 @@ namespace Cr7Sund.PackageTest.IOC
         [Test]
         public void TestLoadScene()
         {
-            _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyOne, LoadSceneMode.Additive, false);
         }
 
         [Test]
         public void TestUnLoadScene()
         {
-            _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyOne, LoadSceneMode.Additive, false);
             _sceneLoader.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
         }
 
@@ -36,11 +37,11 @@ namespace Cr7Sund.PackageTest.IOC
         [Test]
         public void TestLoadSceneAdditive()
         {
-            _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyOne);
+            _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyOne, LoadSceneMode.Single, false);
             _sceneLoader.LoadSceneAsync(SampleSceneKeys.SampleSceneKeyTwo
-                , UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                , UnityEngine.SceneManagement.LoadSceneMode.Additive, false);
         }
-        
+
         [Test]
         public void TestActiveSceneAsync()
         {

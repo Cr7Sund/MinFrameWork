@@ -1,7 +1,9 @@
-﻿using Cr7Sund.NodeTree.Api;
+﻿using System;
+using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Api;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
+using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.Server.Scene.Impl
 {
@@ -22,7 +24,8 @@ namespace Cr7Sund.Server.Scene.Impl
 
         public async PromiseTask SwitchScene(IAssetKey key)
         {
-            await SwitchNode(key);
+            await AddScene(key);
+            await OnSwitchNode(key);
         }
         public async PromiseTask RemoveScene(IAssetKey key)
         {
@@ -36,8 +39,27 @@ namespace Cr7Sund.Server.Scene.Impl
         {
             await PreLoadNode(key);
         }
+
         public async PromiseTask AddScene(IAssetKey key)
         {
+            var sceneKey = key as SceneKey;
+            foreach (var item in _treeNodes)
+            {
+                if (key == item.Key) continue;
+
+                if (sceneKey.LoadSceneMode == LoadSceneMode.Single)
+                {
+                    if (item.Value.LoadState == LoadState.Loading
+                    || item.Value.NodeState == NodeState.Preloaded)
+                    {
+                        var loadSceneKey = sceneKey as SceneKey;
+                        if (loadSceneKey.LoadSceneMode == LoadSceneMode.Single)
+                        {
+                            item.Value.CancelLoad();
+                        }
+                    }
+                }
+            }
             await AddNode(key);
         }
 

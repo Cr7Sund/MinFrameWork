@@ -24,7 +24,7 @@ namespace Cr7Sund.CompilerServices
             MoveNext = Run;
         }
 
-
+        [DebuggerHidden]
         public static void SetStateMachine(ref TStateMachine stateMachine, ref IStateMachineRunnerPromise runnerPromiseFieldRef)
         {
             if (!pool.TryPop(out var result))
@@ -35,7 +35,7 @@ namespace Cr7Sund.CompilerServices
             runnerPromiseFieldRef = result; // set runner before copied.
             result.stateMachine = stateMachine; // copy struct StateMachine(in release build).
         }
-
+        [DebuggerHidden]
         public void GetResult(short token)
         {
             try
@@ -47,22 +47,22 @@ namespace Cr7Sund.CompilerServices
                 TryReturn();
             }
         }
-
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
             return core.GetStatus(token);
         }
-
+        [DebuggerHidden]
         public void SetException(Exception exception)
         {
             core.TrySetException(exception);
         }
-
+        [DebuggerHidden]
         public void SetResult()
         {
             core.TrySetResult();
         }
-
+        [DebuggerHidden]
         void IPromiseTaskSource.GetResult(short token)
         {
             try
@@ -75,16 +75,17 @@ namespace Cr7Sund.CompilerServices
             }
         }
 
+        [DebuggerHidden]
         public PromiseTaskStatus UnsafeGetStatus()
         {
             return core.UnsafeGetStatus();
         }
-
+        [DebuggerHidden]
         public void OnCompleted(Action continuation, short token)
         {
             core.OnCompleted(continuation, token);
         }
-
+        [DebuggerHidden]
         private bool TryReturn()
         {
             core.Reset();
@@ -93,6 +94,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         private void Run()
         {
             stateMachine.MoveNext();
@@ -131,7 +133,7 @@ namespace Cr7Sund.CompilerServices
             runnerPromiseFieldRef = result; // set runner before copied.
             result.stateMachine = stateMachine; // copy struct StateMachine(in release build).
         }
-
+        [DebuggerHidden]
         public T GetResult(short token)
         {
             try
@@ -143,21 +145,22 @@ namespace Cr7Sund.CompilerServices
                 TryReturn();
             }
         }
-
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
             return core.GetStatus(token);
         }
-
+        [DebuggerHidden]
         public void SetException(Exception exception)
         {
             core.TrySetException(exception);
         }
-
+        [DebuggerHidden]
         public void SetResult(T result)
         {
             core.TrySetResult(result);
         }
+        [DebuggerHidden]
         void IPromiseTaskSource.GetResult(short token)
         {
             try

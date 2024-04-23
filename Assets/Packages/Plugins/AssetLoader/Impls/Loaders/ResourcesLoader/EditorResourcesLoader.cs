@@ -17,14 +17,6 @@ namespace Cr7Sund.AssetLoader.Impl
 
 
 
-        public void Unload(IAssetPromise handler)
-        {
-
-        }
-
-        public void CancelLoad(IAssetPromise handler)
-        {
-        }
 
         PromiseTask IAssetLoader.Init()
         {
@@ -48,6 +40,15 @@ namespace Cr7Sund.AssetLoader.Impl
 
         public void RegisterCancelLoad(IAssetKey handler, CancellationToken cancellation)
         {
+        }
+
+        public void LateUpdate(int millisecond)
+        {
+        }
+
+        public PromiseTask DestroyAsync()
+        {
+            return PromiseTask.CompletedTask;
         }
     }
 }

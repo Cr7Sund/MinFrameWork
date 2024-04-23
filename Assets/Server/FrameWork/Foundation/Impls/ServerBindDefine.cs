@@ -3,7 +3,6 @@ namespace Cr7Sund.Server.Impl
     public static class ServerBindDefine
     {
         #region Global(game)
-        public const string GameLoader = "GameAssetLoader";
         public const string GameEventBus = "GameEventBus";
         #endregion
 
