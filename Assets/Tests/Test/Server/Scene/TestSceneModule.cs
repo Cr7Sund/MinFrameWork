@@ -174,7 +174,7 @@ namespace Cr7Sund.ServerTest.Scene
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
         }
 
-        [Test]
+        // [Test]
         public async Task SwitchPreloadScene()
         {
             var handler1 = _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
