@@ -1,14 +1,16 @@
 using System;
-using Object = UnityEngine.Object;
+using System.Threading;
 
 namespace Cr7Sund.AssetLoader.Api
 {
-    public interface IAssetLoader : IInitialize, IDisposable
+    public interface IAssetLoader : IDisposable, IDestroyAsync
     {
-        IAssetPromise Load<T>(IAssetKey key) where T : Object;
-        IAssetPromise LoadAsync<T>(IAssetKey key) where T : Object;
+        PromiseTask Init();
+        PromiseTask<T> Load<T>(IAssetKey assetKey) ;
+        PromiseTask<T> LoadAsync<T>(IAssetKey assetKey) ;
 
-        void Unload(IAssetPromise handler);
+        void Unload(IAssetKey assetKey);
+        void RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation);
     }
 
 }

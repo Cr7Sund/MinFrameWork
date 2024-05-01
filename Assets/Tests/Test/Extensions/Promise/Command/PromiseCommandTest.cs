@@ -161,7 +161,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_exception_rejectedState()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<ExceptionCommandGeneric>() as Promise<int>;
@@ -174,7 +174,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var promise = new CommandPromise<int>();
             var rejectPromise = promise.Then<ExceptionCommandGeneric>() as Promise;
@@ -185,7 +185,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_break_chain()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new CommandPromise<int>();
             var donePromise = promise.Then<SimpleCommandTwoGeneric>();
             var finalPromise = donePromise.Then<ExceptionCommandGeneric>().Then<SimpleCommandOneGeneric>();
@@ -200,7 +200,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void handle_rejected_catch_but_break_chain()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var promise = new CommandPromise<int>();
             var finalPromise = promise.Then<SimpleCommandTwoGeneric>()

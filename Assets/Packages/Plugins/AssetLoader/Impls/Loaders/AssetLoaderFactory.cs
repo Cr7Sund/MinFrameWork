@@ -1,5 +1,6 @@
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Server.Impl;
+using UnityEngine;
 
 namespace Cr7Sund.AssetLoader.Impl
 {
@@ -7,20 +8,20 @@ namespace Cr7Sund.AssetLoader.Impl
     {
         public static IAssetLoader CreateLoader()
         {
-            if (true)
+            if (MacroDefine.IsMainThread && Application.isPlaying)
             {
                 var addressableLoader = new AddressableLoader();
-                addressableLoader.Init();
                 return addressableLoader;
+            }
+            else
+            {
+                return new EditorResourcesLoader();
             }
         }
 
         public static ISceneLoader CreateSceneLoader()
         {
-            if (true)
-            {
-                return new AddressableSceneLoader();
-            }
+            return new AddressableSceneLoader();
         }
     }
 }

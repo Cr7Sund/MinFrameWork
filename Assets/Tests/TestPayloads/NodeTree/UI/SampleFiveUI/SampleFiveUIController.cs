@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.UI.Impl;
 
@@ -8,44 +9,40 @@ namespace Cr7Sund.PackageTest.IOC
         public static int StartValue;
         public static int EnableCount;
 
-
         public static void Init()
         {
             StartValue = 0;
             EnableCount = 0;
         }
 
-
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
             Debug.Debug("Load ui five");
+            await base.OnStart();
 
             StartValue++;
-
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
+            await base.OnEnable();
             Debug.Debug("Enable ui five");
 
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
             Debug.Debug("Disable ui five");
+            await base.OnDisable();
 
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop ui five");
-
+            await base.OnStop();
             StartValue--;
         }
     }

@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.UI.Impl;
 
@@ -9,9 +10,9 @@ namespace Cr7Sund.Game.UI
         public static int EnableCount;
 
         public static IPromise promise;
-        protected override IPromise OnPrepare(object intent)
+        protected override PromiseTask OnPrepare(object intent)
         {
-            return promise;
+            return promise.AsNewTask();
         }
         public static void Init()
         {
@@ -19,37 +20,32 @@ namespace Cr7Sund.Game.UI
             EnableCount = 0;
         }
 
-
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
             Debug.Debug("Load ui three");
-
+            await base.OnStart();
             StartValue++;
 
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
             Debug.Debug("Enable ui three");
-
+            await base.OnEnable();
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
             Debug.Debug("Disable ui three");
-
+            await base.OnDisable();
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop ui three");
-
+            await base.OnStop();
             StartValue--;
         }
     }

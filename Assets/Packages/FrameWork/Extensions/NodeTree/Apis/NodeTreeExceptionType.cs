@@ -23,7 +23,7 @@
         /// <summary>
         /// can not remove an existed node
         /// </summary>
-        REMOVE_NO_EXISTED,
+        REMOVE_NO_EXISTEDNODE,
 
         /// <summary>
         /// try to add an already added node
@@ -33,7 +33,10 @@
         /// should be default state
         /// </summary>
         default_state,
-        
+        /// <summary>
+        /// try to dispose not init or already destroyed
+        /// </summary>
+        dispose_not_int,
         #region Loadable
         /// <summary>
         /// Cant LoadAsync On State of loading or unloading
@@ -67,6 +70,14 @@
         /// there should be a cross context
         /// </summary>
         EMPTY_CROSS_CONTEXT,
+        /// <summary>
+        /// try to assign duplicate cross context
+        /// </summary>
+        DUPLICATE_CROSS_CONTEXT,
+        /// <summary>
+        /// try to add node witch existed unfulfilled operation
+        /// </summary>
+        ADD_RECYCLED,
         #endregion
     }
 }

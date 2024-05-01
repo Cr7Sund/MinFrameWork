@@ -1,11 +1,12 @@
-﻿namespace Cr7Sund
+﻿
+namespace Cr7Sund
 {
     public interface ILifeTime
     {
-        bool IsActive { get; }
+        bool IsActive { get; set; }
 
-        void Enable();
-        void Disable();
-        // void SetActive(bool active);
+        PromiseTask Enable();
+        PromiseTask Disable();
+
     }
 }

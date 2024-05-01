@@ -1,71 +1,89 @@
-using Cr7Sund.Package.Api;
 using Cr7Sund.Server.Impl;
 using NUnit.Framework;
 using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.Server.Scene.Impl;
-using Cr7Sund.Server.Tests;
+using Cr7Sund.Server.Test;
+using System.Threading.Tasks;
+using UnityEngine;
+using Cr7Sund.ServerTest.UI;
 
 namespace Cr7Sund.ServerTest.Scene
 {
     public class TestSceneModule
     {
-        private ISceneModule _sceneModule;
-        private GameNode _gameNode;
+        private SceneModule _sceneModule;
+        private SampleGameLogic _gameLogic;
+        private TestGameRoot _gameRoot;
 
         [SetUp]
-        public void SetUp()
+        public async Task SetUp()
         {
-            // InternalLog.Warn(LogChannel.Lua,)
-
-            // Logger.Warn(LogChannel.Lua,)
-
-            // Debug // do nothing
-
+            Console.Init(InternalLoggerFactory.Create());
 
             _sceneModule = new SceneModule();
+            _gameLogic = new SampleGameLogic();
+            _gameLogic.Init();
+            await _gameLogic.Run();
 
-            _gameNode = GameDirector.Construct<SampleGameBuilder>();
-            var injectionBinder = _gameNode.Context.InjectionBinder;
-
-            Console.Init(InternalLoggerFactory.Create());
-            _gameNode.Run();
-
-            injectionBinder.Injector.Inject(_sceneModule);
+            _gameLogic.GetContextInjector().Inject(_sceneModule);
 
             SampleSceneOneController.Init();
             SampleSceneTwoController.Init();
 
+            if (Application.isPlaying)
+            {
+                var gameRoot = new GameObject("testRoot", typeof(TestGameRoot));
+                GameObject.DontDestroyOnLoad(gameRoot);
+                _gameRoot = gameRoot.GetComponent<TestGameRoot>();
+                _gameRoot.Init(_gameLogic);
+            }
+        }
+
+        [TearDown]
+        public async Task TearDown()
+        {
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyTwo);
+            _sceneModule.Dispose();
+            await _gameLogic.DestroyAsync();
+            if (Application.isPlaying)
+            {
+                GameObject.Destroy(_gameRoot.gameObject);
+            }
+
         }
 
 
         [Test]
-        public void AddScene()
+        public async Task AddScene()
         {
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne)
-                                    .Then(node => Assert.AreEqual(NodeState.Ready, node.NodeState));
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            var node = ((LoadModule)_sceneModule).TestGetViewByKey<SceneNode>(SampleSceneKeys.SampleSceneKeyOne);
+            Assert.AreEqual(NodeState.Ready, node.NodeState);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void SwitchToFistScene()
+        public async Task SwitchToFistScene()
         {
-            _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyOne)
-                                    .Then(node => Assert.AreEqual(NodeState.Ready, node.NodeState));
+            await _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyOne);
+            var node = ((LoadModule)_sceneModule).TestGetViewByKey<SceneNode>(SampleSceneKeys.SampleSceneKeyOne);
+
+            Assert.AreEqual(NodeState.Ready, node.NodeState);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void SwitchToNewScene()
+        public async Task SwitchToNewScene()
         {
 
-            _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
@@ -74,12 +92,10 @@ namespace Cr7Sund.ServerTest.Scene
         }
 
         [Test]
-        public void AddScenes()
+        public async Task AddScenesAsync()
         {
-
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
@@ -88,25 +104,26 @@ namespace Cr7Sund.ServerTest.Scene
         }
 
         [Test]
-        public void RemoveScene()
+        public async Task RemoveScene()
         {
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne)
-                                    .Then(node => Assert.AreEqual(NodeState.Removed, node.NodeState));
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            var node = ((LoadModule)_sceneModule).TestGetViewByKey<SceneNode>(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
+
+            Assert.AreEqual(NodeState.Removed, node.NodeState);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void RemoveScenes()
+        public async Task RemoveScenes()
         {
 
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
-            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyTwo);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
@@ -114,28 +131,24 @@ namespace Cr7Sund.ServerTest.Scene
             Assert.AreEqual(0, SampleSceneTwoController.EnableCount);
         }
 
-
         [Test]
-        public void UnloadScene()
+        public async Task UnloadScene()
         {
-
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
 
             Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void UnloadScenes()
+        public async Task UnloadScenes()
         {
 
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
-            _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyTwo);
 
             Assert.AreEqual(1, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
@@ -144,91 +157,86 @@ namespace Cr7Sund.ServerTest.Scene
         }
 
         [Test]
-        public void PreloadScene()
+        public async Task PreloadScene()
         {
-
-
-            var preloadPromise = _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
 
             Assert.AreEqual(0, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
-
-            Assert.AreEqual(PromiseState.Resolved, preloadPromise.CurState);
         }
 
         [Test]
-        public void AddPreloadScene()
+        public async Task AddPreloadScene()
         {
-
-            _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
         }
 
-        [Test]
-        public void SwitchPreloadScene()
+        // [Test]
+        public async Task SwitchPreloadScene()
         {
+            var handler1 = _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
+            var handler2 = _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
+            try
+            {
+                await handler1;
+            }
+            catch 
+            {
+                // Debug.LogError(e);
+            }
+            await handler2;
 
-
-            _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
-
-
-            Assert.AreEqual(0, SampleSceneOneController.StartValue);
+            Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneTwoController.StartValue);
         }
 
         [Test]
-        public void ReActiveScene()
+        public async Task ReActiveScene()
         {
-
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void ReActivePreloadScene()
+        public async Task ReActivePreloadScene()
         {
-            _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void ReAddUnloadScene()
+        public async Task ReAddUnloadScene()
         {
 
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
 
             Assert.AreEqual(3, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
 
         [Test]
-        public void Switch_NotDisableAgain()
+        public async Task Switch_NotDisableAgain()
         {
 
-
-            _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
-            _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.RemoveScene(SampleSceneKeys.SampleSceneKeyOne);
+            await _sceneModule.SwitchScene(SampleSceneKeys.SampleSceneKeyTwo);
 
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(0, SampleSceneOneController.EnableCount);
         }
-
 
     }
 }

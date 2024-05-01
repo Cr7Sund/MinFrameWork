@@ -1,102 +1,94 @@
-﻿using Cr7Sund.NodeTree.Api;
+﻿using System;
+using System.Threading;
+using Cr7Sund.NodeTree.Api;
+
 namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class BaseController : IController
     {
-        public bool IsStarted { get; private set; }
-        public bool IsActive { get; private set; }
+        public bool IsStarted { get; set; }
+        public bool IsActive { get; set; }
 
+        protected virtual IInternalLog Debug { get => Console.Logger; }
 
         // No preload
         // since it should be existed one, but preload the node is still no created
 
-        public void Start()
+        public async PromiseTask Start()
         {
             IsStarted = true;
-            if (MacroDefine.NoCatchMode)
+            try
             {
-                OnStart();
+                await OnStart();
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Error(e);
+                if (e is OperationCanceledException)
                 {
-                    OnStart();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnStart Error: ", GetType().FullName);
+                    throw;
                 }
             }
         }
 
-        public void Stop()
+        public async PromiseTask Stop()
         {
-            if (MacroDefine.NoCatchMode)
-            {
-                OnStop();
-            }
-            else
-            {
-                try
-                {
-                    OnStop();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnStop Error: ", GetType().FullName);
-                }
-            }
-
             IsStarted = false;
+            try
+            {
+                await OnStop();
+            }
+            catch (Exception e)
+            {
+                Debug.Error(e);
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+            }
         }
 
-        public void Enable()
+        public async PromiseTask Enable()
         {
             IsActive = true;
-
-            if (MacroDefine.NoCatchMode)
+            try
             {
-                OnEnable();
+                await OnEnable();
             }
-            else
+            catch (Exception e)
             {
-                try
+                Debug.Error(e);
+                if (e is OperationCanceledException)
                 {
-                    OnEnable();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{@TypeName}.OnEnable Error: ", GetType().FullName);
+                    throw;
                 }
             }
         }
 
-        public void Disable()
+        public async PromiseTask Disable()
         {
-            if (MacroDefine.NoCatchMode)
-            {
-                OnDisable();
-            }
-            else
-            {
-                try
-                {
-                    OnDisable();
-                }
-                catch (System.Exception e)
-                {
-                    Console.Error(e, "{TypeName}.OnDisable Error: ", GetType().FullName);
-                }
-            }
             IsActive = false;
+            try
+            {
+                await OnDisable();
+            }
+            catch (Exception e)
+            {
+                Debug.Error(e);
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+            }
         }
 
+        public virtual void RegisterAddTask(CancellationToken cancellationToken) { }
+        public virtual void RegisterRemoveTask(CancellationToken cancellationToken) { }
 
-        protected virtual void OnStart() { }
-        protected virtual void OnStop() { }
-        protected virtual void OnEnable() { }
-        protected virtual void OnDisable() { }
+        protected virtual PromiseTask OnStart() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnStop() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnEnable() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnDisable() { return PromiseTask.CompletedTask; }
 
     }
 }

@@ -1,100 +1,93 @@
 ﻿using Cr7Sund.Package.Api;
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
-using UnityEngine;
-using Cr7Sund.Package.Impl;
-using Cr7Sund.Server.UI.Impl;
-using Cr7Sund.Server.Apis;
+using Cr7Sund.Server.UI.Api;
+using System.Threading;
+
 namespace Cr7Sund.Server.Scene.Impl
 {
     public class SceneNode : ModuleNode, ISceneNode
     {
         [Inject] private ISceneLoader _sceneLoader;
-        [Inject] private PageContainer _pageContainer;
         [Inject(ServerBindDefine.SceneTimer)] private IPromiseTimer _sceneTimer;
-
+        [Inject] IPageModule _pageModule;
 
         public SceneNode(IAssetKey assetKey) : base(assetKey)
         {
         }
 
-
         protected override void OnInit()
         {
             base.OnInit();
+            CreateUITransitionBarrier();
         }
 
-
-        public IPromise ActiveScene()
+        public async override PromiseTask OnEnable()
         {
-            if (Application.isPlaying)
+            await base.OnEnable();
+            await ActiveScene();
+        }
+
+        protected override async PromiseTask OnPreloadAsync()
+        {
+            var sceneKey = (SceneKey)Key;
+
+            if (!sceneKey.IsVirtualScene)
+            {
+                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, false);
+            }
+            await base.OnPreloadAsync();
+        }
+
+        protected override async PromiseTask OnLoadAsync()
+        {
+            var sceneKey = (SceneKey)Key;
+
+            if (!sceneKey.IsVirtualScene)
+            {
+                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad);
+            }
+            await base.OnLoadAsync();
+        }
+
+        protected async override PromiseTask OnUnloadAsync()
+        {
+            await _pageModule.CloseAll();
+
+            var sceneKey = (SceneKey)Key;
+            if (!sceneKey.IsVirtualScene)
+            {
+                _sceneLoader.UnloadScene(sceneKey);
+            }
+            await base.OnUnloadAsync();
+        }
+
+        public override void RegisterAddTask(CancellationToken cancellationToken)
+        {
+            base.RegisterAddTask(cancellationToken);
+            _sceneLoader.RegisterCancelLoad(Key, cancellationToken);
+        }
+
+        private PromiseTask ActiveScene()
+        {
+            var sceneKey = Key as SceneKey;
+            if (!sceneKey.IsVirtualScene)
             {
                 return _sceneLoader.ActiveSceneAsync(Key);
             }
             else
             {
-                return Promise.Resolved();
+                return PromiseTask.CompletedTask;
             }
         }
 
-        protected override IPromise<INode> OnPreloadAsync(INode content)
-        {
-            var sceneNode = content as SceneNode;
-            var sceneKey = (SceneKey)sceneNode.Key;
-
-            if (sceneKey.IsVirtualScene)
-            {
-                return base.OnPreloadAsync(content);
-            }
-            else
-            {
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, false)
-                                   .Then(() => _controllerModule.LoadAsync(content));
-            }
-        }
-
-        protected override IPromise<INode> OnLoadAsync(INode content)
-        {
-            var sceneNode = content as SceneNode;
-            var sceneKey = (SceneKey)sceneNode.Key;
-
-            if (sceneKey.IsVirtualScene)
-            {
-                return base.OnLoadAsync(content);
-            }
-            else
-            {
-                return _sceneLoader.LoadSceneAsync(sceneNode.Key, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad)
-                                   .Then(()=>_controllerModule.LoadAsync(content));
-            }
-        }
-
-        protected override IPromise<INode> OnUnloadAsync(INode content)
-        {
-            var sceneNode = content as SceneNode;
-            var sceneKey = (SceneKey)sceneNode.Key;
-
-            if (!sceneKey.IsVirtualScene)
-            {
-                _sceneLoader.UnloadScene(sceneKey);
-            }
-
-            return base.OnUnloadAsync(content);
-        }
-
-        protected void CreateUITransitionBarrier()
+        private void CreateUITransitionBarrier()
         {
             _sceneTimer.Schedule((timeData) =>
             {
-                _pageContainer.TimeOut(timeData.elapsedTime);
+                _pageModule.TimeOut(timeData.elapsedTime);
             });
-        }
-
-        protected override void OnDispose()
-        {
-            base.OnDispose();
         }
     }
 }

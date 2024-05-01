@@ -47,19 +47,27 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (childContext.InjectionBinder is CrossContextInjectionBinder childContextBinder)
             {
-                if (childContextBinder.CrossContextBinder == null)
-                {
-                    childContextBinder.CrossContextBinder = new CrossContextInjectionBinder();
-                }
+                AssertUtil.IsNull(childContextBinder.CrossContextBinder, NodeTreeExceptionType.DUPLICATE_CROSS_CONTEXT);
+
+                childContextBinder.CrossContextBinder = new CrossContextInjectionBinder();
                 childContextBinder.CrossContextBinder.CopyFrom(_crossContextInjectionBinder.CrossContextBinder);
             }
         }
 
         private void RemoveCrossContext(ICrossContext childContext)
         {
-
+            if (childContext.InjectionBinder is CrossContextInjectionBinder childContextBinder)
+            {
+                // since cross context is only from unique context;
+                childContextBinder.CrossContextBinder.RemoveAll();
+            }
         }
 
-
+        public override void Dispose()
+        {
+            base.Dispose();
+            _crossContextInjectionBinder.Dispose();
+            _crossContextInjectionBinder = null;
+        }
     }
 }

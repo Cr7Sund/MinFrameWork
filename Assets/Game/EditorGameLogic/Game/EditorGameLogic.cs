@@ -8,10 +8,5 @@ namespace Cr7Sund.Game.GameLogic
         {
             return new EditorGameBuilder();
         }
-
-        protected override void OnInit()
-        {
-            base.OnInit();
-        }
     }
 }

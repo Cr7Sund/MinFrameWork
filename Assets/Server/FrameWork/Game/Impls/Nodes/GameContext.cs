@@ -13,7 +13,6 @@ using Cr7Sund.Server.UI.Api;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.AssetLoader.Impl;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Server.Apis;
 
 namespace Cr7Sund.Server.Impl
 {
@@ -29,18 +28,20 @@ namespace Cr7Sund.Server.Impl
         {
             var assetLoader = AssetLoaderFactory.CreateLoader();
             var logger = InternalLoggerFactory.Create(Channel);
+            var sceneLoader = AssetLoaderFactory.CreateSceneLoader();
 
             // Cross Context
             // --- --- 
             InjectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IEventBus>().To<EventBus>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<ISceneModule>().To<SceneModule>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<PageContainer>().To<PageContainer>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IConfigContainer>().To<ConfigContainer>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IUITransitionAnimationContainer>().To<UITransitionAnimationContainer>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IInstanceContainer>().To<GameInstanceContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.GameInstancePool);
-            InjectionBinder.Bind<IAssetInstanceContainer>().To<UIPanelContainer>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IAssetLoader>().To(assetLoader).AsCrossContext().ToName(ServerBindDefine.GameLoader);
+            InjectionBinder.Bind<IInstancesContainer>().To<GameInstanceContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.GameInstancePool);
+            InjectionBinder.Bind<IUniqueInstanceContainer>().To<UIPanelContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.UIPanelContainer);
+            InjectionBinder.Bind<IAssetLoader>().To(assetLoader).AsCrossContext();
+            InjectionBinder.Bind<ISceneLoader>().To(sceneLoader).AsCrossContext();
+
             // Local In GameNode or GameController
             // --- --- 
             InjectionBinder.Bind<IGameNode>().To(self);
@@ -56,12 +57,12 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Unbind<IFingerGesture>();
             InjectionBinder.Unbind<IEventBus>();
             InjectionBinder.Unbind<ISceneModule>();
-            InjectionBinder.Unbind<PageContainer>();
             InjectionBinder.Unbind<IConfigContainer>();
             InjectionBinder.Unbind<IUITransitionAnimationContainer>();
-            InjectionBinder.Unbind<IInstanceContainer>(ServerBindDefine.GameInstancePool);
-            InjectionBinder.Unbind<IAssetInstanceContainer>();
-            InjectionBinder.Unbind<IAssetLoader>(ServerBindDefine.GameLoader);
+            InjectionBinder.Unbind<IInstancesContainer>(ServerBindDefine.GameInstancePool);
+            InjectionBinder.Unbind<IUniqueInstanceContainer>(ServerBindDefine.UIPanelContainer);
+            InjectionBinder.Unbind<IAssetLoader>();
+            InjectionBinder.Unbind<ISceneLoader>();
 
             InjectionBinder.Unbind<IGameNode>();
             InjectionBinder.Unbind<IPoolBinder>();

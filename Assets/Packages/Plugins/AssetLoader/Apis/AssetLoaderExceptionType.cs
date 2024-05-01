@@ -14,5 +14,9 @@ namespace Cr7Sund.AssetLoader.Api
         /// try to access result when not done
         /// </summary>
         no_done_State,
+        /// <summary>
+        /// try to access result when already recycle
+        /// </summary>
+        recycle_State,
     }
 }

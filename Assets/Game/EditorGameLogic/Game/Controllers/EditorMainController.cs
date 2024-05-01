@@ -1,11 +1,5 @@
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Config;
+using System;
 using Cr7Sund.Game.Scene;
-using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
-using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Apis;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Scene.Apis;
 
@@ -14,54 +8,48 @@ namespace Cr7Sund.Game.GameLogic
     public class EditorMainController : BaseGameController
     {
         [Inject] private ISceneModule _sceneModule;
-        [Inject] private IConfigContainer _configModule;
-        [Inject(ServerBindDefine.GameInstancePool)] IInstanceContainer _gameInstanceContainer;
 
 
-        #region  Login
-
-        protected override void InitGameEnv()
+        #region Login
+        protected override PromiseTask InitGameEnv()
         {
-            InitConfig();
-            InitUI();
             Debug.Debug("EditorMainController Start");
+            return PromiseTask.CompletedTask;
         }
 
-        protected override IPromise HandleHotfix()
+        protected override PromiseTask HandleHotfix()
         {
-            return Promise.Resolved();
+            return PromiseTask.CompletedTask;
         }
 
-        protected override IPromise<INode> RunLoginScene()
+        protected override async PromiseTask RunLoginScene()
         {
-            return _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
-        }
-
-        private void InitConfig()
-        {
-            // PLAN add asset loader res count checking
-            // Or pass the access to the assetLoader directly
-            var gameConfig = _configModule.GetConfig<UIConfig>(ConfigDefines.UIConfig);
-            foreach (var item in gameConfig.ConfigDefines)
+            try
             {
-                _configModule.GetConfig<UnityEngine.Object>(item);
+                await _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
             }
-
+            catch (Exception ex)
+            {
+                Console.Error(ex);
+            }
         }
 
-        private void InitUI()
-        {
-            _gameInstanceContainer.Instantiate(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
-        }
-        
+
+
         #endregion
 
-        #region  Exit Game
-        protected override void GameOver()
+        #region Exit Game
+        protected override async PromiseTask GameOver()
         {
-            base.GameOver();
-
+            await base.GameOver();
+            await _sceneModule.UnloadScene(SceneKeys.EditorSceneKeyOne);
         }
+
         #endregion
+
+        protected override void OnUpdate(int millisecond)
+        {
+            base.OnUpdate(millisecond);
+        }
     }
 }

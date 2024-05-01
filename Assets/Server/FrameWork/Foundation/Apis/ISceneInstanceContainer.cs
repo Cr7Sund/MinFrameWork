@@ -1,6 +1,6 @@
-namespace Cr7Sund.Server.Apis
+namespace Cr7Sund.Server.Api
 {
-    public interface ISceneInstanceContainer : IInstanceContainer
+    public interface ISceneInstanceContainer : IInstancesContainer
     {
         public string SceneName { get; }
 

@@ -119,8 +119,8 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
-            Release();
-            base.Dispose();
+            Name = string.Empty;
+            CurState = PromiseState.Pending;
         }
 
         protected override void ClearHandlers()
@@ -212,8 +212,7 @@ namespace Cr7Sund.Package.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-
-                    throw e;
+                    throw;
                 }
 
                 if (MacroDefine.IsDebug)
@@ -236,8 +235,7 @@ namespace Cr7Sund.Package.Impl
                 catch (Exception e)
                 {
                     Catch(e);
-
-                    throw e;
+                    throw;
                 }
 
                 Resolve();
@@ -299,13 +297,10 @@ namespace Cr7Sund.Package.Impl
             return Then(() => AnyInternal(promises)) as ICommandPromise;
         }
 
-#if UNITY_INCLUDE_TESTS
         public IBaseCommand Test_GetCommand()
         {
             return _command;
         }
-#endif
-
 
         private void SequenceProgress(float progress)
         {
@@ -335,7 +330,7 @@ namespace Cr7Sund.Package.Impl
         {
             IsRetain = false;
 
-            base.Dispose();
+            Dispose();
             _command = null;
             ReleasePoolPromises();
         }
@@ -359,6 +354,10 @@ namespace Cr7Sund.Package.Impl
             for (int i = 0; i < _promisePoolList.Count; i++)
             {
                 IBasePromise item = _promisePoolList[i];
+                if (item is IPoolable poolable)
+                {
+                    poolable.Release();
+                }
                 item.Dispose();
             }
             _promisePoolList.Clear();

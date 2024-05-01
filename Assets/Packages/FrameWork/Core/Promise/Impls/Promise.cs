@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
+using System.Diagnostics;
 namespace Cr7Sund.Package.Impl
 {
     public class Promise<PromisedT> : IPromise<PromisedT>, IPromiseTaskSource<PromisedT>, IPoolNode<Promise<PromisedT>>
@@ -35,12 +36,14 @@ namespace Cr7Sund.Package.Impl
         /// </summary>
         protected PromisedT _resolveValue;
         private Promise<PromisedT> _nextNode;
+        private Action _registerAction;
         #endregion
 
         #region Properties
         public int Id
         {
-            get; set;
+            get;
+            private set;
         }
         public string Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
@@ -75,7 +78,6 @@ namespace Cr7Sund.Package.Impl
         protected Promise(PromiseState initialState) : this()
         {
             CurState = initialState;
-            Id = Promise.NextId();
         }
 
         public static Promise<PromisedT> Create()
@@ -83,6 +85,10 @@ namespace Cr7Sund.Package.Impl
             if (!_taskPool.TryPop(out var promise))
             {
                 promise = new Promise<PromisedT>();
+            }
+            else
+            {
+                promise.Id = Promise.NextId();
             }
             return promise;
         }
@@ -97,18 +103,25 @@ namespace Cr7Sund.Package.Impl
 
         public virtual void Dispose()
         {
-            if (_resolveValue is IDisposable disposable)
-            {
-                disposable?.Dispose();
-            }
-            ClearHandlers();
+            // Don't do that , since we only reference the value 
+            // if (_resolveValue is IDisposable disposable
+            //     && disposable != this)
+            // {
+            //     disposable?.Dispose();
+            // }
+            AssertUtil.IsNull(_resolveHandlers);
+            AssertUtil.IsNull(_rejectHandlers);
+            AssertUtil.IsNull(_progressHandlers);
             Name = string.Empty;
             _resolveValue = default;
             CurState = PromiseState.Pending;
+            _rejectionException = null;
+            _registerAction = null;
+            _resolveValue = default;
             Id = -1;
         }
 
-        public virtual void TryReturn()
+        public void TryReturn()
         {
             Dispose();
             _taskPool.TryPush(this);
@@ -420,6 +433,7 @@ namespace Cr7Sund.Package.Impl
             return resultPromise;
         }
 
+        [DebuggerHidden]
         public IPromise<ConvertedT> Then<ConvertedT>(Func<PromisedT, ConvertedT> transform)
         {
             AssertUtil.NotNull(transform);
@@ -534,7 +548,6 @@ namespace Cr7Sund.Package.Impl
             Catch(_ => promise.Resolve());
             return promise.Then(onComplete);
         }
-
         public IPromise<PromisedT> Progress(Action<float> onProgress)
         {
             if (CurState == PromiseState.Pending && onProgress != null)
@@ -565,6 +578,10 @@ namespace Cr7Sund.Package.Impl
             }
 
             InvokeResolveHandlers(value);
+            // if (CurState != PromiseState.Pending)
+            // {
+            //     throw new MyException(PromiseExceptionType.Valid_RESOLVED_STATE);
+            // }
         }
 
         public async PromiseTask<PromisedT> ResolveAsync(PromisedT value)
@@ -612,19 +629,10 @@ namespace Cr7Sund.Package.Impl
             InvokeRejectHandlers(ex);
         }
 
-        public void Cancel()
+        public virtual void Cancel()
         {
-            _resolveValue = default(PromisedT);
-            CurState = PromiseState.Pending;
-
-            if (Promise.EnablePromiseTracking)
-            {
-                Promise.PendingPromises.Remove(this);
-            }
-
-            ClearHandlers();
+            Reject(new OperationCanceledException());
         }
-
         #endregion
 
         #region ITaskSource
@@ -659,7 +667,6 @@ namespace Cr7Sund.Package.Impl
                 throw tmpEx;
             }
             TryReturn();
-
         }
 
         public PromiseTaskStatus UnsafeGetStatus()
@@ -687,12 +694,33 @@ namespace Cr7Sund.Package.Impl
                 default:
                     var tmpEx = _rejectionException;
                     TryReturn();
-                    throw new Exception(string.Empty, tmpEx);
-                //throw tmpEx;
+                    throw new Exception(tmpEx.Message, tmpEx);
                 case PromiseState.Resolved:
                     var tmpValue = _resolveValue;
                     TryReturn();
-                    return await new PromiseTask<PromisedT>(tmpValue, 0);
+                    return await PromiseTask<PromisedT>.FromResult(tmpValue);
+            }
+        }
+        public PromiseTask<PromisedT> AsNewTask()
+        {
+            if (this.IsRecycled)
+            {
+                throw new System.Exception("cant await recycle task, check the original promise status");
+            }
+            switch (CurState)
+            {
+                case PromiseState.Pending:
+                    var newPromise = Promise<PromisedT>.Create();
+                    AddResolveHandler(newPromise.Resolve, newPromise);
+                    AddRejectHandler(newPromise.RejectWithoutDebug, newPromise);
+                    return new PromiseTask<PromisedT>(newPromise, 0);
+                case PromiseState.Rejected:
+                default:
+                    var tmpEx = _rejectionException;
+                    throw new Exception(tmpEx.Message, tmpEx);
+                case PromiseState.Resolved:
+                    var tmpValue = _resolveValue;
+                    return new PromiseTask<PromisedT>(tmpValue, 0);
             }
         }
         #endregion
@@ -758,16 +786,13 @@ namespace Cr7Sund.Package.Impl
             }
             if (_resolveHandlers == null)
             {
-                if (_resolveHandlers == null)
+                if (!_resolveListPool.TryPop(out var result))
                 {
-                    if (!_resolveListPool.TryPop(out var result))
-                    {
-                        _resolveHandlers = new ListPoolNode<ResolveHandler<PromisedT>>();
-                    }
-                    else
-                    {
-                        _resolveHandlers = result;
-                    }
+                    _resolveHandlers = new ListPoolNode<ResolveHandler<PromisedT>>();
+                }
+                else
+                {
+                    _resolveHandlers = result;
                 }
             }
             _resolveHandlers.Add(new ResolveHandler<PromisedT>
@@ -776,6 +801,7 @@ namespace Cr7Sund.Package.Impl
                 Rejectable = rejectable
             });
         }
+
 
         private void AddProgressHandler(Action<float> onProgress, IRejectable rejectable)
         {
@@ -814,6 +840,7 @@ namespace Cr7Sund.Package.Impl
             }
 
             ClearHandlers();
+            _registerAction?.Invoke();
         }
 
         //Invoke all progress handlers.
@@ -840,8 +867,8 @@ namespace Cr7Sund.Package.Impl
                     InvokeHandler(handler.Callback, handler.Rejectable, value);
                 }
             }
-
             ClearHandlers();
+            _registerAction?.Invoke();
         }
 
         protected virtual void ClearHandlers()
@@ -893,16 +920,10 @@ namespace Cr7Sund.Package.Impl
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
 
-        public static IPromise<PromisedT> Rejected(Enum errorCode, string message)
+        public static IPromise<PromisedT> Rejected(Enum errorCode)
         {
             Exception ex = new MyException(errorCode);
-            Console.Error(ex, message);
-            return _resolvePromise.Rejected<PromisedT>(ex);
-        }
-        public static IPromise<PromisedT> Rejected<T0>(Enum errorCode, string message, T0 property0)
-        {
-            Exception ex = new MyException(errorCode);
-            Console.Error(ex, message, property0);
+            Console.Error(ex);
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
 
@@ -1079,7 +1100,7 @@ namespace Cr7Sund.Package.Impl
         {
             var promisesArray = promises.ToArray();
             AssertUtil.Greater(promisesArray.Length, 0,
-                 PromiseExceptionType.EMPTY_PROMISE_ANY);
+                PromiseExceptionType.EMPTY_PROMISE_ANY);
 
             int remainingCount = promisesArray.Length;
             float[] progress = new float[remainingCount];
@@ -1198,7 +1219,7 @@ namespace Cr7Sund.Package.Impl
             int count = 0;
 
             fns.Aggregate(
-                     Promise<ConvertedT>.RejectedWithoutDebug(new Exception()),
+                    Promise<ConvertedT>.RejectedWithoutDebug(new Exception()),
                     (prevPromise, fn) =>
                     {
                         int itemSequence = count;
@@ -1235,8 +1256,7 @@ namespace Cr7Sund.Package.Impl
         #endregion
         #endregion
 
-        #region  UnityTest
-#if UNITY_INCLUDE_TESTS
+        #region UnityTest
         public PromisedT Test_GetResolveValue()
         {
             return _resolveValue;
@@ -1249,7 +1269,10 @@ namespace Cr7Sund.Package.Impl
         {
             return _resolveListPool.Size;
         }
-#endif
+        public void Test_ClearHandlers()
+        {
+            ClearHandlers();
+        }
         #endregion
     }
 

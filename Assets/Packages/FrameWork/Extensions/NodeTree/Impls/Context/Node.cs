@@ -3,18 +3,23 @@ using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
+using System;
+using System.Threading;
+
 namespace Cr7Sund.NodeTree.Impl
 {
-    public abstract class Node : AsyncLoadable<INode>, INode
+    public abstract class Node : AsyncLoadable, INode
     {
+        public static readonly CancellationTokenSource UnitCancellation = new CancellationTokenSource();
+
+        private readonly IAssetKey _key;
         private List<INode> _childNodes;
-        private Node _parent;
-        private IAssetKey _key;
-        private IPromise<INode> _addPromise;
-        private IPromise<INode> _removePromise;
-
+        private INode _parent;
         protected IContext _context;
-
+        private Promise _addStatus;
+        private Promise _removeStatus;
+        private CancellationTokenSource _addCancellation;
+        private CancellationTokenSource _removeCancellation;
 
         public INode Parent
         {
@@ -22,12 +27,9 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 return _parent;
             }
-        }
-        public IAssetKey Key
-        {
-            get
+            set
             {
-                return _key;
+                _parent = value;
             }
         }
         public NodeState NodeState
@@ -35,41 +37,28 @@ namespace Cr7Sund.NodeTree.Impl
             get;
             private set;
         }
-
-        public IPromise<INode> AddStatus
-        {
-            get
-            {
-                return _addPromise;
-            }
-        }
-
-        public IPromise<INode> RemoveStatus
-        {
-            get
-            {
-                return _removePromise;
-            }
-        }
+        public IAssetKey Key => _key;
+        public IPromise AddStatus { get => _addStatus; set => _addStatus = value as Promise; }
+        public IPromise RemoveStatus { get => _removeStatus; set => _removeStatus = value as Promise; }
         public bool IsInjected
         {
             get;
-            protected set;
+            set;
         }
         public bool IsInit
         {
             get;
-            private set;
+            set;
         }
         public bool IsStarted
         {
             get;
-            private set;
+            set;
         }
         public bool IsActive
         {
             get;
-            private set;
+            set;
         }
 
         protected List<INode> ChildNodes
@@ -86,7 +75,7 @@ namespace Cr7Sund.NodeTree.Impl
                 return ChildNodes.Count;
             }
         }
-        public INode this[int index] => ChildNodes[index];
+        public INode this[int index] => GetChild(index);
         public IContext Context => _context;
 
 
@@ -96,21 +85,19 @@ namespace Cr7Sund.NodeTree.Impl
         }
 
         #region LifeCycle
-
-        public IPromise<INode> PreLoadChild(INode child)
+        public async PromiseTask PreLoadChild(INode child)
         {
-            if (child.LoadState != LoadState.Default)
-            {
-                return Promise<INode>.Rejected(NodeTreeExceptionType.default_state,
-                    $"Expected Default state , but it's {LoadState}", child.LoadState);
-            }
+            child.StartPreload();
 
-            var childNode = child as Node;
-            childNode.StartPreload();
+            if (!child.IsInjected)
+            {
+                _context.AddContext(child.Context);
+                child.Inject();
+            }
 
             // since we don't add child first
             // on loaded will not be call 
-            return childNode.PreLoadAsync(child);
+            await child.PreLoadAsync();
         }
 
         public void Init()
@@ -124,7 +111,7 @@ namespace Cr7Sund.NodeTree.Impl
             OnInit();
         }
 
-        public void Start()
+        public async PromiseTask Start()
         {
             if (IsStarted)
             {
@@ -138,28 +125,33 @@ namespace Cr7Sund.NodeTree.Impl
             stack.Push(root);
             while (stack.Count > 0)
             {
-                var top = stack.Pop() as Node;
+                var top = stack.Pop();
                 resultQueue.Push(top);
-                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
+                for (int i = top.ChildCount - 1; i >= 0; i--)
                 {
-                    if (!top.ChildNodes[i].IsStarted)
+                    if (!top.GetChild(i).IsStarted)
                     {
-                        stack.Push(top.ChildNodes[i]);
+                        stack.Push(top.GetChild(i));
                     }
                 }
             }
 
-            while (resultQueue.Count > 0)
+            try
             {
-                var first = resultQueue.Pop() as Node;
-                first.OnStart();
-                first.IsStarted = true;
+                while (resultQueue.Count > 0)
+                {
+                    var first = resultQueue.Pop();
+                    first.IsStarted = true;
+                    await first.OnStart();
+                }
             }
-
-            ReleaseCollection(stack, resultQueue);
+            finally
+            {
+                ReleaseCollection(stack, resultQueue);
+            }
         }
 
-        public void Enable()
+        public async PromiseTask Enable()
         {
             if (IsActive || !IsStarted)
             {
@@ -173,28 +165,33 @@ namespace Cr7Sund.NodeTree.Impl
             stack.Push(root);
             while (stack.Count > 0)
             {
-                var top = stack.Pop() as Node;
+                var top = stack.Pop();
                 resultQueue.Push(top);
-                for (int i = 0; i < top.ChildNodes.Count; i++)
+                for (int i = 0; i < top.ChildCount; i++)
                 {
-                    if (!top.ChildNodes[i].IsActive && top.ChildNodes[i].IsStarted)
+                    if (!top.GetChild(i).IsActive && top.GetChild(i).IsStarted)
                     {
-                        stack.Push(top.ChildNodes[i]);
+                        stack.Push(top.GetChild(i));
                     }
                 }
             }
-            var list = new List<int>();
 
-            while (resultQueue.Count > 0)
+            try
             {
-                var first = resultQueue.Pop() as Node;
-                first.OnEnable();
-                first.IsActive = true;
+                while (resultQueue.Count > 0)
+                {
+                    var first = resultQueue.Pop();
+                    first.IsActive = true;
+                    await first.OnEnable();
+                }
             }
-            ReleaseCollection(stack, resultQueue);
+            finally
+            {
+                ReleaseCollection(stack, resultQueue);
+            }
         }
 
-        public void Disable()
+        public async PromiseTask Disable()
         {
             if (!IsStarted || !IsActive)
             {
@@ -208,26 +205,34 @@ namespace Cr7Sund.NodeTree.Impl
             stack.Push(root);
             while (stack.Count > 0)
             {
-                var top = stack.Pop() as Node;
+                var top = stack.Pop();
                 resultQueue.Push(top);
-                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
+                for (int i = top.ChildCount - 1; i >= 0; i--)
                 {
-                    if (top.ChildNodes[i].IsActive)
+                    if (top.GetChild(i).IsActive)
                     {
-                        stack.Push(top.ChildNodes[i]);
+                        stack.Push(top.GetChild(i));
                     }
                 }
             }
 
-            while (resultQueue.Count > 0)
+            try
             {
-                var first = resultQueue.Pop() as Node;
-                first.OnDisable();
-                first.IsActive = false;
+                while (resultQueue.Count > 0)
+                {
+                    var first = resultQueue.Pop();
+
+                    await first.OnDisable();
+                    first.IsActive = false;
+                }
             }
-            ReleaseCollection(stack, resultQueue);
+            finally
+            {
+                ReleaseCollection(stack, resultQueue);
+            }
         }
-        public void Stop()
+
+        public async PromiseTask Stop()
         {
             if (!IsStarted)
             {
@@ -242,74 +247,149 @@ namespace Cr7Sund.NodeTree.Impl
             stack.Push(root);
             while (stack.Count > 0)
             {
-                var top = stack.Pop() as Node;
+                var top = stack.Pop();
                 resultQueue.Push(top);
-                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
+                for (int i = top.ChildCount - 1; i >= 0; i--)
                 {
-                    if (top.ChildNodes[i].IsStarted)
+                    if (top.GetChild(i).IsStarted)
                     {
-                        stack.Push(top.ChildNodes[i]);
+                        stack.Push(top.GetChild(i));
                     }
                 }
             }
 
-            while (resultQueue.Count > 0)
+            try
             {
-                var first = resultQueue.Pop() as Node;
-                first.OnStop();
-                first.IsStarted = false;
-            }
-            ReleaseCollection(stack, resultQueue);
-        }
-        public void Dispose()
-        {
-            if (!IsInit) return;
-            if (IsActive)
-            {
-                SetActive(false);
-            }
-            if (IsStarted)
-            {
-                Stop();
-            }
+                while (resultQueue.Count > 0)
+                {
+                    var first = resultQueue.Pop();
 
-            if (LoadState == LoadState.Loading || LoadState == LoadState.Loaded)
-                UnloadAsync(this).Then(DisposeRecursively);
-            else
-                DisposeRecursively(this);
+                    await first.OnStop();
+                    first.IsStarted = false;
+                }
+            }
+            finally
+            {
+                ReleaseCollection(stack, resultQueue);
+            }
         }
 
-        protected virtual void OnInit() { }
-        protected virtual void OnStart() { }
-        protected virtual void OnEnable() { }
-        protected virtual void OnDisable() { }
-        protected virtual void OnStop() { }
-        protected virtual void OnDispose() { }
-
-
-        protected void SetActive(bool active)
+        public async PromiseTask SetActive(bool active)
         {
             if (IsActive == active)
                 return;
 
-            var controller = this as ILifeTime;
-
             if (active)
             {
-                controller.Enable();
+                //delay create cancellation
+                await Enable();
             }
             else
             {
-                controller.Disable();
+                await Disable();
             }
         }
+
+        public void CancelCurTask()
+        {
+            switch (NodeState)
+            {
+                case NodeState.Adding:
+                case NodeState.Preloading:
+                    CancelLoad();
+                    return;
+                case NodeState.Unloading:
+                case NodeState.Removing:
+                    CancelUnload();
+                    return;
+                case NodeState.Preloaded:
+                case NodeState.Ready:
+                case NodeState.Removed:
+                case NodeState.Unloaded:
+                case NodeState.Default:
+                default:
+                    return;
+            }
+        }
+
+        public void CancelLoad()
+        {
+            if (LoadState != LoadState.Loading) return;
+
+
+            if (_addCancellation == null)
+            {
+                _addCancellation = GetNewCancellation();
+                _addCancellation.Cancel();
+
+                RegisterAddTask(_addCancellation.Token);
+            }
+        }
+
+        public void CancelUnload()
+        {
+            if (LoadState != LoadState.Unloading) return;
+
+            if (_removeCancellation == null)
+            {
+                _removeCancellation = GetNewCancellation();
+                RegisterRemoveTask(_removeCancellation.Token);
+            }
+            _removeCancellation.Cancel();
+        }
+        public virtual void RegisterAddTask(CancellationToken cancellationToken)
+        {
+        }
+
+        public virtual void RegisterRemoveTask(CancellationToken cancellationToken)
+        {
+        }
+
+        public void Destroy()
+        {
+            IsInit = false;
+            _childNodes = null;
+            _parent = null;
+
+            if (_addCancellation != null)
+            {
+                ReturnCancellation(_addCancellation);
+                _addCancellation = null;
+            }
+            if (_removeCancellation != null)
+            {
+                ReturnCancellation(_removeCancellation);
+                _removeCancellation = null;
+            }
+
+            Deject();
+            _context = null;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            AssertUtil.IsTrue(_childNodes == null || _childNodes.Count <= 0);
+            AssertUtil.IsFalse(IsInit, NodeTreeExceptionType.dispose_not_int);
+            AssertUtil.IsNull(_addStatus);
+            AssertUtil.IsNull(_removeStatus);
+            OnDispose();
+        }
+
+        protected virtual void OnInit() { }
+        public virtual PromiseTask OnStart() { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnEnable() { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnDisable() { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnStop() { return PromiseTask.CompletedTask; }
+        protected virtual void OnDispose() { }
+
 
         private void ReleaseCollection(Stack<INode> stack, Stack<INode> resultQueue)
         {
             if (!IsInjected) return;
 
             var contextInjectionBinder = _context.InjectionBinder;
-            
             var poolBinder = contextInjectionBinder.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<INode>>();
             var queuePool = poolBinder.GetOrCreate<Stack<INode>>();
@@ -320,6 +400,7 @@ namespace Cr7Sund.NodeTree.Impl
             stackPool.ReturnInstance(stack);
             queuePool.ReturnInstance(resultQueue);
         }
+
         private void GetCollection(out Stack<INode> stack, out Stack<INode> resultQueue)
         {
             var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
@@ -331,263 +412,250 @@ namespace Cr7Sund.NodeTree.Impl
             stack.Clear();
             resultQueue.Clear();
         }
-        private void DisposeRecursively(INode root)
-        {
-            GetCollection(out var stack, out var resultQueue);
-
-            // N-ary Tree Postorder Traversal
-            stack.Push(root);
-            while (stack.Count > 0)
-            {
-                var top = stack.Pop() as Node;
-                resultQueue.Push(top);
-                for (int i = top.ChildNodes.Count - 1; i >= 0; i--)
-                {
-                    if (top.ChildNodes[i].IsInit)
-                    {
-                        stack.Push(top.ChildNodes[i]);
-                    }
-                }
-            }
-
-            while (resultQueue.Count > 0)
-            {
-                var first = resultQueue.Pop() as Node;
-                first.RealDispose();
-            }
-
-            ReleaseCollection(stack, resultQueue);
-        }
-        private void RealDispose()
-        {
-            OnDispose();
-
-            //IoC Dispose
-            Deject();
-            _context.Dispose();
-
-            //NodeTree Dispose
-            _parent?.ChildNodes.Remove(this);
-            ChildNodes.Clear();
-            _parent = null;
-            IsInit = false;
-        }
         #endregion
 
         #region INode
-        public IPromise<INode> AddChildAsync(INode child)
+        public async PromiseTask AddChildAsync(INode child, bool overwrite = false)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_ADD);
+            AssertUtil.IsFalse(child.AddStatus != null && _addStatus.IsRecycled, NodeTreeExceptionType.ADD_RECYCLED);
 
-            if (child.LoadState == LoadState.Loading)
-            {
-                return child.LoadStatus;
-            }
+            // the below situations will be better handle outside 
             if (child.LoadState == LoadState.Unloading)
             {
-                return Promise<INode>.Rejected(NodeTreeExceptionType.INVALID_NODESTATE,
+                throw new MyException(
                     "can not add node when unloading");
             }
             if (child.LoadState == LoadState.Fail)
             {
-                return Promise<INode>.Rejected(NodeTreeExceptionType.INVALID_NODESTATE,
+                throw new MyException(
                     "can not add node when already fail");
             }
-
-            var childNode = child as Node;
-            if (ChildNodes.Contains(childNode))
+            if (child.NodeState == NodeState.Adding)
             {
-                return child.LoadStatus;
+                AssertUtil.NotNull(child.AddStatus);
+                if (overwrite)
+                {
+                    child.AddStatus.Cancel();
+                }
+                await child.AddStatus.AsNewTask();
+                return;
             }
 
-            childNode.SetAdding();
+            AssertUtil.IsNull(child.AddStatus);
+            child.SetAdding();
+            child.AddStatus = Promise.Create();
 
-            _context.AddContext(childNode._context);
-            if (!child.IsInjected)
+            try
             {
-                child.Inject();
-            }
-            if (!child.IsInit)
-            {
+                if (!child.IsInjected)
+                {
+                    _context.AddContext(child.Context);
+                    child.Inject();
+                }
+
                 child.Init();
-            }
+                if (child.LoadState == LoadState.Default
+                                    || child.LoadState == LoadState.Unloaded)
+                {
+                    try
+                    {
+                        await child.LoadAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        // remove addStatus before unload all
+                        if (child.AddStatus.CurState == PromiseState.Pending)
+                            child.AddStatus.RejectWithoutDebug(ex);
+                        child.AddStatus.TryReturn();
+                        child.AddStatus = null;
 
-            if (child.LoadState == LoadState.Default
-                || child.LoadState == LoadState.Unloaded)
-            {
-                childNode._addPromise = child.LoadAsync(child)
-                                        .Then(AddChildInternal, ex =>
-                                        {
-                                            _context.RemoveContext(childNode._context);
-                                            childNode.Dispose();
-                                            childNode.EndUnLoad(true);
-                                            return Promise<INode>.RejectedWithoutDebug(ex);
-                                        });
-            }
-            else
-            {
-                childNode._addPromise = AddChildInternal(childNode);
-            }
+                        //UnloadChildAsync
+                        await RemoveChildAsyncInternal(child, true, false);
+                        throw;
+                    }
+                }
 
-            return childNode._addPromise;
-        }
-        public IPromise<INode> UnloadChildAsync(INode child)
-        {
-            return RemoveChildAsyncInternal(child, true);
-        }
-        public IPromise<INode> RemoveChildAsync(INode child)
-        {
-            return RemoveChildAsyncInternal(child, false);
-        }
-        public IPromise<INode> GetCurStatus()
-        {
-            switch (NodeState)
-            {
-                case NodeState.Preloading:
-                    return LoadStatus;
-                case NodeState.Adding:
-                    return AddStatus;
-                case NodeState.Preloaded:
-                case NodeState.Ready:
-                    return LoadStatus;
-                case NodeState.Unloading:
-                case NodeState.Removing:
-                case NodeState.Removed:
-                    return RemoveStatus;
-                case NodeState.Unloaded:
-                    return UnloadStatus;
-                case NodeState.Default:
-                default:
-                    return Promise<INode>.Resolved(this);
+                try
+                {
+                    await AddChildInternal(child);
+                }
+                catch
+                {
+                    await RemoveChildAsyncInternal(child, false, false);
+                    throw;
+                }
             }
+            catch (Exception ex) // in case of another unexpected exceptions
+            {
+                if (child.AddStatus != null
+                        && child.AddStatus.CurState == PromiseState.Pending)
+                    child.AddStatus.RejectWithoutDebug(ex);
+                throw;
+            }
+            finally
+            {
+                child.SetReady();
+                if (child.AddStatus != null)
+                {
+                    if (child.AddStatus.CurState == PromiseState.Pending)
+                    {
+                        child.AddStatus.Resolve();
+                    }
+                    child.AddStatus.TryReturn();
+                    child.AddStatus = null;
+                }
+            }
+        }
+
+        public async PromiseTask UnloadChildAsync(INode child, bool overwrite = false)
+        {
+            await RemoveChildAsyncInternal(child, true, overwrite);
+        }
+
+        public async PromiseTask RemoveChildAsync(INode child, bool overwrite = false)
+        {
+            await RemoveChildAsyncInternal(child, false, overwrite);
         }
 
         protected virtual void OnAddChild(INode child) { }
         protected virtual void OnRemoveChild(INode child) { }
 
-        private IPromise<INode> RemoveChildAsyncInternal(INode child, bool shouldUnload)
+        private async PromiseTask RemoveChildAsyncInternal(INode child, bool shouldUnload, bool overwrite)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
-            if (child.LoadState != LoadState.Loaded)
+
+            if (child.NodeState == NodeState.Removing
+                || child.NodeState == NodeState.Unloading)
             {
-                return Promise<INode>.Rejected(NodeTreeExceptionType.INVALID_NODESTATE,
-                     "can not remove node at : {LoadState} State", child.LoadState);
-            }
-            AssertUtil.IsTrue(ChildNodes.Contains(child), NodeTreeExceptionType.REMOVE_NO_EXISTED);
-
-            var childNode = child as Node;
-            childNode.StartUnload(shouldUnload);
-
-            if (childNode.IsActive)
-            {
-                childNode.SetActive(false);
-            }
-
-            _context.RemoveContext(childNode._context);
-
-            if (shouldUnload)
-            {
-                if (child.IsStarted)
+                if (overwrite)
                 {
-                    child.Stop();
+                    child.RemoveStatus.Cancel();
                 }
-                childNode._removePromise = child.UnloadAsync(child)
-                    .ContinueWith(() =>
-                    {
-                        if (childNode.IsInjected)
-                        {
-                            childNode.Deject();
-                        }
-                        RemoveChildInternal(childNode, shouldUnload);
-                        return Promise<INode>.Resolved(childNode);
-                    }); // if unload fail, we still remove from node tree
-            }
-            else
-            {
-                childNode._removePromise = RemoveChildInternal(childNode, shouldUnload);
+                await child.RemoveStatus.AsNewTask();
+                return;
             }
 
-            return childNode._removePromise;
+            child.StartUnload(shouldUnload);
+
+            AssertUtil.IsNull(child.RemoveStatus);
+            child.RemoveStatus = Promise.Create();
+
+            try
+            {
+                if (shouldUnload)
+                {
+                    await child.SetActive(false);
+                    await child.Stop();
+                    await child.UnloadAsync();
+                    UnloadChildInternal(child);
+                }
+                else
+                {
+                    await child.SetActive(false);
+                    RemoveChildInternal(child);
+                }
+            }
+            catch (Exception e) // in case of another unexpected exceptions
+            {
+                if (child.RemoveStatus != null
+                    && child.RemoveStatus.CurState == PromiseState.Pending) //in case of unload
+                {
+                    child.RemoveStatus.RejectWithoutDebug(e);
+                }
+                throw;
+            }
+            finally
+            {
+                child.EndUnLoad(shouldUnload);
+            }
+
+            if (child.RemoveStatus != null) //in case of unload
+            {
+                child.RemoveStatus.Resolve();
+            }
         }
-        private IPromise<INode> RemoveChildInternal(INode child, bool shouldUnload)
+
+        private void RemoveChildInternal(INode child)
         {
             AssertUtil.NotNull(child);
-            AssertUtil.IsTrue(ChildNodes.Contains(child));
 
-            var childNode = child as Node;
             ChildNodes.Remove(child);
-            childNode._parent = null;
-            OnRemoveChild(child);
+            child.Parent = null;
 
-            childNode.EndUnLoad(shouldUnload);
-            return Promise<INode>.Resolved(child);
+            child.RemoveStatus.TryReturn();
+            child.RemoveStatus = null;
+            OnRemoveChild(child);
         }
-        private IPromise<INode> AddChildInternal(INode child)
+
+        private void UnloadChildInternal(INode child)
+        {
+            RemoveChildInternal(child);
+
+            _context.RemoveContext(child.Context);
+            child.Destroy();
+        }
+
+        private async PromiseTask AddChildInternal(INode child)
         {
             AssertUtil.NotNull(child);
             AssertUtil.IsTrue(child.LoadState == LoadState.Loaded);
             AssertUtil.IsFalse(ChildNodes.Contains(child));
 
+            child.Parent = this;
+            var childParent = child.Parent;
             ChildNodes.Add(child);
+
             OnAddChild(child);
 
-            var childNode = child as Node;
-            childNode._parent = this;
-
-            var childParent = childNode._parent;
             if (childParent.IsStarted && !child.IsStarted)
             {
-                child.Start();
+                await child.Start();
             }
-
             if (childParent.IsActive && !child.IsActive)
             {
-                childNode.SetActive(true);
+                await child.SetActive(true);
             }
-
-            childNode.SetReady();
-            return Promise<INode>.Resolved(child);
         }
         #endregion
 
         #region Load
-        public bool IsLoading() => LoadState == LoadState.Loading;
-        private void SetAdding() =>
+        public void SetAdding() =>
             NodeState = NodeState.Adding;
-        private void StartPreload() => NodeState = NodeState.Preloading;
-        private void EndPreload() => NodeState = NodeState.Preloaded;
-        private void SetReady() => NodeState = NodeState.Ready;
-        private void StartUnload(bool shouldUnload) =>
+
+        public void StartPreload() => NodeState = NodeState.Preloading;
+
+        public void EndPreload() => NodeState = NodeState.Preloaded;
+
+        public void SetReady() => NodeState = NodeState.Ready;
+
+        public void StartUnload(bool shouldUnload) =>
             NodeState = shouldUnload ? NodeState.Removing :
                 NodeState.Unloading;
-        private void EndUnLoad(bool unload) =>
-            NodeState = unload ? NodeState.Unloaded :
-                NodeState.Removed;
+        public void EndUnLoad(bool unload) => NodeState = unload ? NodeState.Unloaded :
+            NodeState.Removed;
 
-        protected override IPromise<INode> OnLoadAsync(INode content)
-        {
-            return Promise<INode>.Resolved(content);
-        }
 
-        protected override IPromise<INode> OnPreloadAsync(INode content)
-        {
-            return Promise<INode>.Resolved(content);
-        }
-        protected override IPromise<INode> OnUnloadAsync(INode content)
-        {
-            return Promise<INode>.Resolved(content);
-        }
-        protected sealed override void OnLoaded()
-        {
-
-        }
-        protected sealed override void OnUnloaded()
-        {
-
-        }
         protected override void OnPreLoaded()
         {
             EndPreload();
+        }
+
+        private CancellationTokenSource GetNewCancellation()
+        {
+            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+            var cancellationPool = poolBinder.GetOrCreate<CancellationTokenSource>();
+            return cancellationPool.GetInstance();
+        }
+
+        private void ReturnCancellation(CancellationTokenSource cancellationToken)
+        {
+            if (cancellationToken != null)
+            {
+                var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+                var cancellationPool = poolBinder.GetOrCreate<CancellationTokenSource>();
+                cancellationPool.ReturnInstance(cancellationToken);
+            }
         }
         #endregion
 
@@ -604,8 +672,8 @@ namespace Cr7Sund.NodeTree.Impl
             IsInjected = true;
 
             _context.AddComponents(this);
-
             _context.InjectionBinder.Injector.Inject(this);
+
             OnInject();
         }
 
@@ -617,7 +685,6 @@ namespace Cr7Sund.NodeTree.Impl
 
             OnDeject();
             _context.InjectionBinder.Injector.Deject(this);
-
             _context.RemoveComponents();
         }
         /// <summary>
@@ -636,12 +703,20 @@ namespace Cr7Sund.NodeTree.Impl
         {
 
         }
-
         #endregion
 
         public override string ToString()
         {
+            if (Key == null) return string.Empty;
             return Key.ToString();
+        }
+
+        public INode GetChild(int index)
+        {
+            AssertUtil.Greater(index, -1);
+            AssertUtil.Greater(ChildNodes.Count, 0);
+
+            return ChildNodes[index];
         }
     }
 }

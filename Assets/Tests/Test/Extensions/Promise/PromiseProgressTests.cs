@@ -159,7 +159,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void exception_is_thrown_for_progress_after_reject()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promise = new Promise<int>();
             promise.RejectWithoutDebug(new Exception());
 
@@ -170,7 +170,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void first_progress_is_averaged()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var promiseA = new Promise<int>();
             var promiseB = new Promise<int>();
             var promiseC = new Promise<int>();

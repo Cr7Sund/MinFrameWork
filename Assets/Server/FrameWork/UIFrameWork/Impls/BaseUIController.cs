@@ -1,232 +1,244 @@
-﻿using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
-using Cr7Sund.NodeTree.Impl;
+﻿using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.Impl;
-
+using System;
 
 namespace Cr7Sund.Server.UI.Impl
 {
      public abstract class BaseUIController : BaseController, IUIController
      {
-          [Inject(ServerBindDefine.UILogger)] protected IInternalLog Debug;
+          [Inject(ServerBindDefine.UILogger)] protected IInternalLog _log;
+          protected override IInternalLog Debug => _log;
 
-          public virtual IPromise Prepare(object intent = null)
+          public virtual PromiseTask Prepare(object intent = null)
           {
-               if (MacroDefine.NoCatchMode)
+               try
                {
                     return OnPrepare(intent);
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnPrepare(intent);
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise WillPushEnter()
+          public PromiseTask WillPushEnter()
           {
-               if (MacroDefine.NoCatchMode)
+               try
                {
                     return OnWillPushEnter();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnWillPushEnter();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise DidPushEnter()
+          public PromiseTask DidPushEnter()
           {
-               if (MacroDefine.NoCatchMode)
+               try
                {
                     return OnDidPushEnter();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnDidPushEnter();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise WillPushExit()
+          public PromiseTask WillPushExit()
           {
-               if (MacroDefine.NoCatchMode)
+               try
                {
                     return OnWillPushExit();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnWillPushExit();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise DidPushExit()
+          public PromiseTask DidPushExit()
           {
-               if (MacroDefine.NoCatchMode)
+
+               try
                {
                     return OnDidPushExit();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnDidPushExit();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise WillPopEnter()
+          public PromiseTask WillPopEnter()
           {
-               if (MacroDefine.NoCatchMode)
+
+               try
                {
                     return OnWillPopEnter();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnWillPopEnter();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise DidPopEnter()
+          public PromiseTask DidPopEnter()
           {
-               if (MacroDefine.NoCatchMode)
+
+               try
                {
                     return OnDidPopEnter();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnDidPopEnter();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise WillPopExit()
+          public PromiseTask WillPopExit()
           {
-               if (MacroDefine.NoCatchMode)
+
+               try
                {
                     return OnWillPopExit();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnWillPopExit();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
-          public IPromise DidPopExit()
+          public PromiseTask DidPopExit()
           {
-               if (MacroDefine.NoCatchMode)
+               try
                {
                     return OnDidPopExit();
                }
-               else
+               catch (Exception e)
                {
-                    try
+                    if (e is OperationCanceledException)
                     {
-                         return OnDidPopExit();
+                         throw;
                     }
-                    catch (System.Exception e)
+                    else
                     {
-                         return Promise.Rejected(e);
+                         Debug.Error(e);
+                         return PromiseTask.CompletedTask;
                     }
                }
           }
 
           #region overload methods
 
-          protected virtual IPromise OnPrepare(object intent)
+          protected virtual PromiseTask OnPrepare(object intent)
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPushEnter()
+          protected virtual PromiseTask OnWillPushEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPushEnter()
+          protected virtual PromiseTask OnDidPushEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPushExit()
+          protected virtual PromiseTask OnWillPushExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPushExit()
+          protected virtual PromiseTask OnDidPushExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPopEnter()
+          protected virtual PromiseTask OnWillPopEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPopEnter()
+          protected virtual PromiseTask OnDidPopEnter()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnWillPopExit()
+          protected virtual PromiseTask OnWillPopExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
-          protected virtual IPromise OnDidPopExit()
+          protected virtual PromiseTask OnDidPopExit()
           {
-               return Promise.Resolved();
+               return PromiseTask.CompletedTask;
           }
 
           #endregion

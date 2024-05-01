@@ -1,76 +1,118 @@
+using System;
 using System.Collections.Generic;
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.AssetLoader.Impl;
+using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class BaseUniqueInstanceContainer : BaseAssetContainer, IAssetInstanceContainer
+    public abstract class BaseUniqueInstanceContainer : BaseAssetContainer, IUniqueInstanceContainer
     {
-        private Dictionary<string, IAssetPromise> _instancePromises = new();
-
-
-        public IAssetPromise CreateInstance(IAssetKey assetKey)
+        private class InstanceWrapper : IDisposable, IPoolNode<InstanceWrapper>
         {
-            if (_instancePromises.ContainsKey(assetKey.Key))
+            private static ReusablePool<InstanceWrapper> _pool = new ReusablePool<InstanceWrapper>();
+
+            private GameObject _instance;
+            private int _count;
+            private InstanceWrapper _nextNode;
+
+
+            public ref InstanceWrapper NextNode => ref _nextNode;
+            public bool IsRecycled { get; set; }
+
+
+            public static InstanceWrapper Create(GameObject gameObject)
             {
-                return _instancePromises[assetKey.Key];
+                if (!_pool.TryPop(out var wrapper))
+                {
+                    wrapper = new InstanceWrapper();
+                }
+
+                wrapper._instance = gameObject;
+                wrapper._count++;
+                return wrapper;
             }
 
-            var instancePromise = new AssetPromise();
-            _instancePromises.Add(assetKey.Key, instancePromise);
-
-            LoadAsset(assetKey).Then((asset) =>
+            public T GetResult<T>() where T : Object
             {
-                var instance = InstantiateAsset(asset);
-                instancePromise.Resolve(instance);
-            });
+                T result = _instance as T;
+                _count++;
+                return result;
+            }
 
+            public bool TryDestroy()
+            {
+                _count--;
+                if (_count == 0)
+                {
+                    GameObject.Destroy(_instance);
+                    Dispose();
+                    _pool.TryPush(this);
+                }
+                return _count == 0;
+            }
 
-            return instancePromise;
+            public void Dispose()
+            {
+                AssertUtil.AreEqual(_count, 0);
+                _instance = default;
+            }
         }
 
-        public IAssetPromise CreateInstanceAsync(IAssetKey assetKey)
+        private Dictionary<IAssetKey, InstanceWrapper> _instancePromises = new();
+
+
+        public async PromiseTask<T> CreateInstance<T>(IAssetKey assetKey) where T : Object
         {
-            if (_instancePromises.ContainsKey(assetKey.Key))
+            if (_instancePromises.ContainsKey(assetKey))
             {
-                return _instancePromises[assetKey.Key];
+                return _instancePromises[assetKey].GetResult<T>();
             }
 
-            var instancePromise = new AssetPromise();
-            _instancePromises.Add(assetKey.Key, instancePromise);
-
-            LoadAssetAsync(assetKey).Then((asset) =>
-            {
-                var instance = InstantiateAsset(asset);
-                instancePromise.Resolve(instance);
-            });
-
-
-            return instancePromise;
+            var asset = await LoadAsset<T>(assetKey);
+            var instance = InstantiateAsset(asset);
+            _instancePromises.Add(assetKey, InstanceWrapper.Create(instance as GameObject));
+            return instance;
         }
 
-
-        public override void Unload(IAssetKey key)
+        public async PromiseTask<T> CreateInstanceAsync<T>(IAssetKey assetKey) where T : Object
         {
-            if (_instancePromises.ContainsKey(key.Key))
+            if (_instancePromises.ContainsKey(assetKey))
             {
-                _instancePromises[key.Key].Dispose();
-                _instancePromises.Remove(key.Key);
+                return _instancePromises[assetKey].GetResult<T>();
             }
-            base.Unload(key);
+
+            var asset = await LoadAssetAsync<T>(assetKey);
+            var instance = InstantiateAsset(asset);
+            _instancePromises.Add(assetKey, InstanceWrapper.Create(instance as GameObject));
+            return instance;
+        }
+
+        public override void Unload(IAssetKey assetKey)
+        {
+            if (_instancePromises.ContainsKey(assetKey))
+            {
+                _instancePromises[assetKey].TryDestroy();
+                base.Unload(assetKey);
+            }
+        }
+
+        public override void UnloadAll()
+        {
+            foreach (var item in _instancePromises)
+            {
+                item.Value.TryDestroy();
+                base.Unload(item.Key);
+            }
         }
 
         public override void Dispose()
         {
             foreach (var item in _instancePromises)
             {
-                item.Value.Dispose(); // assetPromise will handle GameObject Destroy
+                item.Value.Dispose();
             }
-
-            base.Dispose();
             _instancePromises.Clear();
         }
 
@@ -81,6 +123,5 @@ namespace Cr7Sund.Server.Impl
 
             return instance;
         }
-
     }
 }

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.Server.UI.Api;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Cr7Sund.ServerTest.UI
@@ -11,25 +14,33 @@ namespace Cr7Sund.ServerTest.UI
     public partial class TestPageContainer
     {
 
-      //[Test]
-        public void PreparePage_Pending()
+        [Test]
+        public async Task PreparePage_Pending()
         {
-            SampleThreeUIController.promise = new Promise();
+            SampleThreeUIController.promise = Promise.Create();
 
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
+            var task = _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
             Assert.AreEqual(0, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
+
+            SampleThreeUIController.promise.Resolve();
+            await task;
         }
 
-      //[Test]
-        public void PreparePage_Rejected()
+        [Test]
+        public async Task PreparePage_Rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
-            SampleThreeUIController.Rejected = true;
-
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            SampleThreePanel.Rejected = true;
+            // AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
+            try
+            {
+                await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            }
+            catch (Exception ex)
+            {
+                Assert.AreEqual(ex.Message, "hello exception");
+            }
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleThreeUIController.StartValue);
@@ -38,69 +49,132 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
         }
 
-      //[Test]
-        public void PreparePage_Resolved()
+        [Test]
+        public async Task PreparePage_Resolved()
         {
-            SampleThreeUIController.promise = new Promise();
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
+            SampleThreeUIController.promise = Promise.Create(); ;
             SampleThreeUIController.promise.Resolve();
+
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
 
-      //[Test]
-        public void PreparePages_TransitionException()
+#pragma warning disable CS4014
+        [Test]
+        public async Task PreparePages_TransitionException()
         {
-            SampleThreeUIController.promise = new Promise();
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-            TestDelegate testDelegate = () => _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            // PLAN handle open events 
+            SampleThreeUIController.promise = Promise.Create();
+            MyException ex = null;
 
-            var ex = Assert.Throws<MyException>(testDelegate);
+            if (Application.isPlaying)
+            {
+                _gameRoot.PromiseTimer.WaitFor(2, async () =>
+                        {
+                            try
+                            {
+                                await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError(e);
+                            }
+                        });
+                _gameRoot.PromiseTimer.WaitFor(50, async () =>
+                {
+                    try
+                    {
+                        await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+                    }
+                    catch (MyException e)
+                    {
+                        ex = e;
+                    }
+                });
+                await _gameRoot.PromiseTimer.WaitFor(100).AsTask();
+                // we need to resolve or reject the push 
+                SampleThreeUIController.promise.Resolve();
+            }
+            else
+            {
+               await Task.Delay(2).ContinueWith(async (t) =>
+                            {
+                                try
+                                {
+                                    await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.LogError(e);
+                                }
+                            });
+
+               await Task.Delay(5).ContinueWith(async (t) =>
+                                  {
+                                      try
+                                      {
+                                          await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+                                      }
+                                      catch (MyException e)
+                                      {
+                                          ex = e;
+                                      }
+                                  });
+
+
+                await Task.Delay(10).ContinueWith((t) =>
+                {
+                    SampleThreeUIController.promise.Resolve();
+                });
+
+            }
+
+
             Assert.AreEqual(UIExceptionType.OPEN_IN_TRANSITION, ex.Type);
         }
 
+#pragma warning restore CS4014
 
-      //[Test]
-        public void Anim_fail_same()
+        [Test]
+        public async Task Anim_fail_same()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
+            AssertHelper.Expect(LogType.Warning, new Regex("the asset is already on the nodeTree"));
             SampleFivePanel.Rejected = true;
 
-            _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleFiveUIController.EnableCount);
         }
-
-      //[Test]
-        public void Anim_fail_switch()
+        [Test]
+        public async Task Anim_fail_switch()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
 
             SampleFivePanel.Rejected = true;
 
-            _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
             Assert.AreEqual(0, SampleFiveUIController.EnableCount);
         }
 
-      //[Test]
-        public void Anim_fail_back()
+        [Test]
+        public async Task Anim_fail_back()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.Expect(LogType.Error, new Regex("hello exception"));
 
             SampleFivePanel.Rejected = true;
 
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
-            _pageContainer.BackPage();
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFiveUI);
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);

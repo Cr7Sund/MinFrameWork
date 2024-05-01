@@ -1,7 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Cr7Sund.CompilerServices
@@ -12,11 +12,12 @@ namespace Cr7Sund.CompilerServices
         ExceptionDispatchInfo exception;
         bool calledGet = false;
 
+        [DebuggerHidden]
         public ExceptionHolder(ExceptionDispatchInfo exception)
         {
             this.exception = exception;
         }
-
+        [DebuggerHidden]
         public ExceptionDispatchInfo GetException()
         {
             if (!calledGet)
@@ -58,7 +59,7 @@ namespace Cr7Sund.CompilerServices
         public short Version => version;
 
 
-
+        [DebuggerHidden]
         public void Reset()
         {
             ReportUnhandledError();
@@ -72,7 +73,7 @@ namespace Cr7Sund.CompilerServices
             hasUnhandledError = false;
             continuation = null;
         }
-
+        [DebuggerHidden]
         void ReportUnhandledError()
         {
             if (hasUnhandledError)
@@ -97,7 +98,7 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Completes with a successful result.</summary>
         /// <param name="result">The result.</param>
-
+        [DebuggerHidden]
         public bool TrySetResult()
         {
             if (Interlocked.Increment(ref completedCount) == 1)
@@ -114,21 +115,21 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Completes with an error.</summary>
         /// <param name="ex">The exception.</param>
-
+        [DebuggerHidden]
         public bool TrySetException(Exception ex)
         {
             if (Interlocked.Increment(ref completedCount) == 1)
             {
                 // setup result
                 hasUnhandledError = true;
-                if (ex is OperationCanceledException)
+                if (ex is OperationCanceledException oce)
                 {
                     this.error = ex;
                 }
                 else
                 {
 #if DEBUG
-                    this.error = new ExceptionHolder            (ExceptionDispatchInfo.Capture(ex));
+                    this.error = new ExceptionHolder(ExceptionDispatchInfo.Capture(ex));
 #else
                     this.error = ex;
 #endif
@@ -150,7 +151,7 @@ namespace Cr7Sund.CompilerServices
             {
                 // setup result
                 hasUnhandledError = true;
-                error = new OperationCanceledException(cancellationToken);
+                error = new OperationCanceledException();
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
@@ -167,6 +168,7 @@ namespace Cr7Sund.CompilerServices
         /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
             ValidateToken(token);
@@ -192,6 +194,7 @@ namespace Cr7Sund.CompilerServices
         // [StackTraceHidden]
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public void GetResult(short token)
         {
             ValidateToken(token);
@@ -268,6 +271,7 @@ namespace Cr7Sund.CompilerServices
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         private void ValidateToken(short token)
         {
             if (token != version)
@@ -330,7 +334,7 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Completes with a successful result.</summary>
         /// <param name="result">The result.</param>
-
+        [DebuggerHidden]
         public bool TrySetResult(TResult result)
         {
             if (Interlocked.Increment(ref completedCount) == 1)
@@ -364,7 +368,7 @@ namespace Cr7Sund.CompilerServices
                 else
                 {
 #if DEBUG
-                    this.error = new ExceptionHolder            (ExceptionDispatchInfo.Capture(ex));
+                    this.error = new ExceptionHolder(ExceptionDispatchInfo.Capture(ex));
 #else
                     this.error = ex;
 #endif
@@ -386,7 +390,7 @@ namespace Cr7Sund.CompilerServices
             {
                 // setup result
                 hasUnhandledError = true;
-                error = new OperationCanceledException(cancellationToken);
+                error = new OperationCanceledException();
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {

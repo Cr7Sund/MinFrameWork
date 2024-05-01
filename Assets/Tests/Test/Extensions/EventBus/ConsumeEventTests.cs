@@ -1,5 +1,4 @@
-﻿using Cr7Sund.PackageTest.EventBus;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Cr7Sund.PackageTest.EventBus
 {

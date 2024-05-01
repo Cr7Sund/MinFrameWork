@@ -1,52 +1,39 @@
-using Cr7Sund.Game.UI;
+using System;
 using Cr7Sund.Server.Scene.Impl;
-using Cr7Sund.Server.UI.Impl;
+using Cr7Sund.Server.UI.Api;
 
 namespace Cr7Sund.Game.Scene
 {
     public class EditorSceneOneController : BaseSceneController
     {
-        [Inject] private PageContainer _pageContainer;
-        public static int StartValue;
-        public static int EnableCount;
+        [Inject] private IPageModule _pageContainer;
 
         public static void Init()
         {
-            StartValue = 0;
-            EnableCount = 0;
         }
 
-        protected override void OnStart()
+        protected async override PromiseTask OnStart()
         {
-            base.OnStart();
+            await base.OnStart();
             Debug.Debug("Load scene one");
-
-            StartValue++;
         }
 
-        protected override void OnEnable()
+        protected async override PromiseTask OnEnable()
         {
-            base.OnEnable();
+            await _pageContainer.PushPage(UI.EditorUIKeys.SampleOneUI);
             Debug.Debug("Enable scene one");
-
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected async override PromiseTask OnDisable()
         {
-            base.OnDisable();
+            await base.OnDisable();
             Debug.Debug("Disable scene one");
-
-            EnableCount--;
         }
 
-        protected override void OnStop()
+        protected async override PromiseTask OnStop()
         {
-            base.OnStop();
+            await base.OnStop();
             Debug.Debug("Stop scene one");
-
-            StartValue--;
         }
     }
 }

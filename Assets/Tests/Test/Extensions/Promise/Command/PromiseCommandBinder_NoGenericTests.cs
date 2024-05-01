@@ -195,8 +195,8 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void return_instance_to_pool_by_rejected()
         {
-            LogAssert.ignoreFailingMessages = true;
-            // LogAssert.Expect(UnityEngine.LogType.Error, new Regex("System.NotImplementedException"));
+            AssertHelper.IgnoreFailingMessages();
+            // AssertHelper.Expect(UnityEngine.LogType.Error, new Regex("System.NotImplementedException"));
 
             var binding = _commandPromiseBinder.Bind(SomeEnum.ONE).AsOnce()
                 .Then<SimpleCommandOne>()

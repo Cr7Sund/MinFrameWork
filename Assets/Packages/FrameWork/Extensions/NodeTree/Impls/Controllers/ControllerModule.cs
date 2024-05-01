@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Package.Impl;
+using System.Threading;
 
 namespace Cr7Sund.NodeTree.Impl
 {
-    public class ControllerModule : AsyncLoadable<INode>, IControllerModule
+    public class ControllerModule : AsyncLoadable, IControllerModule
     {
         protected IContext _context;
-        protected List<IController> _lsControllers;
-        protected List<IUpdatable> _lsUpdates;
-        protected List<ILateUpdate> _lsLateUpdates;
+        protected List<IController> _childControllers;
+        protected List<IUpdatable> _childUpdates;
+        protected List<ILateUpdate> _childLateUpdates;
 
         public bool IsInjected
         {
@@ -23,36 +22,38 @@ namespace Cr7Sund.NodeTree.Impl
         public bool IsActive
         {
             get;
-            private set;
+            set;
         }
         public bool IsStarted
         {
             get;
-            private set;
+            set;
         }
         public bool IsInit
         {
             get;
             private set;
         }
+        public CancellationTokenSource AddCancellation { get; }
+        public CancellationTokenSource RemoveCancellation { get; }
 
 
         public ControllerModule()
         {
-            _lsControllers = new List<IController>();
-            _lsLateUpdates = new List<ILateUpdate>();
-            _lsUpdates = new List<IUpdatable>();
+            _childControllers = new List<IController>();
+            _childLateUpdates = new List<ILateUpdate>();
+            _childUpdates = new List<IUpdatable>();
         }
 
 
         #region IControllerModule Implementation
-        public bool AddController<T>() where T : IController
+        public async PromiseTask AddController<T>() where T : IController
         {
             CheckBusiness<T>();
-            return AddController(Activator.CreateInstance<T>());
+            await AddController(Activator.CreateInstance<T>());
         }
 
-        public bool AddController(IController controller)
+        public async PromiseTask AddController(IController controller)
         {
             AssertUtil.NotNull(controller, NodeTreeExceptionType.EMPTY_CONTROLLER_ADD);
             CheckController(controller);
@@ -61,72 +62,80 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 _context.InjectionBinder.Injector.Inject(controller);
 
-                if (controller is ILoadAsync load)
+                if (controller is AsyncLoadable load)
                 {
-                    load.LoadAsync().Then(() =>
+                    try
                     {
-                        controller.Start();
-                        controller.Enable();
-                        AddChild(controller);
-                        _lsControllers.Add(controller);
-                    });
-                    return true;
+                        await load.LoadAsync();
+                    }
+                    catch
+                    {
+                        await load.UnloadAsync();
+                        throw;
+                    }
                 }
-                else
+
+                try
                 {
-                    controller.Start();
-                    controller.Enable();
+                    await controller.Start();
                 }
+                catch
+                {
+                    await controller.Stop();
+                    throw;
+                }
+
+                try
+                {
+                    await controller.Enable();
+                }
+                catch
+                {
+                    await controller.Disable();
+                    throw;
+                }
+
             }
 
-            _lsControllers.Add(controller);
+            _childControllers.Add(controller);
             AddChild(controller);
-
-            return true;
         }
 
-        public bool RemoveController<T>() where T : IController
+        public async PromiseTask RemoveController<T>() where T : IController
         {
-            for (int i = 0, length = _lsControllers.Count; i < length; i++)
+            for (int i = 0, length = _childControllers.Count; i < length; i++)
             {
-                var controller = _lsControllers[i];
+                var controller = _childControllers[i];
                 if (controller.GetType() == typeof(T))
                 {
-                    return RemoveController(controller);
+                    await RemoveController(controller);
                 }
             }
-
-            return false;
         }
 
-        public bool RemoveController(IController controller)
+        public async PromiseTask RemoveController(IController controller)
         {
             AssertUtil.NotNull(controller, NodeTreeExceptionType.EMPTY_CONTROLLER_REMOVE);
             CheckController(controller);
 
             if (controller.IsActive)
             {
-                RemoveChild(controller);
+                await controller.Disable();
+            }
 
-                controller.Disable();
+            if (controller.IsStarted)
+            {
+                await controller.Stop();
+            }
 
-                if (controller is ILoadAsync load)
-                {
-                    load.UnloadAsync().Then(() =>
-                    {
-                        if (controller.IsStarted)
-                            controller.Stop();
-                    });
-                }
-                else
-                {
-                    if (controller.IsStarted)
-                        controller.Stop();
-                }
+            if (controller is AsyncLoadable load)
+            {
+                await load.UnloadAsync();
             }
 
             _context.InjectionBinder.Injector.Deject(controller);
-            return _lsControllers.Remove(controller);
+            RemoveChild(controller);
+            _childControllers.Remove(controller);
         }
 
         [Conditional(MacroDefine.UNITY_EDITOR)]
@@ -144,9 +153,9 @@ namespace Cr7Sund.NodeTree.Impl
 
         private void CheckType(Type type)
         {
-            for (int i = 0; i < _lsControllers.Count; i++)
+            for (int i = 0; i < _childControllers.Count; i++)
             {
-                if (_lsControllers[i].GetType() == type)
+                if (_childControllers[i].GetType() == type)
                 {
                     throw new MyException($"Duplicate controller have been added : {type}");
                 }
@@ -161,14 +170,14 @@ namespace Cr7Sund.NodeTree.Impl
             }
             if (controller is IUpdatable update)
             {
-                if (!_lsUpdates.Contains(update))
-                    _lsUpdates.Add(update);
+                if (!_childUpdates.Contains(update))
+                    _childUpdates.Add(update);
             }
 
             if (controller is ILateUpdate lateUpdate)
             {
-                if (!_lsLateUpdates.Contains(lateUpdate))
-                    _lsLateUpdates.Add(lateUpdate);
+                if (!_childLateUpdates.Contains(lateUpdate))
+                    _childLateUpdates.Add(lateUpdate);
             }
         }
 
@@ -180,45 +189,48 @@ namespace Cr7Sund.NodeTree.Impl
             }
             if (controller is IUpdatable update)
             {
-                if (_lsUpdates.Contains(update))
-                    _lsUpdates.Remove(update);
+                if (_childUpdates.Contains(update))
+                    _childUpdates.Remove(update);
             }
 
             if (controller is ILateUpdate lateUpdate)
             {
-                if (_lsLateUpdates.Contains(lateUpdate))
-                    _lsLateUpdates.Remove(lateUpdate);
+                if (_childLateUpdates.Contains(lateUpdate))
+                    _childLateUpdates.Remove(lateUpdate);
             }
         }
 
         #endregion
 
         #region LifeCycles
-        public void Start()
+        public async PromiseTask Start()
         {
             if (IsStarted) return;
 
             IsStarted = true;
-            for (int i = 0; i < _lsControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
-                _lsControllers[i].Start();
+                await _childControllers[i].Start();
             }
         }
-        public void Enable()
+        public async PromiseTask Enable()
         {
             if (!IsStarted || IsActive) return;
 
             IsActive = true;
-            for (int i = 0; i < _lsControllers.Count; i++)
+            // PLAN Aggregate exceptions 
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
-                _lsControllers[i].Enable();
+                await _childControllers[i].Enable();
             }
         }
         public void Update(int millisecond)
         {
-            for (int i = 0, length = _lsUpdates.Count; i < length; i++)
+            for (int i = 0, length = _childUpdates.Count; i < length; i++)
             {
-                var update = _lsUpdates[i];
+                var update = _childUpdates[i];
                 if (update is IController controller &&
                      controller.IsStarted && controller.IsActive)
                 {
@@ -228,9 +240,9 @@ namespace Cr7Sund.NodeTree.Impl
         }
         public void LateUpdate(int millisecond)
         {
-            for (int i = 0, length = _lsLateUpdates.Count; i < length; i++)
+            for (int i = 0, length = _childLateUpdates.Count; i < length; i++)
             {
-                var update = _lsLateUpdates[i];
+                var update = _childLateUpdates[i];
 
                 if (update is IController controller &&
                    controller.IsStarted && controller.IsActive)
@@ -239,27 +251,44 @@ namespace Cr7Sund.NodeTree.Impl
                 }
             }
         }
-        public void Stop()
+        public async PromiseTask Stop()
         {
             if (!IsStarted) return;
 
-            for (int i = 0; i < _lsControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
-                _lsControllers[i].Stop();
+                await _childControllers[i].Stop();
             }
             IsStarted = false;
         }
-        public void Disable()
+        public async PromiseTask Disable()
         {
             if (!IsStarted || !IsActive) return;
 
-            for (int i = 0; i < _lsControllers.Count; i++)
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
             {
-                _lsControllers[i].Disable();
+                await _childControllers[i].Disable();
             }
             IsActive = false;
         }
 
+        public void RegisterAddTask(CancellationToken cancellationToken)
+        {
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
+            {
+                _childControllers[i].RegisterAddTask(cancellationToken);
+            }
+        }
+        public void RegisterRemoveTask(CancellationToken cancellationToken)
+        {
+            for (int i = 0; i < _childControllers.Count; i++)
+            {
+                _childControllers[i].RegisterAddTask(cancellationToken);
+            }
+        }
 
         #endregion
 
@@ -271,7 +300,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = true;
 
-            foreach (var ctrl in _lsControllers)
+            foreach (var ctrl in _childControllers)
             {
                 _context.InjectionBinder.Injector.Inject(ctrl);
             }
@@ -284,7 +313,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = false;
 
-            foreach (var ctrl in _lsControllers)
+            foreach (var ctrl in _childControllers)
             {
                 _context.InjectionBinder.Injector.Deject(ctrl);
             }
@@ -294,21 +323,8 @@ namespace Cr7Sund.NodeTree.Impl
         {
             _context = context;
         }
+
+
         #endregion
-
-        protected override IPromise<INode> OnPreloadAsync(INode content)
-        {
-            return Promise<INode>.Resolved(content);
-        }
-
-        protected override IPromise<INode> OnLoadAsync(INode content)
-        {
-            return Promise<INode>.Resolved(content);
-        }
-
-        protected override IPromise<INode> OnUnloadAsync(INode content)
-        {
-            return Promise<INode>.Resolved(content);
-        }
     }
 }

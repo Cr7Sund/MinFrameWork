@@ -1,17 +1,20 @@
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
-using UnityEngine;
 using Cr7Sund.Server.Api;
+using Cr7Sund.FrameWork.Util;
+using Object = UnityEngine.Object;
+using System.Threading;
+using Cr7Sund.Server.Impl;
+using System;
 
 namespace Cr7Sund.Server.UI.Impl
 {
-    public class UINode : UpdateNode, IUINode
+    public abstract class UINode : UpdateNode, IUINode
     {
-        [Inject] private IAssetInstanceContainer _uiContainer;
+        [Inject(ServerBindDefine.UIPanelContainer)] private IUniqueInstanceContainer _uiContainer;
+        [Inject] private IPanelModule _panelModule;
+        [Inject(ServerBindDefine.UILogger)] protected IInternalLog _log;
 
         public IUIView View { get; private set; }
         public string PageId { get; set; }
@@ -19,7 +22,7 @@ namespace Cr7Sund.Server.UI.Impl
         public IUIController Controller { get; private set; }
 
 
-        private UINode(IAssetKey assetKey) : base(assetKey)
+        protected UINode(IAssetKey assetKey) : base(assetKey)
         {
 
         }
@@ -30,10 +33,9 @@ namespace Cr7Sund.Server.UI.Impl
             PageId = System.Guid.NewGuid().ToString();
         }
 
-        public IPromise BeforeExit(bool push, IUINode enterPage)
-        {
-            IsTransitioning = true;
 
+        public PromiseTask BeforeExit(bool push, IUINode enterPage)
+        {
             View.BeforeExit();
 
             if (push)
@@ -42,10 +44,8 @@ namespace Cr7Sund.Server.UI.Impl
                 return Controller.WillPopExit();
         }
 
-        public IPromise BeforeEnter(bool push, IUINode enterPage)
+        public PromiseTask BeforeEnter(bool push, IUINode enterPage)
         {
-            IsTransitioning = true;
-
             View.BeforeEnter();
 
             if (push)
@@ -54,109 +54,95 @@ namespace Cr7Sund.Server.UI.Impl
                 return Controller.WillPushEnter();
         }
 
-        public IPromise Enter(bool push, IUINode partnerView, bool playAnimation)
+        public async PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation)
         {
-            Controller.Enable();
-
-            return View.EnterRoutine(push, partnerView, playAnimation);
+            if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
+            {
+                View.Enable(Parent);
+            }
+            await Controller.Enable();
+            await View.EnterRoutine(push, partnerView, playAnimation);
         }
 
-        public IPromise Exit(bool push, IUINode partnerView, bool playAnimation)
+        public async PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation)
         {
-            Controller.Disable();
-
-            return View.ExitRoutine(push, partnerView, playAnimation);
+            View.Disable();
+            await Controller.Disable();
+            await View.ExitRoutine(push, partnerView, playAnimation);
         }
 
-        public IPromise AfterEnter(bool push, IUINode exitPage)
+        public async PromiseTask AfterEnter(bool push, IUINode exitPage)
         {
-            IsTransitioning = false;
             View.AfterEnter();
 
             if (push)
-                return Controller.DidPushEnter();
+                await Controller.DidPushEnter();
             else
-                return Controller.DidPopEnter();
+                await Controller.DidPopEnter();
+
         }
 
-        public IPromise AfterExit(bool push, IUINode enterPage)
+        public async PromiseTask AfterExit(bool push, IUINode enterPage)
         {
-            IsTransitioning = false;
             View.AfterExit();
 
             if (push)
-                return Controller.DidPushExit();
+                await Controller.DidPushExit();
             else
-                return Controller.DidPopExit();
+                await Controller.DidPopExit();
         }
 
-        protected override IPromise<INode> OnPreloadAsync(INode content)
+        protected override async PromiseTask OnPreloadAsync()
         {
-            var uiKey = content.Key as UIKey;
-            IPromise preparePromise = null;
-            IPromise loadPromise = null;
-
-            preparePromise = Controller.Prepare(uiKey.Intent);
-            if (Application.isPlaying)
+            var uiKey = Key as UIKey;
+            var prepareTask = Controller.Prepare(uiKey.Intent);
+            if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                var assetPromise = _uiContainer.LoadAssetAsync(content.Key);
-                loadPromise = assetPromise.Then(_ => { });
+                await _uiContainer.LoadAssetAsync<Object>(Key);
             }
-            else
-            {
-                loadPromise = base.OnPreloadAsync(content)
-                                  .Then(_ => { });
-            }
-
-            return Promise.All(preparePromise, loadPromise)
-                    .Then(() => Promise<INode>.Resolved(content));
+            await prepareTask;
         }
 
-        protected override IPromise<INode> OnLoadAsync(INode content)
+        protected override async PromiseTask OnLoadAsync()
         {
-            var uiNode = content as UINode;
-            var uiKey = uiNode.Key as UIKey;
+            AssertUtil.IsFalse(LoadState == LoadState.Loaded); // handle different situation outside
 
-            if (_uiContainer.ContainsAsset(Key))
+            var uiKey = Key as UIKey;
+            var prepareTask = Controller.Prepare(uiKey.Intent);
+
+            if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync(uiKey)
-                                                   : _uiContainer.CreateInstance(uiKey);
-                return assetPromise.Then(asset =>
-                {
-                    View.OnLoad((GameObject)asset);
-                    return content;
-                });
+                var instance = await _uiContainer.CreateInstanceAsync<Object>(Key);
+                // Attention : the below chain load task is called from addressables
+                await View.OnLoad(instance as UnityEngine.GameObject);
+                await prepareTask;
             }
             else
             {
-                IPromise loadPromise = null;
-                IPromise preparePromise = Controller.Prepare(uiKey.Intent);
-
-                if (Application.isPlaying)
-                {
-                    var assetPromise = uiKey.LoadAsync ? _uiContainer.CreateInstanceAsync(uiKey)
-                                                       : _uiContainer.CreateInstance(uiKey);
-                    loadPromise = assetPromise.Then(asset => View.OnLoad((GameObject)asset));
-                }
-                else
-                {
-                    loadPromise = base.OnLoadAsync(content)
-                                     .Then(_ => { });
-                }
-
-                return Promise.All(preparePromise, loadPromise)
-                    .Then(() => Promise<INode>.Resolved(content));
+                await View.OnLoad(null);
+                await prepareTask;
             }
+
         }
 
-        protected override IPromise<INode> OnUnloadAsync(INode content)
+        protected override PromiseTask OnUnloadAsync()
         {
             _uiContainer.Unload(Key);
-            return base.OnUnloadAsync(content);
+            return base.OnUnloadAsync();
         }
 
-        #region  LifeCycle
+        public override void RegisterAddTask(CancellationToken cancellationToken)
+        {
+            _uiContainer.RegisterCancelLoad(Key, cancellationToken);
+            Controller.RegisterAddTask(cancellationToken);
+        }
 
+        public override void RegisterRemoveTask(CancellationToken cancellationToken)
+        {
+            Controller.RegisterRemoveTask(cancellationToken);
+        }
+
+        #region LifeCycle
         protected override void OnInject()
         {
             base.OnInject();
@@ -178,22 +164,57 @@ namespace Cr7Sund.Server.UI.Impl
             // that has not instantiated
         }
 
-        protected override void OnStart()
+        public override async PromiseTask OnStart()
         {
-            // only call once
-            View.Start(Parent);
-            Controller.Start();
+            try
+            {
+                if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
+                {
+                    View.Start(Parent);
+                }
+                await Controller.Start();
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
         }
 
-        protected override void OnEnable()
+        public override async PromiseTask OnEnable()
         {
-            // call after transition
-            // and always be called after Start
-            // VM.Enable();
+            UIKey enterUIKey = Key as UIKey;
+            bool isPush = enterUIKey.IsPush;
+            IUINode exitPage = enterUIKey.exitPage;
 
-            if (Application.isPlaying)
+            try
             {
-                View.Enable(Parent);
+                IsTransitioning = true;
+
+                await BeforeEnter(isPush, exitPage);
+                await Enter(isPush, exitPage, enterUIKey.PlayAnimation);
+                await AfterEnter(push: isPush, exitPage);
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
+            finally
+            {
+                IsTransitioning = false;
             }
         }
 
@@ -203,25 +224,61 @@ namespace Cr7Sund.Server.UI.Impl
             View.Update(milliseconds);
         }
 
-        protected override void OnDisable()
+        public override async PromiseTask OnDisable()
         {
+            UIKey exitUIkey = Key as UIKey;
+            bool isPush = exitUIkey.IsPush;
+            IUINode enterPage = exitUIkey.exitPage;
 
-            View.Disable();
+            try
+            {
+                IsTransitioning = true;
+
+                await BeforeExit(isPush, enterPage);
+                await Exit(isPush, enterPage, exitUIkey.PlayAnimation);
+                await AfterExit(isPush, enterPage);
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
+            finally
+            {
+                IsTransitioning = false;
+            }
         }
 
-        protected override void OnStop()
+        public override async PromiseTask OnStop()
         {
-            // only call once
-            Controller.Stop();
-            View.Stop();
+            try
+            {
+                View.Stop();
+                await Controller.Stop();
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException)
+                {
+                    throw;
+                }
+                else
+                {
+                    _log.Error(ex);
+                }
+            }
         }
 
         protected override void OnDispose()
         {
-            // duplicate
             View.Dispose();
         }
-
         #endregion
     }
 }

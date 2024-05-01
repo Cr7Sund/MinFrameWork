@@ -7,8 +7,8 @@ namespace Cr7Sund.Server.UI.Api
 {
     public interface IUITransitionAnimationContainer : IDisposable
     {
-        IPromise<IUITransitionAnimationBehaviour> GetAnimationBehaviour(UITransitionAnimation animation);
-        IPromise<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter);
+        PromiseTask<IUITransitionAnimationBehaviour> GetAnimationBehaviour(UITransitionAnimation animation);
+        PromiseTask<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter);
         void UnloadAnimation(UITransitionAnimation animation);
     }
 }

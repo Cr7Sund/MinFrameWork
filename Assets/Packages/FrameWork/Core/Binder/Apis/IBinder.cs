@@ -80,5 +80,10 @@ namespace Cr7Sund.Package.Api
         /// </summary>
         /// <param name="fromBinder"></param>
         void CopyFrom(IBinder fromBinder);
+        /// <summary>
+        /// remove all  bindings 
+        /// not unbind since the binding maybe come from other binders
+        /// </summary>
+        void RemoveAll();
     }
 }

@@ -14,6 +14,8 @@ namespace Cr7Sund.Collection.Generic
         internal int _size;
 
         public int Count => _size;
+        private int _version;
+
 
         public UnsafeUnOrderList()
         {
@@ -36,6 +38,42 @@ namespace Cr7Sund.Collection.Generic
             }
 
             _items[_size++] = value;
+            _version++;
+        }
+
+        public void Remove(T value)
+        {
+            int matchIndex = Array.IndexOf(_items, value);
+            if (matchIndex == -1) throw new InvalidOperationException("not value found");
+            _items[matchIndex] = _items[_size - 1];
+            _items[--_size] = default;
+            _version++;
+        }
+
+        public bool Contains(T value)
+        {
+            return Array.IndexOf(_items, value) != -1;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Count == 0 ? SZGenericArrayEnumerator<T>.Empty :
+                       new Enumerator(this);
+        }
+
+        public void Clear()
+        {
+            if (_size > 0)
+            {
+                Array.Clear(_items, 0, _size); // Clear the elements so that the gc can reclaim the references.
+            }
+            _size = 0;
+            _version++;
         }
 
         private void AddWithResize()
@@ -59,47 +97,21 @@ namespace Cr7Sund.Collection.Generic
             return newCapacity;
         }
 
-        public void Remove(T value)
-        {
-            int matchIndex = Array.IndexOf(_items, value);
-            _items[matchIndex] = _items[_size - 1];
-            _items[--_size] = default;
-        }
-
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return Count == 0 ? SZGenericArrayEnumerator<T>.Empty :
-                       new Enumerator(this);
-        }
-
-        public void Clear()
-        {
-            if (_size > 0)
-            {
-                Array.Clear(_items, 0, _size); // Clear the elements so that the gc can reclaim the references.
-            }
-            _size = 0;
-        }
-
         public struct Enumerator : IEnumerator<T>, IEnumerator
         {
-            internal static IEnumerator<T> s_emptyEnumerator;
+            // internal static IEnumerator<T> s_emptyEnumerator;
 
             private readonly UnsafeUnOrderList<T> _list;
             private int _index;
             private T _current;
+            private int _version;
 
             internal Enumerator(UnsafeUnOrderList<T> list)
             {
                 _list = list;
                 _index = 0;
                 _current = default;
+                _version = list._version;
             }
 
             public void Dispose()
@@ -108,6 +120,11 @@ namespace Cr7Sund.Collection.Generic
 
             public bool MoveNext()
             {
+                if (_version != _list._version)
+                {
+                    throw new InvalidOperationException("can not modified when enumerating");
+                }
+                
                 UnsafeUnOrderList<T> localList = _list;
 
                 if ((uint)_index < (uint)localList._size)
@@ -136,6 +153,7 @@ namespace Cr7Sund.Collection.Generic
                     {
                         throw new InvalidOperationException("InvalidOperation_EnumFailed");
                     }
+
                     return Current;
                 }
             }

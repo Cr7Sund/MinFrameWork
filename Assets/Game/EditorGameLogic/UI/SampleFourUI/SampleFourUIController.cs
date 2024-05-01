@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Server.UI.Impl;
 using UnityEngine;
 
@@ -16,36 +17,32 @@ namespace Cr7Sund.Game.UI
         }
 
 
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
             Debug.Debug("Load ui four");
-
+            await base.OnStart();
             StartValue++;
 
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
             Debug.Debug("Enable ui four");
-
+            await base.OnEnable();
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
             Debug.Debug("Disable ui four");
-
+            await base.OnDisable();
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop ui four");
-
+            await base.OnStop();
             StartValue--;
         }
     }

@@ -1,10 +1,7 @@
+using System;
 using System.Collections.Generic;
-using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
+using System.Threading;
 using Cr7Sund.FrameWork.Util;
-using Cr7Sund.NodeTree.Api;
-using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
@@ -12,50 +9,52 @@ using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.Server.Impl
 {
-    public class AddressableSceneLoader : ISceneLoader
+
+    internal class AddressableSceneLoader : ISceneLoader
     {
-        protected Dictionary<IAssetKey, AsyncOperationHandle<SceneInstance>> _assetKeyToHandles
-            = new Dictionary<IAssetKey, AsyncOperationHandle<SceneInstance>>();
+        protected Dictionary<IAssetKey, AsynChainOperations> _assetKeyToHandles
+            = new();
 
-
-        public IPromise LoadSceneAsync(IAssetKey key,
-            LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true)
+        public async PromiseTask LoadSceneAsync(IAssetKey key,
+            LoadSceneMode loadMode, bool activateOnLoad)
         {
-            if (_assetKeyToHandles.ContainsKey(key))
+            if (_assetKeyToHandles.TryGetValue(key, out var setter))
             {
-                // currently dont support duplicate scene load
-                throw new MyException($"already load scene {key}");
+                await setter.Chain();
+                return;
             }
+            var sceneKey = key.Key;
 
-            var resultPromise = new Promise();
-            var asyncOperation = Addressables.LoadSceneAsync(key.Key, loadMode, activateOnLoad);
-            _assetKeyToHandles.Add(key, asyncOperation);
-            asyncOperation.Completed += handler =>
-            {
-                if (handler.Status == AsyncOperationStatus.Succeeded)
-                {
-                    resultPromise.Resolve();
-                }
-                else if (handler.Status == AsyncOperationStatus.Failed)
-                {
-                    resultPromise.Reject(handler.OperationException);
-                }
-            };
+            AsyncOperationHandle handler = Addressables.LoadSceneAsync(sceneKey, loadMode, activateOnLoad);
+            setter = AsynChainOperations.Start(ref handler);
+            _assetKeyToHandles.Add(key, setter);
 
-            return resultPromise;
+            // await addressableHandle.Task;
+            await setter.Chain();
         }
+
         public void UnloadScene(IAssetKey key)
         {
             if (!_assetKeyToHandles.ContainsKey(key))
             {
-                // currently dont support duplicate scene load
                 throw new MyException($"not loaded scene {key}");
             }
 
-            Addressables.UnloadSceneAsync(_assetKeyToHandles[key]);
+            _assetKeyToHandles[key].Unload(OnUnloadHandle);
             _assetKeyToHandles.Remove(key);
         }
-        public IPromise ActiveSceneAsync(IAssetKey key)
+
+        private static void OnUnloadHandle(AsynChainOperations asynChain)
+        {
+            if (SceneManager.sceneCount > 1)
+            {
+                //Unloading the last loaded scene is not supported
+                Addressables.UnloadSceneAsync(asynChain.Handler);
+            }
+            asynChain.TryReturn();
+        }
+
+        public async PromiseTask ActiveSceneAsync(IAssetKey key)
         {
             if (!_assetKeyToHandles.ContainsKey(key))
             {
@@ -63,35 +62,40 @@ namespace Cr7Sund.Server.Impl
                 throw new MyException($"not loaded scene {key}");
             }
 
-            var resultPromise = new Promise();
-
-            if (!_assetKeyToHandles[key].IsDone)
+            if (_assetKeyToHandles[key].Handler.IsValid() && !_assetKeyToHandles[key].Handler.IsDone)
             {
-                _assetKeyToHandles[key].Completed += _ => ActiveAsync(resultPromise, key);
-            }
-            else
-            {
-                ActiveAsync(resultPromise, key);
+                await _assetKeyToHandles[key].Chain();
+                return;
             }
 
-            return resultPromise;
+            ActiveAsync(key);
         }
-        private void ActiveAsync(Promise resultPromise, IAssetKey key)
+
+        public void RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation)
         {
-            if (!_assetKeyToHandles[key].IsValid()) return;
+            throw new NotImplementedException();
+            var key = assetKey.Key;
 
-            _assetKeyToHandles[key].Result.ActivateAsync().completed += handler =>
+            if (!_assetKeyToHandles.ContainsKey(assetKey))
             {
-                if (handler.isDone)
-                {
-                    resultPromise.Resolve();
-                }
-                else
-                {
-                    // exception happen in Active scene
-                    resultPromise.Reject(new MyException(""));
-                }
-            };
+                throw new MyException(
+                    $"There is no asset that has been requested for release (Asset:{key}).");
+            }
+
+            var handler = _assetKeyToHandles[assetKey];
+            cancellation.Register(() =>
+            {
+                // UnloadScene(assetKey);
+                handler.Cancel(cancellation);
+            });
         }
+
+        private void ActiveAsync(IAssetKey key)
+        {
+            var sceneInstance = _assetKeyToHandles[key].GetResult<SceneInstance>();
+            sceneInstance.ActivateAsync();
+        }
+
+
     }
 }

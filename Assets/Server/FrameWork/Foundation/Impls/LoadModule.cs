@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Cr7Sund.Package.EventBus.Api;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.Performance;
 using Cr7Sund.Server.Api;
 using Cr7Sund.Touch.Api;
+using Cr7Sund.Package.Impl;
+using Cr7Sund.Package.Api;
 namespace Cr7Sund.Server.Impl
 {
     public abstract class LoadModule : ILoadModule
@@ -14,19 +14,12 @@ namespace Cr7Sund.Server.Impl
         protected INode _focusNode;
         [Inject]
         private IFingerGesture _fingerGesture;
-
         [Inject]
         protected IEventBus _eventBus;
         [Inject]
         protected IPoolBinder _poolBinder;
         protected Dictionary<IAssetKey, INode> _treeNodes;
 
-
-        internal bool IsInTransition
-        {
-            get;
-            private set;
-        }
 
         protected abstract INode _parentNode { get; }
 
@@ -37,313 +30,297 @@ namespace Cr7Sund.Server.Impl
         }
 
 
-        public IPromise<INode> AddNode(IAssetKey key, bool overwrite = false)
+        public async PromiseTask AddNode(IAssetKey assetKey, bool overwrite = false)
         {
-            Freeze();
-
             if (!_parentNode.IsStarted)
             {
-                UnFreeze();
-                return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_addNode,
-                    "NodeModule.AddNode: Do not allow AddNode while ParentNode.Started is false! NodeName: {Key}", key);
+                throw new MyException(
+                    $"NodeModule.AddNode: Do not allow AddNode while ParentNode.Started is false! NodeName: {assetKey}");
+            }
+            if (assetKey == null)
+            {
+                return;
             }
             // if (!_parentNode.IsActive)
             // allowed load a bundle of node which mean the parent node maybe not enabled
 
-            // rejected if we are -ing
+            Freeze();
+
             // in case of unhandled case or duplicate operation
-            if (_treeNodes.TryGetValue(key, out var assetNode))
+            if (_treeNodes.TryGetValue(assetKey, out var assetNode))
             {
+
                 if (assetNode.NodeState == NodeState.Removing)
                 {
-                    return AddNodeFromRemoving(assetNode, overwrite);
+                    await AddNodeFromRemoving(assetKey);
+                    return;
                 }
                 if (assetNode.NodeState == NodeState.Unloading)
                 {
-                    return AddNodeFromUnloading(assetNode, overwrite);
+                    await AddNodeFromUnloading(assetKey);
+                    return;
                 }
+
                 if (assetNode.NodeState == NodeState.Ready)
                 {
-                    Console.Warn("NodeModule.AddNode: the asset is already on the nodeTree. NodeName: {Key}", key);
+                    Console.Warn("NodeModule.AddNode: the asset is already on the nodeTree. NodeName: {Key}", assetKey);
                     UnFreeze();
-                    return assetNode.LoadStatus;
-                }
-                if (assetNode.IsLoading())
-                {
-                    if (overwrite)
-                    {
-                        assetNode.LoadStatus.Cancel();
-                    }
-                    UnFreeze();
-                    return assetNode.LoadStatus;
-                }
-                if (assetNode.NodeState == NodeState.Adding)
-                {
-                    if (overwrite)
-                    {
-                        assetNode.AddStatus.Cancel();
-                    }
-                    UnFreeze();
-                    return assetNode.AddStatus;
-                }
-                if (assetNode.NodeState == NodeState.Preloaded)
-                {
-                    return AddNodeFromLoaded(assetNode);
-                }
-                if (assetNode.NodeState == NodeState.Removed)
-                {
-                    return AddNodeFromLoaded(assetNode);
-                }
-            }
-
-            return AddNodeFromStart(key); //Or Restart
-        }
-        public IPromise<INode> RemoveNode(IAssetKey key)
-        {
-            return UnloadNodeInternal(key, false);
-        }
-        public IPromise<INode> PreLoadNode(IAssetKey key, bool overwrite = false)
-        {
-            AssertUtil.IsFalse(_treeNodes.ContainsKey(key), FoundationExceptionType.duplicate_preloadNode);
-
-            if (!_parentNode.IsStarted)
-            {
-                return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_preloadNode,
-                "NodeModule.PreLoadNode: Do not allow PreLoadNode while parent node's Started is false! NodeName: {Key}", key);
-            }
-
-            if (_treeNodes.TryGetValue(key, out var assetNode))
-            {
-                if (assetNode.NodeState == NodeState.Removed)
-                {
-                    Console.Warn("NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {Key} ", key);
-                    return assetNode.RemoveStatus;
-                }
-                if (assetNode.NodeState == NodeState.Removing)
-                {
-                    Console.Warn("NodeModule.PreLoadNode: the asset is removing.(which mean it has also already load) NodeName: {Key} ", key);
-                    return assetNode.RemoveStatus;
+                    return;
                 }
                 if (assetNode.NodeState == NodeState.Preloading)
                 {
-                    Console.Warn("NodeModule.PreLoadNode: the asset is preloading! NodeName: {Key} ", key);
-                    if (!overwrite)
-                    {
-                        return assetNode.LoadStatus;
-                    }
-                    else
-                    {
-                        assetNode.LoadStatus.Cancel();
-                        return assetNode.LoadStatus;
-                    }
-                }
-                if (assetNode.IsLoading())
-                {
-                    Console.Warn("NodeModule.PreLoadNode: the asset is loading! NodeName: {Key} ", key);
-                    return assetNode.LoadStatus;
+                    Console.Warn("NodeModule.LoadNode: the asset is Preloading! NodeName: {Key} ", assetKey);
                 }
                 if (assetNode.NodeState == NodeState.Adding)
                 {
-                    Console.Warn("NodeModule.PreLoadNode: the asset is adding! NodeName: {Key} ", key);
-                    return assetNode.AddStatus;
+                    Console.Warn("NodeModule.LoadNode: the asset is adding! NodeName: {Key} ", assetKey);
                 }
                 if (assetNode.NodeState == NodeState.Preloaded)
                 {
-                    Console.Warn("NodeModule.PreLoadNode: the asset is preloaded! NodeName: {Key} ", key);
-                    return assetNode.LoadStatus;
                 }
-                if (assetNode.NodeState == NodeState.Ready)
+                if (assetNode.NodeState == NodeState.Removed)
                 {
-                    Console.Warn("NodeModule.PreLoadNode: the asset is already on the nodeTree. NodeName: {Key} ", key);
-                    return assetNode.AddStatus;
                 }
-                if (assetNode.NodeState == NodeState.Unloading)
-                {
-                    return assetNode.UnloadStatus
-                            .Then(node => PreloadNodeFromStart(node.Key));
-                }
-            }
-
-            return PreloadNodeFromStart(key);
-        }
-        int curTime = -1;
-        public const int UITimeOutTime = 5000;
-        public void TimeOut(int elapsedTime)
-        {
-            if (!IsInTransition || _focusNode == null ||
-                 curTime < 0)
-            {
-                curTime = elapsedTime;
+                await AddNodeFromLoaded(assetKey, overwrite);
                 return;
             }
 
-            if (elapsedTime - curTime < UITimeOutTime) return;
-
-            _focusNode.GetCurStatus().Resolve(_focusNode);
+            await AddNodeFromStart(assetKey); //Or Restart
         }
 
-        public virtual void Dispose()
+        public async PromiseTask RemoveNode(IAssetKey key, bool overwrite = false)
         {
-            foreach (var item in _treeNodes)
+            await UnloadNodeInternal(key, false, overwrite);
+        }
+
+        public async PromiseTask PreLoadNode(IAssetKey assetKey)
+        {
+            AssertUtil.IsFalse(_treeNodes.ContainsKey(assetKey), FoundationExceptionType.duplicate_preloadNode);
+
+            if (!_parentNode.IsStarted)
             {
-                item.Value.Dispose();
+                throw new MyException(
+                    $"NodeModule.PreLoadNode: Do not allow PreLoadNode while parent node's Started is false! NodeName: {assetKey}");
             }
 
-            _treeNodes.Clear();
+            if (_treeNodes.TryGetValue(assetKey, out var assetNode))
+            {
+                if (assetNode.NodeState == NodeState.Removed)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {Key} ", assetKey);
+                    return;
+                }
+                if (assetNode.NodeState == NodeState.Removing)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset is removing. NodeName: {Key} ", assetKey);
+                    await PreloadNodeFromRemoving(assetKey);
+                    return;
+                }
+                if (assetNode.NodeState == NodeState.Unloading)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset is unloading. NodeName: {Key} ", assetKey);
+                    await PreloadNodeFromRemoving(assetKey);
+                    return;
+                }
+
+                if (assetNode.NodeState == NodeState.Preloaded)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset is preloaded! NodeName: {Key} ", assetKey);
+                    return;
+                }
+                if (assetNode.NodeState == NodeState.Ready)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset is already on the nodeTree. NodeName: {Key} ", assetKey);
+                    return;
+                }
+
+                if (assetNode.NodeState == NodeState.Preloading)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset is preloading! NodeName: {Key} ", assetKey);
+                }
+                if (assetNode.NodeState == NodeState.Adding)
+                {
+                    Console.Warn("NodeModule.PreLoadNode: the asset is adding! NodeName: {Key} ", assetKey);
+                }
+                // we don't care about overwrite when loading
+                await PreloadNodeFromLoading(assetKey);
+                return;
+            }
+
+            await PreloadNodeFromStart(assetKey);
+            return;
+        }
+
+        public T TestGetViewByKey<T>(IAssetKey assetKey) where T : class, INode
+        {
+            return GetViewByKey<T>(assetKey);
+        }
+        
+        public virtual void Dispose()
+        {
+            AssertUtil.LessOrEqual(_treeNodes.Count, 0);
+            _treeNodes = null;
             _focusNode = null;
         }
 
-        internal IPromise<INode> UnloadNode(IAssetKey key)
+        public async PromiseTask UnloadNode(IAssetKey key, bool overwrite = false)
         {
-            return UnloadNodeInternal(key, true);
+            await UnloadNodeInternal(key, true, overwrite);
         }
-        internal IPromise<INode> UnloadNodeInternal(IAssetKey key, bool unload)
+
+        internal async PromiseTask UnloadNodeInternal(IAssetKey assetKey, bool unload, bool overwrite)
         {
+            if (assetKey == null)
+            {
+                return;
+            }
             Freeze();
             if (!_parentNode.IsStarted)
             {
                 UnFreeze();
-                return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_unloadNode,
-                    "NodeModule.RemoveNode: Do not allow unload while parentNode.Started is false! NodeName: {Key}", key);
+                throw new MyException(
+                    $"NodeModule.RemoveNode: Do not allow unload while parentNode.Started is false! NodeName: {assetKey}");
             }
-            if (_treeNodes.TryGetValue(key, out var assetNode))
+
+            if (_treeNodes.TryGetValue(assetKey, out var assetNode))
             {
                 if (assetNode.NodeState == NodeState.Unloaded)
                 {
+                    Console.Warn("try to remove an unloaded node: {Key}", assetNode.Key);
                     UnFreeze();
-                    Console.Warn("try to remove an unloaded node: {assetNode.Key}");
-                    return assetNode.UnloadStatus;
+                    return;
                 }
                 if (assetNode.NodeState == NodeState.Unloading)
                 {
-                    UnFreeze();
-                    Console.Warn("try to remove an unloading node: {assetNode.Key}");
-                    return assetNode.UnloadStatus;
-                }
-                if (assetNode.IsLoading())
-                {
-                    DispatchRemoveBegin(assetNode.Key);
-                    return assetNode.CancelLoad()
-                        .Then(OnUnloadNode);
+                    Console.Warn("try to remove an unloading node: {Key}", assetNode.Key);
                 }
                 if (assetNode.NodeState == NodeState.Adding)
                 {
-                    Console.Warn("NodeModule.RemoveNode: the asset is adding , but is not loading! NodeName: {Key} ", key);
-                    assetNode.AddStatus.Cancel();
+                    Console.Warn("NodeModule.RemoveNode: the asset is adding! NodeName: {Key} ", assetKey);
+                    assetNode.CancelLoad();
                 }
 
                 if (unload == false)
                 {
-                    return RemoveNodeFromNodeTree(key);
+                    await RemoveNodeFromNodeTree(assetKey, overwrite);
+                    return;
                 }
                 else
                 {
-                    return UnloadNodeFromNodeTree(key);
+                    await UnloadNodeFromNodeTree(assetKey, overwrite);
+                    return;
                 }
             }
-
-            UnFreeze();
-            return Promise<INode>.Rejected(FoundationExceptionType.parent_no_start_addNode,
-                "NodeModule.RemoveNode: Unhandled occasion...RemoveNode Fail.. NodeName: {Key}", key);
         }
-        internal IPromise<INode> SwitchNode(IAssetKey key)
+        
+        internal async PromiseTask SwitchNode(IAssetKey key)
         {
-            return AddNode(key).Then(OnSwitchNode);
+            await AddNode(key);
+            await OnSwitchNode(key);
+            return;
         }
 
         protected virtual void Freeze()
         {
-            IsInTransition = true;
             _fingerGesture.Freeze();
         }
         protected virtual void UnFreeze()
         {
-            IsInTransition = false;
             _fingerGesture.UnFreeze();
         }
         protected abstract INode CreateNode(IAssetKey key);
-        protected virtual IPromise<INode> OnAdded(INode node)
+
+        protected virtual void OnAdded(IAssetKey key)
         {
-            return Promise<INode>.Resolved(node);
         }
 
-        private IPromise<INode> OnSwitchNode(INode curNode)
+        protected virtual PromiseTask OnRemoved(IAssetKey key)
         {
-            var promise = Promise<INode>.Resolved(curNode);
+            return PromiseTask.CompletedTask;
+        }
 
-            if (_treeNodes.Count <= 1) return promise;
+        protected T GetViewByKey<T>(IAssetKey assetKey) where T : class, INode
+        {
+            if (assetKey != null)
+            {
+                if (_treeNodes.TryGetValue(assetKey, out var node))
+                {
+                    return node as T;
+                }
+            }
 
+            return default;
+        }
+
+        protected async PromiseTask UnloadAllNodes()
+        {
+            var tmpList = _poolBinder.AutoCreate<List<IAssetKey>>();
+            tmpList.Clear();
 
             foreach (var keyValuePair in _treeNodes)
             {
                 var assetNode = keyValuePair.Value;
-
-                if (assetNode == curNode) continue;
-                if (!assetNode.IsActive) continue;
-
-                promise = promise.Then(_ =>
-                {
-                    return RemoveNode(assetNode.Key).Then(prevNode =>
-                    {
-                        DispatchSwitch(curNode.Key, prevNode.Key);
-                        return prevNode;
-                    });
-                });
+                tmpList.Add(assetNode.Key);
             }
 
-            return promise.Then(node =>
+            for (int i = tmpList.Count - 1; i >= 0; i--)
             {
-                MemoryMonitor.CleanMemory();
-                return node;
-            });
+                await UnloadNode(tmpList[i]);
+            }
+
+            tmpList.Clear();
+            _poolBinder.Return(tmpList);
         }
-        private IPromise<INode> RemoveNodeFromNodeTree(IAssetKey key)
+
+        protected async PromiseTask OnSwitchNode(IAssetKey curKey)
         {
-            var removeNode = _treeNodes[key];
+            foreach (var keyValuePair in _treeNodes)
+            {
+                var assetNode = keyValuePair.Value;
+
+                if (assetNode.Key == curKey) continue;
+                if (!assetNode.IsActive) continue;
+
+                await RemoveNode(assetNode.Key);
+                DispatchSwitch(curKey, assetNode.Key);
+            }
+        }
+
+        private async PromiseTask RemoveNodeFromNodeTree(IAssetKey removeKey, bool overwrite)
+        {
+            var removeNode = _treeNodes[removeKey];
 
             if (removeNode.NodeState == NodeState.Removed)
             {
                 UnFreeze();
-                return removeNode.RemoveStatus;
-            }
-            if (removeNode.NodeState == NodeState.Removing)
-            {
-                UnFreeze();
-                return removeNode.RemoveStatus;
-            }
-            if (removeNode.NodeState == NodeState.Preloaded)
-            {
-                DispatchRemoveBegin(removeNode.Key);
-
-                return _parentNode.UnloadAsync(removeNode)
-                    .Then(OnRemoveNode);
+                return;
             }
 
-            return _parentNode.RemoveChildAsync(removeNode)
-                .Then(OnRemoveNode);
+            await _parentNode.RemoveChildAsync(removeNode, overwrite);
+            await OnRemoveNode(removeKey);
         }
-        private IPromise<INode> UnloadNodeFromNodeTree(IAssetKey key)
+
+        private async PromiseTask OnRemoveNode(IAssetKey removeKey)
+        {
+            if (_focusNode != null && _focusNode.Key == removeKey)
+                _focusNode = null;
+
+            await OnRemoved(removeKey);
+            UnFreeze();
+            DispatchRemoveEnd(removeKey);
+        }
+        private async PromiseTask UnloadNodeFromNodeTree(IAssetKey key, bool overwrite)
         {
             var unloadNode = _treeNodes[key];
 
-            DispatchRemoveBegin(unloadNode.Key);
+            DispatchRemoveBegin(key);
 
-            return _parentNode.UnloadChildAsync(unloadNode) // unload will always return resolved
-                .Then(OnUnloadNode);
+            await _parentNode.UnloadChildAsync(unloadNode, overwrite); // unload will always return resolved
+            OnUnloadNode(key);
         }
-        private INode OnRemoveNode(INode removeNode)
-        {
-            UnFreeze();
-            if (_focusNode != null && _focusNode.Key == removeNode.Key)
-                _focusNode = null;
 
-            DispatchRemoveEnd(removeNode.Key);
-            return removeNode;
-        }
-        private INode OnUnloadNode(INode unloadNode)
+        private IAssetKey OnUnloadNode(IAssetKey unloadKey)
         {
-            var unloadKey = unloadNode.Key;
-
             UnFreeze();
             if (_focusNode != null && _focusNode.Key == unloadKey)
                 _focusNode = null;
@@ -351,93 +328,100 @@ namespace Cr7Sund.Server.Impl
             _treeNodes.Remove(unloadKey);
             DispatchRemoveEnd(unloadKey);
 
-            return unloadNode;
+            return unloadKey;
         }
 
-        private IPromise<INode> PreloadNodeFromStart(IAssetKey key)
+
+        private async PromiseTask PreloadNodeFromStart(IAssetKey key)
         {
             var newNode = CreateNode(key);
             _treeNodes.Add(key, newNode);
-            return _parentNode.PreLoadChild(newNode);
+
+            await _parentNode.PreLoadChild(newNode);
+        }
+        private async PromiseTask PreloadNodeFromLoading(IAssetKey assetKey)
+        {
+            await _parentNode.PreLoadChild(_treeNodes[assetKey]);
         }
 
-        private IPromise<INode> AddNodeFromStart(IAssetKey key)
+        private async PromiseTask PreloadNodeFromRemoving(IAssetKey assetKey)
         {
-            AssertUtil.IsFalse(_treeNodes.ContainsKey(key), FoundationExceptionType.duplicate_addNode);
-
-            var newNode = CreateNode(key);
-            DispatchAddBegin(newNode.Key);
-
-            _treeNodes.Add(key, newNode);
-
-            return AddChildNode(newNode);
+            _treeNodes[assetKey].CancelUnload();
+            await _parentNode.PreLoadChild(_treeNodes[assetKey]);
         }
-        private IPromise<INode> AddNodeFromLoaded(INode assetNode)
+        private async PromiseTask PreloadNodeFromUnloading(IAssetKey assetKey)
         {
-            DispatchAddBegin(assetNode.Key);
-
-            return AddChildNode(assetNode);
+            _treeNodes[assetKey].CancelUnload();
+            OnUnloadNode(assetKey);
+            await _parentNode.PreLoadChild(_treeNodes[assetKey]);
         }
 
-        private IPromise<INode> AddChildNode(INode assetNode)
+        private async PromiseTask AddNodeFromStart(IAssetKey assetKey)
         {
-            _focusNode = assetNode;
+            AssertUtil.IsFalse(_treeNodes.ContainsKey(assetKey), FoundationExceptionType.duplicate_addNode);
 
-            return _parentNode
-                .AddChildAsync(assetNode)
-                .Then(OnAddLoadedNode)
-                .Catch((ex) => OnFailLoadedNode(assetNode, ex));
+            var newNode = CreateNode(assetKey);
+            _treeNodes.Add(assetKey, newNode);
+            DispatchAddBegin(assetKey);
+
+            await AddChildNode(assetKey, false);
+        }
+        private async PromiseTask AddNodeFromLoaded(IAssetKey assetKey, bool overwrite)
+        {
+            DispatchAddBegin(assetKey);
+
+            await AddChildNode(assetKey, overwrite);
         }
 
-        private IPromise<INode> AddNodeFromRemoving(INode assetNode, bool overwrite)
+        private async PromiseTask AddChildNode(IAssetKey assetKey, bool overwrite)
         {
-            if (!overwrite)
+            _focusNode = _treeNodes[assetKey];
+
+            try
             {
-                UnFreeze();
-                return Promise<INode>.Rejected(FoundationExceptionType.is_removing_addNode,
-                     "NodeModule.AddNode: the asset is removing. NodeName: {Key}", assetNode.Key);
+                await _parentNode.AddChildAsync(_treeNodes[assetKey], overwrite);
             }
-            else
+            catch 
             {
-                assetNode.RemoveStatus.Cancel();
+                OnFailLoadedNode(assetKey);
+                throw;
+            }
 
-                DispatchAddBegin(assetNode.Key);
+            OnAddLoadedNode(assetKey);
+        }
 
-                return AddChildNode(assetNode); ;
-            }
-        }
-        private IPromise<INode> AddNodeFromUnloading(INode assetNode, bool overwrite)
+        private void OnAddLoadedNode(IAssetKey assetKey)
         {
-            if (!overwrite)
-            {
-                UnFreeze();
-                return Promise<INode>.Rejected(FoundationExceptionType.is_unloading_addNode,
-                 "NodeModule.AddNode: the asset is unloading. NodeName: {Key}", assetNode.Key);
-            }
-            else
-            {
-                assetNode.UnloadStatus.Cancel();
-                return assetNode.UnloadStatus
-                    .Then(OnUnloadNode)
-                    .Then((node) => AddNodeFromStart(node.Key));
-            }
+            OnAdded(assetKey);
+            UnFreeze();
+            DispatchAddEnd(assetKey);
         }
-        private IPromise<INode> OnAddLoadedNode(INode node)
-        {
-            return OnAdded(node)
-                .ContinueWith(() =>
-                {
-                    UnFreeze();
-                    DispatchAddEnd(node.Key);
-                    return Promise<INode>.Resolved(node);
-                });
-        }
-        private INode OnFailLoadedNode(INode node, System.Exception ex)
+
+        private void OnFailLoadedNode(IAssetKey assetKey)
         {
             UnFreeze();
-            DispatchAddEnd(node.Key);
-            _treeNodes.Remove(node.Key);
-            return  node;
+            DispatchAddEnd(assetKey);
+            _treeNodes.Remove(assetKey);
+        }
+
+        private async PromiseTask AddNodeFromRemoving(IAssetKey assetKey)
+        {
+            _treeNodes[assetKey].CancelUnload();
+
+            DispatchAddBegin(assetKey);
+            await AddChildNode(assetKey, false);
+        }
+
+        private async PromiseTask AddNodeFromUnloading(IAssetKey assetKey)
+        {
+            var assetNode = _treeNodes[assetKey];
+            assetNode.CancelUnload();
+
+            // OnUnloadNode(assetKey);
+            // await AddNodeFromStart(assetKey);
+
+            //equivalent to
+            await AddChildNode(assetKey, false);
         }
 
         protected virtual void DispatchSwitch(IAssetKey curNode, IAssetKey lastNode)
@@ -458,16 +442,14 @@ namespace Cr7Sund.Server.Impl
 
 
         #region Observer
-        public void AddObserver<TEvent>(EventHandler<TEvent> handler) where TEvent : IEventData, new()
+        public void AddObserver<TEvent>(Package.EventBus.Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
             _eventBus.AddObserver(handler);
         }
-        public void RemoveObserver<TEvent>(EventHandler<TEvent> handler) where TEvent : IEventData, new()
+        public void RemoveObserver<TEvent>(Package.EventBus.Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
             _eventBus.RemoveObserver(handler);
         }
-
-
         #endregion
     }
 }

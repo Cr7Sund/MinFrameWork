@@ -5,40 +5,37 @@ using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 using NUnit.Framework;
-using Cr7Sund.Server.Tests;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Test;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Cr7Sund.ServerTest.UI
 {
     public partial class TestPageContainer
     {
-        private SceneNode _sceneNode;
-        private PageContainer _pageContainer;
+        private PageModule _pageContainer;
+        private SampleGameLogic _gameLogic;
+        private SceneModule _sceneModule;
+        private TestGameRoot _gameRoot;
 
         [SetUp]
-        public void SetUp()
+        public async Task SetUp()
         {
-            _pageContainer = new PageContainer();
-            var builder = new SampleSceneOneBuilder();
-            SceneDirector.Construct(builder, new SceneKey());
-            _sceneNode = builder.GetProduct();
-
-            var sceneInjectBinder = _sceneNode.Context.InjectionBinder;
-            var gameContext = new SampleGameContext();
-            gameContext.AddComponents(new GameNode());
-            if (sceneInjectBinder is ICrossContextInjectionBinder childContextBinder)
-            {
-                var gameCrossBinder = gameContext.InjectionBinder as ICrossContextInjectionBinder;
-                childContextBinder.CrossContextBinder = new CrossContextInjectionBinder();
-                childContextBinder.CrossContextBinder.CopyFrom(gameCrossBinder.CrossContextBinder);
-            }
-
-
             Console.Init(InternalLoggerFactory.Create());
-            RunScene();
 
+            _gameLogic = new SampleGameLogic();
+            _gameLogic.Init();
+            await _gameLogic.Run();
+
+            _sceneModule = new SceneModule();
+            _gameLogic.GetContextInjector().Inject(_sceneModule);
+            await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyTwo);
+            var sceneNode = _sceneModule.TestGetViewByKey<SceneNode>(SampleSceneKeys.SampleSceneKeyTwo);
+            var sceneInjectBinder = sceneNode.Context.InjectionBinder;
+
+            _pageContainer = new PageModule();
             sceneInjectBinder.Injector.Inject(_pageContainer);
+
             SampleOneUIController.Init();
             SampleTwoUIController.Init();
             SampleThreeUIController.Init();
@@ -48,56 +45,69 @@ namespace Cr7Sund.ServerTest.UI
             SampleFivePanel.AnimPromise = Promise.Resolved();
             SampleThreeUIController.Rejected = false;
             SampleFivePanel.Rejected = false;
+            SampleThreePanel.Rejected = false;
+            SampleThreePanel.promise = Promise.Resolved();
+
+            if (Application.isPlaying)
+            {
+                var gameRoot = new GameObject("testRoot", typeof(TestGameRoot));
+                _gameRoot = gameRoot.GetComponent<TestGameRoot>();
+                _gameRoot.Init(_gameLogic);
+            }
+
         }
 
-        private void RunScene()
+        [TearDown]
+        public async Task TearDown()
         {
-            _sceneNode.Inject();
-            _sceneNode.Init();
-            _sceneNode.Start();
-            _sceneNode.Enable();
+            await _pageContainer.CloseAll();
+            await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyTwo);
+            await _gameLogic.DestroyAsync();
+            if (Application.isPlaying)
+            {
+                GameObject.Destroy(_gameRoot.gameObject);
+            }
+
+
         }
 
-
-       //[Test]
-        public void PushPage()
+        [Test]
+        public async Task PushPage()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
         }
 
-        public void SwitchPage()
+        public async Task SwitchPage()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);
             Assert.AreEqual(1, SampleTwoUIController.EnableCount);
         }
 
-       //[Test]
-        public void SwitchPages()
+        [Test]
+        public async Task SwitchPages()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
 
             Assert.AreEqual(3, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);
             Assert.AreEqual(0, SampleTwoUIController.EnableCount);
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
-       //[Test]
-        public void SwitchPages_WithNoStack()
+        [Test]
+        public async Task SwitchPages_WithNoStack()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);
@@ -105,54 +115,55 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
         }
 
-
-
-       //[Test]
-        public void ExitBeforeSequence_Pending()
+        [Test]
+        public async Task ExitBeforeSequence_Pending()
         {
-            SampleThreeUIController.promise = new Promise();
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            SampleThreeUIController.promise = Promise.Create();
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            var task = _pageContainer.PushPage(SampleUIKeys.SampleThreeUI); // sample three is hide first
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);
             Assert.AreEqual(0, SampleThreeUIController.StartValue);
-        }
-
-       //[Test]
-        public void ExitBeforeSequence_Resolved()
-        {
-            SampleThreeUIController.promise = new Promise();
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
 
             SampleThreeUIController.promise.Resolve();
+            await task;
+        }
+
+        [Test]
+        public async Task ExitBeforeSequence_Resolved()
+        {
+            SampleThreeUIController.promise = Promise.Create();
+            SampleThreeUIController.promise.Resolve();
+
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleThreeUIController.EnableCount);
             Assert.AreEqual(1, SampleThreeUIController.StartValue);
         }
 
-       //[Test]
-        public void BackPage()
+        [Test]
+        public async Task BackPage()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
-            _pageContainer.BackPage();
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.BackPage();
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
             Assert.AreEqual(0, SampleTwoUIController.EnableCount);
         }
 
-       //[Test]
-        public void BackPages()
+        [Test]
+        public async Task BackPages()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-            _pageContainer.BackPage();
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            await _pageContainer.BackPage();
 
             Assert.AreEqual(2, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleOneUIController.EnableCount);
@@ -160,14 +171,14 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-       //[Test]
-        public void BackPageByPopCount()
+        [Test]
+        public async Task BackPageByPopCount()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
 
-            _pageContainer.BackPage(2);
+            await _pageContainer.BackPage(2);
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
@@ -175,14 +186,14 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-       //[Test]
-        public void BackPageByDest()
+        [Test]
+        public async Task BackPageByDest()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
 
-            _pageContainer.BackPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.BackPage(SampleUIKeys.SampleOneUI);
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
@@ -190,26 +201,25 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
         }
 
-       //[Test]
-        public void BackPage_Destroy()
+        [Test]
+        public async Task BackPage_Destroy()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
-
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
             Assert.AreEqual(1, SampleFourUIController.StartValue);
-            _pageContainer.BackPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.BackPage(SampleUIKeys.SampleOneUI);
 
             Assert.AreEqual(0, SampleFourUIController.StartValue);
         }
 
-       //[Test]
-        public void BackPages_Destroy()
+        [Test]
+        public async Task BackPages_Destroy()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
-            _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
 
-            _pageContainer.BackPage();
+            await _pageContainer.BackPage();
 
             Assert.AreEqual(1, _pageContainer.OperateNum);
             Assert.AreEqual(1, SampleOneUIController.EnableCount);
@@ -217,15 +227,38 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleFourUIController.EnableCount);
         }
 
-       //[Test]
-        public void BackPage_EmptyException()
+        [Test]
+        public async Task BackPage_EmptyException()
         {
-            _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
 
-            TestDelegate testDelegate = () => _pageContainer.BackPage();
-            var ex = Assert.Throws<MyException>(testDelegate);
+            MyException ex = null;
+            try
+            {
+                await _pageContainer.BackPage();
+            }
+            catch (MyException e)
+            {
+                ex = e;
+            }
+
             Assert.AreEqual(UIExceptionType.NO_LEFT_BACK, ex.Type);
+
         }
 
+        [Test]
+        public async Task CloseAllPages()
+        {
+            await _pageContainer.PushPage(SampleUIKeys.SampleOneUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+            await _pageContainer.PushPage(SampleUIKeys.SampleTwoUI);
+
+            await _pageContainer.CloseAll();
+
+            Assert.AreEqual(0, _pageContainer.OperateNum);
+            Assert.AreEqual(0, SampleFourUIController.StartValue);
+            Assert.AreEqual(0, SampleOneUIController.StartValue);
+            Assert.AreEqual(0, SampleTwoUIController.StartValue);
+        }
     }
 }

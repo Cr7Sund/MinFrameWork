@@ -18,13 +18,11 @@ namespace Cr7Sund.NodeTree.Impl
             InjectionBinder = new InjectionBinder();
         }
 
-        
+
         public virtual void AddContext(IContext context)
         {
-            if (!_contexts.Contains(context))
-            {
-                _contexts.Add(context);
-            }
+            AssertUtil.IsFalse(_contexts.Contains(context));
+            _contexts.Add(context);
         }
         public virtual void RemoveContext(IContext context)
         {
@@ -32,11 +30,12 @@ namespace Cr7Sund.NodeTree.Impl
             _contexts.Remove(context);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             _contexts.Clear();
             _contexts = null;
             InjectionBinder.Dispose();
+            InjectionBinder = null;
         }
 
         public abstract void AddComponents(INode self);

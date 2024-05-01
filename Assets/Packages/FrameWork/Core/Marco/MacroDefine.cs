@@ -1,4 +1,5 @@
-﻿namespace Cr7Sund
+﻿
+namespace Cr7Sund
 {
     /// <summary>
     ///     宏定义
@@ -173,6 +174,13 @@
             }
         }
 
+        public static bool IsMainThread
+        {
+            get
+            {
+                return System.Threading.Thread.CurrentThread.ManagedThreadId == 1;
+            }
+        }
         /// <summary>
         /// only use when you pursue ultimate performance
         /// it will stop the game when exception happens 

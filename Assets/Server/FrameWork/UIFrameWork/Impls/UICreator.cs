@@ -2,9 +2,15 @@
 {
     public static class UICreator
     {
-        public static UINode Create(UIKey key)
+        public static PageNode CreatePageNode(UIKey key)
         {
-            return new UINode(key, key.CreateView(), key.CreateCtrl());
+            return new PageNode(key, key.CreateView(), key.CreateCtrl());
         }
+
+        public static PanelNode CreatePanelNode(UIKey key)
+        {
+            return new PanelNode(key, key.CreateView(), key.CreateCtrl());
+        }
+
     }
 }

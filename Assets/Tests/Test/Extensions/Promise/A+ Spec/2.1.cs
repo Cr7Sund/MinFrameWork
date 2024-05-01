@@ -18,7 +18,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
         [Test]
         public void When_pending_a_promise_may_transition_to_either_the_fulfilled_or_rejected_state()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
             var pendingPromise1 = new Promise<object>();
             Assert.AreEqual(PromiseState.Pending, pendingPromise1.CurState);
             pendingPromise1.Resolve(new object());
@@ -74,7 +74,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             [Test]
             public void _must_not_transition_to_any_other_state()
             {
-                LogAssert.ignoreFailingMessages = true;
+                AssertHelper.IgnoreFailingMessages();
                 var rejectedPromise = new Promise<object>();
                 rejectedPromise.RejectWithoutDebug(new Exception());
 
@@ -87,7 +87,7 @@ namespace Cr7Sund.PackageTest.PromiseTest.A__Spec
             [Test]
             public void _must_have_a_reason_which_must_not_change()
             {
-                LogAssert.ignoreFailingMessages = true;
+                AssertHelper.IgnoreFailingMessages();
                 var rejectedPromise = new Promise<object>();
                 var reason = new Exception();
                 int handled = 0;

@@ -211,13 +211,10 @@ namespace Cr7Sund.Package.Impl
 
             return Then(_ => Any<PromisedT>(promises)) as ICommandPromise<PromisedT>;
         }
-
-#if UNITY_INCLUDE_TESTS
         public IBaseCommand Test_GetCommand()
         {
             return _command;
         }
-#endif
 
         protected void SequenceProgress(float progress)
         {
@@ -300,8 +297,13 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
-            Release();
-            base.Dispose();
+            if (_resolveValue is IDisposable disposable
+                     && disposable != this)
+            {
+                disposable?.Dispose();
+            }
+            Name = string.Empty;
+            CurState = PromiseState.Pending;
         }
 
         protected override Promise<T> GetRawPromise<T>()
@@ -413,7 +415,7 @@ namespace Cr7Sund.Package.Impl
         {
             IsRetain = false;
 
-            base.Dispose();
+            Dispose();
             _command = null;
             ReleasePoolPromises();
         }
@@ -437,6 +439,10 @@ namespace Cr7Sund.Package.Impl
             for (int i = 0; i < _promisePoolList.Count; i++)
             {
                 IBasePromise item = _promisePoolList[i];
+                if (item is IPoolable poolable)
+                {
+                    poolable.Release();
+                }
                 item.Dispose();
             }
             _promisePoolList.Clear();

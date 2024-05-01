@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Impl;
 
@@ -14,38 +15,31 @@ namespace Cr7Sund.PackageTest.IOC
             EnableCount = 0;
         }
 
-
-
-        protected override void OnStart()
+        protected override async PromiseTask OnStart()
         {
-            base.OnStart();
             Debug.Debug("Load scene one");
-
-            StartValue +=2;
+            await base.OnStart();
+            StartValue += 2;
         }
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
             Debug.Debug("Enable scene one");
-
-
+            await base.OnEnable();
             EnableCount++;
         }
 
-        protected override void OnDisable()
+        protected override async PromiseTask OnDisable()
         {
-            base.OnDisable();
             Debug.Debug("Disable scene one");
-
+            await base.OnDisable();
             EnableCount--;
         }
 
-        protected override void OnStop()
+        protected override async PromiseTask OnStop()
         {
-            base.OnStop();
             Debug.Debug("Stop scene one");
-
+            await base.OnStop();
             StartValue--;
         }
     }

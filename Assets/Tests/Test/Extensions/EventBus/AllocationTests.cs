@@ -6,6 +6,7 @@ namespace Cr7Sund.PackageTest.EventBus
 	[TestFixture]
 	public class AllocationTests
 	{
+		#if UNITY_EDITOR
 		[Test]
 		public void RaisingEvent_DoesNotAllocate()
 		{
@@ -19,5 +20,6 @@ namespace Cr7Sund.PackageTest.EventBus
 				bus.Raise(new SampleTestEvent());
 			});
 		}
+		#endif
 	}
 }

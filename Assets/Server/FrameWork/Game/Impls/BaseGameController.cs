@@ -1,69 +1,102 @@
-using Cr7Sund.NodeTree.Api;
+using Cr7Sund.AssetLoader.Api;
+using Cr7Sund.Config;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.Api;
-using Cr7Sund.Server.Apis;
+using UnityEngine;
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class BaseGameController : UpdateController
+    public abstract class BaseGameController : BaseController, IUpdatable, ILateUpdate
     {
         [Inject(ServerBindDefine.GameTimer)] private IPromiseTimer _gameTimer;
-        [Inject(ServerBindDefine.GameLogger)] protected IInternalLog Debug;
+        [Inject(ServerBindDefine.GameLogger)] protected IInternalLog _log;
+        [Inject(ServerBindDefine.GameInstancePool)] IInstancesContainer _gameInstanceContainer;
+        [Inject] private IConfigContainer _configModule;
 
-        protected sealed override void OnStart()
-        {
-            OnSplashClosed();
-        }
+        [Inject] IAssetLoader _assetLoader;
 
-        protected sealed override void OnEnable()
-        {
-            GameStart();
-        }
+        protected override IInternalLog Debug => _log;
 
-        protected override void OnStop()
-        {
-            GameOver();
-            // PLAN UnBind Invoke dispose
-        }
 
-        protected override void OnUpdate(int millisecond)
+        public void Update(int millisecond)
         {
             _gameTimer.Update(millisecond);
+            OnUpdate(millisecond);
+        }
+
+        public void LateUpdate(int milliseconds)
+        {
+            OnLateUpdate(milliseconds);
+        }
+
+        protected sealed override async PromiseTask OnStart()
+        {
+            if (Application.isPlaying)
+            {
+                await _assetLoader.Init();
+                await OnSplashClosed();
+            }
+        }
+
+        protected override async PromiseTask OnEnable()
+        {
+            await GameStart();
+        }
+
+        protected override async PromiseTask OnStop()
+        {
+            if (Application.isPlaying)
+            {
+                await GameOver();
+                await _assetLoader.DestroyAsync();
+            }
         }
 
         #region  Login
-        private void OnSplashClosed()
+        private async PromiseTask OnSplashClosed()
         {
-            GameEnvInit();
+            await InitConfig();
+            await InitUI();
+            await InitGameEnv();
         }
 
-        private void GameEnvInit()
+        private async PromiseTask GameStart()
         {
-            // InitSDK(); 
-            // NetModule.Init();
-            // InitHardware(); //_languageModule, Notch
-            InitGameEnv();
-
+            await HandleHotfix();
+            await RunLoginScene();
         }
 
-
-        private void GameStart()
+        protected virtual PromiseTask GameOver()
         {
-            HandleHotfix()
-                .Then(RunLoginScene);
-        }
-
-        protected virtual void GameOver()
-        {
+            _configModule.UnloadAll();
+            _gameInstanceContainer.UnloadAll();
             Console.Info("Game Over");
+            return PromiseTask.CompletedTask;
         }
 
-        protected abstract void InitGameEnv();
-        protected abstract IPromise HandleHotfix();
-        protected abstract IPromise<INode> RunLoginScene();
+        protected abstract PromiseTask InitGameEnv();
+        protected abstract PromiseTask HandleHotfix();
+        protected abstract PromiseTask RunLoginScene();
+        protected virtual void OnUpdate(int millisecond) { }
+        protected virtual void OnLateUpdate(int millisecond) { }
 
+        #endregion
 
+        #region  Init
+        private async PromiseTask InitConfig()
+        {
+            var gameConfig = await _configModule.GetConfig<UIConfig>(ConfigDefines.UIConfig);
+            foreach (var item in gameConfig.ConfigDefines)
+            {
+                await _configModule.GetConfig<Object>(item);
+            }
+        }
+
+        private async PromiseTask InitUI()
+        {
+            await _gameInstanceContainer.InstantiateAsync<Object>(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
+        }
         #endregion
     }
 }

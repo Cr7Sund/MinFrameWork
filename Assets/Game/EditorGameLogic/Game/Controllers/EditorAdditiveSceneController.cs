@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.Game.Scene;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Apis;
@@ -9,10 +10,9 @@ namespace Cr7Sund.Game.GameLogic
         [Inject] private ISceneModule _sceneModule;
 
 
-        protected override void OnEnable()
+        protected override async PromiseTask OnEnable()
         {
-            base.OnEnable();
-            _sceneModule.AddScene(SceneKeys.EditorSceneKeyTwo);
+            await _sceneModule.AddScene(SceneKeys.EditorAddictiveSceneKeyOne);
         }
 
     }

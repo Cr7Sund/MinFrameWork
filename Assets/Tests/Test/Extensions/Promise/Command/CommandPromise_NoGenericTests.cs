@@ -1,4 +1,3 @@
-using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.PackageTest.IOC;
 using NUnit.Framework;
@@ -57,7 +56,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_exception_trigger_catch()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var promise = new CommandPromise();
             var rejectPromise = promise.Then<ExceptionCommand>() as Promise;
@@ -68,7 +67,7 @@ namespace Cr7Sund.PackageTest.PromiseCommandTest
         [Test]
         public void command_break_chain()
         {
-            LogAssert.ignoreFailingMessages = true;
+            AssertHelper.IgnoreFailingMessages();
 
             var promise = new CommandPromise();
 
