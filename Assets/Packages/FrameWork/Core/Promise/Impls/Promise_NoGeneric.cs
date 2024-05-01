@@ -994,9 +994,10 @@ namespace Cr7Sund.Package.Impl
         public static int Test_GetPendingPromiseCount()
         {
             #if UNITY_EDITOR
-            return PendingPromises.Count;
+                return PendingPromises.Count;
+            #else
+                    return 0;
             #endif
-            return 0;
         }
 
         public static void ClearPending()
