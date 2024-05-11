@@ -75,12 +75,9 @@ namespace Cr7Sund.Server.Impl
                 {
                     Console.Warn("NodeModule.LoadNode: the asset is adding! NodeName: {Key} ", assetKey);
                 }
-                if (assetNode.NodeState == NodeState.Preloaded)
-                {
-                }
-                if (assetNode.NodeState == NodeState.Removed)
-                {
-                }
+                //NodeState.Preloaded 
+                //NodeState.Removed
+                // NodeState.Default
                 await AddNodeFromLoaded(assetKey, overwrite);
                 return;
             }
@@ -107,7 +104,7 @@ namespace Cr7Sund.Server.Impl
             {
                 if (assetNode.NodeState == NodeState.Removed)
                 {
-                    Console.Warn("NodeModule.PreLoadNode: the asset has been removed.(which mean it has already load) NodeName: {Key} ", assetKey);
+                    Console.Warn("NodeModule.PreLoadNode: the asset has been removed.(which also mean it has already load) NodeName: {Key} ", assetKey);
                     return;
                 }
                 if (assetNode.NodeState == NodeState.Removing)
@@ -152,10 +149,14 @@ namespace Cr7Sund.Server.Impl
 
         public virtual void Dispose()
         {
-            // foreach (var item in _treeNodes)
-            // {
-            //     Console.Info("Still left {Node}", item.Key);
-            // }
+            if (MacroDefine.IsDebug)
+            {
+                foreach (var item in _treeNodes)
+                {
+                    Console.Info("LoadModule: Still left {Node}", item.Key);
+                }
+            }
+
             AssertUtil.LessOrEqual(_treeNodes.Count, 0);
             _treeNodes = null;
             _focusNode = null;
