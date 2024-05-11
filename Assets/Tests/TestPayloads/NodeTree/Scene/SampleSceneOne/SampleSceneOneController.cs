@@ -1,5 +1,4 @@
 using System.Threading;
-using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Impl;
 
 namespace Cr7Sund.PackageTest.IOC
@@ -15,10 +14,10 @@ namespace Cr7Sund.PackageTest.IOC
             EnableCount = 0;
         }
 
-        protected override async PromiseTask OnStart()
+        protected override async PromiseTask OnStart(CancellationToken cancellation)
         {
             Debug.Debug("Load scene one");
-            await base.OnStart();
+            await base.OnStart(cancellation);
             StartValue += 2;
         }
 

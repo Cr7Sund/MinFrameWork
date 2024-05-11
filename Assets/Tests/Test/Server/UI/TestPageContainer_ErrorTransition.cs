@@ -11,7 +11,7 @@ using UnityEngine.TestTools;
 
 namespace Cr7Sund.ServerTest.UI
 {
-    public partial class TestPageContainer
+    public partial class TestPageModule
     {
 
         [Test]
@@ -79,9 +79,10 @@ namespace Cr7Sund.ServerTest.UI
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError(e);
+                                Debug.Log(e);
                             }
                         });
+
                 _gameRoot.PromiseTimer.WaitFor(50, async () =>
                 {
                     try
@@ -95,33 +96,33 @@ namespace Cr7Sund.ServerTest.UI
                 });
                 await _gameRoot.PromiseTimer.WaitFor(100).AsTask();
                 // we need to resolve or reject the push 
-                SampleThreeUIController.promise.Resolve();
+                SampleThreeUIController.promise.Cancel();
             }
             else
             {
-               await Task.Delay(2).ContinueWith(async (t) =>
-                            {
-                                try
-                                {
-                                    await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogError(e);
-                                }
-                            });
+                await Task.Delay(2).ContinueWith(async (t) =>
+                             {
+                                 try
+                                 {
+                                     await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+                                 }
+                                 catch (Exception e)
+                                 {
+                                     Debug.LogError(e);
+                                 }
+                             });
 
-               await Task.Delay(5).ContinueWith(async (t) =>
-                                  {
-                                      try
-                                      {
-                                          await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
-                                      }
-                                      catch (MyException e)
-                                      {
-                                          ex = e;
-                                      }
-                                  });
+                await Task.Delay(5).ContinueWith(async (t) =>
+                                   {
+                                       try
+                                       {
+                                           await _pageContainer.PushPage(SampleUIKeys.SampleFourUI);
+                                       }
+                                       catch (MyException e)
+                                       {
+                                           ex = e;
+                                       }
+                                   });
 
 
                 await Task.Delay(10).ContinueWith((t) =>
@@ -130,7 +131,6 @@ namespace Cr7Sund.ServerTest.UI
                 });
 
             }
-
 
             Assert.AreEqual(UIExceptionType.OPEN_IN_TRANSITION, ex.Type);
         }

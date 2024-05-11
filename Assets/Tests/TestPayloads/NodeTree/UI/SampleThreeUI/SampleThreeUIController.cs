@@ -31,9 +31,9 @@ namespace Cr7Sund.PackageTest.IOC
         }
 
 
-        protected override async PromiseTask OnStart()
+        protected override async PromiseTask OnStart(CancellationToken cancellation)
         {
-            await base.OnStart();
+            await base.OnStart(cancellation);
             Debug.Debug("Load ui three");
 
             StartValue++;

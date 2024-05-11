@@ -8,7 +8,7 @@ namespace Cr7Sund.PackageTest.IOC
     public class SampleThreePanel : UIView
     {
         public static bool Rejected;
-        public static IPromise promise;
+        public static IPromise LoadPromise;
 
 
         public override async PromiseTask OnLoad(GameObject go)
@@ -20,7 +20,7 @@ namespace Cr7Sund.PackageTest.IOC
             }
             else
             {
-                await promise.AsNewTask();
+                await LoadPromise.AsNewTask();
             }
         }
     }

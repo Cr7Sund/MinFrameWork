@@ -1,5 +1,5 @@
+using System.Threading;
 using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 
@@ -10,7 +10,7 @@ namespace Cr7Sund.PackageTest.IOC
         public static IPromise AnimPromise ;
         public static bool Rejected;
 
-        public override PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation)
+        public override PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation, CancellationToken cancellation)
         {
             if (Rejected)
             {

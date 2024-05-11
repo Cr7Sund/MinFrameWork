@@ -54,7 +54,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             await _node.AddChildAsync(child1);
             await _node.AddChildAsync(child2);
             _node.Init();
-            await _node.Start();
+            await _node.Start(default);
             await _node.Enable();
             _node.Update(2);
 
@@ -74,7 +74,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             await _node.AddChildAsync(child1);
             await _node.AddChildAsync(child2);
             _node.Init();
-            await _node.Start();
+            await _node.Start(default);
             await _node.Enable();
             _node.LateUpdate(2);
 
