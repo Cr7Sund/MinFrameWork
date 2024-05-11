@@ -354,9 +354,9 @@ namespace Cr7Sund.Package.Impl
                 }
                 catch (Exception ex)
                 {
-                    if (onRejected == null)
+                    if (onRejected != null)
                     {
-                        return onRejected?.Invoke(ex);
+                        return onRejected.Invoke(ex);
                     }
                     else
                     {

@@ -8,7 +8,7 @@ namespace Cr7Sund.FrameWork.Util
         {
             if (MacroDefine.IsEditor)
             {
-                AssertUtil.IsAssignableFrom<TEnum>(excepted, actual, errorCode);
+                AssertUtil.IsAssignableFrom(excepted, actual, errorCode);
             }
         }
 

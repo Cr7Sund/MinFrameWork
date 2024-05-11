@@ -1,7 +1,5 @@
 ﻿
 
-using System.Threading;
-
 namespace Cr7Sund.Server.Scene.Impl
 {
     public static class SceneDirector

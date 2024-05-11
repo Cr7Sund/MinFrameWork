@@ -84,7 +84,7 @@ namespace Cr7Sund.Package.EventBus.Impl
 			}
 
 			OnAfterRaiseEvent();
-			poolBinder?.Return<TEvent>(tEvent);
+			poolBinder?.Return(tEvent);
 
 			return wasConsumed;
 		}

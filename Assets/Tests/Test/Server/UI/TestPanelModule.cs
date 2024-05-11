@@ -92,10 +92,10 @@ namespace Cr7Sund.ServerTest.UI
         [Test]
         public async Task OpenPanel()
         {
-            // await _panelContainer.OpenPanel(SampleUIKeys.SampleTwoUI);
+            await _panelContainer.OpenPanel(SampleUIKeys.SampleTwoUI);
 
-            // Assert.AreEqual(1, _panelContainer.OperateNum);
-            // Assert.AreEqual(1, SampleTwoUIController.EnableCount);
+            Assert.AreEqual(1, _panelContainer.OperateNum);
+            Assert.AreEqual(1, SampleTwoUIController.EnableCount);
         }
 
         [Test]

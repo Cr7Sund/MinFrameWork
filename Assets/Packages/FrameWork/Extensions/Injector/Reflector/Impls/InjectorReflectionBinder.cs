@@ -25,7 +25,7 @@ namespace Cr7Sund.Package.Impl
         public IReflectedClass Get(Type type)
         {
             var binding = GetBinding(type);
-            IReflectedClass retVal = null;
+            IReflectedClass retVal;
 
             if (binding == null)
             {

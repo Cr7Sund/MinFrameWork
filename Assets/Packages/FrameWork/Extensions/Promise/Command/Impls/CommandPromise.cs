@@ -300,7 +300,7 @@ namespace Cr7Sund.Package.Impl
             if (_resolveValue is IDisposable disposable
                      && disposable != this)
             {
-                disposable?.Dispose();
+                disposable.Dispose();
             }
             Name = string.Empty;
             CurState = PromiseState.Pending;

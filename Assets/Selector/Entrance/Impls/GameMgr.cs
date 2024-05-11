@@ -39,8 +39,6 @@ namespace Cr7Sund.Selector.Impl
                         _status = GameStatus.Started;
                         break;
                     }
-                default:
-                    break;
             }
         }
 

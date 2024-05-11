@@ -109,7 +109,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             var completed = 0;
             var result = 0;
 
-            promise.Then<int>((v) => result += 1);
+            promise.Then((v) => result += 1);
             await promise.ResolveAsync(result);
             completed++;
 

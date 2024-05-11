@@ -1,5 +1,3 @@
-using System;
-
 namespace Cr7Sund.Package.Api
 {
     /// <summary>

@@ -148,7 +148,6 @@ namespace Cr7Sund.Server.Impl
             }
 
             await PreloadNodeFromStart(assetKey);
-            return;
         }
 
         public virtual void Dispose()
@@ -197,12 +196,10 @@ namespace Cr7Sund.Server.Impl
                 if (unload == false)
                 {
                     await RemoveNodeFromNodeTree(assetKey, overwrite);
-                    return;
                 }
                 else
                 {
                     await UnloadNodeFromNodeTree(assetKey, overwrite);
-                    return;
                 }
             }
         }
@@ -211,7 +208,6 @@ namespace Cr7Sund.Server.Impl
         {
             await AddNode(key);
             await OnSwitchNode(key);
-            return;
         }
 
         public async PromiseTask CancelNode(IAssetKey assetKey)

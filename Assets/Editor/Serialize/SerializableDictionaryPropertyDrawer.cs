@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Reflection;
@@ -492,7 +491,7 @@ public class SerializableDictionaryPropertyDrawer : PropertyDrawer
 		}
 		else
 		{
-			return object.Equals(value1, value2);
+			return Equals(value1, value2);
 		}
 	}
 

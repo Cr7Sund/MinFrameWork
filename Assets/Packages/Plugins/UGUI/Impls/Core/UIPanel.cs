@@ -1,7 +1,6 @@
 using Cr7Sund.UGUI.Apis;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Object = UnityEngine.Object;
 
 namespace Cr7Sund.UGUI.Impls
 {

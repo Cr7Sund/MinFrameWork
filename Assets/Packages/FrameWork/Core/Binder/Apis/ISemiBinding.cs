@@ -1,8 +1,6 @@
 
 
 
-using System;
-
 /**
  * @interface Cr7Sund.Framework.Api.ISemiBinding
  *

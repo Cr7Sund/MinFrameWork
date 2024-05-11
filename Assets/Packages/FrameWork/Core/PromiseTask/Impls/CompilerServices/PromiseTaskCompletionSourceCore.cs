@@ -265,7 +265,7 @@ namespace Cr7Sund.CompilerServices
                     throw new InvalidOperationException("Already continuation registered, can not await twice or get Status after await.");
                 }
 
-                continuation?.Invoke();
+                continuation.Invoke();
             }
         }
 
@@ -503,7 +503,7 @@ namespace Cr7Sund.CompilerServices
                     throw new InvalidOperationException("Already continuation registered, can not await twice or get Status after await.");
                 }
 
-                continuation?.Invoke();
+                continuation.Invoke();
             }
         }
 

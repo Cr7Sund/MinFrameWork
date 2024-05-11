@@ -1,4 +1,3 @@
-using Cr7Sund.Config;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;

@@ -24,7 +24,7 @@ namespace Cr7Sund.Package.Impl
         {
             var type = typeof(T);
             var binding = GetBinding(type);
-            IPool<T> retVal = null;
+            IPool<T> retVal;
             if (binding == null)
             {
                 binding = GetRawBinding();

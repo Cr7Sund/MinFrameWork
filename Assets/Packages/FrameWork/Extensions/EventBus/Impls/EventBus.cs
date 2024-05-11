@@ -12,22 +12,22 @@ namespace Cr7Sund.Package.EventBus.Impl
 
         public bool Dispatch<TEvent>(TEvent @event) where TEvent : IEventData, new()
         {
-            return base.Raise<TEvent>(@event);
+            return base.Raise(@event);
         }
 
         public bool DispatchImmediately<TEvent>(TEvent @event) where TEvent : IEventData, new()
         {
-            return this.RaiseImmediately<TEvent>(@event);
+            return this.RaiseImmediately(@event);
         }
 
         public void AddObserver<TEvent>(Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
-            this.SubscribeTo<TEvent>(handler);
+            this.SubscribeTo(handler);
         }
 
         public void RemoveObserver<TEvent>(Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
-            this.UnsubscribeFrom<TEvent>(handler);
+            this.UnsubscribeFrom(handler);
         }
 
         public TEvent CreateEvent<TEvent>() where TEvent : IEventData, new()

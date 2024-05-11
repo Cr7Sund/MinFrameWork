@@ -1,7 +1,3 @@
-using System;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
-using System.Collections;
 namespace Cr7Sund.Collection
 {
     public struct TupleStruct<T1, T2>

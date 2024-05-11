@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cr7Sund.Collection;
@@ -140,12 +139,9 @@ namespace Cr7Sund.Server.Impl
             {
                 return;
             }
-            else
-            {
-                var activePromise = PromiseTaskSource.Create();
-                _activeScenePromise.Add(new TupleStruct<IAssetKey, PromiseTaskSource>(assetKey, activePromise));
-                await new PromiseTask(activePromise, 0);
-            }
+            var activePromise = PromiseTaskSource.Create();
+            _activeScenePromise.Add(new TupleStruct<IAssetKey, PromiseTaskSource>(assetKey, activePromise));
+            await new PromiseTask(activePromise, 0);
         }
     }
 }

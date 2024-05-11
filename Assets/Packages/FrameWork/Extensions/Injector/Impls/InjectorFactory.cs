@@ -65,7 +65,7 @@ namespace Cr7Sund.Package.Impl
         {
             var value = o is Type ? o as Type : o.GetType();
 
-            object retVal = null;
+            object retVal;
             {
                 if (args == null || args.Length == 0)
                 {

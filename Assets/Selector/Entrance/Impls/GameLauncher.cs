@@ -57,14 +57,6 @@ namespace Cr7Sund.Selector.Impl
             }
         }
 
-        void OnEnable()
-        {
-        }
-
-        void OnDisable()
-        {
-        }
-
         private void Update()
         {
             _gameLogic?.Update(_updateCorrector.GetCorrectedTime());

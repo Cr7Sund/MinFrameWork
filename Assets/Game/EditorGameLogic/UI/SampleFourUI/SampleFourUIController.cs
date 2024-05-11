@@ -1,6 +1,5 @@
 using System.Threading;
 using Cr7Sund.Server.UI.Impl;
-using UnityEngine;
 
 namespace Cr7Sund.Game.UI
 {

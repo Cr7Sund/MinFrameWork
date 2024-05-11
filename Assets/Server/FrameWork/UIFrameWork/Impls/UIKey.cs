@@ -41,7 +41,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         public override string ToString()
         {
-            return Key.ToString();
+            return Key;
         }
     }
 }

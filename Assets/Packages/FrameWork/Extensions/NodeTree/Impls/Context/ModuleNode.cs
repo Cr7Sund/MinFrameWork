@@ -1,5 +1,3 @@
-using System.Threading;
-
 namespace Cr7Sund.NodeTree.Impl
 {
     public class ModuleNode : UpdateNode

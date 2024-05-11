@@ -110,7 +110,7 @@ namespace Cr7Sund.Server.Impl
 
         public async PromiseTask CancelLoad(IAssetKey assetKey, CancellationToken token)
         {
-            await base.CancelLoadAsync(assetKey, token);
+            await CancelLoadAsync(assetKey, token);
             AssertUtil.IsFalse(_instancePromises.ContainsKey(assetKey));
         }
 

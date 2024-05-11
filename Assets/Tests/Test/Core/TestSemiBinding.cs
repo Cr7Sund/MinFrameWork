@@ -125,7 +125,7 @@ namespace Cr7Sund.PackageTest.IOC
             var o1 = new ClassWithConstructorParameters(43, "def");
             var o2 = new ClassWithConstructorParameters(44, "ghi");
 
-            var list = new ClassWithConstructorParameters[3]
+            var list = new ClassWithConstructorParameters[]
             {
                 o, o1,
                 o2

@@ -1,4 +1,3 @@
-using System.Threading;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Scene.Impl;
 

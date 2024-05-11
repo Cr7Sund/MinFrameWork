@@ -13,7 +13,7 @@ namespace Cr7Sund.Server.Impl
 
         public async PromiseTask<T> GetConfig<T>(IAssetKey assetKey) where T : Object
         {
-            return await base.LoadAsset<T>(assetKey);
+            return await LoadAsset<T>(assetKey);
         }
 
         public async void RemoveConfigAsync(IAssetKey assetKey)

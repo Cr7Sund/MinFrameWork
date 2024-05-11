@@ -137,7 +137,7 @@ namespace Cr7Sund.Package.Impl
             {
                 if (item is IDisposable disposable)
                 {
-                    disposable?.Dispose();
+                    disposable.Dispose();
                 }
             }
 

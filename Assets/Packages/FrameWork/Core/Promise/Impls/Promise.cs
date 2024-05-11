@@ -684,7 +684,7 @@ namespace Cr7Sund.Package.Impl
         {
             if (this.IsRecycled)
             {
-                throw new System.Exception("cant await twice since it has been recycled");
+                throw new Exception("cant await twice since it has been recycled");
             }
             switch (CurState)
             {

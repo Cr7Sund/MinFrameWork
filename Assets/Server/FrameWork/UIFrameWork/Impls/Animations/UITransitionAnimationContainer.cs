@@ -28,7 +28,7 @@ namespace Cr7Sund.Server.UI.Impl
                 case UIAnimationAssetType.MonoBehaviour:
                     return animation.AnimationBehaviour;
                 case UIAnimationAssetType.ScriptableObject:
-                    var asset = await base.LoadAssetAsync<Object>(animation.AnimationAsset, cancellation)
+                    var asset = await LoadAssetAsync<Object>(animation.AnimationAsset, cancellation)
                      as IPromise<IUITransitionAnimationBehaviour>;
                     return asset as IUITransitionAnimationBehaviour;
                 default:

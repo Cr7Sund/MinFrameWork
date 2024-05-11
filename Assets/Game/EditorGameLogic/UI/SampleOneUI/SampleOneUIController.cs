@@ -27,6 +27,7 @@ namespace Cr7Sund.Game.UI
         protected override async PromiseTask OnEnable()
         {
             // await _pageContainer.PushPage(EditorUIKeys.SampleTwoUI);
+            await base.OnEnable();
             Debug.Debug("Enable ui one");
             EnableCount++;
         }

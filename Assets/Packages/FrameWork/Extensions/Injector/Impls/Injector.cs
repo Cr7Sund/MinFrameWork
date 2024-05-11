@@ -8,12 +8,10 @@ namespace Cr7Sund.Package.Impl
     {
 
         private static readonly IInjectorFactory _factory = new InjectorFactory();
-        private readonly IPoolBinder _poolBinder;
-        private readonly IReflectionBinder _reflectionBinder;
         private int _depth;
         private const int MAX_DEPTH = 100;
 
-        public IPoolBinder PoolBinder { get; set; }
+        public IPoolBinder PoolBinder { get;  }
         public IInjectorFactory Factory { get; set; }
         public IInjectionBinder Binder { get; set; }
         public IReflectionBinder Reflector { get; set; }
@@ -21,12 +19,12 @@ namespace Cr7Sund.Package.Impl
 
         public Injector()
         {
-            _reflectionBinder = new InjectorReflectionBinder();
-            _poolBinder = new PoolBinder();
+            IReflectionBinder reflectionBinder = new InjectorReflectionBinder();
+            IPoolBinder poolBinder = new PoolBinder();
 
             Factory = _factory;
-            Reflector = _reflectionBinder;
-            PoolBinder = _poolBinder;
+            Reflector = reflectionBinder;
+            PoolBinder = poolBinder;
         }
 
 
@@ -59,8 +57,9 @@ namespace Cr7Sund.Package.Impl
                 if (binding.Type == InjectionBindingType.POOL)
                 {
                     var pool = PoolBinder.GetOrCreate(reflectionType);
-                    pool.InflationType = PoolInflationType.INCREMENT;
                     failIf(pool == null, InjectionExceptionType.NOPOOL_CONSTRUCT);
+
+                    pool.InflationType = PoolInflationType.INCREMENT;
                     retVal = pool.GetInstance();
                 }
                 else // handle other case
@@ -224,7 +223,7 @@ namespace Cr7Sund.Package.Impl
             failIf(binding == null, InjectionExceptionType.NULL_BINDING_GET_INJECT, t, name, target);
             object bindingValue = binding.Value.SingleValue;
 
-            object retVal = null;
+            object retVal;
             if (binding.Type == InjectionBindingType.VALUE)
             {
                 if (!binding.IsToInject)

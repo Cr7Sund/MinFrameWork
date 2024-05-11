@@ -1,6 +1,4 @@
 
-using Cr7Sund.Logger;
-
 namespace Cr7Sund
 {
     public class InternalLoggerFactory

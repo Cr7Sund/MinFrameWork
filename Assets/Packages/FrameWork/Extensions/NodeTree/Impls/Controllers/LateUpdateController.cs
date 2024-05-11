@@ -1,6 +1,4 @@
-﻿using System;
-using Cr7Sund.NodeTree.Api;
-namespace Cr7Sund.NodeTree.Impl
+﻿namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class LateUpdateController : BaseController, ILateUpdate
     {

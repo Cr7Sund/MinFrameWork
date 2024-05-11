@@ -11,7 +11,7 @@ namespace Cr7Sund.Server.Impl
 {
     public abstract class BaseInstancesContainer : BaseAssetContainer, IInstancesContainer
     {
-        private Dictionary<string, GameObject> _instanceContainers = new();
+        private readonly Dictionary<string, GameObject> _instanceContainers = new();
         private readonly Dictionary<IAssetKey, UnsafeUnOrderList<GameObject>> _instantiatePromises = new();
 
 
@@ -56,7 +56,7 @@ namespace Cr7Sund.Server.Impl
             // there exist same game object instantiate not by asset
             AssertUtil.IsFalse(_instanceContainers.ContainsKey(name));
 
-            var asset = await base.LoadAsset<T>(assetKey); // resolved
+            var asset = await LoadAsset<T>(assetKey); // resolved
             var instance = InstantiateAsset(asset, name);
             if (!_instantiatePromises.TryGetValue(assetKey, out var promiseList))
             {
@@ -84,7 +84,7 @@ namespace Cr7Sund.Server.Impl
             // there exist same game object instantiate not by asset
             AssertUtil.IsFalse(_instanceContainers.ContainsKey(name));
 
-            var asset = await base.LoadAssetAsync<T>(assetKey, cancellation);
+            var asset = await LoadAssetAsync<T>(assetKey, cancellation);
             var instance = InstantiateAsset(asset, name);
             if (!_instantiatePromises.TryGetValue(assetKey, out var promiseList))
             {
@@ -98,18 +98,14 @@ namespace Cr7Sund.Server.Impl
 
         public GameObject GetInstance(IAssetKey assetKey, string name)
         {
-            if (_instanceContainers.ContainsKey(name))
-            {
-                return _instanceContainers[name];
-            }
-            return null;
+            return _instanceContainers.GetValueOrDefault(name);
         }
 
         public void ReturnInstance(string name)
         {
-            if (!_instanceContainers.TryGetValue(name, out var instance))
+            if (_instanceContainers.TryGetValue(name, out var instance))
             {
-                GameObject.Destroy(instance);
+                Object.Destroy(instance);
             }
             else
             {
@@ -122,14 +118,13 @@ namespace Cr7Sund.Server.Impl
 
         public async PromiseTask ReturnInstance(string name, IAssetKey assetKey)
         {
-            if (!_instanceContainers.TryGetValue(name, out var instance))
+            if (_instanceContainers.TryGetValue(name, out var instance))
             {
                 GameObject.Destroy(instance);
             }
 
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
             {
-                int count = instances.Count;
                 GameObject target = null;
                 foreach (var item in instances)
                 {
@@ -149,11 +144,11 @@ namespace Cr7Sund.Server.Impl
             }
         }
 
-        public override async PromiseTask UnloadAll()
+        public async override PromiseTask UnloadAll()
         {
             foreach (var item in _instanceContainers)
             {
-                GameObject.Destroy(item.Value);
+                Object.Destroy(item.Value);
             }
             _instanceContainers.Clear();
 
@@ -161,7 +156,7 @@ namespace Cr7Sund.Server.Impl
             {
                 foreach (var instance in item.Value)
                 {
-                    GameObject.Destroy(instance);
+                    Object.Destroy(instance);
                 }
                 await base.Unload(item.Key);
                 item.Value.Clear();

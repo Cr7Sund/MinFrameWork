@@ -321,14 +321,14 @@ namespace Cr7Sund.Package.Impl
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T>>(CommandPromiseBinding.MaxPoolCount);
                 result = pool.GetInstance();
-                InitPromise<T>(result);
+                InitPromise(result);
                 result.ReleaseHandler = HandleResolve;
             }
             else
             {
                 result = new CommandPromise<T>();
                 result.ReleaseHandler = HandleResolve;
-                InitPromise<T>(result);
+                InitPromise(result);
             }
 
             return result;
@@ -342,13 +342,13 @@ namespace Cr7Sund.Package.Impl
             {
                 var pool = _poolBinder.GetOrCreate<CommandPromise<T1, T2>>(CommandPromiseBinding.MaxPoolCount);
                 result = pool.GetInstance();
-                InitPromise<T2>(result);
+                InitPromise(result);
                 result.ReleaseHandler = HandleResolve;
             }
             else
             {
                 result = new CommandPromise<T1, T2>();
-                InitPromise<T2>(result);
+                InitPromise(result);
                 result.ReleaseHandler = HandleResolve;
             }
 
