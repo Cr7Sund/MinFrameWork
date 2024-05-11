@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Api;
 namespace Cr7Sund.Package.Impl
@@ -68,8 +69,8 @@ namespace Cr7Sund.Package.Impl
 
                 if (result)
                 {
-                    wait.pendingPromise.Resolve();
                     node = RemoveNode(node);
+                    wait.pendingPromise.Resolve();
                 }
                 else
                 {
@@ -123,8 +124,13 @@ namespace Cr7Sund.Package.Impl
             return WaitUntil(t => !predicate(t));
         }
 
-        public IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll)
+        public IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll, CancellationToken cancellation = default)
         {
+            if (cancellation.IsCancellationRequested)
+            {
+                return Promise.Rejected(new OperationCanceledException(cancellation));
+            }
+
             var promise = new Promise();
 
             var wait = new PredicateWait
@@ -139,19 +145,24 @@ namespace Cr7Sund.Package.Impl
 
             waitings.AddLast(wait);
 
+            cancellation.Register(() =>
+            {
+                promise.Cancel();
+                waitings.Remove(wait);
+            });
             return promise;
         }
 
-        public IPromise Schedule(int duration, Action<TimeData> poll)
+        public IPromise Schedule(int duration, Action<TimeData> poll, CancellationToken cancellation = default)
         {
             AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 
-            return Schedule(t => t.elapsedTime > duration, t => poll(t));
+            return Schedule(t => t.elapsedTime > duration, t => poll(t), cancellation);
         }
 
-        public IPromise Schedule(Action<TimeData> poll)
+        public IPromise Schedule(Action<TimeData> poll, CancellationToken cancellation = default)
         {
-            return Schedule(t => false, t => poll(t));
+            return Schedule(t => false, t => poll(t), cancellation);
         }
 
         /// <summary>
@@ -175,6 +186,11 @@ namespace Cr7Sund.Package.Impl
             }
 
             return null;
+        }
+
+        public void Clear()
+        {
+            waitings.Clear();
         }
 
         public void Dispose()

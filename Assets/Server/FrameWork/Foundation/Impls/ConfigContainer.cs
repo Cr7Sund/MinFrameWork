@@ -16,9 +16,9 @@ namespace Cr7Sund.Server.Impl
             return await base.LoadAsset<T>(assetKey);
         }
 
-        public void RemoveConfigAsync(IAssetKey assetKey)
+        public async void RemoveConfigAsync(IAssetKey assetKey)
         {
-            base.Unload(assetKey);
+            await base.Unload(assetKey);
         }
     }
 }

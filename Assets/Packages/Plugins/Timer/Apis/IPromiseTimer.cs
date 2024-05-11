@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 namespace Cr7Sund.Package.Api
 {
     public interface IPromiseTimer : IDisposable
@@ -26,12 +27,12 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll);
+        IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll, CancellationToken cancellation = default);
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise Schedule(int duration, Action<TimeData> poll);
-        IPromise Schedule(Action<TimeData> poll);
+        IPromise Schedule(int duration, Action<TimeData> poll, CancellationToken cancellation = default);
+        IPromise Schedule(Action<TimeData> poll, CancellationToken cancellation = default);
         /// <summary>
         ///     Update all pending promises. Must be called for the promises to progress and resolve at all.
         /// </summary>
@@ -42,6 +43,7 @@ namespace Cr7Sund.Package.Api
         /// </summary>
         bool Cancel(IPromise promise);
 
+        void Clear();
         // TODO 
         // Support wait for frame
         // https://github.com/jonagill/AsyncRoutines/tree/main

@@ -26,7 +26,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             return _controllerModule.LoadAsync();
         }
-        
+
         protected override PromiseTask OnUnloadAsync()
         {
             return _controllerModule.UnloadAsync();
@@ -59,10 +59,10 @@ namespace Cr7Sund.NodeTree.Impl
 
         public override PromiseTask OnStart()
         {
-            return _controllerModule.Start();
+            return _controllerModule.Start(AddCancellation.Token);
         }
 
-        public override async PromiseTask OnStop()
+        public override async PromiseTask OnStopAsync()
         {
             await _controllerModule.Stop();
         }
@@ -89,18 +89,6 @@ namespace Cr7Sund.NodeTree.Impl
             base.OnLateUpdate(milliseconds);
 
             _controllerModule.LateUpdate(milliseconds);
-        }
-
-        public override void RegisterAddTask(CancellationToken cancellationToken)
-        {
-            base.RegisterAddTask(cancellationToken);
-            _controllerModule.RegisterAddTask(cancellationToken);
-        }
-
-        public override void RegisterRemoveTask(CancellationToken cancellationToken)
-        {
-            base.RegisterRemoveTask(cancellationToken);
-            _controllerModule.RegisterRemoveTask(cancellationToken);
         }
     }
 }

@@ -6,22 +6,21 @@ using Cr7Sund.FrameWork.Util;
 using UnityEngine.ResourceManagement.AsyncOperations;
 namespace Cr7Sund.Server.Impl
 {
-    internal class AsynChainOperations : IPoolNode<AsynChainOperations>, IDisposable
+    internal class AsyncChainOperations : IPoolNode<AsyncChainOperations>, IDisposable
     {
-        private static ReusablePool<AsynChainOperations> _pool;
+        private static ReusablePool<AsyncChainOperations> _pool;
 
         private AsyncOperationHandle _handler;
         private readonly Action<AsyncOperationHandle> _completeAction;
-        private Action<AsynChainOperations> _deleteAction;
+        private Action<AsyncChainOperations> _deleteAction;
         private List<PromiseTaskSource> _promiseTaskSources = new();
-        private AsynChainOperations _nextNode;
+        private AsyncChainOperations _nextNode;
 
-        public ref AsynChainOperations NextNode => ref _nextNode;
+        public ref AsyncChainOperations NextNode => ref _nextNode;
         public bool IsRecycled { get; set; }
         public AsyncOperationHandle Handler => _handler;
 
-
-        public AsynChainOperations()
+        public AsyncChainOperations()
         {
             _completeAction = OnCompleted;
         }
@@ -29,6 +28,10 @@ namespace Cr7Sund.Server.Impl
 
         public PromiseTask Chain()
         {
+            if (!_handler.IsValid())
+            {
+                return PromiseTask.CompletedTask;
+            }
             if (_handler.IsDone)
             {
                 return PromiseTask.CompletedTask;
@@ -39,21 +42,20 @@ namespace Cr7Sund.Server.Impl
             return new PromiseTask(taskSource, 0);
         }
 
-        public void Cancel(CancellationToken cancellation)
+        public void RegisterCancel(CancellationToken cancellation)
         {
-            for (int i = _promiseTaskSources.Count - 1; i >= 0; i--)
+            for (int i = 0; i < _promiseTaskSources.Count; i++)
             {
                 PromiseTaskSource item = _promiseTaskSources[i];
-                item.Cancel(cancellation);
+                item.RegisterCancel(cancellation);
             }
-
         }
 
-        public static AsynChainOperations Start(ref AsyncOperationHandle handler)
+        public static AsyncChainOperations Start(ref AsyncOperationHandle handler, CancellationToken cancellation)
         {
             if (!_pool.TryPop(out var wrapper))
             {
-                wrapper = new AsynChainOperations();
+                wrapper = new AsyncChainOperations();
             }
 
             wrapper._handler = handler;
@@ -62,24 +64,42 @@ namespace Cr7Sund.Server.Impl
                 handler.Completed += wrapper._completeAction;
             }
 
+            if (cancellation.IsCancellationRequested)
+            {
+                wrapper.RegisterCancel(cancellation);
+            }
+            else
+            {
+                cancellation.Register(() =>
+                {
+                    wrapper.RegisterCancel(cancellation);
+                });
+            }
+
             return wrapper;
         }
 
         public T GetResult<T>()
         {
-            if (_handler.IsValid() && _handler.IsDone)
+            if (!_handler.IsDone)
+            {
+                throw new MyException(AssetLoaderExceptionType.no_done_State);
+            }
+
+            if (_handler.IsValid())
             {
                 AssertUtil.NotNull(_handler.Result);
                 AssertUtil.IsInstanceOf(typeof(T), _handler.Result);
+
                 return (T)_handler.Result;
             }
             else
             {
-                throw new MyException(AssetLoaderExceptionType.no_done_State);
+                return default;
             }
         }
 
-        public void Unload(Action<AsynChainOperations> deleteAction)
+        public void Unload(Action<AsyncChainOperations> deleteAction)
         {
             if (_promiseTaskSources.Count == 0)
             {
@@ -102,7 +122,7 @@ namespace Cr7Sund.Server.Impl
         private void OnCompleted(AsyncOperationHandle h)
         {
             h.Completed -= OnCompleted;
-            for (int i = _promiseTaskSources.Count - 1; i >= 0; i--)
+            for (int i = 0; i < _promiseTaskSources.Count; i++)
             {
                 PromiseTaskSource item = _promiseTaskSources[i];
                 // item.status = h.ToTaskStatus();

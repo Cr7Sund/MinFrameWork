@@ -14,37 +14,46 @@ namespace Cr7Sund.NodeTree.Impl
         // No preload
         // since it should be existed one, but preload the node is still no created
 
-        public async PromiseTask Start()
+        public async PromiseTask Start(CancellationToken cancellation)
         {
             IsStarted = true;
             try
             {
-                await OnStart();
+                await OnStart(cancellation);
             }
             catch (Exception e)
             {
-                Debug.Error(e);
                 if (e is OperationCanceledException)
                 {
                     throw;
+                }
+                else
+                {
+                    Debug.Error(e);
                 }
             }
         }
 
         public async PromiseTask Stop()
         {
-            IsStarted = false;
             try
             {
                 await OnStop();
             }
             catch (Exception e)
             {
-                Debug.Error(e);
                 if (e is OperationCanceledException)
                 {
                     throw;
                 }
+                else
+                {
+                    Debug.Error(e);
+                }
+            }
+            finally
+            {
+                IsStarted = false;
             }
         }
 
@@ -57,35 +66,44 @@ namespace Cr7Sund.NodeTree.Impl
             }
             catch (Exception e)
             {
-                Debug.Error(e);
                 if (e is OperationCanceledException)
                 {
                     throw;
+                }
+                else
+                {
+                    Debug.Error(e);
                 }
             }
         }
 
         public async PromiseTask Disable()
         {
-            IsActive = false;
             try
             {
                 await OnDisable();
             }
             catch (Exception e)
             {
-                Debug.Error(e);
                 if (e is OperationCanceledException)
                 {
                     throw;
                 }
+                else
+                {
+                    Debug.Error(e);
+                }
+            }
+            finally
+            {
+                IsActive = false;
             }
         }
 
-        public virtual void RegisterAddTask(CancellationToken cancellationToken) { }
+        public virtual PromiseTask RegisterAddTask(CancellationToken cancellationToken) { return PromiseTask.CompletedTask; }
         public virtual void RegisterRemoveTask(CancellationToken cancellationToken) { }
 
-        protected virtual PromiseTask OnStart() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnStart(CancellationToken cancellation) { return PromiseTask.CompletedTask; }
         protected virtual PromiseTask OnStop() { return PromiseTask.CompletedTask; }
         protected virtual PromiseTask OnEnable() { return PromiseTask.CompletedTask; }
         protected virtual PromiseTask OnDisable() { return PromiseTask.CompletedTask; }

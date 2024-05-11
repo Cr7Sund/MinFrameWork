@@ -13,17 +13,6 @@ namespace Cr7Sund.Server.Scene.Apis
         /// </summary>
         INode FocusScene { get; }
 
-        /// <summary>
-        /// Runs a scene, unloading all previously loaded scenes.
-        /// </summary>
-        /// <param name="key">The key of the scene to run.</param>
-        PromiseTask SwitchScene(IAssetKey key);
-
-        /// <summary>
-        /// Removes a scene from the module.
-        /// </summary>
-        /// <param name="key">The key of the scene to remove.</param>
-        PromiseTask RemoveScene(IAssetKey key);
 
         /// <summary>
         /// Unload a scene from the module.
@@ -37,6 +26,12 @@ namespace Cr7Sund.Server.Scene.Apis
         /// <param name="key">The key of the scene to preload.</param>
         /// <returns>An asynchronous operation representing the preloading process.</returns>
         PromiseTask PreLoadScene(IAssetKey key);
+
+        /// <summary>
+        /// Runs a scene, unloading all previously loaded scenes when additive
+        /// </summary>
+        /// <param name="key">The key of the scene to run.</param>
+        PromiseTask SwitchScene(IAssetKey key);
 
         /// <summary>
         /// Adds and runs a scene without unloading previously loaded scenes.

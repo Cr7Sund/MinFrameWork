@@ -24,25 +24,16 @@ namespace Cr7Sund.Game.GameLogic
 
         protected override async PromiseTask RunLoginScene()
         {
-            try
-            {
-                await _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
-            }
-            catch (Exception ex)
-            {
-                Console.Error(ex);
-            }
+            await _sceneModule.AddScene(SceneKeys.EditorSceneKeyOne);
         }
-
-
 
         #endregion
 
         #region Exit Game
         protected override async PromiseTask GameOver()
         {
-            await base.GameOver();
             await _sceneModule.UnloadScene(SceneKeys.EditorSceneKeyOne);
+            await base.GameOver();
         }
 
         #endregion

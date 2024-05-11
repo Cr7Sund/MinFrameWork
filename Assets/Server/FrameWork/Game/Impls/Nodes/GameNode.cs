@@ -25,7 +25,7 @@ namespace Cr7Sund.Server.Impl
             Inject();
             Init();
             await LoadAsync();
-            await Start();
+            await Start(AddCancellation.Token);
             await SetActive(true);
         }
 
@@ -46,7 +46,7 @@ namespace Cr7Sund.Server.Impl
                 await UnloadAsync();
             }
 
-            Destroy();
+            Destroy(null);
             Dispose();
         }
 

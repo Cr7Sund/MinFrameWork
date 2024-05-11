@@ -1,7 +1,8 @@
-﻿using Cr7Sund.Package.Api;
+﻿using System.Threading;
+using Cr7Sund.Package.Api;
 namespace Cr7Sund.NodeTree.Api
 {
-    public interface INode : ILifeTime, ILoadAsync, IInjectable, IRunnable, IInitialize, IDestroy
+    public interface INode : ILifeTime, ILoadAsync, IInjectable, IRunnable, IInitialize
     {
         IContext Context { get; }
         INode Parent { get; set; }
@@ -10,19 +11,21 @@ namespace Cr7Sund.NodeTree.Api
         NodeState NodeState { get; }
         IAssetKey Key { get; }
         int ChildCount { get; }
-        
+        CancellationTokenSource AddCancellation{get; }
+
         PromiseTask PreLoadChild(INode child);
         PromiseTask AddChildAsync(INode child, bool overwrite = false);
         PromiseTask UnloadChildAsync(INode child, bool overwrite = false);
         PromiseTask RemoveChildAsync(INode child, bool overwrite = false);
+        PromiseTask CancelLoadChild(INode child);
+        void Destroy(IContext parentContext);
         INode GetChild(int index);
-
 
         #region Load
         PromiseTask LoadAsync();
         PromiseTask PreLoadAsync();
         PromiseTask UnloadAsync();
-        void CancelLoad();
+        PromiseTask CancelLoadAsync(CancellationToken cancellation);
         void CancelUnload();
 
         void SetAdding();
@@ -30,7 +33,7 @@ namespace Cr7Sund.NodeTree.Api
         void SetReady();
         void StartUnload(bool shouldUnload);
         void EndUnLoad(bool unload);
-        void CancelCurTask();
+        PromiseTask CancelCurTask();
         #endregion
 
         #region LifeCycle
@@ -38,7 +41,7 @@ namespace Cr7Sund.NodeTree.Api
         PromiseTask OnStart();
         PromiseTask OnEnable();
         PromiseTask OnDisable();
-        PromiseTask OnStop();
+        PromiseTask OnStopAsync();
         #endregion
 
     }

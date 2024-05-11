@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Config;
 using Cr7Sund.FrameWork.Util;
@@ -20,14 +21,14 @@ namespace Cr7Sund.Server.UI.Impl
         protected override IAssetLoader Loader => _assetLoader;
 
 
-        public async PromiseTask<IUITransitionAnimationBehaviour> GetAnimationBehaviour(UITransitionAnimation animation)
+        public async PromiseTask<IUITransitionAnimationBehaviour> GetAnimationBehaviour(UITransitionAnimation animation, CancellationToken cancellation)
         {
             switch (animation.AssetType)
             {
                 case UIAnimationAssetType.MonoBehaviour:
                     return animation.AnimationBehaviour;
                 case UIAnimationAssetType.ScriptableObject:
-                    var asset = await base.LoadAssetAsync<Object>(animation.AnimationAsset)
+                    var asset = await base.LoadAssetAsync<Object>(animation.AnimationAsset, cancellation)
                      as IPromise<IUITransitionAnimationBehaviour>;
                     return asset as IUITransitionAnimationBehaviour;
                 default:
@@ -35,32 +36,26 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        public async PromiseTask<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter)
+        public async PromiseTask<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter, CancellationToken cancellation)
         {
-            var settings = await _configContainer.LoadAssetAsync<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig);
+            var settings = await _configContainer.LoadAssetAsync<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig, cancellation);
             return settings.GetDefaultPageTransitionAnimation(push, enter);
         }
 
-        public void UnloadAnimation(UITransitionAnimation animation)
+        public async PromiseTask UnloadAnimation(UITransitionAnimation animation)
         {
             AssertUtil.NotNull(animation);
 
             switch (animation.AssetType)
             {
                 case UIAnimationAssetType.ScriptableObject:
-                    Unload(animation.AnimationAsset);
+                   await Unload(animation.AnimationAsset);
                     break;
                 case UIAnimationAssetType.MonoBehaviour:
                 default:
                     break;
             }
 
-        }
-
-        public override void Dispose()
-        {
-            Unload(ConfigDefines.UITransitionConfig);
-            base.Dispose();
         }
 
     }

@@ -26,6 +26,14 @@ namespace Cr7Sund
                 _logProvider?.WriteException(logLevel, ex);
             }
         }
+
+        private void Log(LogLevel logLevel, Exception ex, string prefix)
+        {
+            if (logLevel >= _miniumLogLevel)
+            {
+                _logProvider?.WriteException(logLevel, ex, prefix);
+            }
+        }
         private void Log(LogLevel logLevel, string message)
         {
             if (logLevel >= _miniumLogLevel)
@@ -69,6 +77,11 @@ namespace Cr7Sund
             Log(LogLevel.Error, e);
         }
 
+        public void Error(Exception e, string message)
+        {
+            Log(LogLevel.Error, e, message);
+        }
+
         public void Fatal(string message)
         {
             Log(LogLevel.Fatal, message);
@@ -88,6 +101,10 @@ namespace Cr7Sund
         {
             Log(LogLevel.Info, message);
         }
+        public void Info(Exception ex)
+        {
+            Log(LogLevel.Info, ex);
+        }
         public void Info<T0>(string message, T0 propertyValue0)
         {
             Log(LogLevel.Info, message, propertyValue0);
@@ -100,6 +117,15 @@ namespace Cr7Sund
         public void Warn(string message)
         {
             Log(LogLevel.Warn, message);
+        }
+        public void Warn<T0>(string message, T0 propertyValue0)
+        {
+            Log(LogLevel.Warn, message, propertyValue0);
+        }
+
+        public void Warn<T0, T1>(string message, T0 propertyValue0, T1 propertyValue1)
+        {
+            Log(LogLevel.Warn, message, propertyValue0, propertyValue1);
         }
 
         public void Debug(string message)
@@ -120,11 +146,6 @@ namespace Cr7Sund
         public void Error<T0, T1>(string message, T0 propertyValue0, T1 propertyValue1)
         {
             Log(LogLevel.Error, message, propertyValue0, propertyValue1);
-        }
-
-        public void Warn<T0>(string message, T0 propertyValue0)
-        {
-            Log(LogLevel.Warn, message, propertyValue0);
         }
 
         public void Error<T0>(string message, T0 propertyValue0)

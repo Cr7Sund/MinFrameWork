@@ -67,8 +67,10 @@ namespace Cr7Sund
             _registerAction = continuation;
         }
 
-        public void Cancel(CancellationToken cancellation)
+        public void RegisterCancel(CancellationToken cancellation)
         {
+            if (_status != PromiseTaskStatus.Pending) return;
+
             if (cancellation.IsCancellationRequested)
             {
                 Reject(new OperationCanceledException(cancellation));
@@ -87,6 +89,8 @@ namespace Cr7Sund
 
         public void Reject(Exception e)
         {
+            AssertUtil.IsTrue(_status == PromiseTaskStatus.Pending);
+
             _error = e;
             if (e is OperationCanceledException)
             {
@@ -96,7 +100,6 @@ namespace Cr7Sund
             {
                 _status = PromiseTaskStatus.Faulted;
             }
-            _registerAction?.Invoke();
         }
 
         private void TryReturn()

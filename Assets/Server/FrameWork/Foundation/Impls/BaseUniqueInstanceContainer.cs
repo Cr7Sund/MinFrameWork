@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
 using UnityEngine;
@@ -76,35 +77,41 @@ namespace Cr7Sund.Server.Impl
             return instance;
         }
 
-        public async PromiseTask<T> CreateInstanceAsync<T>(IAssetKey assetKey) where T : Object
+        public async PromiseTask<T> CreateInstanceAsync<T>(IAssetKey assetKey, CancellationToken cancellation) where T : Object
         {
             if (_instancePromises.ContainsKey(assetKey))
             {
                 return _instancePromises[assetKey].GetResult<T>();
             }
 
-            var asset = await LoadAssetAsync<T>(assetKey);
+            var asset = await LoadAssetAsync<T>(assetKey, cancellation);
             var instance = InstantiateAsset(asset);
             _instancePromises.Add(assetKey, InstanceWrapper.Create(instance as GameObject));
             return instance;
         }
 
-        public override void Unload(IAssetKey assetKey)
+        public override async PromiseTask Unload(IAssetKey assetKey)
         {
             if (_instancePromises.ContainsKey(assetKey))
             {
                 _instancePromises[assetKey].TryDestroy();
-                base.Unload(assetKey);
+                await base.Unload(assetKey);
             }
         }
 
-        public override void UnloadAll()
+        public override async PromiseTask UnloadAll()
         {
             foreach (var item in _instancePromises)
             {
                 item.Value.TryDestroy();
-                base.Unload(item.Key);
+                await base.Unload(item.Key);
             }
+        }
+
+        public async PromiseTask CancelLoad(IAssetKey assetKey, CancellationToken token)
+        {
+            await base.CancelLoadAsync(assetKey, token);
+            AssertUtil.IsFalse(_instancePromises.ContainsKey(assetKey));
         }
 
         public override void Dispose()

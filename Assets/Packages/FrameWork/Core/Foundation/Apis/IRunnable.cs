@@ -6,10 +6,7 @@ namespace Cr7Sund
     {
         bool IsStarted { get;  set; }
 
-        PromiseTask Start();
+        PromiseTask Start(CancellationToken cancellation);
         PromiseTask Stop();
-
-        void RegisterAddTask(CancellationToken cancellationToken);
-        void RegisterRemoveTask(CancellationToken cancellationToken);
     }
 }

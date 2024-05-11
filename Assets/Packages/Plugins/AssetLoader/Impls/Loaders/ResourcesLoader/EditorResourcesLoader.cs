@@ -23,23 +23,24 @@ namespace Cr7Sund.AssetLoader.Impl
             return PromiseTask.CompletedTask;
         }
 
-
         PromiseTask<T> IAssetLoader.Load<T>(IAssetKey key)
         {
             return new PromiseTask<T>(default(T), 0);
         }
 
-        PromiseTask<T> IAssetLoader.LoadAsync<T>(IAssetKey key)
+        PromiseTask<T> IAssetLoader.LoadAsync<T>(IAssetKey key, CancellationToken cancellation)
         {
             return new PromiseTask<T>(default(T), 0);
         }
 
-        public void Unload(IAssetKey handler)
+        public PromiseTask Unload(IAssetKey handler)
         {
+            return PromiseTask.CompletedTask;
         }
 
-        public void RegisterCancelLoad(IAssetKey handler, CancellationToken cancellation)
+        public PromiseTask RegisterCancelLoad(IAssetKey handler, CancellationToken cancellation)
         {
+            return PromiseTask.CompletedTask;
         }
 
         public void LateUpdate(int millisecond)

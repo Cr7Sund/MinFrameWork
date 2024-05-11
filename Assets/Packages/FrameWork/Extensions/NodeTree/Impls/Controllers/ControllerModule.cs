@@ -29,13 +29,6 @@ namespace Cr7Sund.NodeTree.Impl
             get;
             set;
         }
-        public bool IsInit
-        {
-            get;
-            private set;
-        }
-        public CancellationTokenSource AddCancellation { get; }
-        public CancellationTokenSource RemoveCancellation { get; }
 
 
         public ControllerModule()
@@ -47,13 +40,13 @@ namespace Cr7Sund.NodeTree.Impl
 
 
         #region IControllerModule Implementation
-        public async PromiseTask AddController<T>() where T : IController
+        public async PromiseTask AddController<T>(CancellationToken cancellation = default) where T : IController
         {
             CheckBusiness<T>();
-            await AddController(Activator.CreateInstance<T>());
+            await AddController(Activator.CreateInstance<T>(), cancellation);
         }
 
-        public async PromiseTask AddController(IController controller)
+        public async PromiseTask AddController(IController controller, CancellationToken cancellation)
         {
             AssertUtil.NotNull(controller, NodeTreeExceptionType.EMPTY_CONTROLLER_ADD);
             CheckController(controller);
@@ -77,7 +70,7 @@ namespace Cr7Sund.NodeTree.Impl
 
                 try
                 {
-                    await controller.Start();
+                    await controller.Start(cancellation);
                 }
                 catch
                 {
@@ -203,7 +196,7 @@ namespace Cr7Sund.NodeTree.Impl
         #endregion
 
         #region LifeCycles
-        public async PromiseTask Start()
+        public async PromiseTask Start(CancellationToken cancellation)
         {
             if (IsStarted) return;
 
@@ -211,7 +204,7 @@ namespace Cr7Sund.NodeTree.Impl
             int count = _childControllers.Count;
             for (int i = 0; i < count; i++)
             {
-                await _childControllers[i].Start();
+                await _childControllers[i].Start(cancellation);
             }
         }
         public async PromiseTask Enable()
@@ -272,22 +265,6 @@ namespace Cr7Sund.NodeTree.Impl
                 await _childControllers[i].Disable();
             }
             IsActive = false;
-        }
-
-        public void RegisterAddTask(CancellationToken cancellationToken)
-        {
-            int count = _childControllers.Count;
-            for (int i = 0; i < count; i++)
-            {
-                _childControllers[i].RegisterAddTask(cancellationToken);
-            }
-        }
-        public void RegisterRemoveTask(CancellationToken cancellationToken)
-        {
-            for (int i = 0; i < _childControllers.Count; i++)
-            {
-                _childControllers[i].RegisterAddTask(cancellationToken);
-            }
         }
 
         #endregion

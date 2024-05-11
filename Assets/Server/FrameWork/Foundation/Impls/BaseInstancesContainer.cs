@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cr7Sund.Collection.Generic;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
@@ -67,7 +68,7 @@ namespace Cr7Sund.Server.Impl
             return instance;
         }
 
-        public async PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name) where T : Object
+        public async PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name, CancellationToken cancellation) where T : Object
         {
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
             {
@@ -83,7 +84,7 @@ namespace Cr7Sund.Server.Impl
             // there exist same game object instantiate not by asset
             AssertUtil.IsFalse(_instanceContainers.ContainsKey(name));
 
-            var asset = await base.LoadAssetAsync<T>(assetKey);
+            var asset = await base.LoadAssetAsync<T>(assetKey, cancellation);
             var instance = InstantiateAsset(asset, name);
             if (!_instantiatePromises.TryGetValue(assetKey, out var promiseList))
             {
@@ -119,7 +120,7 @@ namespace Cr7Sund.Server.Impl
             }
         }
 
-        public void ReturnInstance(string name, IAssetKey assetKey)
+        public async PromiseTask ReturnInstance(string name, IAssetKey assetKey)
         {
             if (!_instanceContainers.TryGetValue(name, out var instance))
             {
@@ -143,12 +144,12 @@ namespace Cr7Sund.Server.Impl
             }
             if (_instantiatePromises[assetKey].Count == 0)
             {
-                base.Unload(assetKey);
+                await base.Unload(assetKey);
                 _instantiatePromises.Remove(assetKey);
             }
         }
 
-        public override void UnloadAll()
+        public override async PromiseTask UnloadAll()
         {
             foreach (var item in _instanceContainers)
             {
@@ -162,12 +163,12 @@ namespace Cr7Sund.Server.Impl
                 {
                     GameObject.Destroy(instance);
                 }
-                base.Unload(item.Key);
+                await base.Unload(item.Key);
                 item.Value.Clear();
             }
             _instantiatePromises.Clear();
 
-            base.UnloadAll();
+            await base.UnloadAll();
         }
 
         public override void Dispose()

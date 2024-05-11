@@ -20,7 +20,12 @@ namespace Cr7Sund.Server.Scene.Impl
         protected override void OnInit()
         {
             base.OnInit();
+        }
+
+        public override PromiseTask OnStart()
+        {
             CreateUITransitionBarrier();
+            return base.OnStart();
         }
 
         public async override PromiseTask OnEnable()
@@ -29,13 +34,20 @@ namespace Cr7Sund.Server.Scene.Impl
             await ActiveScene();
         }
 
+        public override async PromiseTask OnStopAsync()
+        {
+            await _pageModule.CloseAll();
+            _sceneTimer.Clear();
+            await base.OnStopAsync();
+        }
+
         protected override async PromiseTask OnPreloadAsync()
         {
             var sceneKey = (SceneKey)Key;
 
             if (!sceneKey.IsVirtualScene)
             {
-                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, false);
+                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, false, AddCancellation.Token);
             }
             await base.OnPreloadAsync();
         }
@@ -46,27 +58,26 @@ namespace Cr7Sund.Server.Scene.Impl
 
             if (!sceneKey.IsVirtualScene)
             {
-                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad);
+                await _sceneLoader.LoadSceneAsync(sceneKey, sceneKey.LoadSceneMode, sceneKey.ActivateOnLoad, AddCancellation.Token);
             }
             await base.OnLoadAsync();
         }
 
+        protected override async PromiseTask OnCancelLoadAsync(CancellationToken cancellation)
+        {
+            await _sceneLoader.RegisterCancelLoad(Key, cancellation);
+            await base.OnCancelLoadAsync(cancellation);
+        }
+
         protected async override PromiseTask OnUnloadAsync()
         {
-            await _pageModule.CloseAll();
-
             var sceneKey = (SceneKey)Key;
             if (!sceneKey.IsVirtualScene)
             {
-                _sceneLoader.UnloadScene(sceneKey);
+                await _sceneLoader.UnloadScene(sceneKey);
             }
+            
             await base.OnUnloadAsync();
-        }
-
-        public override void RegisterAddTask(CancellationToken cancellationToken)
-        {
-            base.RegisterAddTask(cancellationToken);
-            _sceneLoader.RegisterCancelLoad(Key, cancellationToken);
         }
 
         private PromiseTask ActiveScene()
@@ -85,9 +96,9 @@ namespace Cr7Sund.Server.Scene.Impl
         private void CreateUITransitionBarrier()
         {
             _sceneTimer.Schedule((timeData) =>
-            {
-                _pageModule.TimeOut(timeData.elapsedTime);
-            });
+                    {
+                        _pageModule.TimeOut(timeData.elapsedTime);
+                    });
         }
     }
 }

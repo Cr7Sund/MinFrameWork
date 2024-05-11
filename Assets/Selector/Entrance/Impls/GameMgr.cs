@@ -19,12 +19,12 @@ namespace Cr7Sund.Selector.Impl
             {
                 case GameStatus.Started:
                     {
-                        EntranceConsole.Fatal("GameMgr::Start  Game already started...");
+                        EntranceConsole.Warn("GameMgr::Start  Game already started...");
                         break;
                     }
                 case GameStatus.Restarting:
                     {
-                        EntranceConsole.Fatal("GameMgr::Start  Game is currently restarting...");
+                        EntranceConsole.Warn("GameMgr::Start  Game is currently restarting...");
                         break;
                     }
                 case GameStatus.Closing:
@@ -78,7 +78,7 @@ namespace Cr7Sund.Selector.Impl
             {
                 case GameStatus.Started:
                     {
-                        EntranceConsole.Fatal("GameMgr::Close");
+                        EntranceConsole.Info("GameMgr::Close");
                         _status = GameStatus.Closing;
                         await DoClose();
                         _status = GameStatus.Closed;
@@ -96,7 +96,7 @@ namespace Cr7Sund.Selector.Impl
                     }
                 case GameStatus.Closed:
                     {
-                        EntranceConsole.Fatal("GameMgr::Close  Game has not been started yet...");
+                        // EntranceConsole.Fatal("GameMgr::Close  Game has not been started yet...");
                         return;
                     }
                 default:

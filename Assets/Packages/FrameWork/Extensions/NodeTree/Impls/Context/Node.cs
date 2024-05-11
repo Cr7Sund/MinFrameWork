@@ -10,8 +10,6 @@ namespace Cr7Sund.NodeTree.Impl
 {
     public abstract class Node : AsyncLoadable, INode
     {
-        public static readonly CancellationTokenSource UnitCancellation = new CancellationTokenSource();
-
         private readonly IAssetKey _key;
         private List<INode> _childNodes;
         private INode _parent;
@@ -78,6 +76,29 @@ namespace Cr7Sund.NodeTree.Impl
         public INode this[int index] => GetChild(index);
         public IContext Context => _context;
 
+        public CancellationTokenSource AddCancellation
+        {
+            get
+            {
+                if (_addCancellation == null)
+                {
+                    _addCancellation = GetNewCancellation();
+                }
+                return _addCancellation;
+            }
+        }
+
+        protected CancellationTokenSource RemoveCancellation
+        {
+            get
+            {
+                if (_removeCancellation == null)
+                {
+                    _removeCancellation = GetNewCancellation();
+                }
+                return _removeCancellation;
+            }
+        }
 
         public Node(IAssetKey assetKey)
         {
@@ -89,6 +110,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             child.StartPreload();
 
+            //PLAN: test after remove below
             if (!child.IsInjected)
             {
                 _context.AddContext(child.Context);
@@ -111,7 +133,7 @@ namespace Cr7Sund.NodeTree.Impl
             OnInit();
         }
 
-        public async PromiseTask Start()
+        public async PromiseTask Start(CancellationToken cancellation)
         {
             if (IsStarted)
             {
@@ -264,7 +286,7 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     var first = resultQueue.Pop();
 
-                    await first.OnStop();
+                    await first.OnStopAsync();
                     first.IsStarted = false;
                 }
             }
@@ -290,13 +312,13 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public void CancelCurTask()
+        public async PromiseTask CancelCurTask()
         {
             switch (NodeState)
             {
                 case NodeState.Adding:
                 case NodeState.Preloading:
-                    CancelLoad();
+                    await CancelLoadAsync(AddCancellation.Token);
                     return;
                 case NodeState.Unloading:
                 case NodeState.Removing:
@@ -312,40 +334,28 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public void CancelLoad()
+        public async PromiseTask CancelLoadChild(INode child)
         {
-            if (LoadState != LoadState.Loading) return;
-
-
-            if (_addCancellation == null)
+            if (child.NodeState != NodeState.Adding)
             {
-                _addCancellation = GetNewCancellation();
-                _addCancellation.Cancel();
-
-                RegisterAddTask(_addCancellation.Token);
+                Console.Warn("try to cancel an not adding node");
+                return;
             }
+
+            child.AddCancellation.Cancel();
+
+            // { child.AddStatus.Cancel(); }
+            await child.CancelLoadAsync(child.AddCancellation.Token);
         }
 
         public void CancelUnload()
         {
             if (LoadState != LoadState.Unloading) return;
 
-            if (_removeCancellation == null)
-            {
-                _removeCancellation = GetNewCancellation();
-                RegisterRemoveTask(_removeCancellation.Token);
-            }
-            _removeCancellation.Cancel();
-        }
-        public virtual void RegisterAddTask(CancellationToken cancellationToken)
-        {
+            RemoveCancellation.Cancel();
         }
 
-        public virtual void RegisterRemoveTask(CancellationToken cancellationToken)
-        {
-        }
-
-        public void Destroy()
+        public void Destroy(IContext parentContext)
         {
             IsInit = false;
             _childNodes = null;
@@ -362,14 +372,29 @@ namespace Cr7Sund.NodeTree.Impl
                 _removeCancellation = null;
             }
 
+            if (_removeStatus != null)
+            {
+                _removeStatus.Resolve();
+                _removeStatus.TryReturn();
+                _removeStatus = null;
+            }
+
             Deject();
+
+            if (parentContext != null)
+            {
+                parentContext.RemoveContext(_context);
+            }
+
+            _context.Dispose();
             _context = null;
         }
 
         public override void Dispose()
         {
             base.Dispose();
-
+            
+            // NodeState = NodeState.Default;
             AssertUtil.IsTrue(_childNodes == null || _childNodes.Count <= 0);
             AssertUtil.IsFalse(IsInit, NodeTreeExceptionType.dispose_not_int);
             AssertUtil.IsNull(_addStatus);
@@ -381,7 +406,7 @@ namespace Cr7Sund.NodeTree.Impl
         public virtual PromiseTask OnStart() { return PromiseTask.CompletedTask; }
         public virtual PromiseTask OnEnable() { return PromiseTask.CompletedTask; }
         public virtual PromiseTask OnDisable() { return PromiseTask.CompletedTask; }
-        public virtual PromiseTask OnStop() { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnStopAsync() { return PromiseTask.CompletedTask; }
         protected virtual void OnDispose() { }
 
 
@@ -418,18 +443,12 @@ namespace Cr7Sund.NodeTree.Impl
         public async PromiseTask AddChildAsync(INode child, bool overwrite = false)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_ADD);
-            AssertUtil.IsFalse(child.AddStatus != null && _addStatus.IsRecycled, NodeTreeExceptionType.ADD_RECYCLED);
 
             // the below situations will be better handle outside 
             if (child.LoadState == LoadState.Unloading)
             {
                 throw new MyException(
                     "can not add node when unloading");
-            }
-            if (child.LoadState == LoadState.Fail)
-            {
-                throw new MyException(
-                    "can not add node when already fail");
             }
             if (child.NodeState == NodeState.Adding)
             {
@@ -446,65 +465,62 @@ namespace Cr7Sund.NodeTree.Impl
             child.SetAdding();
             child.AddStatus = Promise.Create();
 
-            try
+
+            if (!child.IsInjected)
             {
-                if (!child.IsInjected)
-                {
-                    _context.AddContext(child.Context);
-                    child.Inject();
-                }
+                _context.AddContext(child.Context);
+                child.Inject();
+            }
 
-                child.Init();
-                if (child.LoadState == LoadState.Default
-                                    || child.LoadState == LoadState.Unloaded)
-                {
-                    try
-                    {
-                        await child.LoadAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        // remove addStatus before unload all
-                        if (child.AddStatus.CurState == PromiseState.Pending)
-                            child.AddStatus.RejectWithoutDebug(ex);
-                        child.AddStatus.TryReturn();
-                        child.AddStatus = null;
-
-                        //UnloadChildAsync
-                        await RemoveChildAsyncInternal(child, true, false);
-                        throw;
-                    }
-                }
-
+            child.Init();
+            if (child.LoadState == LoadState.Default
+                || child.LoadState == LoadState.Unloaded
+                || child.LoadState == LoadState.Fail)
+            {
                 try
                 {
-                    await AddChildInternal(child);
+                    await child.LoadAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    await RemoveChildAsyncInternal(child, false, false);
+                    // remove addStatus before unload all
+                    if (child.AddStatus.CurState == PromiseState.Pending)
+                    { child.AddStatus.RejectWithoutDebug(ex); }
+                    child.AddStatus.TryReturn();
+                    child.AddStatus = null;
+
+                    //UnloadChildAsync
+                    await RemoveChildAsyncInternal(child, true, false);
                     throw;
                 }
             }
-            catch (Exception ex) // in case of another unexpected exceptions
+
+            try
             {
-                if (child.AddStatus != null
-                        && child.AddStatus.CurState == PromiseState.Pending)
-                    child.AddStatus.RejectWithoutDebug(ex);
+                await AddChildInternal(child);
+            }
+            catch (Exception ex)
+            {
+                // remove addStatus before unload all
+                if (child.AddStatus.CurState == PromiseState.Pending)
+                { child.AddStatus.RejectWithoutDebug(ex); }
+                child.AddStatus.TryReturn();
+                child.AddStatus = null;
+
+                await RemoveChildAsyncInternal(child, false, false);
                 throw;
             }
-            finally
+
+            child.SetReady();
+            if (child.AddStatus != null)
             {
-                child.SetReady();
-                if (child.AddStatus != null)
+                if (child.AddStatus.CurState == PromiseState.Pending)
                 {
-                    if (child.AddStatus.CurState == PromiseState.Pending)
-                    {
-                        child.AddStatus.Resolve();
-                    }
-                    child.AddStatus.TryReturn();
-                    child.AddStatus = null;
+                    child.AddStatus.Resolve();
                 }
+
+                child.AddStatus.TryReturn();
+                child.AddStatus = null;
             }
         }
 
@@ -525,6 +541,16 @@ namespace Cr7Sund.NodeTree.Impl
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
 
+            if (child.NodeState == NodeState.Unloaded)
+            {
+                // please check LoadModule
+                // ---- -----
+                // await _parentNode.CancelLoadChild(assetNode);
+                // -- do something will unload asset node  --
+                // await RemoveNodeFromNodeTree(assetKey, overwrite);
+                // ---- -----
+                return;
+            }
             if (child.NodeState == NodeState.Removing
                 || child.NodeState == NodeState.Unloading)
             {
@@ -558,21 +584,24 @@ namespace Cr7Sund.NodeTree.Impl
             }
             catch (Exception e) // in case of another unexpected exceptions
             {
-                if (child.RemoveStatus != null
-                    && child.RemoveStatus.CurState == PromiseState.Pending) //in case of unload
+                if (child.RemoveStatus != null)
                 {
-                    child.RemoveStatus.RejectWithoutDebug(e);
+                    child.RemoveStatus.Reject(e);
                 }
                 throw;
             }
             finally
             {
+                if (child.RemoveStatus != null)
+                {
+                    if (child.RemoveStatus.CurState == PromiseState.Pending)
+                    {
+                        child.RemoveStatus.Resolve();
+                    }
+                    child.RemoveStatus.TryReturn();
+                    child.RemoveStatus = null;
+                }
                 child.EndUnLoad(shouldUnload);
-            }
-
-            if (child.RemoveStatus != null) //in case of unload
-            {
-                child.RemoveStatus.Resolve();
             }
         }
 
@@ -583,8 +612,6 @@ namespace Cr7Sund.NodeTree.Impl
             ChildNodes.Remove(child);
             child.Parent = null;
 
-            child.RemoveStatus.TryReturn();
-            child.RemoveStatus = null;
             OnRemoveChild(child);
         }
 
@@ -592,8 +619,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             RemoveChildInternal(child);
 
-            _context.RemoveContext(child.Context);
-            child.Destroy();
+            child.Destroy(_context);
         }
 
         private async PromiseTask AddChildInternal(INode child)
@@ -610,7 +636,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (childParent.IsStarted && !child.IsStarted)
             {
-                await child.Start();
+                await child.Start(AddCancellation.Token);
             }
             if (childParent.IsActive && !child.IsActive)
             {
@@ -630,8 +656,8 @@ namespace Cr7Sund.NodeTree.Impl
         public void SetReady() => NodeState = NodeState.Ready;
 
         public void StartUnload(bool shouldUnload) =>
-            NodeState = shouldUnload ? NodeState.Removing :
-                NodeState.Unloading;
+            NodeState = shouldUnload ? NodeState.Unloading :
+                NodeState.Removing;
         public void EndUnLoad(bool unload) => NodeState = unload ? NodeState.Unloaded :
             NodeState.Removed;
 

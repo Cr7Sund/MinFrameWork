@@ -1,3 +1,4 @@
+using System.Threading;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Config;
 using Cr7Sund.NodeTree.Impl;
@@ -10,11 +11,12 @@ namespace Cr7Sund.Server.Impl
     public abstract class BaseGameController : BaseController, IUpdatable, ILateUpdate
     {
         [Inject(ServerBindDefine.GameTimer)] private IPromiseTimer _gameTimer;
-        [Inject(ServerBindDefine.GameLogger)] protected IInternalLog _log;
         [Inject(ServerBindDefine.GameInstancePool)] IInstancesContainer _gameInstanceContainer;
         [Inject] private IConfigContainer _configModule;
-
-        [Inject] IAssetLoader _assetLoader;
+        [Inject] private UI.Api.IUITransitionAnimationContainer _uiTransModule;
+        [Inject] private IAssetLoader _assetLoader;
+        [Inject] private ISceneLoader _sceneLoader;
+        [Inject(ServerBindDefine.GameLogger)] protected IInternalLog _log;
 
         protected override IInternalLog Debug => _log;
 
@@ -27,18 +29,19 @@ namespace Cr7Sund.Server.Impl
 
         public void LateUpdate(int milliseconds)
         {
+            _sceneLoader.LateUpdate(milliseconds);
             OnLateUpdate(milliseconds);
         }
 
-        protected sealed override async PromiseTask OnStart()
+        protected sealed override async PromiseTask OnStart(CancellationToken cancellation)
         {
             if (Application.isPlaying)
             {
                 await _assetLoader.Init();
-                await OnSplashClosed();
+                _sceneLoader.Init();
+                await OnSplashClosed(cancellation);
             }
         }
-
         protected override async PromiseTask OnEnable()
         {
             await GameStart();
@@ -54,10 +57,10 @@ namespace Cr7Sund.Server.Impl
         }
 
         #region  Login
-        private async PromiseTask OnSplashClosed()
+        private async PromiseTask OnSplashClosed(CancellationToken cancellation)
         {
-            await InitConfig();
-            await InitUI();
+            await InitConfig(cancellation);
+            await InitUI(cancellation);
             await InitGameEnv();
         }
 
@@ -70,8 +73,9 @@ namespace Cr7Sund.Server.Impl
         protected virtual PromiseTask GameOver()
         {
             _configModule.UnloadAll();
+            _uiTransModule.UnloadAll();
             _gameInstanceContainer.UnloadAll();
-            Console.Info("Game Over");
+
             return PromiseTask.CompletedTask;
         }
 
@@ -84,18 +88,18 @@ namespace Cr7Sund.Server.Impl
         #endregion
 
         #region  Init
-        private async PromiseTask InitConfig()
+        private async PromiseTask InitConfig(CancellationToken cancellation)
         {
-            var gameConfig = await _configModule.GetConfig<UIConfig>(ConfigDefines.UIConfig);
+            var gameConfig = await _configModule.LoadAssetAsync<UIConfig>(ConfigDefines.UIConfig, cancellation);
             foreach (var item in gameConfig.ConfigDefines)
             {
-                await _configModule.GetConfig<Object>(item);
+                await _configModule.LoadAssetAsync<Object>(item, cancellation);
             }
         }
 
-        private async PromiseTask InitUI()
+        private async PromiseTask InitUI(CancellationToken cancellation)
         {
-            await _gameInstanceContainer.InstantiateAsync<Object>(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME);
+            await _gameInstanceContainer.InstantiateAsync<Object>(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME, cancellation);
         }
         #endregion
     }

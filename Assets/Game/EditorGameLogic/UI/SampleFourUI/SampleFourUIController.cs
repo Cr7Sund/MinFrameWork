@@ -17,10 +17,10 @@ namespace Cr7Sund.Game.UI
         }
 
 
-        protected override async PromiseTask OnStart()
+        protected override async PromiseTask OnStart(CancellationToken cancellation)
         {
             Debug.Debug("Load ui four");
-            await base.OnStart();
+            await base.OnStart(cancellation);
             StartValue++;
 
         }

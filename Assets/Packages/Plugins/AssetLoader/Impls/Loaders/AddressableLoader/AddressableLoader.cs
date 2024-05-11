@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -14,7 +13,8 @@ namespace Cr7Sund.AssetLoader.Impl
     // 2. we to cache the AsyncOperationHandle (since it's struct will be copy each time)
     public class AddressableLoader : IAssetLoader
     {
-        private Dictionary<string, AsynChainOperations> _controlIdToHandles = new();
+
+        private Dictionary<IAssetKey, AsyncChainOperations> _controlIdToHandles = new();
 
         public bool IsInit { get; private set; }
 
@@ -29,51 +29,49 @@ namespace Cr7Sund.AssetLoader.Impl
 
         public PromiseTask<T> Load<T>(IAssetKey key)
         {
-            return LoadInternal<T>(key.Key, false);
+            return LoadInternal<T>(key, false, default);
         }
 
-        public PromiseTask<T> LoadAsync<T>(IAssetKey key)
+        public PromiseTask<T> LoadAsync<T>(IAssetKey key, CancellationToken cancellation)
         {
-            return LoadInternal<T>(key.Key, true);
+            return LoadInternal<T>(key, true, cancellation);
         }
 
-        public void RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation)
-        {
-            throw new NotImplementedException();
-
-            var key = assetKey.Key;
-            if (!_controlIdToHandles.ContainsKey(key))
-            {
-                throw new MyException(
-                    $"There is no asset that has been requested for release (Asset:{key}).");
-            }
-
-            var handler = _controlIdToHandles[key];
-            cancellation.Register(() =>
-            {
-                // Unload(assetKey);
-                handler.Cancel(cancellation);
-            });
-
-        }
-
-        public void Unload(IAssetKey assetKey)
+        public async PromiseTask RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation)
         {
             var key = assetKey.Key;
-            if (!_controlIdToHandles.ContainsKey(key))
+            if (!_controlIdToHandles.ContainsKey(assetKey))
             {
                 throw new MyException(
-                    $"There is no asset that has been requested for release (Asset:{key}).");
+                    $"There is no asset that has been requested to cancel (Asset:{key}).");
             }
 
-            _controlIdToHandles[key].Unload(OnUnloadHandle);
-            _controlIdToHandles.Remove(key);
+            var chainOperation = _controlIdToHandles[assetKey];
+
+            await chainOperation.Chain();
+            //PLAN : replace with cancel 
+            await Unload(assetKey);
         }
 
-        private static void OnUnloadHandle(AsynChainOperations asynChain)
+        public async PromiseTask Unload(IAssetKey assetKey)
         {
-            Addressables.Release(asynChain.Handler);
-            asynChain.TryReturn();
+            var key = assetKey.Key;
+            if (!_controlIdToHandles.ContainsKey(assetKey))
+            {
+                return;
+                // throw new MyException(
+                //     $"There is no asset that has been requested for release (Asset:{key}).");
+            }
+
+            await _controlIdToHandles[assetKey].Chain();
+            _controlIdToHandles[assetKey].Unload(OnUnloadHandle);
+            _controlIdToHandles.Remove(assetKey);
+        }
+
+        private static void OnUnloadHandle(AsyncChainOperations asyncChain)
+        {
+            Addressables.Release(asyncChain.Handler);
+            asyncChain.TryReturn();
         }
 
         public PromiseTask DestroyAsync()
@@ -104,23 +102,25 @@ namespace Cr7Sund.AssetLoader.Impl
             _controlIdToHandles.Clear();
         }
 
-        private async PromiseTask<T> LoadInternal<T>(string key, bool isAsync)
+        private async PromiseTask<T> LoadInternal<T>(IAssetKey assetKey, bool isAsync, CancellationToken cancellation)
         {
-            if (_controlIdToHandles.TryGetValue(key, out var setter))
+            string key = assetKey.Key;
+            if (_controlIdToHandles.TryGetValue(assetKey, out var chainOperation))
             {
-                await setter.Chain();
-                return setter.GetResult<T>();
+                await chainOperation.Chain();
+                return chainOperation.GetResult<T>();
             }
 
             AsyncOperationHandle handler = Addressables.LoadAssetAsync<T>(key);
             if (!isAsync) handler.WaitForCompletion();
-            setter = AsynChainOperations.Start(ref handler);
-            _controlIdToHandles.Add(key, setter);
+            chainOperation = AsyncChainOperations.Start(ref handler, cancellation);
+
+            _controlIdToHandles.Add(assetKey, chainOperation);
 
             // equal to below
             // await addressableHandle.Task;
-            await setter.Chain();
-            return setter.GetResult<T>();
+            await chainOperation.Chain();
+            return chainOperation.GetResult<T>();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -9,10 +10,9 @@ namespace Cr7Sund.Server.Api
         public GameObject Create(string name, params Type[] components);
         public ComponentT Create<ComponentT>(string name) where ComponentT : Object;
         public PromiseTask<T> Instantiate<T>(IAssetKey assetKey, string name) where T : Object;
-        public PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name) where T : Object;
+        public PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name, CancellationToken cancellation) where T : Object;
         public GameObject GetInstance(IAssetKey assetKey, string name);
-
         public void ReturnInstance(string name);
-        public void ReturnInstance(string name, IAssetKey assetKey);
+        public PromiseTask ReturnInstance(string name, IAssetKey assetKey);
     }
 }

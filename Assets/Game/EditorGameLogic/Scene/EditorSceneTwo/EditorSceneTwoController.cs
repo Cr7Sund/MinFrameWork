@@ -16,10 +16,10 @@ namespace Cr7Sund.Game.Scene
         }
 
 
-        protected override async PromiseTask OnStart()
+        protected override async PromiseTask OnStart(CancellationToken cancellation)
         {
             Debug.Debug("Load scene two");
-            await base.OnStart();
+            await base.OnStart(cancellation);
             StartValue++;
 
         }

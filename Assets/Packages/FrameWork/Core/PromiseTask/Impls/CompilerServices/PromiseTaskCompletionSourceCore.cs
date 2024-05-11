@@ -80,9 +80,9 @@ namespace Cr7Sund.CompilerServices
             {
                 try
                 {
-                    if (error is OperationCanceledException oc)
+                    if (error is Exception ex)
                     {
-                        //UniTaskScheduler.PublishUnobservedTaskException(oc);
+                        Console.Error(ex);
                     }
                 }
                 catch

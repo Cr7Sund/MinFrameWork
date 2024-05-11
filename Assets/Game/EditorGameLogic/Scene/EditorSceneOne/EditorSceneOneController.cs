@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Api;
 
@@ -12,9 +13,9 @@ namespace Cr7Sund.Game.Scene
         {
         }
 
-        protected async override PromiseTask OnStart()
+        protected async override PromiseTask OnStart(CancellationToken cancellation)
         {
-            await base.OnStart();
+            await base.OnStart(cancellation);
             Debug.Debug("Load scene one");
         }
 

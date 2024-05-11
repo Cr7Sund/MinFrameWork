@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace Cr7Sund.NodeTree.Api
 {
     /// <summary>
@@ -10,14 +12,14 @@ namespace Cr7Sund.NodeTree.Api
         /// </summary>
         /// <typeparam name="T">Type of the controller.</typeparam>
         /// <returns>True if the addition is successful; otherwise, false.</returns>
-        PromiseTask AddController<T>() where T : IController;
+        PromiseTask AddController<T>(CancellationToken cancellation = default) where T : IController;
 
         /// <summary>
         /// Adds the specified controller.
         /// </summary>
         /// <param name="controller">The controller to add.</param>
         /// <returns>True if the addition is successful; otherwise, false.</returns>
-        PromiseTask AddController(IController controller);
+        PromiseTask AddController(IController controller, CancellationToken cancellation = default);
 
         /// <summary>
         /// Removes the controller of type <typeparamref name="T"/>.

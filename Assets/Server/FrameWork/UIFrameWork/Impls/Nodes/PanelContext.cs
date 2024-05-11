@@ -17,9 +17,6 @@ namespace Cr7Sund.Server.UI.Impl
         {
             // Local In GameNode or GameController
             // --- --- 
-            var assetLoader = AssetLoaderFactory.CreateLoader();
-
-
             InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
             InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.UITimer);
             InjectionBinder.Bind<IUINode>().To(node);

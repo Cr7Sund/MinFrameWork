@@ -572,7 +572,7 @@ namespace Cr7Sund.Package.Impl
 
         public void Cancel()
         {
-            Reject(new OperationCanceledException());
+            RejectWithoutDebug(new OperationCanceledException());
         }
         #endregion
 

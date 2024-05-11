@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cr7Sund.AssetLoader.Api;
@@ -25,40 +24,37 @@ namespace Cr7Sund.Server.Impl
             return _containers[assetKey] as T;
         }
 
-        public async PromiseTask<T> LoadAssetAsync<T>(IAssetKey assetKey) where T : Object
+        public async PromiseTask<T> LoadAssetAsync<T>(IAssetKey assetKey, CancellationToken cancellation) where T : Object
         {
             if (!_containers.ContainsKey(assetKey))
             {
-                var asset = await Loader.LoadAsync<T>(assetKey);
+                var asset = await Loader.LoadAsync<T>(assetKey, cancellation);
                 _containers.Add(assetKey, asset);
             }
 
             return _containers[assetKey] as T;
         }
 
-        public void RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation)
+        public async PromiseTask CancelLoadAsync(IAssetKey assetKey, CancellationToken cancellation)
         {
-            if (_containers.ContainsKey(assetKey))
-            {
-                Loader.RegisterCancelLoad(assetKey, cancellation);
-                _containers.Remove(assetKey);
-            }
+            await Loader.RegisterCancelLoad(assetKey, cancellation);
+            AssertUtil.IsFalse(_containers.ContainsKey(assetKey));
         }
 
-        public virtual void Unload(IAssetKey key)
+        public virtual async PromiseTask Unload(IAssetKey key)
         {
             if (_containers.ContainsKey(key))
             {
-                Loader.Unload(key);
+                await Loader.Unload(key);
                 _containers.Remove(key);
             }
         }
 
-        public virtual void UnloadAll()
+        public virtual async PromiseTask UnloadAll()
         {
             foreach (var item in _containers)
             {
-                Loader.Unload(item.Key);
+                await Loader.Unload(item.Key);
             }
             _containers.Clear();
         }

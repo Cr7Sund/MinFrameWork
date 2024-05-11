@@ -69,6 +69,14 @@ namespace Cr7Sund
             }
         }
 
+        public PromiseTask<bool> SuppressCancellationThrow()
+        {
+            var status = Status;
+            if (status == PromiseTaskStatus.Succeeded) return CompletedTasks.False;
+            if (status == PromiseTaskStatus.Canceled) return CompletedTasks.True;
+            return new PromiseTask<bool>(new IsCanceledSource(source), token);
+        }
+        
         public static PromiseTask WhenAll(params PromiseTask[] tasks)
         {
             return WhenAll((IEnumerable<PromiseTask>)tasks.ToArray());
@@ -80,5 +88,14 @@ namespace Cr7Sund
             var promise = new WhenAllPromiseTaskSource(promiseTasks, promiseTasks.Length); // consumed array in constructor.
             return new PromiseTask(promise, 0);
         }
+    }
+
+    internal static class CompletedTasks
+    {
+        public static readonly PromiseTask<bool> True = PromiseTask<bool>.FromResult(true);
+        public static readonly PromiseTask<bool> False = PromiseTask<bool>.FromResult(false);
+        public static readonly PromiseTask<int> Zero = PromiseTask<int>.FromResult(0);
+        public static readonly PromiseTask<int> MinusOne = PromiseTask<int>.FromResult(-1);
+        public static readonly PromiseTask<int> One = PromiseTask<int>.FromResult(1);
     }
 }

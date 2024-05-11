@@ -32,7 +32,7 @@ namespace Cr7Sund.NodeTree.Impl
 
         public virtual void Dispose()
         {
-            _contexts.Clear();
+            AssertUtil.LessOrEqual(_contexts.Count, 0);
             _contexts = null;
             InjectionBinder.Dispose();
             InjectionBinder = null;

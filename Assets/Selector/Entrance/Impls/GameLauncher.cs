@@ -1,15 +1,17 @@
-using System;
 using Cr7Sund.AssetLoader.Impl;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.Selector.Apis;
 using UnityEngine;
 using Cr7Sund.Config;
+using System;
+using Cr7Sund.AssetLoader.Api;
 
 namespace Cr7Sund.Selector.Impl
 {
     public class GameLauncher : MonoBehaviour, IDestroyAsync
     {
         private IGameLogic _gameLogic;
+        private IAssetLoader _configLoader;
         private TimeCorrector _updateCorrector;
         private TimeCorrector _lateUpdateCorrector;
         private bool _dispose;
@@ -19,12 +21,40 @@ namespace Cr7Sund.Selector.Impl
 
         private async void Awake()
         {
-            await InitFrameWork();
+            try
+            {
+                await InitFrameWork();
+            }
+            catch (System.Exception e)
+            {
+                if (e is OperationCanceledException opex)
+                {
+                    EntranceConsole.Info(opex);
+                }
+                else
+                {
+                    EntranceConsole.Error(e);
+                }
+            }
         }
 
         private async void Start()
         {
-            await _gameLogic.Run();
+            try
+            {
+                await _gameLogic.Run();
+            }
+            catch (System.Exception e)
+            {
+                if (e is OperationCanceledException opex)
+                {
+                    EntranceConsole.Info(opex);
+                }
+                else
+                {
+                    EntranceConsole.Error(e);
+                }
+            }
         }
 
         void OnEnable()
@@ -45,12 +75,12 @@ namespace Cr7Sund.Selector.Impl
             _gameLogic?.LateUpdate(_lateUpdateCorrector.GetCorrectedTime());
         }
 
+
         private async void OnApplicationQuit()
         {
             await DestroyAsync();
+            EntranceConsole.Info("GameLauncher: Exit Game!!!");
             EntranceConsole.Dispose();
-
-            Console.Info("Exit Game!!!");
         }
 
         #endregion
@@ -69,8 +99,8 @@ namespace Cr7Sund.Selector.Impl
 
         private async PromiseTask<GameLogic.GameLogic> CreateGameLogic()
         {
-            var configLoader = AssetLoaderFactory.CreateLoader();
-            var gameConfig = await configLoader.Load<GameConfig>(ConfigDefines.GameConfig);
+            _configLoader = AssetLoaderFactory.CreateLoader();
+            var gameConfig = await _configLoader.Load<GameConfig>(ConfigDefines.GameConfig);
             var gameLogic = gameConfig.CreateLogic();
             return gameLogic;
         }
@@ -82,11 +112,10 @@ namespace Cr7Sund.Selector.Impl
                 _dispose = true;
                 if (_gameLogic != null)
                 {
+                    await _configLoader.Unload(ConfigDefines.GameConfig);
                     await _gameLogic.DestroyAsync();
                 }
             }
-
-            Console.Dispose();
         }
         #endregion
     }

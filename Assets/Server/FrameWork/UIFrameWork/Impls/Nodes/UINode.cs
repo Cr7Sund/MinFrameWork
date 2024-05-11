@@ -3,10 +3,10 @@ using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.Api;
 using Cr7Sund.FrameWork.Util;
-using Object = UnityEngine.Object;
 using System.Threading;
 using Cr7Sund.Server.Impl;
 using System;
+using Object = UnityEngine.Object;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -61,14 +61,14 @@ namespace Cr7Sund.Server.UI.Impl
                 View.Enable(Parent);
             }
             await Controller.Enable();
-            await View.EnterRoutine(push, partnerView, playAnimation);
+            await View.EnterRoutine(push, partnerView, playAnimation, AddCancellation.Token);
         }
 
         public async PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation)
         {
             View.Disable();
             await Controller.Disable();
-            await View.ExitRoutine(push, partnerView, playAnimation);
+            await View.ExitRoutine(push, partnerView, playAnimation, RemoveCancellation.Token);
         }
 
         public async PromiseTask AfterEnter(bool push, IUINode exitPage)
@@ -98,7 +98,7 @@ namespace Cr7Sund.Server.UI.Impl
             var prepareTask = Controller.Prepare(uiKey.Intent);
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                await _uiContainer.LoadAssetAsync<Object>(Key);
+                await _uiContainer.LoadAssetAsync<Object>(Key, AddCancellation.Token);
             }
             await prepareTask;
         }
@@ -112,7 +112,7 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                var instance = await _uiContainer.CreateInstanceAsync<Object>(Key);
+                var instance = await _uiContainer.CreateInstanceAsync<Object>(Key, AddCancellation.Token);
                 // Attention : the below chain load task is called from addressables
                 await View.OnLoad(instance as UnityEngine.GameObject);
                 await prepareTask;
@@ -122,24 +122,18 @@ namespace Cr7Sund.Server.UI.Impl
                 await View.OnLoad(null);
                 await prepareTask;
             }
-
         }
 
-        protected override PromiseTask OnUnloadAsync()
+        protected override async PromiseTask OnCancelLoadAsync(CancellationToken cancellation)
         {
-            _uiContainer.Unload(Key);
-            return base.OnUnloadAsync();
+            await _uiContainer.CancelLoad(Key, cancellation);
+            await base.OnCancelLoadAsync(cancellation);
         }
 
-        public override void RegisterAddTask(CancellationToken cancellationToken)
+        protected override async PromiseTask OnUnloadAsync()
         {
-            _uiContainer.RegisterCancelLoad(Key, cancellationToken);
-            Controller.RegisterAddTask(cancellationToken);
-        }
-
-        public override void RegisterRemoveTask(CancellationToken cancellationToken)
-        {
-            Controller.RegisterRemoveTask(cancellationToken);
+            await _uiContainer.Unload(Key);
+            await base.OnUnloadAsync();
         }
 
         #region LifeCycle
@@ -172,7 +166,7 @@ namespace Cr7Sund.Server.UI.Impl
                 {
                     View.Start(Parent);
                 }
-                await Controller.Start();
+                await Controller.Start(AddCancellation.Token);
             }
             catch (Exception ex)
             {
@@ -255,7 +249,7 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        public override async PromiseTask OnStop()
+        public override async PromiseTask OnStopAsync()
         {
             try
             {

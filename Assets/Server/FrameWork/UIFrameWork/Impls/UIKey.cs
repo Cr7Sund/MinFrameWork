@@ -43,20 +43,5 @@ namespace Cr7Sund.Server.UI.Impl
         {
             return Key.ToString();
         }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is IAssetKey assetKey)
-            {
-                return Key.Equals(assetKey.Key);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return Key.GetHashCode();
-        }
     }
 }

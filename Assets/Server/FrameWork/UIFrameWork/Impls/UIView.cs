@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Api;
+using System.Threading;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -87,7 +88,7 @@ namespace Cr7Sund.Server.UI.Impl
             _canvasGroup.alpha = 0.0f;
         }
 
-        public virtual async PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation)
+        public virtual async PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation, CancellationToken cancellation)
         {
             if (_rectTransform == null)
             {
@@ -98,7 +99,7 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (playAnimation)
             {
-                await TransitionRoutine(push, true, partnerPage);
+                await TransitionRoutine(push, true, partnerPage, cancellation);
             }
         }
 
@@ -125,7 +126,7 @@ namespace Cr7Sund.Server.UI.Impl
             _canvasGroup.alpha = 1.0f;
         }
 
-        public async PromiseTask ExitRoutine(bool push, IUINode partnerPage, bool playAnimation)
+        public async PromiseTask ExitRoutine(bool push, IUINode partnerPage, bool playAnimation, CancellationToken cancellation)
         {
             if (_rectTransform == null)
             {
@@ -134,7 +135,7 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (playAnimation)
             {
-                await TransitionRoutine(push, false, partnerPage);
+                await TransitionRoutine(push, false, partnerPage, cancellation);
             }
         }
 
@@ -237,29 +238,29 @@ namespace Cr7Sund.Server.UI.Impl
             return null;
         }
 
-        private async PromiseTask TransitionRoutine(bool push, bool enter, IUINode partnerPage)
+        private async PromiseTask TransitionRoutine(bool push, bool enter, IUINode partnerPage, CancellationToken cancellation)
         {
             UITransitionAnimation animation = _uiPanel.GetAnimation(push, enter, partnerPage?.Key);
             if (animation == null)
             {
-                var transitionBehaviour = await _animationContainer.GetDefaultPageTransition(push, enter);
-                await PlayTransition(partnerPage, transitionBehaviour);
+                var transitionBehaviour = await _animationContainer.GetDefaultPageTransition(push, enter, cancellation);
+                await PlayTransition(partnerPage, transitionBehaviour, cancellation);
                 return;
             }
 
             if (_transitionDict.ContainsKey(animation))
             {
-                await PlayTransition(partnerPage, _transitionDict[animation]);
+                await PlayTransition(partnerPage, _transitionDict[animation], cancellation);
             }
             else
             {
-                var transitionBehaviour = await _animationContainer.GetAnimationBehaviour(animation);
+                var transitionBehaviour = await _animationContainer.GetAnimationBehaviour(animation, cancellation);
                 _transitionDict.Add(animation, transitionBehaviour);
-                await PlayTransition(partnerPage, transitionBehaviour);
+                await PlayTransition(partnerPage, transitionBehaviour, cancellation);
             }
         }
 
-        private async PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour)
+        private async PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour, CancellationToken cancellation)
         {
             if (transitionBehaviour.Duration > 0.0f)
             {
@@ -268,8 +269,9 @@ namespace Cr7Sund.Server.UI.Impl
                 // PLAN replace with promise task
                 // 🤔🤔🤔why we use scene(Game) timer?
                 // since remove node will be happened in transition
-                var promise = _sceneTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime))
+                var promise = _sceneTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime), cancellation)
                     .Progress(TransitionProgressReporter);
+
                 await promise.AsTask();
             }
         }

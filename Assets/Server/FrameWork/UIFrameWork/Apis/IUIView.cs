@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Package.Api;
 using UnityEngine;
@@ -25,10 +26,10 @@ namespace Cr7Sund.Server.UI.Api
         void Start(INode parent);
         void Enable(INode parent);
         void BeforeEnter();
-        PromiseTask EnterRoutine(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask EnterRoutine(bool push, IUINode partnerView, bool playAnimation, CancellationToken cancellation);
         void AfterEnter();
         void BeforeExit();
-        PromiseTask ExitRoutine(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask ExitRoutine(bool push, IUINode partnerView, bool playAnimation, CancellationToken cancellation);
         void AfterExit();
         void Disable();
         void Stop();
