@@ -9,7 +9,7 @@ namespace Cr7Sund.NodeTree.Impl
         public LoadState LoadState { get; private set; }
 
 
-        public async PromiseTask LoadAsync()
+        public async PromiseTask LoadAsync(UnsafeCancellationToken cancellation)
         {
             if (LoadState == LoadState.Loading
                 || LoadState == LoadState.Unloading)
@@ -21,7 +21,7 @@ namespace Cr7Sund.NodeTree.Impl
             LoadState = LoadState.Loading;
             try
             {
-                await OnLoadAsync();
+                await OnLoadAsync(cancellation);
                 _Loaded();
             }
             catch (Exception ex)
@@ -31,7 +31,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public async PromiseTask PreLoadAsync()
+        public async PromiseTask PreLoadAsync(UnsafeCancellationToken cancellation)
         {
             if (LoadState == LoadState.Loading
                 || LoadState == LoadState.Unloading
@@ -44,7 +44,7 @@ namespace Cr7Sund.NodeTree.Impl
             LoadState = LoadState.Loading;
             try
             {
-                await OnPreloadAsync();
+                await OnPreloadAsync(cancellation);
                 _Preloaded();
             }
             catch (Exception ex)
@@ -54,7 +54,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public virtual async PromiseTask UnloadAsync()
+        public virtual async PromiseTask UnloadAsync(UnsafeCancellationToken cancellation)
         {
             if (LoadState == LoadState.Unloaded) return;
 
@@ -73,28 +73,8 @@ namespace Cr7Sund.NodeTree.Impl
             LoadState = LoadState.Unloading;
             try
             {
-                await OnUnloadAsync();
+                await OnUnloadAsync(cancellation);
                 _Unloaded();
-            }
-            catch (Exception ex)
-            {
-                _HandleException(ex);
-                throw;
-            }
-        }
-
-        public async PromiseTask CancelLoadAsync(CancellationToken cancellation)
-        {
-            if (LoadState == LoadState.Loaded)
-            {
-                Console.Warn("Try to cancel a loaded node");
-                return;
-            }
-
-            try
-            {
-                await OnCancelLoadAsync(cancellation);
-                _Canceled();
             }
             catch (Exception ex)
             {
@@ -128,11 +108,7 @@ namespace Cr7Sund.NodeTree.Impl
             LoadState = LoadState.Unloaded;
             OnUnloaded();
         }
-        private void _Canceled()
-        {
-            LoadState = LoadState.Fail;
-            OnCanceled();
-        }
+
         private void _HandleException(Exception e)
         {
             // if(e is OperationCanceledException){
@@ -148,11 +124,9 @@ namespace Cr7Sund.NodeTree.Impl
         protected virtual void OnLoaded() { }
         protected virtual void OnPreLoaded() { }
         protected virtual void OnUnloaded() { }
-        protected virtual void OnCanceled() { }
         protected virtual void OnCatch(Exception e) { }
-        protected virtual PromiseTask OnLoadAsync() { return PromiseTask.CompletedTask; }
-        protected virtual PromiseTask OnPreloadAsync() { return PromiseTask.CompletedTask; }
-        protected virtual PromiseTask OnCancelLoadAsync(CancellationToken cancellation) { return PromiseTask.CompletedTask; }
-        protected virtual PromiseTask OnUnloadAsync() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnLoadAsync(UnsafeCancellationToken cancellation) { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnPreloadAsync(UnsafeCancellationToken cancellation) { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnUnloadAsync(UnsafeCancellationToken cancellation) { return PromiseTask.CompletedTask; }
     }
 }

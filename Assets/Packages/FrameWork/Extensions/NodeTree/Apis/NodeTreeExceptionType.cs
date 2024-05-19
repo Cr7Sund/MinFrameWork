@@ -37,6 +37,7 @@
         /// try to dispose not init or already destroyed
         /// </summary>
         dispose_not_int,
+
         #region Loadable
         /// <summary>
         /// Cant LoadAsync On State of loading or unloading
@@ -50,7 +51,6 @@
         /// Cant cancel when not loaded 
         /// </summary>
         CANCEL_NOT_LOADED,
-
 
         #endregion
 
@@ -78,6 +78,7 @@
         /// try to add node witch existed unfulfilled operation
         /// </summary>
         ADD_RECYCLED,
+
         #endregion
     }
 }

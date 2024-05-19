@@ -113,6 +113,7 @@ namespace Cr7Sund.Package.Impl
             {
                 result.Id = NextId();
             }
+
             return result;
         }
 
@@ -139,6 +140,7 @@ namespace Cr7Sund.Package.Impl
         public virtual void TryReturn()
         {
             Dispose();
+
             _taskPool.TryPush(this);
         }
         #endregion
@@ -618,7 +620,7 @@ namespace Cr7Sund.Package.Impl
             _registerAction = continuation;
         }
         [DebuggerHidden]
-        public async PromiseTask AsTask()
+        public PromiseTask AsTask()
         {
             if (this.IsRecycled)
             {
@@ -627,17 +629,15 @@ namespace Cr7Sund.Package.Impl
             switch (CurState)
             {
                 case PromiseState.Pending:
-                    await new PromiseTask(this, 0);
-                    return;
+                    return new PromiseTask(this, 0);
                 case PromiseState.Rejected:
                 default:
                     var tmpEx = _rejectionException;
                     TryReturn();
-                    throw new Exception(tmpEx.Message, tmpEx);
+                    return PromiseTask.FromException(tmpEx);
                 case PromiseState.Resolved:
                     TryReturn();
-                    await PromiseTask.CompletedTask;
-                    return;
+                    return PromiseTask.CompletedTask;
             }
         }
 
@@ -700,14 +700,7 @@ namespace Cr7Sund.Package.Impl
             }
             if (_rejectHandlers == null)
             {
-                if (!_rejectListPool.TryPop(out var result))
-                {
-                    _rejectHandlers = new ListPoolNode<RejectHandler>();
-                }
-                else
-                {
-                    _rejectHandlers = result;
-                }
+                _rejectHandlers = ListPoolNode<RejectHandler>.Create(ref _rejectListPool);
             }
             _rejectHandlers.Add(new RejectHandler
             {
@@ -724,14 +717,7 @@ namespace Cr7Sund.Package.Impl
             }
             if (_resolveHandlers == null)
             {
-                if (!_resolveListPool.TryPop(out var result))
-                {
-                    _resolveHandlers = new ListPoolNode<ResolveHandler>();
-                }
-                else
-                {
-                    _resolveHandlers = result;
-                }
+                _resolveHandlers = ListPoolNode<ResolveHandler>.Create(ref _resolveListPool);
             }
             _resolveHandlers.Add(new ResolveHandler
             {
@@ -748,14 +734,7 @@ namespace Cr7Sund.Package.Impl
             }
             if (_progressHandlers == null)
             {
-                if (!_progressListPool.TryPop(out var result))
-                {
-                    _progressHandlers = new ListPoolNode<ProgressHandler>();
-                }
-                else
-                {
-                    _progressHandlers = result;
-                }
+                _progressHandlers = ListPoolNode<ProgressHandler>.Create(ref _progressListPool);
             }
             _progressHandlers.Add(new ProgressHandler
             {
@@ -818,15 +797,15 @@ namespace Cr7Sund.Package.Impl
 
             if (_resolveHandlers != null)
             {
-                _resolveListPool.TryPush(_resolveHandlers);
+                _resolveHandlers.TryReturn(ref _resolveListPool);
             }
             if (_rejectHandlers != null)
             {
-                _rejectListPool.TryPush(_rejectHandlers);
+                _rejectHandlers.TryReturn(ref _rejectListPool);
             }
             if (_progressHandlers != null)
             {
-                _progressListPool.TryPush(_progressHandlers);
+                _progressHandlers.TryReturn(ref _progressListPool);
             }
             _rejectHandlers = null;
             _resolveHandlers = null;
@@ -993,11 +972,11 @@ namespace Cr7Sund.Package.Impl
 
         public static int Test_GetPendingPromiseCount()
         {
-            #if UNITY_EDITOR
-                return PendingPromises.Count;
-            #else
+#if UNITY_EDITOR
+            return PendingPromises.Count;
+#else
                     return 0;
-            #endif
+#endif
         }
 
         public static void ClearPending()

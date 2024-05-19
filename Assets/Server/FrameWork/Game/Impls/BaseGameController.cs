@@ -4,6 +4,7 @@ using Cr7Sund.Config;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Server.Api;
+using Cr7Sund.Server.Scene.Apis;
 using UnityEngine;
 
 namespace Cr7Sund.Server.Impl
@@ -16,9 +17,12 @@ namespace Cr7Sund.Server.Impl
         [Inject] private UI.Api.IUITransitionAnimationContainer _uiTransModule;
         [Inject] private IAssetLoader _assetLoader;
         [Inject] private ISceneLoader _sceneLoader;
+        [Inject] private IPoolBinder _poolBinder;
         [Inject(ServerBindDefine.GameLogger)] protected IInternalLog _log;
+        [Inject] protected ISceneModule _sceneModule;
 
-        protected override IInternalLog Debug => _log;
+
+        protected override IInternalLog Debug => _log ?? Console.Logger;
 
 
         public void Update(int millisecond)
@@ -33,50 +37,45 @@ namespace Cr7Sund.Server.Impl
             OnLateUpdate(milliseconds);
         }
 
-        protected sealed override async PromiseTask OnStart(CancellationToken cancellation)
+        protected sealed override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
-            if (Application.isPlaying)
-            {
-                await _assetLoader.Init();
-                _sceneLoader.Init();
-                await OnSplashClosed(cancellation);
-            }
+            await _assetLoader.Init();
+            _sceneLoader.Init();
+            CreateSceneTransitionBarrier(cancellation);
+            await OnGameStart(cancellation);
         }
+
         protected override async PromiseTask OnEnable()
         {
-            await GameStart();
+            await OnGameEnable();
         }
 
         protected override async PromiseTask OnStop()
         {
-            if (Application.isPlaying)
-            {
-                await GameOver();
-                await _assetLoader.DestroyAsync();
-            }
+            await OnGameStop();
+            await _assetLoader.DestroyAsync();
+            _gameTimer.Clear();
         }
 
-        #region  Login
-        private async PromiseTask OnSplashClosed(CancellationToken cancellation)
+        #region  Start Game
+        private async PromiseTask OnGameStart(UnsafeCancellationToken cancellation)
         {
             await InitConfig(cancellation);
             await InitUI(cancellation);
             await InitGameEnv();
         }
 
-        private async PromiseTask GameStart()
+        private async PromiseTask OnGameEnable()
         {
             await HandleHotfix();
             await RunLoginScene();
         }
 
-        protected virtual PromiseTask GameOver()
+        protected virtual async PromiseTask OnGameStop()
         {
-            _configModule.UnloadAll();
-            _uiTransModule.UnloadAll();
-            _gameInstanceContainer.UnloadAll();
-
-            return PromiseTask.CompletedTask;
+            await _configModule.UnloadAll();
+            await _uiTransModule.UnloadAll();
+            await _gameInstanceContainer.UnloadAll();
         }
 
         protected abstract PromiseTask InitGameEnv();
@@ -88,19 +87,24 @@ namespace Cr7Sund.Server.Impl
         #endregion
 
         #region  Init
-        private async PromiseTask InitConfig(CancellationToken cancellation)
+        private async PromiseTask InitConfig(UnsafeCancellationToken cancellation)
         {
             var gameConfig = await _configModule.LoadAssetAsync<UIConfig>(ConfigDefines.UIConfig, cancellation);
-            foreach (var item in gameConfig.ConfigDefines)
-            {
-                await _configModule.LoadAssetAsync<Object>(item, cancellation);
-            }
+            await _configModule.LoadGroup(gameConfig.ConfigDefines, cancellation, _poolBinder);
         }
 
-        private async PromiseTask InitUI(CancellationToken cancellation)
+        private async PromiseTask InitUI(UnsafeCancellationToken cancellation)
         {
             await _gameInstanceContainer.InstantiateAsync<Object>(ServerBindDefine.UIRootAssetKey, ServerBindDefine.UI_ROOT_NAME, cancellation);
         }
         #endregion
+
+        private void CreateSceneTransitionBarrier(UnsafeCancellationToken cancellation)
+        {
+            _gameTimer.Schedule((timeData) =>
+                    {
+                        _sceneModule.TimeOut(timeData.elapsedTime);
+                    }, cancellation);
+        }
     }
 }

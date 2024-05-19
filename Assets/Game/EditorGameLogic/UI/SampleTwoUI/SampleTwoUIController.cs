@@ -16,7 +16,7 @@ namespace Cr7Sund.Game.UI
         }
 
 
-        protected override async PromiseTask OnStart(CancellationToken cancellation)
+        protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Load ui two");
             await base.OnStart(cancellation);
@@ -31,10 +31,10 @@ namespace Cr7Sund.Game.UI
             EnableCount++;
         }
 
-        protected override async PromiseTask OnDisable()
+        protected override async PromiseTask OnDisable(bool closeImmediately)
         {
             Debug.Debug("Disable ui two");
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
             EnableCount--;
         }
 

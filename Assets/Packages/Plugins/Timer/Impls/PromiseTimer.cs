@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Package.Api;
@@ -111,7 +112,8 @@ namespace Cr7Sund.Package.Impl
                 pendingPromise = promise,
                 timeData = new TimeData(),
                 predicate = predicate,
-                frameStarted = curFrame
+                frameStarted = curFrame,
+                innerTask = promise
             };
 
             waitings.AddLast(wait);
@@ -124,11 +126,12 @@ namespace Cr7Sund.Package.Impl
             return WaitUntil(t => !predicate(t));
         }
 
-        public IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll, CancellationToken cancellation = default)
+        public IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll, UnsafeCancellationToken cancellation = default)
         {
             if (cancellation.IsCancellationRequested)
             {
-                return Promise.Rejected(new OperationCanceledException(cancellation));
+                // PLAN: StackTrace()
+                return Promise.RejectedWithoutDebug(new OperationCanceledException());
             }
 
             var promise = new Promise();
@@ -140,27 +143,31 @@ namespace Cr7Sund.Package.Impl
                 timeData = new TimeData(),
                 predicate = predicate,
                 polling = poll,
-                frameStarted = curFrame
+                frameStarted = curFrame,
+                innerTask = promise
             };
 
             waitings.AddLast(wait);
 
-            cancellation.Register(() =>
+            if (cancellation.IsValid)
             {
-                promise.Cancel();
-                waitings.Remove(wait);
-            });
+                cancellation.Register(() =>
+                         {
+                             promise.Cancel();
+                             waitings.Remove(wait);
+                         });
+            }
             return promise;
         }
 
-        public IPromise Schedule(int duration, Action<TimeData> poll, CancellationToken cancellation = default)
+        public IPromise Schedule(int duration, Action<TimeData> poll, UnsafeCancellationToken cancellation = default)
         {
             AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 
             return Schedule(t => t.elapsedTime > duration, t => poll(t), cancellation);
         }
 
-        public IPromise Schedule(Action<TimeData> poll, CancellationToken cancellation = default)
+        public IPromise Schedule(Action<TimeData> poll, UnsafeCancellationToken cancellation = default)
         {
             return Schedule(t => false, t => poll(t), cancellation);
         }
@@ -190,6 +197,13 @@ namespace Cr7Sund.Package.Impl
 
         public void Clear()
         {
+            var node = waitings.Last;
+            while (node != null)
+            {
+                node.Value.innerTask.Cancel();
+                node = node.Previous;
+            }
+   
             waitings.Clear();
         }
 

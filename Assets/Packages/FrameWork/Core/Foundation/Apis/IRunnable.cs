@@ -4,9 +4,9 @@ namespace Cr7Sund
 {
     public interface IRunnable
     {
-        bool IsStarted { get;  set; }
+        bool IsStarted { get; set; }
 
-        PromiseTask Start(CancellationToken cancellation);
+        PromiseTask Start(UnsafeCancellationToken cancellation);
         PromiseTask Stop();
     }
 }

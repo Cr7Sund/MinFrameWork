@@ -3,7 +3,6 @@ using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.Api;
 using Cr7Sund.FrameWork.Util;
-using System.Threading;
 using Cr7Sund.Server.Impl;
 using System;
 using Object = UnityEngine.Object;
@@ -54,21 +53,21 @@ namespace Cr7Sund.Server.UI.Impl
                 return Controller.WillPushEnter();
         }
 
-        public async PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation)
+        public async PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation, UnsafeCancellationToken cancellation)
         {
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
                 View.Enable(Parent);
             }
             await Controller.Enable();
-            await View.EnterRoutine(push, partnerView, playAnimation, AddCancellation.Token);
+            await View.EnterRoutine(push, partnerView, playAnimation, cancellation);
         }
 
-        public async PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation)
+        public async PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation, bool closeImmediately, UnsafeCancellationToken cancellation)
         {
             View.Disable();
-            await Controller.Disable();
-            await View.ExitRoutine(push, partnerView, playAnimation, RemoveCancellation.Token);
+            await Controller.Disable(closeImmediately);
+            await View.ExitRoutine(push, partnerView, playAnimation, cancellation);
         }
 
         public async PromiseTask AfterEnter(bool push, IUINode exitPage)
@@ -92,28 +91,27 @@ namespace Cr7Sund.Server.UI.Impl
                 await Controller.DidPopExit();
         }
 
-        protected override async PromiseTask OnPreloadAsync()
+        protected override async PromiseTask OnPreloadAsync(UnsafeCancellationToken cancellation)
         {
             var uiKey = Key as UIKey;
-            var prepareTask = Controller.Prepare(uiKey.Intent);
+            var prepareTask = Controller.Prepare(cancellation, uiKey.Intent);
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                await _uiContainer.LoadAssetAsync<Object>(Key, AddCancellation.Token);
+                await _uiContainer.LoadAssetAsync<Object>(Key, cancellation);
             }
             await prepareTask;
         }
 
-        protected override async PromiseTask OnLoadAsync()
+        protected override async PromiseTask OnLoadAsync(UnsafeCancellationToken cancellation)
         {
             AssertUtil.IsFalse(LoadState == LoadState.Loaded); // handle different situation outside
 
             var uiKey = Key as UIKey;
-            var prepareTask = Controller.Prepare(uiKey.Intent);
+            var prepareTask = Controller.Prepare(cancellation, uiKey.Intent);
 
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                var instance = await _uiContainer.CreateInstanceAsync<Object>(Key, AddCancellation.Token);
-                // Attention : the below chain load task is called from addressables
+                var instance = await _uiContainer.CreateInstanceAsync<Object>(Key, cancellation);
                 await View.OnLoad(instance as UnityEngine.GameObject);
                 await prepareTask;
             }
@@ -124,16 +122,10 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        protected override async PromiseTask OnCancelLoadAsync(CancellationToken cancellation)
-        {
-            await _uiContainer.CancelLoad(Key, cancellation);
-            await base.OnCancelLoadAsync(cancellation);
-        }
-
-        protected override async PromiseTask OnUnloadAsync()
+        protected override async PromiseTask OnUnloadAsync(UnsafeCancellationToken cancellation)
         {
             await _uiContainer.Unload(Key);
-            await base.OnUnloadAsync();
+            await base.OnUnloadAsync(cancellation);
         }
 
         #region LifeCycle
@@ -158,7 +150,7 @@ namespace Cr7Sund.Server.UI.Impl
             // that has not instantiated
         }
 
-        public override async PromiseTask OnStart()
+        public override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             try
             {
@@ -166,7 +158,7 @@ namespace Cr7Sund.Server.UI.Impl
                 {
                     View.Start(Parent);
                 }
-                await Controller.Start(AddCancellation.Token);
+                await Controller.Start(cancellation);
             }
             catch (Exception ex)
             {
@@ -192,7 +184,7 @@ namespace Cr7Sund.Server.UI.Impl
                 IsTransitioning = true;
 
                 await BeforeEnter(isPush, exitPage);
-                await Enter(isPush, exitPage, enterUIKey.PlayAnimation);
+                await Enter(isPush, exitPage, enterUIKey.PlayAnimation, AddCancellation.Token);
                 await AfterEnter(push: isPush, exitPage);
             }
             catch (Exception ex)
@@ -218,18 +210,20 @@ namespace Cr7Sund.Server.UI.Impl
             View.Update(milliseconds);
         }
 
-        public override async PromiseTask OnDisable()
+        public override async PromiseTask OnDisable(bool closeImmediately)
         {
             UIKey exitUIkey = Key as UIKey;
             bool isPush = exitUIkey.IsPush;
             IUINode enterPage = exitUIkey.exitPage;
+
+            bool playAnimation = !closeImmediately && exitUIkey.PlayAnimation;
 
             try
             {
                 IsTransitioning = true;
 
                 await BeforeExit(isPush, enterPage);
-                await Exit(isPush, enterPage, exitUIkey.PlayAnimation);
+                await Exit(isPush, enterPage, playAnimation, closeImmediately, RemoveCancellation.Token);
                 await AfterExit(isPush, enterPage);
             }
             catch (Exception ex)
@@ -249,7 +243,7 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        public override async PromiseTask OnStopAsync()
+        public override async PromiseTask OnStop()
         {
             try
             {

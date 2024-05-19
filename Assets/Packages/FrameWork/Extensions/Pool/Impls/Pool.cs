@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
+using System.Collections;
+using System.Reflection;
 namespace Cr7Sund.Package.Impl
 {
-    public class Pool<T> : BasePool, IPool<T> where T :  new()
+    public class Pool<T> : BasePool, IPool<T> where T : new()
     {
 
         /// Stack of instances still in the Pool.
@@ -58,6 +60,21 @@ namespace Cr7Sund.Package.Impl
             {
                 poolable.Restore();
             }
+            if (value is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+            if (MacroDefine.IsDebug)
+            {
+                var property = value.GetType().GetProperty("Count", BindingFlags.Public | BindingFlags.Instance);
+                if (property != null)
+                {
+                    int count = Convert.ToInt32(property.GetValue(value));
+                    AssertUtil.LessOrEqual(count, 0);
+                }
+
+            }
+
             InstancesInUse.Remove(value);
             _instancesAvailable.Push(value);
         }
@@ -110,7 +127,7 @@ namespace Cr7Sund.Package.Impl
 
             if (instancesToCreate == 0 && OverflowBehavior != PoolOverflowBehavior.EXCEPTION) return;
             AssertUtil.Greater(instancesToCreate, 0, PoolExceptionType.NO_INSTANCE_TO_CREATE);
-           
+
             if (InstanceProvider == null)
             {
                 throw new MyException("A Pool of type: " + typeof(T) + " has no instance provider.", PoolExceptionType.NO_INSTANCE_PROVIDER);

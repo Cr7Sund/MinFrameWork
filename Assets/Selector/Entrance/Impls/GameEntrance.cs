@@ -8,6 +8,7 @@ namespace Cr7Sund.Selector.Impl
         static void OnBeforeSplashScreen()
         {
             EntranceConsole.Init(InternalLoggerFactory.Create("GameEntrance"));
+            Console.Init(InternalLoggerFactory.Create("FrameWork"));
 
             EntranceConsole.Debug("Before SplashScreen is shown and before the first scene is loaded.");
         }
@@ -31,7 +32,7 @@ namespace Cr7Sund.Selector.Impl
 
             if (GameMgr.Instance.Status == Api.GameStatus.Started)
             {
-                await GameMgr.Instance.Restart();
+                await GameMgr.Instance.Restart();    
             }
             else
             {

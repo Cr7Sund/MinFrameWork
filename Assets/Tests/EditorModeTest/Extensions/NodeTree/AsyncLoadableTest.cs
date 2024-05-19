@@ -26,7 +26,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             var sampleLoadable = new ResolveAsyncLoadable();
 
             // Act
-            await sampleLoadable.LoadAsync();
+            await sampleLoadable.LoadAsync(UnsafeCancellationToken.None);
 
             // Assert
             Assert.AreEqual(LoadState.Loaded, sampleLoadable.LoadState);
@@ -39,8 +39,8 @@ namespace Cr7Sund.PackageTest.NodeTree
             var sampleLoadable = new ResolveAsyncLoadable();
 
             // Act
-            await sampleLoadable.LoadAsync();
-            await sampleLoadable.UnloadAsync();
+            await sampleLoadable.LoadAsync(UnsafeCancellationToken.None);
+            await sampleLoadable.UnloadAsync(UnsafeCancellationToken.None);
 
             // Assert
             Assert.AreEqual(LoadState.Unloaded, sampleLoadable.LoadState);
@@ -57,7 +57,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             // Act
             try
             {
-                await sampleLoadable.LoadAsync();
+                await sampleLoadable.LoadAsync(UnsafeCancellationToken.None);
             }
             catch
             {
@@ -77,7 +77,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             MyException ex = null;
             try
             {
-                await sampleLoadable.LoadAsync();
+                await sampleLoadable.LoadAsync(UnsafeCancellationToken.None);
             }
             catch (MyException e)
             {
@@ -99,7 +99,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             MyException ex = null;
             try
             {
-                await sampleLoadable.UnloadAsync();
+                await sampleLoadable.UnloadAsync(UnsafeCancellationToken.None);
             }
             catch (MyException e)
             {

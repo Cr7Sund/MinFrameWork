@@ -15,7 +15,7 @@ namespace Cr7Sund.PackageTest.IOC
             EnableCount = 0;
         }
 
-        protected override async PromiseTask OnStart(CancellationToken cancellation)
+        protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Load ui five");
             await base.OnStart(cancellation);
@@ -31,10 +31,10 @@ namespace Cr7Sund.PackageTest.IOC
             EnableCount++;
         }
 
-        protected override async PromiseTask OnDisable()
+        protected override async PromiseTask OnDisable(bool closeImmediately)
         {
             Debug.Debug("Disable ui five");
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
 
             EnableCount--;
         }

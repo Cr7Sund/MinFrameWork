@@ -17,7 +17,7 @@ namespace Cr7Sund.PackageTest.IOC
         }
 
 
-        protected override async PromiseTask OnStart(CancellationToken cancellation)
+        protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Load scene two");
             await base.OnStart(cancellation);
@@ -33,10 +33,10 @@ namespace Cr7Sund.PackageTest.IOC
 
         }
 
-        protected override async PromiseTask OnDisable()
+        protected override async PromiseTask OnDisable(bool closeImmediately)
         {
             Debug.Debug("Disable scene two");
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
 
             EnableCount--;
 
@@ -48,5 +48,6 @@ namespace Cr7Sund.PackageTest.IOC
             await base.OnStop();
             StartValue--;
         }
+
     }
 }

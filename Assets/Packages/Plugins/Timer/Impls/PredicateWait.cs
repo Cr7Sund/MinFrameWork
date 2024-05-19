@@ -35,6 +35,8 @@ namespace Cr7Sund.Package.Impl
         /// </summary>
         public int timeStarted;
 
+        public IPromise innerTask;
+
     }
 
 }

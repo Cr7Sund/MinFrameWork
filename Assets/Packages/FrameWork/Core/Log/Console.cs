@@ -22,14 +22,19 @@ namespace Cr7Sund
             Logger.Info(message);
         }
 
-        // public static void InfoException<T0>(Exception ex, string prefix, T0 property)
-        // {
-        //     Logger.InfoException(message);
-        // }
+        public static void Info(Exception ex)
+        {
+            Logger.Info(ex);
+        }
 
         public static void Info<T0>(string message, T0 propertyValue0)
         {
             Logger.Info(message, propertyValue0);
+        }
+
+        public static void Info<T0, T1>(string message, T0 propertyValue0, T1 propertyValue1)
+        {
+            Logger.Info(message, propertyValue0, propertyValue1);
         }
 
         public static void Info<T0, T1, T2>(string message, T0 propertyValue0, T1 propertyValue1, T2 propertyValue2)

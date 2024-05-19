@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Api;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -88,7 +88,7 @@ namespace Cr7Sund.Server.UI.Impl
             _canvasGroup.alpha = 0.0f;
         }
 
-        public virtual async PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation, CancellationToken cancellation)
+        public virtual async PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation, UnsafeCancellationToken cancellation)
         {
             if (_rectTransform == null)
             {
@@ -126,7 +126,7 @@ namespace Cr7Sund.Server.UI.Impl
             _canvasGroup.alpha = 1.0f;
         }
 
-        public async PromiseTask ExitRoutine(bool push, IUINode partnerPage, bool playAnimation, CancellationToken cancellation)
+        public async PromiseTask ExitRoutine(bool push, IUINode partnerPage, bool playAnimation, UnsafeCancellationToken cancellation)
         {
             if (_rectTransform == null)
             {
@@ -172,7 +172,6 @@ namespace Cr7Sund.Server.UI.Impl
 
         public void Update(int millisecond)
         {
-            _sceneTimer.Update(millisecond);
         }
 
         private void SetActive(bool enabled)
@@ -238,7 +237,7 @@ namespace Cr7Sund.Server.UI.Impl
             return null;
         }
 
-        private async PromiseTask TransitionRoutine(bool push, bool enter, IUINode partnerPage, CancellationToken cancellation)
+        private async PromiseTask TransitionRoutine(bool push, bool enter, IUINode partnerPage, UnsafeCancellationToken cancellation)
         {
             UITransitionAnimation animation = _uiPanel.GetAnimation(push, enter, partnerPage?.Key);
             if (animation == null)
@@ -260,7 +259,7 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        private async PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour, CancellationToken cancellation)
+        private async PromiseTask PlayTransition(IUINode partnerPage, IUITransitionAnimationBehaviour transitionBehaviour, UnsafeCancellationToken cancellation)
         {
             if (transitionBehaviour.Duration > 0.0f)
             {
@@ -272,6 +271,7 @@ namespace Cr7Sund.Server.UI.Impl
                 var promise = _sceneTimer.Schedule(transitionBehaviour.Duration, (timeData) => transitionBehaviour.SetTime(timeData.elapsedTime), cancellation)
                     .Progress(TransitionProgressReporter);
 
+                // promise.Catch(ex => Console.Info("ExitAnim {ex}", ex));
                 await promise.AsTask();
             }
         }

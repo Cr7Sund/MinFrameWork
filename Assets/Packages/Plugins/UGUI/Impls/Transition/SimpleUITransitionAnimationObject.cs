@@ -45,6 +45,11 @@ namespace Cr7Sund.UGUI.Impls
 
         public override void SetTime(int time)
         {
+            if (RectTransform == null)
+            {
+                return;
+            
+            }
             time = Mathf.Max(0, time - _delay);
             float progress = _duration <= 0 ? 1.0f : Mathf.Clamp01(time / (float)_duration);
             progress = Easings.Interpolate(progress, _easeType);

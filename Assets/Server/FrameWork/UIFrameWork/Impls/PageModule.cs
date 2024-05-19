@@ -13,8 +13,6 @@ namespace Cr7Sund.Server.UI.Impl
         [Inject]
         private ISceneNode _sceneNode;
         private Stack<IUINode> _pageContainers = new Stack<IUINode>(16);
-        private int _startTransTime = -1;
-        private const int _loadTimeOutTime = 5000;
 
         protected override INode _parentNode
         {
@@ -31,6 +29,13 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
+        protected override int _loadTimeOutTime
+        {
+            get
+            {
+                return ServerBindDefine.UITimeOutTime;
+            }
+        }
 
         #region Load
         public async PromiseTask BackPage()
@@ -78,13 +83,20 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        public async PromiseTask PushPage(IAssetKey uiKey)
+        public async PromiseTask PushPage(IAssetKey uiKey, bool overwrite = false)
         {
             AssertUtil.IsInstanceOf<SceneNode, UIExceptionType>(_parentNode, UIExceptionType.INVALID_PAGE_PARENT);
 
             if (IsTransitioning())
             {
-                throw new MyException(UIExceptionType.OPEN_IN_TRANSITION);
+                if (overwrite)
+                {
+                    CancelNode(_focusNode.Key);
+                }
+                else
+                {
+                    throw new MyException(UIExceptionType.OPEN_IN_TRANSITION);
+                }
             }
 
             var enterKey = uiKey as UIKey;
@@ -104,8 +116,10 @@ namespace Cr7Sund.Server.UI.Impl
             {
                 // PLAN : black screen
 
-                await RemovePage(exitKey);
-                await AddNode(enterKey);
+                var removeTask = RemovePage(exitKey);
+                var addTask = AddNode(enterKey);
+                await removeTask;
+                await addTask;
             }
             else
             {
@@ -120,6 +134,12 @@ namespace Cr7Sund.Server.UI.Impl
         public async PromiseTask PreLoadUI(UIKey key)
         {
             await PreLoadNode(key);
+        }
+
+        public async PromiseTask CloseAll()
+        {
+            await UnloadAllNodes();
+            _pageContainers.Clear();
         }
 
         protected override INode CreateNode(IAssetKey key)
@@ -176,13 +196,6 @@ namespace Cr7Sund.Server.UI.Impl
             return OperateNum > 0 ? _pageContainers.Peek().Key : null;
         }
 
-        private bool IsTransitioning()
-        {
-            if (_focusNode == null) return false;
-            var focusNode = _focusNode as UINode;
-            return _focusNode.NodeState == NodeState.Adding;
-        }
-
         private void ContainsPopPage(IAssetKey popKey)
         {
             bool existBackUI = false;
@@ -236,31 +249,14 @@ namespace Cr7Sund.Server.UI.Impl
         }
         #endregion
 
-        public void TimeOut(int elapsedTime)
-        {
-            if (!IsTransitioning())
-            {
-                _startTransTime = elapsedTime;
-                return;
-            }
-
-            if (elapsedTime - _startTransTime < _loadTimeOutTime) return;
-
-            _focusNode.CancelCurTask();
-        }
         public override void Dispose()
         {
             base.Dispose();
 
             AssertUtil.LessOrEqual(OperateNum, 0);
             _pageContainers = null;
-            _startTransTime = 0;
         }
 
-        public async PromiseTask CloseAll()
-        {
-            await UnloadAllNodes();
-            _pageContainers.Clear();
-        }
+
     }
 }

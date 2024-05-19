@@ -9,24 +9,26 @@ namespace Cr7Sund
     {
         public static PromiseTask<T> FromException(Exception ex)
         {
-            if (ex is OperationCanceledException oce)
-            {
-               return FromCanceled(oce.CancellationToken);
-            }
+            // if (ex is OperationCanceledException oce)
+            // {
+            //     return FromCanceled(oce.Message, oce.UnsafeCancellationToken);
+            // }
 
             return new PromiseTask<T>(new ExceptionResultSource<T>(ex), 0);
         }
 
-        public static PromiseTask<T> FromCanceled(CancellationToken cancellationToken = default)
+        public static PromiseTask<T> FromCanceled(string cancelMsg, UnsafeCancellationToken cancellationToken)
         {
-            if (cancellationToken == CancellationToken.None)
-            {
-                return CanceledUniTaskCache<T>.Task;
-            }
-            else
-            {
-                return new PromiseTask<T>(new CanceledResultSource<T>(cancellationToken), 0);
-            }
+            return new PromiseTask<T>(new ExceptionResultSource<T>(new OperationCanceledException(cancelMsg)), 0);
+
+            // if (cancellationToken == UnsafeCancellationToken.None)
+            // {
+            //     return CanceledUniTaskCache<T>.Task;
+            // }
+            // else
+            // {
+            //     return new PromiseTask<T>(new CanceledResultSource<T>(cancelMsg, cancellationToken), 0);
+            // }
         }
 
         public static PromiseTask<T> FromResult(T value)
@@ -50,23 +52,13 @@ namespace Cr7Sund
     {
         public static PromiseTask FromException(Exception ex)
         {
-            if (ex is OperationCanceledException oce)
-            {
-                return FromCanceled(oce.CancellationToken);
-            }
+
             return new PromiseTask(new ExceptionResultSource(ex), 0);
         }
 
-        public static PromiseTask FromCanceled(CancellationToken cancellationToken = default)
+        public static PromiseTask FromCanceled(string cancelMsg, UnsafeCancellationToken cancellationToken)
         {
-            if (cancellationToken == CancellationToken.None)
-            {
-                return CanceledUniTaskCache.Task;
-            }
-            else
-            {
-                return new PromiseTask(new CanceledResultSource(cancellationToken), 0);
-            }
+            return new PromiseTask(new ExceptionResultSource(new OperationCanceledException(cancelMsg)), 0);
         }
 
         public PromiseTask<bool> SuppressCancellationThrow()
@@ -76,7 +68,7 @@ namespace Cr7Sund
             if (status == PromiseTaskStatus.Canceled) return CompletedTasks.True;
             return new PromiseTask<bool>(new IsCanceledSource(source), token);
         }
-        
+
         public static PromiseTask WhenAll(params PromiseTask[] tasks)
         {
             return WhenAll((IEnumerable<PromiseTask>)tasks.ToArray());

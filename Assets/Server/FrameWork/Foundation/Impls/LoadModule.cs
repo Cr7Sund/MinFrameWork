@@ -19,10 +19,10 @@ namespace Cr7Sund.Server.Impl
         [Inject]
         protected IPoolBinder _poolBinder;
         protected Dictionary<IAssetKey, INode> _treeNodes;
-
+        private int _startTransTime = -1;
 
         protected abstract INode _parentNode { get; }
-
+        protected virtual int _loadTimeOutTime { get => 3000; }
 
         internal LoadModule()
         {
@@ -49,7 +49,6 @@ namespace Cr7Sund.Server.Impl
             // in case of unhandled case or duplicate operation
             if (_treeNodes.TryGetValue(assetKey, out var assetNode))
             {
-
                 if (assetNode.NodeState == NodeState.Removing)
                 {
                     await AddNodeFromRemoving(assetKey);
@@ -116,7 +115,7 @@ namespace Cr7Sund.Server.Impl
                 if (assetNode.NodeState == NodeState.Unloading)
                 {
                     Console.Warn("NodeModule.PreLoadNode: the asset is unloading. NodeName: {Key} ", assetKey);
-                    await PreloadNodeFromRemoving(assetKey);
+                    await PreloadNodeFromUnloading(assetKey);
                     return;
                 }
 
@@ -160,6 +159,7 @@ namespace Cr7Sund.Server.Impl
             AssertUtil.LessOrEqual(_treeNodes.Count, 0);
             _treeNodes = null;
             _focusNode = null;
+            _startTransTime = 0;
         }
 
         public async PromiseTask UnloadNode(IAssetKey key, bool overwrite = false)
@@ -174,7 +174,6 @@ namespace Cr7Sund.Server.Impl
                 return;
             }
             Freeze();
-
 
             if (_treeNodes.TryGetValue(assetKey, out var assetNode))
             {
@@ -191,7 +190,7 @@ namespace Cr7Sund.Server.Impl
                 if (assetNode.NodeState == NodeState.Adding)
                 {
                     Console.Warn("NodeModule.RemoveNode: the asset is adding! NodeName: {Key} ", assetKey);
-                    await _parentNode.CancelLoadChild(assetNode);
+                    assetNode.CancelLoad();
                 }
 
                 if (unload == false)
@@ -211,12 +210,25 @@ namespace Cr7Sund.Server.Impl
             await OnSwitchNode(key);
         }
 
-        public async PromiseTask CancelNode(IAssetKey assetKey)
+        public void CancelNode(IAssetKey assetKey)
         {
             if (_treeNodes.TryGetValue(assetKey, out var assetNode))
             {
-                await _parentNode.CancelLoadChild(assetNode);
+                assetNode.CancelLoad();
             }
+        }
+
+        public void TimeOut(int elapsedTime)
+        {
+            if (!IsTransitioning())
+            {
+                _startTransTime = elapsedTime;
+                return;
+            }
+
+            if (elapsedTime - _startTransTime < _loadTimeOutTime) return;
+
+            _focusNode.CancelCurTask();
         }
 
         protected virtual void Freeze()
@@ -243,7 +255,6 @@ namespace Cr7Sund.Server.Impl
         protected async PromiseTask UnloadAllNodes()
         {
             var tmpList = _poolBinder.AutoCreate<List<IAssetKey>>();
-            tmpList.Clear();
 
             foreach (var keyValuePair in _treeNodes)
             {
@@ -269,8 +280,7 @@ namespace Cr7Sund.Server.Impl
                 await UnloadNode(tmpList[i]);
             }
 
-            tmpList.Clear();
-            _poolBinder.Return(tmpList);
+            _poolBinder.Return<List<IAssetKey>, IAssetKey>(tmpList);
         }
 
         protected async PromiseTask OnSwitchNode(IAssetKey curKey)
@@ -348,7 +358,6 @@ namespace Cr7Sund.Server.Impl
             return unloadKey;
         }
 
-
         private async PromiseTask PreloadNodeFromStart(IAssetKey key)
         {
             var newNode = CreateNode(key);
@@ -356,6 +365,7 @@ namespace Cr7Sund.Server.Impl
 
             await _parentNode.PreLoadChild(newNode);
         }
+
         private async PromiseTask PreloadNodeFromLoading(IAssetKey assetKey)
         {
             await _parentNode.PreLoadChild(_treeNodes[assetKey]);
@@ -363,12 +373,13 @@ namespace Cr7Sund.Server.Impl
 
         private async PromiseTask PreloadNodeFromRemoving(IAssetKey assetKey)
         {
-            _treeNodes[assetKey].CancelUnload();
+            _treeNodes[assetKey].CancelUnLoad();
             await _parentNode.PreLoadChild(_treeNodes[assetKey]);
         }
+
         private async PromiseTask PreloadNodeFromUnloading(IAssetKey assetKey)
         {
-            _treeNodes[assetKey].CancelUnload();
+            _treeNodes[assetKey].CancelUnLoad();
             OnUnloadNode(assetKey);
             await _parentNode.PreLoadChild(_treeNodes[assetKey]);
         }
@@ -431,8 +442,7 @@ namespace Cr7Sund.Server.Impl
 
         private async PromiseTask AddNodeFromRemoving(IAssetKey assetKey)
         {
-            _treeNodes[assetKey].CancelUnload();
-
+            _treeNodes[assetKey].CancelUnLoad();
             DispatchAddBegin(assetKey);
             await AddChildNode(assetKey, false);
         }
@@ -440,13 +450,15 @@ namespace Cr7Sund.Server.Impl
         private async PromiseTask AddNodeFromUnloading(IAssetKey assetKey)
         {
             var assetNode = _treeNodes[assetKey];
-            assetNode.CancelUnload();
-
-            // OnUnloadNode(assetKey);
-            // await AddNodeFromStart(assetKey);
-
+            assetNode.CancelUnLoad();
             //equivalent to
             await AddChildNode(assetKey, false);
+        }
+
+        protected bool IsTransitioning()
+        {
+            if (_focusNode == null) return false;
+            return _focusNode.NodeState == NodeState.Adding;
         }
 
         protected virtual void DispatchSwitch(IAssetKey curNode, IAssetKey lastNode)

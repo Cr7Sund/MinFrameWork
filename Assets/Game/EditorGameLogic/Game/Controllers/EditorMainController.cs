@@ -6,8 +6,6 @@ namespace Cr7Sund.Game.GameLogic
 {
     public class EditorMainController : BaseGameController
     {
-        [Inject] private ISceneModule _sceneModule;
-
 
         #region Login
         protected override PromiseTask InitGameEnv()
@@ -29,10 +27,10 @@ namespace Cr7Sund.Game.GameLogic
         #endregion
 
         #region Exit Game
-        protected override async PromiseTask GameOver()
+        protected override async PromiseTask OnGameStop()
         {
             await _sceneModule.UnloadScene(SceneKeys.EditorSceneKeyOne);
-            await base.GameOver();
+            await base.OnGameStop();
         }
 
         #endregion
@@ -41,5 +39,7 @@ namespace Cr7Sund.Game.GameLogic
         {
             base.OnUpdate(millisecond);
         }
+
+ 
     }
 }

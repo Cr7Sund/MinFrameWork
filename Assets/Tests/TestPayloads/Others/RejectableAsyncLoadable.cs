@@ -6,12 +6,12 @@ namespace Cr7Sund.FrameWork.Test
     {
         public const string exMsg = "throw exception";
 
-        protected override PromiseTask OnLoadAsync()
+        protected override PromiseTask OnLoadAsync(UnsafeCancellationToken cancellation)
         {
             throw new Exception(exMsg);
         }
 
-        protected override PromiseTask OnUnloadAsync()
+        protected override PromiseTask OnUnloadAsync(UnsafeCancellationToken cancellation)
         {
             throw new Exception("qw");
         }

@@ -18,18 +18,11 @@ namespace Cr7Sund.PackageTest.IOC
 
         }
 
-        protected override async PromiseTask OnLoadAsync()
+   
+        protected override async PromiseTask OnLoadAsync(UnsafeCancellationToken cancellation)
         {
+            cancellation.Register(LoadPromise.Cancel);
             await LoadPromise.AsTask ();
-        }
-
-        protected override PromiseTask OnCancelLoadAsync(CancellationToken cancellation)
-        {
-            if (cancellation.IsCancellationRequested)
-            {
-                LoadPromise.Cancel();
-            }
-            return base.OnCancelLoadAsync(cancellation);
         }
     }
 }

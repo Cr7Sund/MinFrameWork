@@ -13,6 +13,7 @@ namespace Cr7Sund.Server.Impl
 
         protected abstract IAssetLoader Loader { get; }
 
+
         public async PromiseTask<T> LoadAsset<T>(IAssetKey assetKey) where T : Object
         {
             if (!_containers.ContainsKey(assetKey))
@@ -24,22 +25,48 @@ namespace Cr7Sund.Server.Impl
             return _containers[assetKey] as T;
         }
 
-        public async PromiseTask<T> LoadAssetAsync<T>(IAssetKey assetKey, CancellationToken cancellation) where T : Object
+        public async PromiseTask<T> LoadAssetAsync<T>(IAssetKey assetKey, UnsafeCancellationToken cancellation) where T : Object
         {
             if (!_containers.ContainsKey(assetKey))
             {
                 var asset = await Loader.LoadAsync<T>(assetKey, cancellation);
-                _containers.Add(assetKey, asset);
+                if (!_containers.ContainsKey(assetKey))
+                {
+                    _containers.Add(assetKey, asset);
+                }
             }
 
             return _containers[assetKey] as T;
         }
 
-        public async PromiseTask CancelLoadAsync(IAssetKey assetKey, CancellationToken cancellation)
+        public async PromiseTask<Object[]> LoadGroup(IEnumerable<IAssetKey> assetKeys, UnsafeCancellationToken cancellation)
         {
-            await Loader.RegisterCancelLoad(assetKey, cancellation);
-            AssertUtil.IsFalse(_containers.ContainsKey(assetKey));
+            List<PromiseTask<Object>> groups = new List<PromiseTask<Object>>();
+            foreach (var assetKey in assetKeys)
+            {
+                if (!_containers.ContainsKey(assetKey))
+                {
+                    groups.Add(Loader.LoadAsync<Object>(assetKey, cancellation));
+                }
+            }
+
+            return await PromiseTask<Object>.WhenAll(groups);
         }
+
+        public async PromiseTask<T[]> LoadGroup<T>(IEnumerable<IAssetKey> assetKeys, UnsafeCancellationToken cancellation) where T : Object
+        {
+            var groups = new List<PromiseTask<T>>();
+            foreach (var assetKey in assetKeys)
+            {
+                if (!_containers.ContainsKey(assetKey))
+                {
+                    groups.Add(Loader.LoadAsync<T>(assetKey, cancellation));
+                }
+            }
+
+            return await PromiseTask<T>.WhenAll(groups);
+        }
+
 
         public virtual async PromiseTask Unload(IAssetKey key)
         {
@@ -57,6 +84,25 @@ namespace Cr7Sund.Server.Impl
                 await Loader.Unload(item.Key);
             }
             _containers.Clear();
+        }
+
+        public async PromiseTask<T[]> ParallelLoadAssets<T>(IEnumerable<IAssetKey> assetKeys, IList<IAssetKey> inFilterKeys, IList<PromiseTask<T>> inFilterTasks, UnsafeCancellationToken cancellation) where T : Object
+        {
+            foreach (var assetKey in assetKeys)
+            {
+                if (!_containers.ContainsKey(assetKey))
+                {
+                    inFilterKeys.Add(assetKey);
+                    inFilterTasks.Add(Loader.LoadAsync<T>(assetKey, cancellation));
+                }
+            }
+
+            var result = await PromiseTask<T>.WhenAll(inFilterTasks);
+            for (int i = 0; i < inFilterKeys.Count; i++)
+            {
+                _containers.Add(inFilterKeys[i], result[i]);
+            }
+            return result;
         }
 
         public virtual void Dispose()

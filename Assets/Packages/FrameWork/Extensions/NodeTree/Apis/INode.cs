@@ -11,37 +11,38 @@ namespace Cr7Sund.NodeTree.Api
         NodeState NodeState { get; }
         IAssetKey Key { get; }
         int ChildCount { get; }
-        CancellationTokenSource AddCancellation{get; }
+        UnsafeCancellationTokenSource AddCancellation { get; }
+        UnsafeCancellationTokenSource RemoveCancellation { get; }
 
         PromiseTask PreLoadChild(INode child);
         PromiseTask AddChildAsync(INode child, bool overwrite = false);
         PromiseTask UnloadChildAsync(INode child, bool overwrite = false);
         PromiseTask RemoveChildAsync(INode child, bool overwrite = false);
-        PromiseTask CancelLoadChild(INode child);
+        void CancelCurTask();
         void Destroy(IContext parentContext);
         INode GetChild(int index);
 
         #region Load
-        PromiseTask LoadAsync();
-        PromiseTask PreLoadAsync();
-        PromiseTask UnloadAsync();
-        PromiseTask CancelLoadAsync(CancellationToken cancellation);
-        void CancelUnload();
-
+        PromiseTask LoadAsync(UnsafeCancellationToken cancellation);
+        PromiseTask PreLoadAsync(UnsafeCancellationToken cancellation);
+        PromiseTask UnloadAsync(UnsafeCancellationToken cancellation);
+        void CancelLoad();
+        void CancelUnLoad();
         void SetAdding();
         void StartPreload();
         void SetReady();
         void StartUnload(bool shouldUnload);
         void EndUnLoad(bool unload);
-        PromiseTask CancelCurTask();
         #endregion
 
         #region LifeCycle
         PromiseTask SetActive(bool active);
-        PromiseTask OnStart();
+        PromiseTask OnStart(UnsafeCancellationToken cancellation);
         PromiseTask OnEnable();
-        PromiseTask OnDisable();
-        PromiseTask OnStopAsync();
+        PromiseTask OnDisable(bool closeImmediately);
+        PromiseTask OnStop();
+        void OnCancelLoad();
+        void OnCancelUnLoad();
         #endregion
 
     }

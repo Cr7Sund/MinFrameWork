@@ -8,6 +8,8 @@ using Cr7Sund.ServerTest.UI;
 using Cr7Sund.Selector.Impl;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.NodeTree.Api;
+using Cr7Sund.Package.Impl;
+using System.Text.RegularExpressions;
 
 namespace Cr7Sund.ServerTest.Scene
 {
@@ -44,6 +46,10 @@ namespace Cr7Sund.ServerTest.Scene
                 GameObject.DontDestroyOnLoad(gameRoot);
                 _gameRoot = gameRoot.GetComponent<TestGameRoot>();
                 _gameRoot.Init(_gameLogic);
+                _gameRoot.PromiseTimer.Schedule((timeData) =>
+                {
+                    _sceneModule.TimeOut(timeData.elapsedTime);
+                }, UnsafeCancellationToken.None);
             }
         }
 
@@ -60,7 +66,7 @@ namespace Cr7Sund.ServerTest.Scene
             await _gameLogic.DestroyAsync();
             if (Application.isPlaying)
             {
-                GameObject.Destroy(_gameRoot.gameObject);
+                GameObjectUtil.Destroy(_gameRoot.gameObject);
             }
         }
 
@@ -204,5 +210,26 @@ namespace Cr7Sund.ServerTest.Scene
 
             Assert.AreEqual(1, SampleSceneTwoController.StartValue);
         }
+
+
+        [Test]
+        public async Task OpenScene_Pending_TimeOut()
+        {
+            AssertHelper.Expect(LogType.Error, new Regex("System.OperationCanceledException"));
+            SampleSceneOneController.LoadPromise = Promise.Create();
+
+            try
+            {
+                await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
+            }
+            catch (System.Exception ex)
+            {
+                Console.Error(ex);
+            }
+
+            Assert.AreEqual(0, _sceneModule.OperateNum);
+            Assert.AreEqual(0, SampleThreeUIController.EnableCount);
+        }
+
     }
 }

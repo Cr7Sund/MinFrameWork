@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
+using Cr7Sund.CompilerServices;
 using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund
@@ -8,15 +10,25 @@ namespace Cr7Sund
     {
         private static ReusablePool<PromiseTaskSource> _pool;
 
-        private PromiseTaskStatus _status;
-        private Action _registerAction;
         private PromiseTaskSource _nextNode;
-        public Exception _error;
+        private PromiseTaskCompletionSourceCore core;
+        private short version;
 
         public ref PromiseTaskSource NextNode => ref _nextNode;
-        // private PromiseTaskStatus Status => _status;
         public bool IsRecycled { get; set; }
+        public PromiseTask Task
+        {
+            [DebuggerHidden]
+            get
+            {
+                return new PromiseTask(this, core.Version);
+            }
+        }
 
+        private PromiseTaskSource()
+        {
+
+        }
 
         public static PromiseTaskSource Create()
         {
@@ -24,90 +36,61 @@ namespace Cr7Sund
             {
                 result = new PromiseTaskSource();
             }
-
+            result.version = result.core.Version;
+            // TaskTracker.TrackActiveTask(result, 2);
             return result;
         }
 
+        [DebuggerHidden]
         public void GetResult(short token)
         {
-            if (_error != null)
+            try
             {
-                var tmpEx = _error;
-                TryReturn();
-                throw tmpEx;
+                core.GetResult(token);
             }
-
-            TryReturn();
+            finally
+            {
+                TryReturn();
+            }
         }
 
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
-            return _status;
+            return core.GetStatus(token);
         }
 
+        [DebuggerHidden]
         public PromiseTaskStatus UnsafeGetStatus()
         {
-            return _status;
-        }
-
-        void IPromiseTaskSource.GetResult(short token)
-        {
-            if (_error != null)
-            {
-                var tmpEx = _error;
-                TryReturn();
-                throw tmpEx;
-            }
-
-            TryReturn();
+            return core.UnsafeGetStatus();
         }
 
         public void OnCompleted(Action continuation, short token)
         {
-            _registerAction = continuation;
+            core.OnCompleted(continuation, token);
         }
 
-        public void RegisterCancel(CancellationToken cancellation)
+        public bool TryCancel(string cancelMsg, UnsafeCancellationToken cancellation)
         {
-            if (_status != PromiseTaskStatus.Pending) return;
-
-            if (cancellation.IsCancellationRequested)
-            {
-                Reject(new OperationCanceledException(cancellation));
-            }
+            return version == core.Version && core.TrySetCanceled(cancelMsg, cancellation);
         }
 
-        public void Resolve()
+        public bool TryResolve()
         {
-            if (_error != null)
-            {
-                _status = PromiseTaskStatus.Succeeded;
-            }
-
-            _registerAction?.Invoke();
+            return version == core.Version && core.TrySetResult();
         }
 
-        public void Reject(Exception e)
+        public bool TryReject(Exception exception)
         {
-            AssertUtil.IsTrue(_status == PromiseTaskStatus.Pending);
-
-            _error = e;
-            if (e is OperationCanceledException)
-            {
-                _status = PromiseTaskStatus.Canceled;
-            }
-            else
-            {
-                _status = PromiseTaskStatus.Faulted;
-            }
+            return version == core.Version && core.TrySetException(exception);
         }
 
-        private void TryReturn()
+        private bool TryReturn()
         {
-            _status = PromiseTaskStatus.Pending;
-            _registerAction = null;
-            _error = null;
-            _pool.TryPush(this);
+            //TaskTracker.RemoveTracking(this);
+            core.Reset();
+            return _pool.TryPush(this);
         }
     }
 }

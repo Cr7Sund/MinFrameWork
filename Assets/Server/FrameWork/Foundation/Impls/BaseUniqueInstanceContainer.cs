@@ -47,8 +47,9 @@ namespace Cr7Sund.Server.Impl
                 _count--;
                 if (_count == 0)
                 {
-                    GameObject.Destroy(_instance);
+                    GameObjectUtil.Destroy(_instance);
                     Dispose();
+
                     _pool.TryPush(this);
                 }
                 return _count == 0;
@@ -77,7 +78,7 @@ namespace Cr7Sund.Server.Impl
             return instance;
         }
 
-        public async PromiseTask<T> CreateInstanceAsync<T>(IAssetKey assetKey, CancellationToken cancellation) where T : Object
+        public async PromiseTask<T> CreateInstanceAsync<T>(IAssetKey assetKey, UnsafeCancellationToken cancellation) where T : Object
         {
             if (_instancePromises.ContainsKey(assetKey))
             {
@@ -106,12 +107,6 @@ namespace Cr7Sund.Server.Impl
                 item.Value.TryDestroy();
                 await base.Unload(item.Key);
             }
-        }
-
-        public async PromiseTask CancelLoad(IAssetKey assetKey, CancellationToken token)
-        {
-            await CancelLoadAsync(assetKey, token);
-            AssertUtil.IsFalse(_instancePromises.ContainsKey(assetKey));
         }
 
         public override void Dispose()

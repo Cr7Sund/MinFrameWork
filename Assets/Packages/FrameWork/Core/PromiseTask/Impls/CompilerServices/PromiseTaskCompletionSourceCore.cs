@@ -32,12 +32,12 @@ namespace Cr7Sund.CompilerServices
         {
             if (!calledGet)
             {
-                //UniTaskScheduler.PublishUnobservedTaskException(exception.SourceException);
+                Console.Error(exception.SourceException);
             }
         }
     }
 #endif
-    internal static class UniTaskCompletionSourceCoreShared // separated out of generic to avoid unnecessary duplication
+    internal static class PromiseTaskCompletionSourceCoreShared // separated out of generic to avoid unnecessary duplication
     {
         internal static readonly Action s_sentinel = CompletionSentinel;
 
@@ -103,7 +103,7 @@ namespace Cr7Sund.CompilerServices
         {
             if (Interlocked.Increment(ref completedCount) == 1)
             {
-                if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
+                if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
                     continuation?.Invoke();
                 }
@@ -135,7 +135,7 @@ namespace Cr7Sund.CompilerServices
 #endif
                 }
 
-                if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
+                if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
                     continuation?.Invoke();
                 }
@@ -145,15 +145,15 @@ namespace Cr7Sund.CompilerServices
             return false;
         }
 
-        public bool TrySetCanceled(CancellationToken cancellationToken = default)
+        public bool TrySetCanceled(string cancelMsg, UnsafeCancellationToken cancellationToken = default)
         {
             if (Interlocked.Increment(ref completedCount) == 1)
             {
                 // setup result
                 hasUnhandledError = true;
-                error = new OperationCanceledException();
+                error = new OperationCanceledException(cancelMsg);
 
-                if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
+                if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
                     continuation?.Invoke();
                 }
@@ -165,7 +165,7 @@ namespace Cr7Sund.CompilerServices
 
 
         /// <summary>Gets the status of the operation.</summary>
-        /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
+        /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [DebuggerHidden]
@@ -190,7 +190,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         /// <summary>Gets the result of the operation.</summary>
-        /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
+        /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
         // [StackTraceHidden]
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -200,7 +200,7 @@ namespace Cr7Sund.CompilerServices
             ValidateToken(token);
             if (completedCount == 0)
             {
-                throw new InvalidOperationException("Not yet completed, UniTask only allow to use await.");
+                throw new InvalidOperationException("Not yet completed, PromiseTask only allow to use await.");
             }
 
             if (error != null)
@@ -228,7 +228,7 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Schedules the continuation action for this operation.</summary>
         /// <param name="continuation">The continuation to invoke when the operation has completed.</param>
-        /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
+        /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted(Action continuation, short token /*, ValueTaskSourceOnCompletedFlags flags */)
@@ -260,7 +260,7 @@ namespace Cr7Sund.CompilerServices
             {
                 // already running continuation in TrySet.
                 // It will cause call OnCompleted multiple time, invalid.
-                if (!ReferenceEquals(oldContinuation, UniTaskCompletionSourceCoreShared.s_sentinel))
+                if (!ReferenceEquals(oldContinuation, PromiseTaskCompletionSourceCoreShared.s_sentinel))
                 {
                     throw new InvalidOperationException("Already continuation registered, can not await twice or get Status after await.");
                 }
@@ -316,10 +316,21 @@ namespace Cr7Sund.CompilerServices
             {
                 try
                 {
-                    if (error is OperationCanceledException oc)
+                    if (error is OperationCanceledException oce)
                     {
-                        //UniTaskScheduler.PublishUnobservedTaskException(oc);
+                        Console.Error(oce);
                     }
+#if DEBUG
+                    else if (error is ExceptionHolder eh)
+                    {
+                        Console.Error(eh.GetException().SourceException);
+                    }
+#else
+                else if (error is Exception ex)
+                {
+                    Console.Error(ex);
+                }
+#endif
                 }
                 catch
                 {
@@ -342,7 +353,7 @@ namespace Cr7Sund.CompilerServices
                 // setup result
                 this.result = result;
 
-                if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
+                if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
                     continuation?.Invoke();
                 }
@@ -374,7 +385,7 @@ namespace Cr7Sund.CompilerServices
 #endif
                 }
 
-                if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
+                if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
                     continuation?.Invoke();
                 }
@@ -384,7 +395,7 @@ namespace Cr7Sund.CompilerServices
             return false;
         }
 
-        public bool TrySetCanceled(CancellationToken cancellationToken = default)
+        public bool TrySetCanceled(UnsafeCancellationToken cancellationToken = default)
         {
             if (Interlocked.Increment(ref completedCount) == 1)
             {
@@ -392,7 +403,7 @@ namespace Cr7Sund.CompilerServices
                 hasUnhandledError = true;
                 error = new OperationCanceledException();
 
-                if (continuation != null || Interlocked.CompareExchange(ref continuation, UniTaskCompletionSourceCoreShared.s_sentinel, null) != null)
+                if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
                     continuation?.Invoke();
                 }
@@ -404,7 +415,7 @@ namespace Cr7Sund.CompilerServices
 
 
         /// <summary>Gets the status of the operation.</summary>
-        /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
+        /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PromiseTaskStatus GetStatus(short token)
@@ -428,7 +439,7 @@ namespace Cr7Sund.CompilerServices
         }
 
         /// <summary>Gets the result of the operation.</summary>
-        /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
+        /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
         // [StackTraceHidden]
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -437,7 +448,7 @@ namespace Cr7Sund.CompilerServices
             ValidateToken(token);
             if (completedCount == 0)
             {
-                throw new InvalidOperationException("Not yet completed, UniTask only allow to use await.");
+                throw new InvalidOperationException("Not yet completed, PromiseTask only allow to use await.");
             }
 
             if (error != null)
@@ -466,7 +477,7 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Schedules the continuation action for this operation.</summary>
         /// <param name="continuation">The continuation to invoke when the operation has completed.</param>
-        /// <param name="token">Opaque value that was provided to the <see cref="UniTask"/>'s constructor.</param>
+        /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted(Action continuation, short token /*, ValueTaskSourceOnCompletedFlags flags */)
@@ -498,7 +509,7 @@ namespace Cr7Sund.CompilerServices
             {
                 // already running continuation in TrySet.
                 // It will cause call OnCompleted multiple time, invalid.
-                if (!ReferenceEquals(oldContinuation, UniTaskCompletionSourceCoreShared.s_sentinel))
+                if (!ReferenceEquals(oldContinuation, PromiseTaskCompletionSourceCoreShared.s_sentinel))
                 {
                     throw new InvalidOperationException("Already continuation registered, can not await twice or get Status after await.");
                 }

@@ -15,13 +15,12 @@ namespace Cr7Sund.Server.UI.Impl
 {
     public class UITransitionAnimationContainer : BaseAssetContainer, IUITransitionAnimationContainer
     {
-        [Inject] private IConfigContainer _configContainer;
         [Inject] private IAssetLoader _assetLoader;
 
         protected override IAssetLoader Loader => _assetLoader;
 
 
-        public async PromiseTask<IUITransitionAnimationBehaviour> GetAnimationBehaviour(UITransitionAnimation animation, CancellationToken cancellation)
+        public async PromiseTask<IUITransitionAnimationBehaviour> GetAnimationBehaviour(UITransitionAnimation animation, UnsafeCancellationToken cancellation)
         {
             switch (animation.AssetType)
             {
@@ -36,9 +35,9 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        public async PromiseTask<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter, CancellationToken cancellation)
+        public async PromiseTask<IUITransitionAnimationBehaviour> GetDefaultPageTransition(bool push, bool enter, UnsafeCancellationToken cancellation)
         {
-            var settings = await _configContainer.LoadAssetAsync<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig, cancellation);
+            var settings = await LoadAssetAsync<UIScreenNavigatorSettings>(ConfigDefines.UITransitionConfig, cancellation);
             return settings.GetDefaultPageTransitionAnimation(push, enter);
         }
 

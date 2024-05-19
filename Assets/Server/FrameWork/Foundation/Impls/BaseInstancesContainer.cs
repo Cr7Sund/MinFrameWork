@@ -68,7 +68,7 @@ namespace Cr7Sund.Server.Impl
             return instance;
         }
 
-        public async PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name, CancellationToken cancellation) where T : Object
+        public async PromiseTask<T> InstantiateAsync<T>(IAssetKey assetKey, string name, UnsafeCancellationToken cancellation) where T : Object
         {
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
             {
@@ -105,7 +105,7 @@ namespace Cr7Sund.Server.Impl
         {
             if (_instanceContainers.TryGetValue(name, out var instance))
             {
-                Object.Destroy(instance);
+                GameObjectUtil.Destroy(instance);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace Cr7Sund.Server.Impl
         {
             if (_instanceContainers.TryGetValue(name, out var instance))
             {
-                GameObject.Destroy(instance);
+                GameObjectUtil.Destroy(instance);
             }
 
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
@@ -148,7 +148,7 @@ namespace Cr7Sund.Server.Impl
         {
             foreach (var item in _instanceContainers)
             {
-                Object.Destroy(item.Value);
+                GameObjectUtil.Destroy(item.Value);
             }
             _instanceContainers.Clear();
 
@@ -156,7 +156,7 @@ namespace Cr7Sund.Server.Impl
             {
                 foreach (var instance in item.Value)
                 {
-                    Object.Destroy(instance);
+                    GameObjectUtil.Destroy(instance);
                 }
                 await base.Unload(item.Key);
                 item.Value.Clear();

@@ -5,6 +5,9 @@ using UnityEngine;
 using Cr7Sund.Config;
 using System;
 using Cr7Sund.AssetLoader.Api;
+using System.Threading.Tasks;
+using Cr7Sund.Server.Impl;
+using Cr7Sund.Server.Api;
 
 namespace Cr7Sund.Selector.Impl
 {
@@ -14,6 +17,7 @@ namespace Cr7Sund.Selector.Impl
         private IAssetLoader _configLoader;
         private TimeCorrector _updateCorrector;
         private TimeCorrector _lateUpdateCorrector;
+        private EditorApplicationProxy _editorApplicationProxy;
         private bool _dispose;
 
 
@@ -70,8 +74,20 @@ namespace Cr7Sund.Selector.Impl
 
         private async void OnApplicationQuit()
         {
-            await DestroyAsync();
+
+            try
+            {
+                await DestroyAsync();
+            }
+            catch (Exception ex)
+            {
+                EntranceConsole.Error(ex);
+            }
+
+            // _editorApplicationProxy.UnRegisterUpdateCallback(_gameLogic);
+            _editorApplicationProxy.Dispose();
             EntranceConsole.Info("GameLauncher: Exit Game!!!");
+            Console.Dispose();
             EntranceConsole.Dispose();
         }
 
@@ -81,12 +97,13 @@ namespace Cr7Sund.Selector.Impl
 
         private async PromiseTask InitFrameWork()
         {
-            Console.Init(InternalLoggerFactory.Create("FrameWork"));
-
             _gameLogic = await CreateGameLogic();
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
             _gameLogic.Init();
+            
+            _editorApplicationProxy = new EditorApplicationProxy();
+            // _editorApplicationProxy.RegisterUpdateCallback(_gameLogic);
         }
 
         private async PromiseTask<GameLogic.GameLogic> CreateGameLogic()

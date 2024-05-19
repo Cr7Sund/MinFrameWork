@@ -15,16 +15,24 @@ namespace Cr7Sund.ServerTest.UI
     {
 
         [Test]
-        public async Task PreparePage_Pending()
+        public async Task PreparePage_Pending_TimeOut()
         {
+            AssertHelper.Expect(LogType.Error, new Regex("System.OperationCanceledException"));
             SampleThreeUIController.promise = Promise.Create();
 
-            var task = _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            try
+            {
+                await _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
+            }
+            catch (System.Exception ex)
+            {
+                Console.Error(ex);
+            }
+
             Assert.AreEqual(0, _pageContainer.OperateNum);
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
 
-            SampleThreeUIController.promise.Resolve();
-            await task;
+            // SampleThreeUIController.promise.Resolve();
         }
 
         [Test]

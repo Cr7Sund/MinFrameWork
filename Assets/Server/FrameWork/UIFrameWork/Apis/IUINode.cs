@@ -24,10 +24,10 @@ namespace Cr7Sund.Server.UI.Api
         PromiseTask BeforeEnter(bool push, IUINode partnerView);
 
         // Method called when exiting the view
-        PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask Exit(bool push, IUINode partnerView, bool playAnimation, bool closeImmediately, UnsafeCancellationToken cancellation);
 
         // Method called when entering the view
-        PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation);
+        PromiseTask Enter(bool push, IUINode partnerView, bool playAnimation, UnsafeCancellationToken cancellation);
 
         // Method called after exiting the view
         PromiseTask AfterExit(bool push, IUINode enterPage);

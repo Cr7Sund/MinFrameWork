@@ -10,7 +10,7 @@ namespace Cr7Sund.Game.UI
         public static int EnableCount;
 
         public static IPromise promise;
-        protected override PromiseTask OnPrepare(object intent)
+        protected override PromiseTask OnPrepare(UnsafeCancellationToken cancellation, object intent)
         {
             return promise.AsNewTask();
         }
@@ -20,7 +20,7 @@ namespace Cr7Sund.Game.UI
             EnableCount = 0;
         }
 
-        protected override async PromiseTask OnStart(CancellationToken cancellation)
+        protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Load ui three");
             await base.OnStart(cancellation);
@@ -35,10 +35,10 @@ namespace Cr7Sund.Game.UI
             EnableCount++;
         }
 
-        protected override async PromiseTask OnDisable()
+        protected override async PromiseTask OnDisable(bool closeImmediately)
         {
             Debug.Debug("Disable ui three");
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
             EnableCount--;
         }
 

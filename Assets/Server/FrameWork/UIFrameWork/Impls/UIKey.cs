@@ -9,7 +9,6 @@ namespace Cr7Sund.Server.UI.Impl
         private readonly Type _viewType;
 
         public readonly object Intent;
-        public readonly bool PlayAnimation;
         public readonly bool Stack;
         public readonly bool LoadAsync;
         public readonly bool HideFirst;
@@ -19,6 +18,7 @@ namespace Cr7Sund.Server.UI.Impl
         // --- internal content ---
         internal IUINode exitPage { get; set; }
         internal bool IsPush { get; set; }
+        internal bool PlayAnimation { get; set; }
 
 
         public UIKey(string key, Type ctrlType, Type viewType,

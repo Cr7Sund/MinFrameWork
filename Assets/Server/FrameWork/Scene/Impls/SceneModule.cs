@@ -22,7 +22,20 @@ namespace Cr7Sund.Server.Scene.Impl
                 return _gameNode;
             }
         }
-
+        protected override int _loadTimeOutTime
+        {
+            get
+            {
+                return ServerBindDefine.SceneTimeOutTime;
+            }
+        }
+        public int OperateNum
+        {
+            get
+            {
+                return _treeNodes.Count;
+            }
+        }
 
         public async PromiseTask PreLoadScene(IAssetKey key)
         {
@@ -76,7 +89,7 @@ namespace Cr7Sund.Server.Scene.Impl
             for (int i = 0; i < loadingList.Count; i++)
             {
                 Console.Warn("unload loading scene : {SceneNode} ", loadingList[i]);
-                await _parentNode.CancelLoadChild(loadingList[i]);
+                loadingList[i].CancelLoad();
             }
 
             for (int i = 0; i < preloadedList.Count; i++)
@@ -85,8 +98,8 @@ namespace Cr7Sund.Server.Scene.Impl
                 await UnloadNode(preloadedList[i].Key);
             }
 
-            _poolBinder.Return(preloadedList);
-            _poolBinder.Return(loadingList);
+            _poolBinder.Return<List<INode>, INode>(preloadedList);
+            _poolBinder.Return<List<INode>, INode>(loadingList);
         }
 
         private async Task CloseOtherScenes(IAssetKey key, LoadSceneMode closeSceneMode)
@@ -110,7 +123,7 @@ namespace Cr7Sund.Server.Scene.Impl
                 DispatchSwitch(key, assetNode.Key);
             }
 
-            _poolBinder.Return(tmpList);
+            _poolBinder.Return<List<INode>, INode>(tmpList);
         }
         #region  Event
         protected override void DispatchSwitch(IAssetKey curScene, IAssetKey lastScene)

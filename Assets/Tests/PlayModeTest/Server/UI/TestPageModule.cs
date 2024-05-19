@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Selector.Impl;
+using System;
 
 namespace Cr7Sund.ServerTest.UI
 {
@@ -64,6 +65,10 @@ namespace Cr7Sund.ServerTest.UI
                 var gameRoot = new GameObject("testRoot", typeof(TestGameRoot));
                 _gameRoot = gameRoot.GetComponent<TestGameRoot>();
                 _gameRoot.Init(_gameLogic);
+                _gameRoot.PromiseTimer.Schedule((timeData) =>
+                    {
+                        _pageContainer.TimeOut(timeData.elapsedTime);
+                    }, UnsafeCancellationToken.None);
             }
 
         }
@@ -76,7 +81,7 @@ namespace Cr7Sund.ServerTest.UI
             await _gameLogic.DestroyAsync();
             if (Application.isPlaying)
             {
-                GameObject.Destroy(_gameRoot.gameObject);
+                GameObjectUtil.Destroy(_gameRoot.gameObject);
             }
 
         }
@@ -272,26 +277,24 @@ namespace Cr7Sund.ServerTest.UI
         }
 
         [Test]
-        public async Task CancelUI_Success()
+        public void CancelUI_Success()
         {
             SampleThreePanel.LoadPromise = new Promise();
             _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-
-            await _pageContainer.CancelNode(SampleUIKeys.SampleThreeUI);
-            SampleThreePanel.LoadPromise.Cancel();// simulate  cancel load Promise
-
+            _pageContainer.CancelNode(SampleUIKeys.SampleThreeUI);
 
             Assert.AreEqual(0, SampleThreeUIController.StartValue);
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
+            Console.Info("hello");
         }
 
         [Test]
         public async Task ReAddCancelUI()
         {
             SampleThreePanel.LoadPromise = new Promise();
+
             _pageContainer.PushPage(SampleUIKeys.SampleThreeUI);
-            await _pageContainer.CancelNode(SampleUIKeys.SampleThreeUI);
-            SampleThreePanel.LoadPromise.Cancel();// simulate  cancel load Promise
+            _pageContainer.CancelNode(SampleUIKeys.SampleThreeUI);
 
             SampleThreePanel.LoadPromise = new Promise();
             SampleThreePanel.LoadPromise.Resolve();

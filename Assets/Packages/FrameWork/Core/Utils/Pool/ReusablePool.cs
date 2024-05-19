@@ -5,9 +5,15 @@ namespace Cr7Sund.FrameWork.Util
     public interface IPoolNode<T>
     {
         ref T NextNode { get; }
-        bool IsRecycled { get; set; }
+        /// <summary>
+        /// Object Validation
+        /// Before returning an object to the pool, set your internal state flag to true
+        /// when change the flag to true which means it is not already in use elsewhere.
+        /// </summary>
+        bool IsRecycled { get; set;}
     }
 
+    //since pool is static
     public struct ReusablePool<T> where T : class, IPoolNode<T>
     {
         internal static int MaxPoolSize = int.MaxValue;
@@ -48,8 +54,8 @@ namespace Cr7Sund.FrameWork.Util
 
             if (size < MaxPoolSize)
             {
-                item.IsRecycled = true;
                 item.NextNode = root;
+                item.IsRecycled = true;
                 root = item;
                 size++;
                 return true;

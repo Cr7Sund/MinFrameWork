@@ -2,14 +2,13 @@ using System;
 using System.Threading;
 using UnityEngine.SceneManagement;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetLoader.Api
 {
     public interface ISceneLoader : IInitialize, IDisposable, ILateUpdate
     {
         PromiseTask LoadSceneAsync(IAssetKey key,
-            LoadSceneMode loadMode, bool activateOnLoad, CancellationToken cancellation);
+            LoadSceneMode loadMode, bool activateOnLoad, UnsafeCancellationToken cancellation);
         PromiseTask ActiveSceneAsync(IAssetKey key);
         PromiseTask UnloadScene(IAssetKey key);
-        PromiseTask RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation);
     }
 }

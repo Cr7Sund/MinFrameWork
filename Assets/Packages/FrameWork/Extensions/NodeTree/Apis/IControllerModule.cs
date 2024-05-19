@@ -12,14 +12,14 @@ namespace Cr7Sund.NodeTree.Api
         /// </summary>
         /// <typeparam name="T">Type of the controller.</typeparam>
         /// <returns>True if the addition is successful; otherwise, false.</returns>
-        PromiseTask AddController<T>(CancellationToken cancellation = default) where T : IController;
+        PromiseTask AddController<T>(UnsafeCancellationToken cancellation = default) where T : IController;
 
         /// <summary>
         /// Adds the specified controller.
         /// </summary>
         /// <param name="controller">The controller to add.</param>
         /// <returns>True if the addition is successful; otherwise, false.</returns>
-        PromiseTask AddController(IController controller, CancellationToken cancellation = default);
+        PromiseTask AddController(IController controller, UnsafeCancellationToken cancellation = default);
 
         /// <summary>
         /// Removes the controller of type <typeparamref name="T"/>.
@@ -32,7 +32,8 @@ namespace Cr7Sund.NodeTree.Api
         /// Removes the specified controller.
         /// </summary>
         /// <param name="controller">The controller to remove.</param>
+        /// <param name="cancellation">The cancellation of remove.</param>
         /// <returns>True if the removal is successful; otherwise, false.</returns>
-        PromiseTask RemoveController(IController controller);
+        PromiseTask RemoveController(IController controller, UnsafeCancellationToken cancellation);
     }
 }

@@ -15,19 +15,19 @@ namespace Cr7Sund.NodeTree.Impl
             _controllerModule = controllerModule;
         }
 
-        protected override PromiseTask OnPreloadAsync()
+        protected override PromiseTask OnPreloadAsync(UnsafeCancellationToken cancellation)
         {
-            return _controllerModule.PreLoadAsync();
+            return _controllerModule.PreLoadAsync(cancellation);
         }
 
-        protected override PromiseTask OnLoadAsync()
+        protected override PromiseTask OnLoadAsync(UnsafeCancellationToken cancellation)
         {
-            return _controllerModule.LoadAsync();
+            return _controllerModule.LoadAsync(cancellation);
         }
 
-        protected override PromiseTask OnUnloadAsync()
+        protected override PromiseTask OnUnloadAsync(UnsafeCancellationToken cancellation)
         {
-            return _controllerModule.UnloadAsync();
+            return _controllerModule.UnloadAsync(cancellation);
         }
 
         public sealed override void Inject()
@@ -55,12 +55,12 @@ namespace Cr7Sund.NodeTree.Impl
             _controllerModule.Deject();
         }
 
-        public override PromiseTask OnStart()
+        public override PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
-            return _controllerModule.Start(AddCancellation.Token);
+            return _controllerModule.Start(cancellation);
         }
 
-        public override async PromiseTask OnStopAsync()
+        public override async PromiseTask OnStop()
         {
             await _controllerModule.Stop();
         }
@@ -70,9 +70,9 @@ namespace Cr7Sund.NodeTree.Impl
             return _controllerModule.Enable();
         }
 
-        public override PromiseTask OnDisable()
+        public override PromiseTask OnDisable(bool closeImmediately )
         {
-            return _controllerModule.Disable();
+            return _controllerModule.Disable(closeImmediately);
         }
 
         protected override void OnUpdate(int milliseconds)

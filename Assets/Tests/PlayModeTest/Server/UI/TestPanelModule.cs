@@ -9,6 +9,7 @@ using Cr7Sund.Server.UI.Api;
 using UnityEngine;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Selector.Impl;
+using System.Text.RegularExpressions;
 
 namespace Cr7Sund.ServerTest.UI
 {
@@ -34,6 +35,8 @@ namespace Cr7Sund.ServerTest.UI
             await _gameLogic.Run();
 
             _sceneModule = new SceneModule();
+            SampleSceneOneController.Init();
+
             _gameLogic.GetContextInjector().Inject(_sceneModule);
             await _sceneModule.AddScene(SampleSceneKeys.SampleSceneKeyOne);
             var metGetNode = typeof(LoadModule).GetMethod("GetViewByKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -72,6 +75,14 @@ namespace Cr7Sund.ServerTest.UI
 
             _panelContainer = new PanelModule();
             uiInjectBinder.Injector.Inject(_panelContainer);
+
+            if (Application.isPlaying)
+            {
+                _gameRoot.PromiseTimer.Schedule((timeData) =>
+                {
+                    _panelContainer.TimeOut(timeData.elapsedTime);
+                }, UnsafeCancellationToken.None);
+            }
         }
 
         [TearDown]
@@ -84,7 +95,7 @@ namespace Cr7Sund.ServerTest.UI
             
             if (Application.isPlaying)
             {
-                GameObject.Destroy(_gameRoot.gameObject);
+                GameObjectUtil.Destroy(_gameRoot.gameObject);
             }
         }
 
@@ -99,7 +110,7 @@ namespace Cr7Sund.ServerTest.UI
         }
 
         [Test]
-        public async Task OpenPages()
+        public async Task OpenPanels()
         {
             await _panelContainer.OpenPanel(SampleUIKeys.SampleOneUI);
             await _panelContainer.OpenPanel(SampleUIKeys.SampleTwoUI);
@@ -169,5 +180,23 @@ namespace Cr7Sund.ServerTest.UI
             Assert.AreEqual(0, SampleTwoUIController.StartValue);
         }
 
+        [Test]
+        public async Task OpenPanel_Pending_TimeOut()
+        {
+            AssertHelper.Expect(LogType.Error, new Regex("System.OperationCanceledException"));
+            SampleThreeUIController.promise = Promise.Create();
+
+            try
+            {
+                await _panelContainer.OpenPanel(SampleUIKeys.SampleThreeUI);
+            }
+            catch (System.Exception ex)
+            {
+                Console.Error(ex);
+            }
+
+            Assert.AreEqual(0, _panelContainer.OperateNum);
+            Assert.AreEqual(0, SampleThreeUIController.EnableCount);
+        }
     }
 }

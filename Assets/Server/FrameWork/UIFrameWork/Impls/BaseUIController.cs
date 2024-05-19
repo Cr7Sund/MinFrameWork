@@ -8,13 +8,14 @@ namespace Cr7Sund.Server.UI.Impl
      public abstract class BaseUIController : BaseController, IUIController
      {
           [Inject(ServerBindDefine.UILogger)] protected IInternalLog _log;
-          protected override IInternalLog Debug => _log;
+          protected override IInternalLog Debug => _log ?? Console.Logger;
 
-          public virtual PromiseTask Prepare(object intent = null)
+
+          public virtual PromiseTask Prepare(UnsafeCancellationToken cancellation, object intent = null)
           {
                try
                {
-                    return OnPrepare(intent);
+                    return OnPrepare(cancellation, intent);
                }
                catch (Exception e)
                {
@@ -196,7 +197,7 @@ namespace Cr7Sund.Server.UI.Impl
 
           #region overload methods
 
-          protected virtual PromiseTask OnPrepare(object intent)
+          protected virtual PromiseTask OnPrepare(UnsafeCancellationToken cancellation, object intent)
           {
                return PromiseTask.CompletedTask;
           }

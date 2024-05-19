@@ -1,22 +1,23 @@
+using System;
 using System.Collections.Generic;
-using System.Threading;
+using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.Collection;
 using Cr7Sund.FrameWork.Util;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetLoader.Impl
 {
 
     internal class AddressableSceneLoader : ISceneLoader
     {
 
-        private Dictionary<IAssetKey, AsyncChainOperations> _assetKeyToHandles
+        private Dictionary<IAssetKey, AsyncChainOperations<SceneInstance>> _assetKeyToHandles
             = new();
         private List<TupleStruct<IAssetKey, PromiseTaskSource>> _activeScenePromise = new();
         public bool IsInit { get; set; }
+        private readonly Action<AsyncChainOperations<SceneInstance>> _onUnloadedAction = OnUnloadHandle;
 
         public void Init()
         {
@@ -31,20 +32,21 @@ namespace Cr7Sund.Server.Impl
             IsInit = false;
         }
 
-        public async PromiseTask LoadSceneAsync(IAssetKey key,
-            LoadSceneMode loadMode, bool activateOnLoad, CancellationToken cancellation)
+        public async PromiseTask LoadSceneAsync(IAssetKey assetKey,
+            LoadSceneMode loadMode, bool activateOnLoad, UnsafeCancellationToken cancellation)
         {
-            if (_assetKeyToHandles.TryGetValue(key, out var chainOperation))
+            if (_assetKeyToHandles.TryGetValue(assetKey, out var chainOperation))
             {
                 await chainOperation.Chain();
                 return;
             }
-            var sceneKey = key.Key;
+            var sceneKey = assetKey.Key;
 
-            AsyncOperationHandle handler = Addressables.LoadSceneAsync(sceneKey, loadMode, activateOnLoad);
-            chainOperation = AsyncChainOperations.Start(ref handler, cancellation);
+            var handler = Addressables.LoadSceneAsync(sceneKey, loadMode, activateOnLoad);
 
-            _assetKeyToHandles.Add(key, chainOperation);
+            chainOperation = AsyncChainOperations<SceneInstance>.Start(ref handler, assetKey.Key, cancellation);
+            _assetKeyToHandles.Add(assetKey, chainOperation);
+            RegisterCancel(assetKey, cancellation);
 
             // await addressableHandle.Task;
             await chainOperation.Chain();
@@ -58,52 +60,33 @@ namespace Cr7Sund.Server.Impl
                 // throw new MyException($"not loaded scene {key}");
             }
 
-            await _assetKeyToHandles[assetKey].Chain();
-            if (_assetKeyToHandles[assetKey].Handler.IsValid())
-            {
-                var sceneInstance = _assetKeyToHandles[assetKey].GetResult<SceneInstance>();
-                if (!sceneInstance.Scene.isLoaded)
-                {
-                    await ActiveSceneAsync(assetKey);
-                }
-            }
-
-            _assetKeyToHandles[assetKey].Unload(OnUnloadHandle);
+            var asyncChainOperation = _assetKeyToHandles[assetKey];
             _assetKeyToHandles.Remove(assetKey);
+
+            await asyncChainOperation.Chain();
+            asyncChainOperation.RegisterUnload(_onUnloadedAction);
         }
 
         public async PromiseTask ActiveSceneAsync(IAssetKey key)
         {
             if (!_assetKeyToHandles.ContainsKey(key))
             {
-                // currently dont support duplicate scene load 
                 // throw new MyException($"not loaded scene {key}");
                 return;
             }
 
-            if (_assetKeyToHandles[key].Handler.IsValid() && !_assetKeyToHandles[key].Handler.IsDone)
+            if (!_assetKeyToHandles[key].Handler.IsValid())
             {
-                await _assetKeyToHandles[key].Chain();
+                Console.Warn("try to active an invalid scene");
                 return;
             }
 
-            await ActiveAsync(key);
-        }
-
-        public async PromiseTask RegisterCancelLoad(IAssetKey assetKey, CancellationToken cancellation)
-        {
-            var key = assetKey.Key;
-
-            if (!_assetKeyToHandles.ContainsKey(assetKey))
+            if (!_assetKeyToHandles[key].Handler.IsDone)
             {
-                throw new MyException(
-                    $"There is no asset that has been requested for release (Asset:{key}).");
+                throw new MyException(AssetLoaderExceptionType.ACTIVE_UNLOADED_SCENE);
             }
 
-            var chainOperation = _assetKeyToHandles[assetKey];
-
-            await chainOperation.Chain();
-            await UnloadScene(assetKey);
+            await ActiveAsync(key);
         }
 
         public void LateUpdate(int milliseconds)
@@ -111,23 +94,43 @@ namespace Cr7Sund.Server.Impl
             for (int i = _activeScenePromise.Count - 1; i >= 0; i--)
             {
                 var item = _activeScenePromise[i];
-                AsyncChainOperations asyncChainOperations = _assetKeyToHandles[item.Item1];
+                AsyncChainOperations<SceneInstance> asyncChainOperations = _assetKeyToHandles[item.Item1];
                 if (asyncChainOperations.Handler.IsDone &&
                     asyncChainOperations.GetResult<SceneInstance>().Scene.isLoaded)
                 {
-                    item.Item2.Resolve();
+                    item.Item2.TryResolve();
                     _activeScenePromise.RemoveAt(i);
                 }
             }
         }
-        private static void OnUnloadHandle(AsyncChainOperations asinChain)
+
+        private static void OnUnloadHandle(AsyncChainOperations<SceneInstance> asyncChain)
         {
-            if (SceneManager.sceneCount > 1)
+            // since unload scene automatically when switch scene
+            if (asyncChain.Handler.IsValid())
             {
-                //Unloading the last loaded scene is not supported
-                Addressables.UnloadSceneAsync(asinChain.Handler);
+                // we need to resolve the loading promise by active the scene 
+                var sceneInstance = asyncChain.GetResult<SceneInstance>();
+                if (!sceneInstance.Scene.isLoaded)
+                {
+                    sceneInstance.ActivateAsync();
+                }
+
+                if (SceneManager.sceneCount > 1)
+                {
+                    //Unloading the last loaded scene is not supported
+                    try
+                    {
+                        Addressables.UnloadSceneAsync(asyncChain.Handler);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Console.Error(ex);
+                    }
+                }
             }
-            asinChain.TryReturn();
+
+            asyncChain.TryReturn();
         }
 
         private async PromiseTask ActiveAsync(IAssetKey assetKey)
@@ -141,7 +144,34 @@ namespace Cr7Sund.Server.Impl
             }
             var activePromise = PromiseTaskSource.Create();
             _activeScenePromise.Add(new TupleStruct<IAssetKey, PromiseTaskSource>(assetKey, activePromise));
-            await new PromiseTask(activePromise, 0);
+            await activePromise.Task;
+        }
+
+        private void RegisterCancel(IAssetKey assetKey, UnsafeCancellationToken cancellation)
+        {
+            if (cancellation.IsCancellationRequested)
+            {
+                OnCancel(assetKey, cancellation);
+            }
+            else
+            {
+                cancellation.Register(() => OnCancel(assetKey, cancellation));
+            }
+        }
+
+        private void OnCancel(IAssetKey assetKey, UnsafeCancellationToken cancellation)
+        {
+            // unload win
+            if (!_assetKeyToHandles.ContainsKey(assetKey))
+            {
+                return;
+            }
+            
+            AsyncChainOperations<SceneInstance> chainOperation = _assetKeyToHandles[assetKey];
+
+            chainOperation.RegisterCancel(assetKey.Key, cancellation);
+            chainOperation.RegisterUnload(_onUnloadedAction);
+            _assetKeyToHandles.Remove(assetKey);
         }
     }
 }

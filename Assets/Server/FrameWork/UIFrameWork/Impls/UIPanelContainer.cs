@@ -8,6 +8,6 @@ namespace Cr7Sund.Server.UI.Impl
     {
         [Inject] private IAssetLoader _assetLoader;
         protected override IAssetLoader Loader => _assetLoader;
-        
+
     }
 }

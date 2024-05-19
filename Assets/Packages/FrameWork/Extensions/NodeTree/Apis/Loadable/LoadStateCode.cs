@@ -3,9 +3,10 @@
     public enum LoadState
     {
         Default,
-        Fail,
         Loading,
         Loaded,
+        Fail,
+        Canceled,
         Unloading,
         Unloaded,
     }

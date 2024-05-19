@@ -6,18 +6,13 @@ namespace Cr7Sund.Game.UI
 {
     public class SampleOneUIController : BaseUIController
     {
-        public static int StartValue;
-        public static int EnableCount;
+        public int StartValue;
+        public int EnableCount;
 
         [Inject] private IPageModule _pageContainer;
 
-        public static void Init()
-        {
-            StartValue = 0;
-            EnableCount = 0;
-        }
 
-        protected override async PromiseTask OnStart(CancellationToken cancellation)
+        protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Load ui one {StartValue}", StartValue);
             await base.OnStart(cancellation);
@@ -26,16 +21,25 @@ namespace Cr7Sund.Game.UI
 
         protected override async PromiseTask OnEnable()
         {
-            // await _pageContainer.PushPage(EditorUIKeys.SampleTwoUI);
-            await base.OnEnable();
             Debug.Debug("Enable ui one");
+
+            try
+            {
+                // loaded
+                await _pageContainer.PushPage(EditorUIKeys.SampleTwoUI, true);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Info(ex);
+            }
+            await base.OnEnable();
             EnableCount++;
         }
 
-        protected override async PromiseTask OnDisable()
+        protected override async PromiseTask OnDisable(bool closeImmediately)
         {
             Debug.Debug("Disable ui one");
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
             EnableCount--;
         }
 

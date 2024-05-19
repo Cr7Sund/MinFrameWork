@@ -13,7 +13,7 @@ namespace Cr7Sund.PackageTest.IOC
 
         public static IPromise promise;
 
-        protected override PromiseTask OnPrepare(object intentProPro)
+        protected override PromiseTask OnPrepare(UnsafeCancellationToken cancellation, object intent)
         {
             if (Rejected)
             {
@@ -21,6 +21,11 @@ namespace Cr7Sund.PackageTest.IOC
             }
             else
             {
+                cancellation.Register(() =>
+                {
+                    if (promise.CurState == PromiseState.Pending)
+                        promise.Cancel();
+                });
                 return promise.AsNewTask();
             }
         }
@@ -31,7 +36,7 @@ namespace Cr7Sund.PackageTest.IOC
         }
 
 
-        protected override async PromiseTask OnStart(CancellationToken cancellation)
+        protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             await base.OnStart(cancellation);
             Debug.Debug("Load ui three");
@@ -48,9 +53,9 @@ namespace Cr7Sund.PackageTest.IOC
             EnableCount++;
         }
 
-        protected override async PromiseTask OnDisable()
+        protected override async PromiseTask OnDisable(bool closeImmediately)
         {
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
             Debug.Debug("Disable ui three");
 
             EnableCount--;

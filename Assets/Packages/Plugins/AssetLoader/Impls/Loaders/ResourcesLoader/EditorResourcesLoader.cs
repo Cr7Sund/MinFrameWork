@@ -28,7 +28,7 @@ namespace Cr7Sund.AssetLoader.Impl
             return new PromiseTask<T>(default(T), 0);
         }
 
-        PromiseTask<T> IAssetLoader.LoadAsync<T>(IAssetKey key, CancellationToken cancellation)
+        PromiseTask<T> IAssetLoader.LoadAsync<T>(IAssetKey key, UnsafeCancellationToken cancellation)
         {
             return new PromiseTask<T>(default(T), 0);
         }
@@ -38,10 +38,11 @@ namespace Cr7Sund.AssetLoader.Impl
             return PromiseTask.CompletedTask;
         }
 
-        public PromiseTask RegisterCancelLoad(IAssetKey handler, CancellationToken cancellation)
+        public PromiseTask CancelLoad(IAssetKey handler)
         {
             return PromiseTask.CompletedTask;
         }
+
 
         public void LateUpdate(int millisecond)
         {

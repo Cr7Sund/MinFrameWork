@@ -10,7 +10,7 @@ namespace Cr7Sund.PackageTest.IOC
         public static IPromise AnimPromise ;
         public static bool Rejected;
 
-        public override PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation, CancellationToken cancellation)
+        public override PromiseTask EnterRoutine(bool push, IUINode partnerPage, bool playAnimation, UnsafeCancellationToken cancellation)
         {
             if (Rejected)
             {

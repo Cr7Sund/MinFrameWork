@@ -6,7 +6,7 @@ namespace Cr7Sund
         bool IsActive { get; set; }
 
         PromiseTask Enable();
-        PromiseTask Disable();
+        PromiseTask Disable(bool closeImmediately);
 
     }
 }

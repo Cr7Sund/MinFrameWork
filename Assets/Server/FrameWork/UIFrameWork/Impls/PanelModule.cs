@@ -22,6 +22,13 @@ namespace Cr7Sund.Server.UI.Impl
                 return _parentNode.ChildCount;
             }
         }
+        protected override int _loadTimeOutTime
+        {
+            get
+            {
+                return ServerBindDefine.UITimeOutTime;
+            }
+        }
 
         // Only Call from Page
         public async PromiseTask OpenPanel(IAssetKey uiKey)

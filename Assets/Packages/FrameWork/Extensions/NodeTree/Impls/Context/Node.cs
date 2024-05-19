@@ -16,8 +16,8 @@ namespace Cr7Sund.NodeTree.Impl
         protected IContext _context;
         private Promise _addStatus;
         private Promise _removeStatus;
-        private CancellationTokenSource _addCancellation;
-        private CancellationTokenSource _removeCancellation;
+        private UnsafeCancellationTokenSource _addCancellation;
+        private UnsafeCancellationTokenSource _removeCancellation;
 
         public INode Parent
         {
@@ -76,7 +76,7 @@ namespace Cr7Sund.NodeTree.Impl
         public INode this[int index] => GetChild(index);
         public IContext Context => _context;
 
-        public CancellationTokenSource AddCancellation
+        public UnsafeCancellationTokenSource AddCancellation
         {
             get
             {
@@ -88,7 +88,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        protected CancellationTokenSource RemoveCancellation
+        public UnsafeCancellationTokenSource RemoveCancellation
         {
             get
             {
@@ -119,7 +119,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             // since we don't add child first
             // on loaded will not be call 
-            await child.PreLoadAsync();
+            await child.PreLoadAsync(child.AddCancellation.Token);
         }
 
         public void Init()
@@ -133,7 +133,7 @@ namespace Cr7Sund.NodeTree.Impl
             OnInit();
         }
 
-        public async PromiseTask Start(CancellationToken cancellation)
+        public async PromiseTask Start(UnsafeCancellationToken cancellation)
         {
             if (IsStarted)
             {
@@ -164,7 +164,7 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     var first = resultQueue.Pop();
                     first.IsStarted = true;
-                    await first.OnStart();
+                    await first.OnStart(cancellation);
                 }
             }
             finally
@@ -213,7 +213,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public async PromiseTask Disable()
+        public async PromiseTask Disable(bool closeImmediately)
         {
             if (!IsStarted || !IsActive)
             {
@@ -244,7 +244,7 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     var first = resultQueue.Pop();
 
-                    await first.OnDisable();
+                    await first.OnDisable(closeImmediately);
                     first.IsActive = false;
                 }
             }
@@ -286,8 +286,87 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     var first = resultQueue.Pop();
 
-                    await first.OnStopAsync();
+                    await first.OnStop();
                     first.IsStarted = false;
+                }
+            }
+            finally
+            {
+                ReleaseCollection(stack, resultQueue);
+            }
+        }
+
+        public void CancelLoad()
+        {
+            GetCollection(out var stack, out var resultQueue);
+
+            // N-ary Tree Postorder Traversal
+            var root = this;
+            stack.Push(root);
+            while (stack.Count > 0)
+            {
+                var top = stack.Pop();
+                resultQueue.Push(top);
+                for (int i = top.ChildCount - 1; i >= 0; i--)
+                {
+                    INode node = top.GetChild(i);
+                    if (node.NodeState == NodeState.Adding
+                         && !node.AddCancellation.Token.IsCancellationRequested)
+                    {
+                        stack.Push(node);
+                    }
+                }
+            }
+
+            try
+            {
+                while (resultQueue.Count > 0)
+                {
+                    var first = resultQueue.Pop();
+                    first.OnCancelLoad();
+                }
+            }
+            finally
+            {
+                ReleaseCollection(stack, resultQueue);
+            }
+        }
+
+        public void CancelUnLoad()
+        {
+            if (!IsStarted)
+            {
+                return;
+            }
+
+            GetCollection(out var stack, out var resultQueue);
+
+            // N-ary Tree Postorder Traversal
+
+            var root = this;
+            stack.Push(root);
+            while (stack.Count > 0)
+            {
+                var top = stack.Pop();
+                resultQueue.Push(top);
+                for (int i = top.ChildCount - 1; i >= 0; i--)
+                {
+                    INode node = top.GetChild(i);
+                    if ((NodeState == NodeState.Unloading
+                         || NodeState != NodeState.Removing)
+                         && !node.RemoveCancellation.Token.IsCancellationRequested)
+                    {
+                        stack.Push(node);
+                    }
+                }
+            }
+
+            try
+            {
+                while (resultQueue.Count > 0)
+                {
+                    var first = resultQueue.Pop();
+                    first.OnCancelUnLoad();
                 }
             }
             finally
@@ -308,21 +387,21 @@ namespace Cr7Sund.NodeTree.Impl
             }
             else
             {
-                await Disable();
+                await Disable(false);
             }
         }
 
-        public async PromiseTask CancelCurTask()
+        public void CancelCurTask()
         {
             switch (NodeState)
             {
                 case NodeState.Adding:
                 case NodeState.Preloading:
-                    await CancelLoadAsync(AddCancellation.Token);
+                    CancelLoad();
                     return;
                 case NodeState.Unloading:
                 case NodeState.Removing:
-                    CancelUnload();
+                    CancelUnLoad();
                     return;
                 case NodeState.Preloaded:
                 case NodeState.Ready:
@@ -334,23 +413,44 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public async PromiseTask CancelLoadChild(INode child)
+        public void OnCancelLoad()
         {
-            if (child.NodeState != NodeState.Adding)
+            if (NodeState != NodeState.Adding)
             {
-                Console.Warn("try to cancel an not adding node");
+                Console.Warn("try to cancel an not adding node: {NodeState}", NodeState);
                 return;
             }
+            if (AddCancellation.Token.IsCancellationRequested)
+            {
+                return;
+            }
+            // 😒 Why we need to await unload
+            // if we Load SameInstance in race, 
+            // A = ATask, B = BTask
+            // A.Load -> A.Cancel, B.Load ->A.Finish
+            // A win: A.Unload-> B.Load, new Task->valid
+            // B win: B.Load-> A.Unload, After B->invalid
 
-            child.AddCancellation.Cancel();
-
-            // { child.AddStatus.Cancel(); }
-            await child.CancelLoadAsync(child.AddCancellation.Token);
+            // the situation 2 will cause expected result
+            // 😊 but we can make sure when begin cancelling the cache asset will be remove from container
+            // which means it will be decrease reference  count
+            // and the new another load operation will be not be affected
+            AddCancellation.Cancel();
+            // await first.UnloadAsync();
         }
 
-        public void CancelUnload()
+        public void OnCancelUnLoad()
         {
-            if (LoadState != LoadState.Unloading) return;
+            if (NodeState != NodeState.Unloading
+              || NodeState != NodeState.Removing)
+            {
+                Console.Warn($"try to cancel an not adding node: {NodeState}", NodeState);
+                return;
+            }
+            if (RemoveCancellation.Token.IsCancellationRequested)
+            {
+                return;
+            }
 
             RemoveCancellation.Cancel();
         }
@@ -393,7 +493,7 @@ namespace Cr7Sund.NodeTree.Impl
         public override void Dispose()
         {
             base.Dispose();
-            
+
             // NodeState = NodeState.Default;
             AssertUtil.IsTrue(_childNodes == null || _childNodes.Count <= 0);
             AssertUtil.IsFalse(IsInit, NodeTreeExceptionType.dispose_not_int);
@@ -403,12 +503,11 @@ namespace Cr7Sund.NodeTree.Impl
         }
 
         protected virtual void OnInit() { }
-        public virtual PromiseTask OnStart() { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnStart(UnsafeCancellationToken cancellation) { return PromiseTask.CompletedTask; }
         public virtual PromiseTask OnEnable() { return PromiseTask.CompletedTask; }
-        public virtual PromiseTask OnDisable() { return PromiseTask.CompletedTask; }
-        public virtual PromiseTask OnStopAsync() { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnDisable(bool closeImmediately) { return PromiseTask.CompletedTask; }
+        public virtual PromiseTask OnStop() { return PromiseTask.CompletedTask; }
         protected virtual void OnDispose() { }
-
 
         private void ReleaseCollection(Stack<INode> stack, Stack<INode> resultQueue)
         {
@@ -479,7 +578,7 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 try
                 {
-                    await child.LoadAsync();
+                    await child.LoadAsync(child.AddCancellation.Token);
                 }
                 catch (Exception ex)
                 {
@@ -490,7 +589,7 @@ namespace Cr7Sund.NodeTree.Impl
                     child.AddStatus = null;
 
                     //UnloadChildAsync
-                    await RemoveChildAsyncInternal(child, true, false);
+                    await RemoveChildAsyncInternal(child, true, false, true);
                     throw;
                 }
             }
@@ -507,7 +606,7 @@ namespace Cr7Sund.NodeTree.Impl
                 child.AddStatus.TryReturn();
                 child.AddStatus = null;
 
-                await RemoveChildAsyncInternal(child, false, false);
+                await RemoveChildAsyncInternal(child, false, false, true);
                 throw;
             }
 
@@ -526,18 +625,18 @@ namespace Cr7Sund.NodeTree.Impl
 
         public async PromiseTask UnloadChildAsync(INode child, bool overwrite = false)
         {
-            await RemoveChildAsyncInternal(child, true, overwrite);
+            await RemoveChildAsyncInternal(child, true, overwrite, false);
         }
 
         public async PromiseTask RemoveChildAsync(INode child, bool overwrite = false)
         {
-            await RemoveChildAsyncInternal(child, false, overwrite);
+            await RemoveChildAsyncInternal(child, false, overwrite, false);
         }
 
         protected virtual void OnAddChild(INode child) { }
         protected virtual void OnRemoveChild(INode child) { }
 
-        private async PromiseTask RemoveChildAsyncInternal(INode child, bool shouldUnload, bool overwrite)
+        private async PromiseTask RemoveChildAsyncInternal(INode child, bool shouldUnload, bool overwrite, bool closeImmediately)
         {
             AssertUtil.NotNull(child, NodeTreeExceptionType.EMPTY_NODE_REMOVE);
 
@@ -545,7 +644,7 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 // please check LoadModule
                 // ---- -----
-                // await _parentNode.CancelLoadChild(assetNode);
+                // await _parentNode.OnCancelLoad(assetNode);
                 // -- do something will unload asset node  --
                 // await RemoveNodeFromNodeTree(assetKey, overwrite);
                 // ---- -----
@@ -571,14 +670,14 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 if (shouldUnload)
                 {
-                    await child.SetActive(false);
+                    await child.Disable(closeImmediately);
                     await child.Stop();
-                    await child.UnloadAsync();
+                    await child.UnloadAsync(child.RemoveCancellation.Token);
                     UnloadChildInternal(child);
                 }
                 else
                 {
-                    await child.SetActive(false);
+                    await child.Disable(closeImmediately);
                     RemoveChildInternal(child);
                 }
             }
@@ -658,31 +757,33 @@ namespace Cr7Sund.NodeTree.Impl
         public void StartUnload(bool shouldUnload) =>
             NodeState = shouldUnload ? NodeState.Unloading :
                 NodeState.Removing;
+
         public void EndUnLoad(bool unload) => NodeState = unload ? NodeState.Unloaded :
             NodeState.Removed;
-
 
         protected override void OnPreLoaded()
         {
             EndPreload();
         }
 
-        private CancellationTokenSource GetNewCancellation()
+        private UnsafeCancellationTokenSource GetNewCancellation()
         {
             var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-            var cancellationPool = poolBinder.GetOrCreate<CancellationTokenSource>();
+            var cancellationPool = poolBinder.GetOrCreate<UnsafeCancellationTokenSource>();
             return cancellationPool.GetInstance();
         }
 
-        private void ReturnCancellation(CancellationTokenSource cancellationToken)
+        private void ReturnCancellation(UnsafeCancellationTokenSource cancellationToken)
         {
             if (cancellationToken != null)
             {
                 var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-                var cancellationPool = poolBinder.GetOrCreate<CancellationTokenSource>();
+                var cancellationPool = poolBinder.GetOrCreate<UnsafeCancellationTokenSource>();
+                cancellationToken.Dispose();
                 cancellationPool.ReturnInstance(cancellationToken);
             }
         }
+
         #endregion
 
         #region Inject Config

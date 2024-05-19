@@ -40,13 +40,19 @@ namespace Cr7Sund.NodeTree.Impl
 
 
         #region IControllerModule Implementation
-        public async PromiseTask AddController<T>(CancellationToken cancellation = default) where T : IController
+        public async PromiseTask AddController<T>(UnsafeCancellationToken cancellation = default) where T : IController
         {
             CheckBusiness<T>();
             await AddController(Activator.CreateInstance<T>(), cancellation);
         }
 
-        public async PromiseTask AddController(IController controller, CancellationToken cancellation)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <param name="cancellation">it can cancel load and unload</param>
+        /// <returns></returns>
+        public async PromiseTask AddController(IController controller, UnsafeCancellationToken cancellation)
         {
             AssertUtil.NotNull(controller, NodeTreeExceptionType.EMPTY_CONTROLLER_ADD);
             CheckController(controller);
@@ -59,11 +65,11 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     try
                     {
-                        await load.LoadAsync();
+                        await load.LoadAsync(cancellation);
                     }
                     catch
                     {
-                        await load.UnloadAsync();
+                        await load.UnloadAsync(cancellation);
                         throw;
                     }
                 }
@@ -84,7 +90,7 @@ namespace Cr7Sund.NodeTree.Impl
                 }
                 catch
                 {
-                    await controller.Disable();
+                    await controller.Disable(false);
                     throw;
                 }
 
@@ -101,19 +107,19 @@ namespace Cr7Sund.NodeTree.Impl
                 var controller = _childControllers[i];
                 if (controller.GetType() == typeof(T))
                 {
-                    await RemoveController(controller);
+                    await RemoveController(controller, UnsafeCancellationToken.None);
                 }
             }
         }
 
-        public async PromiseTask RemoveController(IController controller)
+        public async PromiseTask RemoveController(IController controller, UnsafeCancellationToken cancellation)
         {
             AssertUtil.NotNull(controller, NodeTreeExceptionType.EMPTY_CONTROLLER_REMOVE);
             CheckController(controller);
 
             if (controller.IsActive)
             {
-                await controller.Disable();
+                await controller.Disable(false);
             }
 
             if (controller.IsStarted)
@@ -123,7 +129,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (controller is AsyncLoadable load)
             {
-                await load.UnloadAsync();
+                await load.UnloadAsync(cancellation);
             }
 
             _context.InjectionBinder.Injector.Deject(controller);
@@ -196,7 +202,7 @@ namespace Cr7Sund.NodeTree.Impl
         #endregion
 
         #region LifeCycles
-        public async PromiseTask Start(CancellationToken cancellation)
+        public async PromiseTask Start(UnsafeCancellationToken cancellation)
         {
             if (IsStarted) return;
 
@@ -255,18 +261,31 @@ namespace Cr7Sund.NodeTree.Impl
             }
             IsStarted = false;
         }
-        public async PromiseTask Disable()
+        public async PromiseTask Disable(bool closeImmediately)
         {
             if (!IsStarted || !IsActive) return;
 
             int count = _childControllers.Count;
             for (int i = 0; i < count; i++)
             {
-                await _childControllers[i].Disable();
+                await _childControllers[i].Disable(closeImmediately);
             }
             IsActive = false;
         }
 
+        protected override async PromiseTask OnPreloadAsync(UnsafeCancellationToken cancellation)
+        {
+            int count = _childControllers.Count;
+            for (int i = 0; i < count; i++)
+            {
+                if (_childControllers[i] is IPreloadable preloadable)
+                {
+                    await preloadable.Prepare(cancellation);
+                }
+            }
+            await base.OnPreloadAsync(cancellation);
+        }
+        
         #endregion
 
         #region Inject Config

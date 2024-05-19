@@ -14,7 +14,6 @@ namespace Cr7Sund.PackageTest.NodeTree
     [TestFixture]
     public class NodeTest
     {
-        public static readonly CancellationTokenSource UnitCancellation = new CancellationTokenSource();
 
         private SampleNode _node;
 
@@ -254,7 +253,7 @@ namespace Cr7Sund.PackageTest.NodeTree
         public async Task NodeTest_UnloadAllNode_ShouldUnloadAllNodes()
         {
             _node.Init();
-            await _node.LoadAsync();
+            await _node.LoadAsync(UnsafeCancellationToken.None);
 
             // Arrange
             var child1 = new SampleNode();
@@ -371,7 +370,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             await _node.Start(default);
             await _node.Enable();
             await _node.AddChildAsync(child1);
-            await _node.CancelLoadChild(child1);
+            child1.CancelLoad();
 
             Assert.AreEqual(1, _node.ChildCount);
             Assert.IsTrue(child1.IsInit);
@@ -388,9 +387,9 @@ namespace Cr7Sund.PackageTest.NodeTree
             await _node.Start(default);
             await _node.Enable();
             _node.AddChildAsync(child1);
-            await _node.CancelLoadChild(child1);
+            child1.CancelLoad();
 
-            Assert.AreEqual(LoadState.Fail, child1.LoadState);
+            Assert.AreEqual(LoadState.Unloaded, child1.LoadState);
             Assert.AreEqual(0, _node.ChildCount);
         }
 
@@ -403,7 +402,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             await _node.Start(default);
             await _node.Enable();
             _node.AddChildAsync(child1);
-            await _node.CancelLoadChild(child1);
+            child1.CancelLoad();
 
             Assert.AreEqual(0, _node.ChildCount);
             Assert.IsFalse(child1.IsInit);
@@ -420,7 +419,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             await _node.Enable();
 
             _node.AddChildAsync(child1);
-            await _node.CancelLoadChild(child1);
+            child1.CancelLoad();
             child1.AssignContext(new SampleContext());
             SampleCancelNode.LoadPromise = new Promise();
             SampleCancelNode.LoadPromise.Resolve();
@@ -430,6 +429,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             Assert.AreEqual(NodeState.Ready, child1.NodeState);
             Assert.AreEqual(1, _node.ChildCount);
         }
+
 
         private async PromiseTask DestroyRootNode(Node root)
         {
@@ -445,7 +445,7 @@ namespace Cr7Sund.PackageTest.NodeTree
 
             if (root.LoadState == LoadState.Loading || root.LoadState == LoadState.Loaded)
             {
-                await root.UnloadAsync();
+                await root.UnloadAsync(UnsafeCancellationToken.None);
             }
 
             root.Destroy(default);

@@ -124,6 +124,7 @@ namespace Cr7Sund.Package.Impl
         public void TryReturn()
         {
             Dispose();
+
             _taskPool.TryPush(this);
         }
         #endregion
@@ -761,14 +762,7 @@ namespace Cr7Sund.Package.Impl
             }
             if (_rejectHandlers == null)
             {
-                if (!Promise._rejectListPool.TryPop(out var result))
-                {
-                    _rejectHandlers = new ListPoolNode<RejectHandler>();
-                }
-                else
-                {
-                    _rejectHandlers = result;
-                }
+                _rejectHandlers = ListPoolNode<RejectHandler>.Create(ref Promise._rejectListPool);
             }
 
             _rejectHandlers.Add(new RejectHandler
@@ -786,14 +780,7 @@ namespace Cr7Sund.Package.Impl
             }
             if (_resolveHandlers == null)
             {
-                if (!_resolveListPool.TryPop(out var result))
-                {
-                    _resolveHandlers = new ListPoolNode<ResolveHandler<PromisedT>>();
-                }
-                else
-                {
-                    _resolveHandlers = result;
-                }
+                _resolveHandlers = ListPoolNode<ResolveHandler<PromisedT>>.Create(ref _resolveListPool);
             }
             _resolveHandlers.Add(new ResolveHandler<PromisedT>
             {
@@ -811,14 +798,7 @@ namespace Cr7Sund.Package.Impl
             }
             if (_progressHandlers == null)
             {
-                if (!Promise._progressListPool.TryPop(out var result))
-                {
-                    _progressHandlers = new ListPoolNode<ProgressHandler>();
-                }
-                else
-                {
-                    _progressHandlers = result;
-                }
+                _progressHandlers = ListPoolNode<ProgressHandler>.Create(ref Promise._progressListPool);
             }
             _progressHandlers.Add(new ProgressHandler
             {
@@ -879,15 +859,15 @@ namespace Cr7Sund.Package.Impl
 
             if (_resolveHandlers != null)
             {
-                _resolveListPool.TryPush(_resolveHandlers);
+                _resolveHandlers.TryReturn(ref _resolveListPool);
             }
             if (_rejectHandlers != null)
             {
-                Promise._rejectListPool.TryPush(_rejectHandlers);
+                _rejectHandlers.TryReturn(ref Promise._rejectListPool);
             }
             if (_progressHandlers != null)
             {
-                Promise._progressListPool.TryPush(_progressHandlers);
+                _progressHandlers.TryReturn(ref Promise._progressListPool);
             }
 
             _rejectHandlers = null;

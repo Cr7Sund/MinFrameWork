@@ -7,7 +7,7 @@ namespace Cr7Sund.FrameWork.Test
     public class SampleAsyncLoadableWithException : AsyncLoadable
     {
         public const string exMsg = "throw exception";
-        protected override PromiseTask OnLoadAsync()
+        protected override PromiseTask OnLoadAsync(UnsafeCancellationToken cancellation)
         {
             // Simulate an exception during the loading process
             throw new MyException(exMsg);

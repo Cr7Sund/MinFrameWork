@@ -142,5 +142,12 @@ namespace Cr7Sund.Package.Impl
             var pool = poolBinder.Get<T>();
             pool.ReturnInstance(value);
         }
+
+        public static void Return<T, TValue>(this IPoolBinder poolBinder, T value) where T : ICollection<TValue>, new()
+        {
+            value.Clear();
+            var pool = poolBinder.Get<T>();
+            pool.ReturnInstance(value);
+        }
     }
 }

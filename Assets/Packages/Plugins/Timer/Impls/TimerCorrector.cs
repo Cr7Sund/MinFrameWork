@@ -1,8 +1,9 @@
+using Cr7Sund.Package.Api;
 using UnityEngine;
 
 namespace Cr7Sund.Package.Impl
 {
-    public class TimeCorrector
+    public class TimeCorrector : ITimeCorrector
     {
         private float _addedLeftTime;
         private float _lastTime;

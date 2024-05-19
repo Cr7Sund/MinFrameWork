@@ -7,8 +7,6 @@ namespace Cr7Sund.PackageTest.NodeTree
 {
     public class UpdateNodeTest
     {
-        public static readonly CancellationTokenSource UnitCancellation = new CancellationTokenSource();
-
         private SampleUpdateNode _node;
 
 

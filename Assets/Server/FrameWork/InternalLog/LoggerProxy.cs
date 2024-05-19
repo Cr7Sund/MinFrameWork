@@ -109,6 +109,12 @@ namespace Cr7Sund
         {
             Log(LogLevel.Info, message, propertyValue0);
         }
+
+        public void Info<T0, T1>(string message, T0 propertyValue0, T1 propertyValue1)
+        {
+            Log(LogLevel.Info, message, propertyValue0, propertyValue1);
+        }
+        
         public void Info<T0, T1, T2>(string message, T0 propertyValue0, T1 propertyValue1, T2 propertyValue2)
         {
             Log(LogLevel.Info, message, propertyValue0, propertyValue1, propertyValue2);

@@ -23,32 +23,43 @@ namespace Cr7Sund.Server.Impl
 
             Inject();
             Init();
-            await LoadAsync();
+            SetAdding();
+            await LoadAsync(AddCancellation.Token);
             await Start(AddCancellation.Token);
             await SetActive(true);
+            SetReady();
         }
 
         public async PromiseTask DestroyAsync()
         {
             if (!IsInit) return;
+
+            if (NodeState == NodeState.Adding)
+            {
+                CancelLoad();
+            }
+
             if (IsActive)
             {
-                await SetActive(false);
+                await Disable(true);
             }
             if (IsStarted)
             {
                 await Stop();
             }
-
-            if (LoadState == LoadState.Loading || LoadState == LoadState.Loaded)
+            if (LoadState == LoadState.Loaded)
             {
-                await UnloadAsync();
+                await UnloadAsync(RemoveCancellation.Token);
             }
 
             Destroy(null);
             Dispose();
         }
 
+        public override string ToString()
+        {
+            return "GameNode";
+        }
     }
 
 }

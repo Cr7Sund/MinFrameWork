@@ -14,7 +14,7 @@ namespace Cr7Sund.NodeTree.Impl
         // No preload
         // since it should be existed one, but preload the node is still no created
 
-        public async PromiseTask Start(CancellationToken cancellation)
+        public async PromiseTask Start(UnsafeCancellationToken cancellation)
         {
             IsStarted = true;
             try
@@ -77,11 +77,11 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public async PromiseTask Disable()
+        public async PromiseTask Disable(bool closeImmediately)
         {
             try
             {
-                await OnDisable();
+                await OnDisable(closeImmediately);
             }
             catch (Exception e)
             {
@@ -100,13 +100,13 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public virtual PromiseTask RegisterAddTask(CancellationToken cancellationToken) { return PromiseTask.CompletedTask; }
-        public virtual void RegisterRemoveTask(CancellationToken cancellationToken) { }
+        public virtual PromiseTask RegisterAddTask(UnsafeCancellationToken cancellationToken) { return PromiseTask.CompletedTask; }
+        public virtual void RegisterRemoveTask(UnsafeCancellationToken cancellationToken) { }
 
-        protected virtual PromiseTask OnStart(CancellationToken cancellation) { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnStart(UnsafeCancellationToken cancellation) { return PromiseTask.CompletedTask; }
         protected virtual PromiseTask OnStop() { return PromiseTask.CompletedTask; }
         protected virtual PromiseTask OnEnable() { return PromiseTask.CompletedTask; }
-        protected virtual PromiseTask OnDisable() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask OnDisable(bool closeImmediately) { return PromiseTask.CompletedTask; }
 
     }
 }

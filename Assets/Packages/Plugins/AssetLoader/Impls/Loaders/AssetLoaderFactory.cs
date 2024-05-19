@@ -1,5 +1,4 @@
 using Cr7Sund.AssetLoader.Api;
-using Cr7Sund.Server.Impl;
 using UnityEngine;
 
 namespace Cr7Sund.AssetLoader.Impl

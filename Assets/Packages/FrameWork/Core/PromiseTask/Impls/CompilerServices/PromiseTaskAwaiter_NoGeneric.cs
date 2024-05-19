@@ -39,7 +39,6 @@ namespace Cr7Sund.CompilerServices
             }
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void OnCompleted(Action continuation)
         {

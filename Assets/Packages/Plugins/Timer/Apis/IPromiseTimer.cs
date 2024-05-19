@@ -27,12 +27,12 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll, CancellationToken cancellation = default);
+        IPromise Schedule(Func<TimeData, bool> predicate, Action<TimeData> poll, UnsafeCancellationToken cancellation = default);
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise Schedule(int duration, Action<TimeData> poll, CancellationToken cancellation = default);
-        IPromise Schedule(Action<TimeData> poll, CancellationToken cancellation = default);
+        IPromise Schedule(int duration, Action<TimeData> poll, UnsafeCancellationToken cancellation = default);
+        IPromise Schedule(Action<TimeData> poll, UnsafeCancellationToken cancellation = default);
         /// <summary>
         ///     Update all pending promises. Must be called for the promises to progress and resolve at all.
         /// </summary>

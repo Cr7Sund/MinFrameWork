@@ -3,7 +3,7 @@ namespace Cr7Sund.Server.UI.Api
     public interface IUIController : ILifeTime, IRunnable
     {
         // Called before view crate and do some async work
-        public PromiseTask Prepare(object intent = null);
+        public PromiseTask Prepare(UnsafeCancellationToken cancellation, object intent = null);
 
         // Called just before this page is displayed by the Push transition.
         public PromiseTask WillPushEnter();

@@ -12,7 +12,7 @@ namespace Cr7Sund.Game.Scene
         {
         }
 
-        protected async override PromiseTask OnStart(CancellationToken cancellation)
+        protected async override PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {
             await base.OnStart(cancellation);
             Debug.Debug("Load scene one");
@@ -20,13 +20,21 @@ namespace Cr7Sund.Game.Scene
 
         protected async override PromiseTask OnEnable()
         {
-            await _pageContainer.PushPage(UI.EditorUIKeys.SampleOneUI);
             Debug.Debug("Enable scene one");
+
+            try
+            {
+                await _pageContainer.PushPage(UI.EditorUIKeys.SampleOneUI);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Info(ex);
+            }
         }
 
-        protected async override PromiseTask OnDisable()
+        protected async override PromiseTask OnDisable(bool closeImmediately)
         {
-            await base.OnDisable();
+            await base.OnDisable(closeImmediately);
             Debug.Debug("Disable scene one");
         }
 
