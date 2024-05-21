@@ -272,7 +272,7 @@ namespace Cr7Sund.Server.UI.Impl
                     .Progress(TransitionProgressReporter);
 
                 // promise.Catch(ex => Console.Info("ExitAnim {ex}", ex));
-                await promise.AsTask();
+                await promise.Task;
             }
         }
 

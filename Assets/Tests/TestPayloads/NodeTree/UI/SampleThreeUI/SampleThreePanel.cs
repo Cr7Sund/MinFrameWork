@@ -20,7 +20,7 @@ namespace Cr7Sund.PackageTest.IOC
             }
             else
             {
-                await LoadPromise.AsNewTask();
+                await LoadPromise.Join();
             }
         }
     }

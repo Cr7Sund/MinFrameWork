@@ -6,37 +6,8 @@ using System.Threading;
 
 namespace Cr7Sund.CompilerServices
 {
-#if DEBUG
-    internal class ExceptionHolder
-    {
-        ExceptionDispatchInfo exception;
-        bool calledGet = false;
 
-        [DebuggerHidden]
-        public ExceptionHolder(ExceptionDispatchInfo exception)
-        {
-            this.exception = exception;
-        }
-        [DebuggerHidden]
-        public ExceptionDispatchInfo GetException()
-        {
-            if (!calledGet)
-            {
-                calledGet = true;
-                GC.SuppressFinalize(this);
-            }
-            return exception;
-        }
 
-        ~ExceptionHolder()
-        {
-            if (!calledGet)
-            {
-                Console.Error(exception.SourceException);
-            }
-        }
-    }
-#endif
     internal static class PromiseTaskCompletionSourceCoreShared // separated out of generic to avoid unnecessary duplication
     {
         internal static readonly Action s_sentinel = CompletionSentinel;
@@ -46,6 +17,7 @@ namespace Cr7Sund.CompilerServices
             throw new InvalidOperationException("The sentinel delegate should never be invoked.");
         }
     }
+
 
     public struct PromiseTaskCompletionSourceCore
     {
@@ -57,7 +29,23 @@ namespace Cr7Sund.CompilerServices
 
         /// <summary>Gets the operation version.</summary>
         public short Version => version;
+        public Exception Error
+        {
+            get
+            {
+                if (error is ExceptionHolder exceptionHolder)
+                {
+                    return exceptionHolder.InnerException;
+                }
+                else if (error is Exception ex)
+                {
+                    return ex;
+                }
 
+                throw new NotImplementedException();
+            }
+        }
+        
 
         [DebuggerHidden]
         public void Reset()
@@ -73,6 +61,7 @@ namespace Cr7Sund.CompilerServices
             hasUnhandledError = false;
             continuation = null;
         }
+
         [DebuggerHidden]
         void ReportUnhandledError()
         {
@@ -91,10 +80,6 @@ namespace Cr7Sund.CompilerServices
             }
         }
 
-        internal void MarkHandled()
-        {
-            hasUnhandledError = false;
-        }
 
         /// <summary>Completes with a successful result.</summary>
         /// <param name="result">The result.</param>
@@ -128,11 +113,7 @@ namespace Cr7Sund.CompilerServices
                 }
                 else
                 {
-#if DEBUG
                     this.error = new ExceptionHolder(ExceptionDispatchInfo.Capture(ex));
-#else
-                    this.error = ex;
-#endif
                 }
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
@@ -210,20 +191,13 @@ namespace Cr7Sund.CompilerServices
                 {
                     throw oce;
                 }
-#if DEBUG
                 else if (error is ExceptionHolder eh)
                 {
                     eh.GetException().Throw();
                 }
-#else
-                else if (error is Exception ex)
-                {
-                    throw ex;
-                }
-#endif
+
                 throw new InvalidOperationException("Critical: invalid exception type was held.");
             }
-
         }
 
         /// <summary>Schedules the continuation action for this operation.</summary>
@@ -283,17 +257,34 @@ namespace Cr7Sund.CompilerServices
 
     public struct PromiseTaskCompletionSourceCore<TResult>
     {
-        TResult result;
-        object error; // ExceptionHolder or OperationCanceledException
-        short version;
-        bool hasUnhandledError;
-        int completedCount; // 0: completed == false
-        Action continuation;
+        private TResult result;
+        private object error; // ExceptionHolder or OperationCanceledException
+        private short version;
+        private bool hasUnhandledError;
+        private int completedCount; // 0: completed == false
+        private Action continuation;
 
         /// <summary>Gets the operation version.</summary>
         public short Version => version;
 
 
+        public TResult Result => result;
+        public Exception Error
+        {
+            get
+            {
+                if (error is ExceptionHolder exceptionHolder)
+                {
+                    return exceptionHolder.InnerException;
+                }
+                else if (error is Exception ex)
+                {
+                    return ex;
+                }
+
+                throw new NotImplementedException();
+            }
+        }
 
         public void Reset()
         {
@@ -314,33 +305,9 @@ namespace Cr7Sund.CompilerServices
         {
             if (hasUnhandledError)
             {
-                try
-                {
-                    if (error is OperationCanceledException oce)
-                    {
-                        Console.Error(oce);
-                    }
-#if DEBUG
-                    else if (error is ExceptionHolder eh)
-                    {
-                        Console.Error(eh.GetException().SourceException);
-                    }
-#else
-                else if (error is Exception ex)
-                {
-                    Console.Error(ex);
-                }
-#endif
-                }
-                catch
-                {
-                }
+                Console.Error(Error);
             }
-        }
 
-        internal void MarkHandled()
-        {
-            hasUnhandledError = false;
         }
 
         /// <summary>Completes with a successful result.</summary>
@@ -378,11 +345,7 @@ namespace Cr7Sund.CompilerServices
                 }
                 else
                 {
-#if DEBUG
                     this.error = new ExceptionHolder(ExceptionDispatchInfo.Capture(ex));
-#else
-                    this.error = ex;
-#endif
                 }
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
@@ -395,13 +358,13 @@ namespace Cr7Sund.CompilerServices
             return false;
         }
 
-        public bool TrySetCanceled(UnsafeCancellationToken cancellationToken = default)
+        public bool TrySetCanceled(string cancelMsg, UnsafeCancellationToken cancellationToken = default)
         {
             if (Interlocked.Increment(ref completedCount) == 1)
             {
                 // setup result
                 hasUnhandledError = true;
-                error = new OperationCanceledException();
+                error = new OperationCanceledException(cancelMsg);
 
                 if (continuation != null || Interlocked.CompareExchange(ref continuation, PromiseTaskCompletionSourceCoreShared.s_sentinel, null) != null)
                 {
@@ -418,6 +381,7 @@ namespace Cr7Sund.CompilerServices
         /// <param name="token">Opaque value that was provided to the <see cref="PromiseTask"/>'s constructor.</param>
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
             ValidateToken(token);
@@ -458,17 +422,12 @@ namespace Cr7Sund.CompilerServices
                 {
                     throw oce;
                 }
-#if DEBUG
                 else if (error is ExceptionHolder eh)
                 {
                     eh.GetException().Throw();
                 }
-#else
-                else if (error is Exception ex)
-                {
-                    throw ex;
-                }
-#endif
+
+
                 throw new InvalidOperationException("Critical: invalid exception type was held.");
             }
 

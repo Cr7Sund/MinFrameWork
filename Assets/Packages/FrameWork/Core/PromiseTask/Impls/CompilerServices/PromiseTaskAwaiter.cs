@@ -20,6 +20,7 @@ namespace Cr7Sund.CompilerServices
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DebuggerHidden]
         public PromiseTaskAwaiter(in PromiseTask<T> task)
         {
             this.task = task;

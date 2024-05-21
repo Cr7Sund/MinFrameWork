@@ -4,7 +4,6 @@ using System.Linq;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
-using UnityEngine.TestTools;
 namespace Cr7Sund.PackageTest.PromiseTest
 {
     public class PromiseTests
@@ -14,6 +13,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         {
             Console.Init(InternalLoggerFactory.Create());
         }
+
         
         [Test]
         public void can_resolve_simple_promise()

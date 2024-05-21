@@ -26,7 +26,7 @@ namespace Cr7Sund.PackageTest.IOC
                     if (promise.CurState == PromiseState.Pending)
                         promise.Cancel();
                 });
-                return promise.AsNewTask();
+                return promise.Join();
             }
         }
         public static void Init()

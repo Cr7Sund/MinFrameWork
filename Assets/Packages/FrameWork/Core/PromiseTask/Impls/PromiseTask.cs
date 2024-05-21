@@ -1,4 +1,5 @@
 #pragma warning disable CS0436
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Cr7Sund.CompilerServices;
 
@@ -13,6 +14,7 @@ namespace Cr7Sund
 
         public PromiseTaskStatus Status
         {
+            [DebuggerHidden]
             get
             {
                 return (source == null) ? PromiseTaskStatus.Succeeded : source.GetStatus(token);
@@ -33,6 +35,7 @@ namespace Cr7Sund
             this.result = default;
         }
 
+        [DebuggerHidden]
         public PromiseTaskAwaiter<T> GetAwaiter() => new PromiseTaskAwaiter<T>(this);
 
     }

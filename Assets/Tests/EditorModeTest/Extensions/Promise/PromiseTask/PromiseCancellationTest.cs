@@ -24,7 +24,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             AsyncTestDelegate testDelegate = async () =>
             {
                 cancellation.Cancel();
-                await promise.AsTask();
+                await promise.Task;
             };
 
             Assert.ThrowsAsync<TaskCanceledException>(testDelegate);
@@ -41,7 +41,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
             TestDelegate testDelegate = cancellation.Cancel;
 
             var ex = Assert.Throws<System.Exception>(testDelegate);
-            Assert.AreEqual("token is currently closed", ex.Message);
+            Assert.AreEqual("token is already canceled or cancelling", ex.Message);
         }
 
         [Test]

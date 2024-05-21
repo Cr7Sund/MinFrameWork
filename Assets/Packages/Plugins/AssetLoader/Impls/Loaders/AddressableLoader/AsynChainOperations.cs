@@ -26,6 +26,7 @@ namespace Cr7Sund.AssetLoader.Impl
         private UnsafeCancellationToken _cancellation;
         private string _cancelMsg;
         private State _state;
+        
         public ref AsyncChainOperations<T> NextNode => ref _nextNode;
         public bool IsRecycled { get; set; }
         public AsyncOperationHandle Handler => _handler;

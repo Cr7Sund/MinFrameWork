@@ -1,24 +1,21 @@
 using System;
-using System.CodeDom;
-using System.Threading;
 using System.Threading.Tasks;
 using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 
 namespace Cr7Sund.PackageTest.PromiseTest
 {
-    public class PromiseTaskTests
+    public class PromiseTaskSourceTests
     {
         [SetUp]
         public void SetUp()
         {
             Console.Init(InternalLoggerFactory.Create());
         }
-
         [TearDown]
         public void TearDown()
         {
-            Assert.LessOrEqual(0, Promise<int>.Test_GetPoolCount());
+            Assert.LessOrEqual(0, PromiseTaskSource<int>.Test_GetPoolCount());
         }
 
         [Test]
@@ -29,8 +26,8 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             async PromiseTask<int> ResolveInternal()
             {
-                var testPromise = Promise<int>.Create();
-                testPromise.Resolve(2);
+                var testPromise = PromiseTaskSource<int>.Create();
+                testPromise.TryResolve(2);
                 return await testPromise.Task;
             }
 
@@ -49,8 +46,8 @@ namespace Cr7Sund.PackageTest.PromiseTest
 
             async PromiseTask<int> ResolveInternal()
             {
-                var promise = Promise<int>.Create();
-                promise.RejectWithoutDebug(new System.NotImplementedException(Message));
+                var promise = PromiseTaskSource<int>.Create();
+                promise.TryReject(new System.NotImplementedException(Message));
                 return await promise.Task;
             }
 
@@ -109,61 +106,27 @@ namespace Cr7Sund.PackageTest.PromiseTest
             Assert.AreEqual(Message, resultEx);
         }
 
-
-        [Test]
-        public async Task ChainPromise()
-        {
-            var promise = Promise<int>.Create();
-            var completed = 0;
-            var result = 0;
-
-            promise.Then((v) => result += 1);
-            await promise.ResolveAsync(result);
-            completed++;
-
-            Assert.AreEqual(1, completed);
-            Assert.AreEqual(1, result);
-        }
-
 #if DEBUG
-        [Test]
-        public void PoolAction()
-        {
-            // setup
-            var firstPromise = new Promise<int>();
-            firstPromise.Then(_ => { });
-            firstPromise.Resolve(2);
-
-            int size = Promise<int>.Test_GetResolveListPoolCount();
-            var promise = new Promise<int>();
-            promise.Then(_ => { });
-            Assert.AreEqual(size - 1, Promise<int>.Test_GetResolveListPoolCount());
-
-            promise.Resolve(2);
-            Assert.AreEqual(size, Promise<int>.Test_GetResolveListPoolCount());
-        }
 
         [Test]
         public async Task PoolTaskPromise()
         {
             //setup
-            var firstPromise = Promise<int>.Create();
-            firstPromise.Then(_ => { });
-            await firstPromise.ResolveAsync(2);
+            var firstPromise = PromiseTaskSource<int>.Create();
+            firstPromise.TryResolve(2);
+            await firstPromise.Task;
 
-            int promiseSize = Promise<int>.Test_GetPoolCount();
-            int actionSize = Promise<int>.Test_GetResolveListPoolCount();
+            int promiseSize = PromiseTaskSource<int>.Test_GetPoolCount();
 
-            var promise = Promise<int>.Create();
-            promise.Then(_ => { });
-            Assert.AreEqual(promiseSize - 1, Promise<int>.Test_GetPoolCount());
-            Assert.AreEqual(actionSize - 1, Promise<int>.Test_GetResolveListPoolCount());
-            await promise.ResolveAsync(2);
-            Assert.AreEqual(promiseSize, Promise<int>.Test_GetPoolCount());
-            Assert.AreEqual(actionSize, Promise<int>.Test_GetResolveListPoolCount());
+            var promise = PromiseTaskSource<int>.Create();
+            Assert.AreEqual(promiseSize - 1, PromiseTaskSource<int>.Test_GetPoolCount());
+            promise.TryResolve(2);
+            await promise.Task;
+            Assert.AreEqual(promiseSize, PromiseTaskSource<int>.Test_GetPoolCount());
         }
 
 #endif
+
         [Test]
         public async Task sequentialStart()
         {
@@ -203,49 +166,13 @@ namespace Cr7Sund.PackageTest.PromiseTest
             Assert.AreEqual(20, results[0]);
             Assert.AreEqual(3, results[1]);
         }
-
-        [Test]
-        public async Task JoinTask()
-        {
-            var promise = Promise<int>.Create();
-            async PromiseTask<int> ResolveInternal1()
-            {
-                var result = await promise.Join();
-                result++;
-                return result;
-            }
-            async PromiseTask<int> ResolveInternal2()
-            {
-                var result = await promise.Join();
-                result++;
-                return result;
-            }
-            async PromiseTask<int> ResolveInternal()
-            {
-                var result = await promise.Task;
-                result += 6;
-                return result;
-            }
-            var promiseTask1 = ResolveInternal1();
-            var promiseTask2 = ResolveInternal2();
-
-            promise.Resolve(4);
-            var result = await ResolveInternal();
-            var result1 = await promiseTask1;
-            var result2 = await promiseTask2;
-
-            Assert.AreEqual(10, result);
-            Assert.AreEqual(5, result1);
-            Assert.AreEqual(5, result2);
-        }
-
         private async PromiseTask<int> resolveAfter2Seconds(int result)
         {
             await Task.Delay(2);
 
-            var promise = Promise<int>.Create();
+            var promise = PromiseTaskSource<int>.Create();
             result *= 10;
-            promise.Resolve(result);
+            promise.TryResolve(result);
             return await promise.Task;
         }
 
@@ -253,9 +180,9 @@ namespace Cr7Sund.PackageTest.PromiseTest
         {
             await Task.Delay(1);
 
-            var promise = Promise<int>.Create();
+            var promise = PromiseTaskSource<int>.Create();
             result++;
-            promise.Resolve(result);
+            promise.TryResolve(result);
 
             return await promise.Task;
         }

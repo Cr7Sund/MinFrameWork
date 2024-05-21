@@ -88,7 +88,7 @@ namespace Cr7Sund.CompilerServices
         /// <param name="stateMachine"></param>
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ICriticalNotifyCompletion where TStateMachine : IAsyncStateMachine
         {
-            // aovid boxed operation (interface to struct)
+            // avoid boxed operation (interface to struct)
             if (runnerPromise == null)
                 AsyncMethodBuilderCore<TStateMachine, T>.SetStateMachine(ref stateMachine, ref runnerPromise);
             awaiter.UnsafeOnCompleted(runnerPromise.MoveNext);

@@ -11,8 +11,8 @@ namespace Cr7Sund
         private static ReusablePool<PromiseTaskSource> _pool;
 
         private PromiseTaskSource _nextNode;
-        private PromiseTaskCompletionSourceCore core;
-        private short version;
+        private PromiseTaskCompletionSourceCore _core;
+        private short _version;
 
         public ref PromiseTaskSource NextNode => ref _nextNode;
         public bool IsRecycled { get; set; }
@@ -21,7 +21,8 @@ namespace Cr7Sund
             [DebuggerHidden]
             get
             {
-                return new PromiseTask(this, core.Version);
+                ValidateToken();
+                return new PromiseTask(this, _core.Version);
             }
         }
 
@@ -36,7 +37,7 @@ namespace Cr7Sund
             {
                 result = new PromiseTaskSource();
             }
-            result.version = result.core.Version;
+            result._version = result._core.Version;
             // TaskTracker.TrackActiveTask(result, 2);
             return result;
         }
@@ -46,7 +47,7 @@ namespace Cr7Sund
         {
             try
             {
-                core.GetResult(token);
+                _core.GetResult(token);
             }
             finally
             {
@@ -57,40 +58,54 @@ namespace Cr7Sund
         [DebuggerHidden]
         public PromiseTaskStatus GetStatus(short token)
         {
-            return core.GetStatus(token);
+            return _core.GetStatus(token);
         }
 
         [DebuggerHidden]
         public PromiseTaskStatus UnsafeGetStatus()
         {
-            return core.UnsafeGetStatus();
+            return _core.UnsafeGetStatus();
         }
 
         public void OnCompleted(Action continuation, short token)
         {
-            core.OnCompleted(continuation, token);
+            _core.OnCompleted(continuation, token);
         }
 
         public bool TryCancel(string cancelMsg, UnsafeCancellationToken cancellation)
         {
-            return version == core.Version && core.TrySetCanceled(cancelMsg, cancellation);
+            return _version == _core.Version && _core.TrySetCanceled(cancelMsg, cancellation);
         }
 
         public bool TryResolve()
         {
-            return version == core.Version && core.TrySetResult();
+            return _version == _core.Version && _core.TrySetResult();
         }
 
         public bool TryReject(Exception exception)
         {
-            return version == core.Version && core.TrySetException(exception);
+            return _version == _core.Version && _core.TrySetException(exception);
         }
+
+        #region UnityTest
+        public static int Test_GetPoolCount()
+        {
+            return _pool.Size;
+        }
+        #endregion
 
         private bool TryReturn()
         {
             //TaskTracker.RemoveTracking(this);
-            core.Reset();
+
+            ValidateToken();
+            _core.Reset();
             return _pool.TryPush(this);
+        }
+
+        private void ValidateToken()
+        {
+            AssertUtil.AreEqual(this._version, this._core.Version, PromiseTaskExceptionType.CAN_VISIT_VALID_VERSION);
         }
     }
 }

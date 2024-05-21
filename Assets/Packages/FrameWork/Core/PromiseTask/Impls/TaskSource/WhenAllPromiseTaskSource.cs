@@ -8,7 +8,7 @@ namespace Cr7Sund
     {
         private int completeCount;
         private int tasksLength;
-        private PromiseTaskCompletionSourceCore core;
+        private PromiseTaskCompletionSourceCore<AsyncUnit> core;
 
         public WhenAllPromiseTaskSource(PromiseTask[] tasks, int tasksLength)
         {
@@ -17,7 +17,7 @@ namespace Cr7Sund
 
             if (tasksLength == 0)
             {
-                core.TrySetResult();
+                core.TrySetResult(AsyncUnit.Default);
                 return;
             }
 
@@ -63,7 +63,7 @@ namespace Cr7Sund
 
             if (Interlocked.Increment(ref self.completeCount) == self.tasksLength)
             {
-                self.core.TrySetResult();
+                self.core.TrySetResult(AsyncUnit.Default);
             }
         }
 

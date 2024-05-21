@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Elastic.CommonSchema;
+using Cr7Sund.FrameWork.Util;
+using Cr7Sund.Package.Api;
 
 namespace Cr7Sund
 {
@@ -61,18 +62,15 @@ namespace Cr7Sund
 
     public class UnsafeCancellationTokenSource : IDisposable
     {
-        private enum State
-        {
-            NotCanceledState,
-            NotifyingState,
-            NotifyingCompleteState,
-        }
-
         private List<Action> _registrations;
-        private int _version;
-        private State _state;
+        private short _version;
+        private int _state;
+        // NotCanceledState 0,
+        // NotifyingState  1,
+        // NotifyingCompleteState 2,
 
-        internal bool IsCancellationRequested => _state != State.NotCanceledState;
+        internal bool IsCancellationRequested => _state > 0; // _state != State.NotCanceledState;
+
         internal int Version => _version;
         public UnsafeCancellationToken Token
         {
@@ -101,11 +99,18 @@ namespace Cr7Sund
 
         public void Dispose()
         {
-            // reset
-            if (_state == State.NotifyingState) return;
+            //_state == State.NotifyingState
+            if (_state == 1)
+            {
+                throw new MyException(PromiseExceptionType.dispose_notifying_cancel);
+            }
 
+            if (_state != 0)
+            {
+                // rest to State.NotCanceledState;
+                Interlocked.CompareExchange(ref _state, 0, 2);
+            }
             _registrations?.Clear();
-            _state = State.NotCanceledState;
             _version++;
         }
 
@@ -119,7 +124,8 @@ namespace Cr7Sund
 
         private void ExecuteCallbackHandlers()
         {
-            _state = State.NotifyingState;
+            // ->State.NotifyingState
+            Interlocked.CompareExchange(ref _state, 1, 0);
 
             if (_registrations != null)
             {
@@ -134,16 +140,17 @@ namespace Cr7Sund
                         Console.Error(ex);
                     }
                 }
- 
+
             }
-            _state = State.NotifyingCompleteState;
+            // =》 State.NotifyingCompleteState;
+            Interlocked.CompareExchange(ref _state, 2, 1);
         }
 
         private void ThrowIfCancel()
         {
             if (IsCancellationRequested)
             {
-                throw new System.Exception("token is already canceled or cancelling )");
+                throw new System.Exception("token is already canceled or cancelling");
             }
         }
     }

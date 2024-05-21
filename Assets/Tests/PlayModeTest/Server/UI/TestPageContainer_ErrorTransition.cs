@@ -102,7 +102,7 @@ namespace Cr7Sund.ServerTest.UI
                         ex = e;
                     }
                 });
-                await _gameRoot.PromiseTimer.WaitFor(100).AsTask();
+                await _gameRoot.PromiseTimer.WaitFor(100).Task;
                 // we need to resolve or reject the push 
                 SampleThreeUIController.promise.Cancel();
             }

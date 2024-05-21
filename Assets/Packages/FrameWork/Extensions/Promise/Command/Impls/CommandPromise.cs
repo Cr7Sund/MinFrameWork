@@ -297,11 +297,6 @@ namespace Cr7Sund.Package.Impl
 
         public override void Dispose()
         {
-            if (_resolveValue is IDisposable disposable
-                     && disposable != this)
-            {
-                disposable.Dispose();
-            }
             Name = string.Empty;
             CurState = PromiseState.Pending;
         }
@@ -453,7 +448,6 @@ namespace Cr7Sund.Package.Impl
         public void Reset()
         {
             CurState = PromiseState.Pending;
-            _resolveValue = default;
         }
         #endregion
 

@@ -18,7 +18,7 @@ namespace Cr7Sund.PackageTest.IOC
             }
             else
             {
-                return AnimPromise.AsNewTask();
+                return AnimPromise.Join();
             }
         }
 

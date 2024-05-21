@@ -255,11 +255,20 @@ namespace Cr7Sund.FrameWork.Util
                 throw new MyException($"Expected {expected}  but it's {actual}");
             }
         }
-        public static void AreEqual(uint expected, uint actual)
+
+        public static void AreEqual<TEnum>(uint expected, uint actual, TEnum errorCode) where TEnum : Enum
         {
             if (expected != actual)
             {
-                throw new MyException($"Expected {expected}  but it's {actual}");
+                throw new MyException($"Expected {expected}  but it's {actual}", errorCode);
+            }
+        }
+
+        public static void AreEqual<TEnum>(short expected, short actual, TEnum errorCode) where TEnum : Enum
+        {
+            if (expected != actual)
+            {
+                throw new MyException($"Expected {expected}  but it's {actual}", errorCode);
             }
         }
 

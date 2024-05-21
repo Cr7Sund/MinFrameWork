@@ -19,7 +19,6 @@ namespace Cr7Sund.ServerTest.Scene
         private SampleGameLogic _gameLogic;
         private TestGameRoot _gameRoot;
 
-
         [SetUp]
         public async Task TestSceneModule_SetUp()
         {
@@ -112,7 +111,6 @@ namespace Cr7Sund.ServerTest.Scene
             Assert.AreEqual(0, SampleSceneTwoController.EnableCount);
         }
 
-
         [Test]
         public async Task TestSceneModule_PreloadScene()
         {
@@ -145,7 +143,7 @@ namespace Cr7Sund.ServerTest.Scene
 
             await _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyThree);
             await _sceneModule.PreLoadScene(SampleSceneKeys.SampleSceneKeyFour);
-           
+
             var sceneThreeNode = (SceneNode)genMetGetNode.Invoke(_sceneModule, new[] { SampleSceneKeys.SampleSceneKeyThree });
             var sceneFourNode = (SceneNode)genMetGetNode.Invoke(_sceneModule, new[] { SampleSceneKeys.SampleSceneKeyFour });
             Assert.IsNull(sceneThreeNode);
@@ -189,6 +187,7 @@ namespace Cr7Sund.ServerTest.Scene
             Assert.AreEqual(2, SampleSceneOneController.StartValue);
             Assert.AreEqual(1, SampleSceneOneController.EnableCount);
         }
+        
 
         [Test]
         public async Task TestSceneModule_SwitchToNewScene_ShouldCloseOtherScene()
@@ -210,7 +209,6 @@ namespace Cr7Sund.ServerTest.Scene
 
             Assert.AreEqual(1, SampleSceneTwoController.StartValue);
         }
-
 
         [Test]
         public async Task OpenScene_Pending_TimeOut()

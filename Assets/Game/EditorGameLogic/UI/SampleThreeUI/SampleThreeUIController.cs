@@ -9,11 +9,7 @@ namespace Cr7Sund.Game.UI
         public static int StartValue;
         public static int EnableCount;
 
-        public static IPromise promise;
-        protected override PromiseTask OnPrepare(UnsafeCancellationToken cancellation, object intent)
-        {
-            return promise.AsNewTask();
-        }
+  
         public static void Init()
         {
             StartValue = 0;
@@ -25,7 +21,6 @@ namespace Cr7Sund.Game.UI
             Debug.Debug("Load ui three");
             await base.OnStart(cancellation);
             StartValue++;
-
         }
 
         protected override async PromiseTask OnEnable()

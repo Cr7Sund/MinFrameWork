@@ -556,7 +556,7 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     child.AddStatus.Cancel();
                 }
-                await child.AddStatus.AsNewTask();
+                await child.AddStatus.Join();
                 return;
             }
 
@@ -657,7 +657,7 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     child.RemoveStatus.Cancel();
                 }
-                await child.RemoveStatus.AsNewTask();
+                await child.RemoveStatus.Join();
                 return;
             }
 

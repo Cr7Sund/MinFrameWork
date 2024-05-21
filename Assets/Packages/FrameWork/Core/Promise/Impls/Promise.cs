@@ -4,6 +4,7 @@ using System.Linq;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
 using System.Diagnostics;
+using Cr7Sund.CompilerServices;
 namespace Cr7Sund.Package.Impl
 {
     public class Promise<PromisedT> : IPromise<PromisedT>, IPromiseTaskSource<PromisedT>, IPoolNode<Promise<PromisedT>>
@@ -16,10 +17,6 @@ namespace Cr7Sund.Package.Impl
 
         #region Fields
         /// <summary>
-        ///     The exception when the promise is rejected.
-        /// </summary>
-        private Exception _rejectionException;
-        /// <summary>
         ///     Error handlers.
         /// </summary>
         protected ListPoolNode<RejectHandler> _rejectHandlers;
@@ -31,12 +28,9 @@ namespace Cr7Sund.Package.Impl
         ///     Progress handlers.
         /// </summary>
         protected ListPoolNode<ProgressHandler> _progressHandlers;
-        /// <summary>
-        ///     The value when the promises is resolved.
-        /// </summary>
-        protected PromisedT _resolveValue;
+        protected PromiseTaskCompletionSourceCore<PromisedT> _core;
         private Promise<PromisedT> _nextNode;
-        private Action _registerAction;
+        private short _version;
         #endregion
 
         #region Properties
@@ -49,6 +43,16 @@ namespace Cr7Sund.Package.Impl
         public PromiseState CurState { get; protected set; }
         public ref Promise<PromisedT> NextNode => ref _nextNode;
         public bool IsRecycled { get; set; }
+        private PromisedT _resolveValue => _core.Result;
+        private Exception _rejectionException => _core.Error;
+        public PromiseTask<PromisedT> Task
+        {
+            get
+            {
+                ValidateToken();
+                return new PromiseTask<PromisedT>(this, _version);
+            }
+        }
         #endregion
 
         public Promise()
@@ -90,6 +94,7 @@ namespace Cr7Sund.Package.Impl
             {
                 promise.Id = Promise.NextId();
             }
+            promise._version = promise._core.Version;
             return promise;
         }
 
@@ -113,18 +118,15 @@ namespace Cr7Sund.Package.Impl
             AssertUtil.IsNull(_rejectHandlers);
             AssertUtil.IsNull(_progressHandlers);
             Name = string.Empty;
-            _resolveValue = default;
             CurState = PromiseState.Pending;
-            _rejectionException = null;
-            _registerAction = null;
-            _resolveValue = default;
+            _core.Reset();
             Id = -1;
         }
 
         public void TryReturn()
         {
+            // TaskTracker.RemoveTracking(this);
             Dispose();
-
             _taskPool.TryPush(this);
         }
         #endregion
@@ -566,29 +568,22 @@ namespace Cr7Sund.Package.Impl
             {
                 throw new MyException(PromiseExceptionType.Valid_RESOLVED_STATE);
             }
-            if (IsRecycled)
-            {
-                throw new Exception("can resolve twice, since it has been recycled");
-            }
-            _resolveValue = value;
-            CurState = PromiseState.Resolved;
+            ValidateToken();
 
+            CurState = PromiseState.Resolved;
             if (Promise.EnablePromiseTracking)
             {
                 Promise.PendingPromises.Remove(this);
             }
 
             InvokeResolveHandlers(value);
-            // if (CurState != PromiseState.Pending)
-            // {
-            //     throw new MyException(PromiseExceptionType.Valid_RESOLVED_STATE);
-            // }
+            _core.TrySetResult(value);
         }
 
         public async PromiseTask<PromisedT> ResolveAsync(PromisedT value)
         {
             Resolve(value);
-            return await AsTask();
+            return await Task;
         }
 
         public void ReportProgress(float progress)
@@ -614,12 +609,8 @@ namespace Cr7Sund.Package.Impl
             {
                 throw new MyException(PromiseExceptionType.Valid_REJECTED_STATE);
             }
-            if (IsRecycled)
-            {
-                throw new Exception("can reject twice, since it has been recycled");
-            }
+            ValidateToken();
 
-            _rejectionException = ex;
             CurState = PromiseState.Rejected;
 
             if (Promise.EnablePromiseTracking)
@@ -628,6 +619,7 @@ namespace Cr7Sund.Package.Impl
             }
 
             InvokeRejectHandlers(ex);
+            _core.TrySetException(ex);
         }
 
         public virtual void Cancel()
@@ -639,91 +631,62 @@ namespace Cr7Sund.Package.Impl
         #region ITaskSource
         public PromisedT GetResult(short token)
         {
-            var returnResult = _resolveValue;
-            if (_rejectionException != null)
+            try
             {
-                // PLAN handle cancel
-                var tmpEx = _rejectionException;
-                TryReturn();
-                throw tmpEx;
+                return _core.GetResult(token);
             }
-
-            TryReturn();
-            return returnResult;
+            finally
+            {
+                TryReturn();
+            }
         }
 
         public PromiseTaskStatus GetStatus(short token)
         {
-            return CurState.ToTaskStatus();
+            return _core.GetStatus(token);
         }
 
         void IPromiseTaskSource.GetResult(short token)
         {
-            if (_rejectionException != null)
-            {
-                // PLAN handle cancel
-                var tmpEx = _rejectionException;
-                TryReturn();
-
-                throw tmpEx;
-            }
-            TryReturn();
+            GetResult(token);
         }
 
         public PromiseTaskStatus UnsafeGetStatus()
         {
-            return CurState.ToTaskStatus();
+            return _core.UnsafeGetStatus();
         }
 
         public void OnCompleted(Action continuation, short token)
         {
-            AddResolveHandler(_ => continuation?.Invoke(), this);
-            AddRejectHandler(_ => continuation?.Invoke(), this);
+            _core.OnCompleted(continuation, token);
         }
 
-        public async PromiseTask<PromisedT> AsTask()
+        public PromiseTask<PromisedT> Join()
         {
-            if (this.IsRecycled)
-            {
-                throw new Exception("cant await twice since it has been recycled");
-            }
-            switch (CurState)
-            {
-                case PromiseState.Pending:
-                    return await new PromiseTask<PromisedT>(this, 0);
-                case PromiseState.Rejected:
-                default:
-                    var tmpEx = _rejectionException;
-                    TryReturn();
-                    throw new Exception(tmpEx.Message, tmpEx);
-                case PromiseState.Resolved:
-                    var tmpValue = _resolveValue;
-                    TryReturn();
-                    return await PromiseTask<PromisedT>.FromResult(tmpValue);
-            }
-        }
-        public PromiseTask<PromisedT> AsNewTask()
-        {
-            if (this.IsRecycled)
-            {
-                throw new System.Exception("cant await recycle task, check the original promise status");
-            }
+            ValidateToken();
+
             switch (CurState)
             {
                 case PromiseState.Pending:
                     var newPromise = Promise<PromisedT>.Create();
                     AddResolveHandler(newPromise.Resolve, newPromise);
                     AddRejectHandler(newPromise.RejectWithoutDebug, newPromise);
-                    return new PromiseTask<PromisedT>(newPromise, 0);
+                    return newPromise.Task;
                 case PromiseState.Rejected:
                 default:
                     var tmpEx = _rejectionException;
                     throw new Exception(tmpEx.Message, tmpEx);
                 case PromiseState.Resolved:
                     var tmpValue = _resolveValue;
-                    return new PromiseTask<PromisedT>(tmpValue, 0);
+                    return new PromiseTask<PromisedT>(tmpValue, _version);
             }
         }
+
+        private void ValidateToken()
+        {
+            AssertUtil.AreEqual(this._version, this._core.Version, PromiseExceptionType.CAN_VISIT_VALID_VERSION);
+        }
+
         #endregion
 
         #region private methods
@@ -756,10 +719,7 @@ namespace Cr7Sund.Package.Impl
 
         protected void AddRejectHandler(Action<Exception> onRejected, IRejectable rejectable)
         {
-            if (IsRecycled)
-            {
-                throw new Exception("can not add reject handler again, since it has been recycled");
-            }
+            ValidateToken();
             if (_rejectHandlers == null)
             {
                 _rejectHandlers = ListPoolNode<RejectHandler>.Create(ref Promise._rejectListPool);
@@ -820,7 +780,6 @@ namespace Cr7Sund.Package.Impl
             }
 
             ClearHandlers();
-            _registerAction?.Invoke();
         }
 
         //Invoke all progress handlers.
@@ -848,7 +807,6 @@ namespace Cr7Sund.Package.Impl
                 }
             }
             ClearHandlers();
-            _registerAction?.Invoke();
         }
 
         protected virtual void ClearHandlers()
@@ -980,7 +938,7 @@ namespace Cr7Sund.Package.Impl
             AssertUtil.NotNull(ex);
 
             var promise = GetRawPromise<ConvertedT>();
-            promise._rejectionException = ex;
+            promise._core.TrySetException(ex);
             promise.CurState = PromiseState.Rejected;
 
             return promise;
@@ -993,7 +951,7 @@ namespace Cr7Sund.Package.Impl
         {
             var promise = GetRawPromise<ConvertedT>();
             promise.CurState = PromiseState.Resolved;
-            promise._resolveValue = promisedValue;
+            promise._core.TrySetResult(promisedValue);
             return promise;
         }
 

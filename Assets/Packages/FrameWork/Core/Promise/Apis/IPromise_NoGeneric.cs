@@ -8,6 +8,8 @@ namespace Cr7Sund.Package.Api
     /// </summary>
     public interface IPromise : IPendingPromise, IBasePromise
     {
+        PromiseTask Task { get; }
+
         /// <summary>
         /// Sets the name of the promise, useful for debugging.
         /// </summary>
@@ -155,8 +157,7 @@ namespace Cr7Sund.Package.Api
         /// of the promise.
         /// </summary>
         IPromise Progress(Action<float> onProgress);
-        PromiseTask AsTask();
-        PromiseTask AsNewTask();
+        PromiseTask Join();
         void TryReturn();
     }
 }

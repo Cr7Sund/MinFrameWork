@@ -34,5 +34,14 @@ namespace Cr7Sund.Package.Api
         CAN_NOT_REACT_RELEASED,
         // can not react an running binding since using at once, try to use ForceStop
         CAN_NOT_REACT_RUNNING,
+        /// <summary>
+        /// Token  version  is not matched,
+        /// can not await twice or get Status after await
+        /// </summary>
+        CAN_VISIT_VALID_VERSION,
+        /// <summary>
+        /// try dispose cancellation when still notifying
+        /// </summary>
+        dispose_notifying_cancel,
     }
 }
