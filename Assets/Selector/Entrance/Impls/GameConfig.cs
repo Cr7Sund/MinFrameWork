@@ -18,6 +18,7 @@ namespace Cr7Sund.Config
         public string GameLogicTypeFullName;
         public string AssemblyInfo;
 
+
         public GameLogic.GameLogic CreateLogic()
         {
             if (!string.IsNullOrEmpty(AssemblyInfo) &&
