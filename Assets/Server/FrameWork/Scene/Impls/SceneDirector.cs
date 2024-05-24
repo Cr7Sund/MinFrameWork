@@ -4,10 +4,10 @@ namespace Cr7Sund.Server.Scene.Impl
 {
     public static class SceneDirector
     {
-        public static void Construct(SceneBuilder builder, SceneKey key)
+        public static async PromiseTask Construct(SceneBuilder builder, SceneKey key)
         {
             builder.BuildContext();
-            builder.BuildControllers();
+            await builder.BuildControllers();
             builder.BuildNode(key);
         }
     }

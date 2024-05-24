@@ -5,9 +5,9 @@ namespace Cr7Sund.PackageTest.IOC
 {
     public class SampleSceneOneBuilder : SceneBuilder
     {
-        protected override void AddControllers(IControllerModule controllerModule)
+        protected override async PromiseTask AddControllers(IControllerModule controllerModule)
         {
-            controllerModule.AddController<SampleSceneOneController>();
+            await controllerModule.AddController<SampleSceneOneController>();
         }
         protected override SceneContext CreateContext()
         {

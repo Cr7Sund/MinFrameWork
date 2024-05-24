@@ -4,6 +4,8 @@ using System.Diagnostics;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using System.Threading;
+using Cr7Sund.Package.Api;
+using Cr7Sund.Package.Impl;
 
 namespace Cr7Sund.NodeTree.Impl
 {
@@ -13,6 +15,7 @@ namespace Cr7Sund.NodeTree.Impl
         protected List<IController> _childControllers;
         protected List<IUpdatable> _childUpdates;
         protected List<ILateUpdate> _childLateUpdates;
+        [Inject] protected IPoolBinder _poolBinder;
 
         public bool IsInjected
         {
@@ -205,71 +208,104 @@ namespace Cr7Sund.NodeTree.Impl
         public async PromiseTask Start(UnsafeCancellationToken cancellation)
         {
             if (IsStarted) return;
-
             IsStarted = true;
-            int count = _childControllers.Count;
-            for (int i = 0; i < count; i++)
+
+            var tmpList = _poolBinder.AutoCreate<List<IController>>();
+            for (int i = 0; i < _childControllers.Count; i++)
             {
-                await _childControllers[i].Start(cancellation);
+                tmpList.Add(_childControllers[i]);
             }
+            foreach (var ctrl in tmpList)
+            {
+                await ctrl.Start(cancellation);
+            }
+            _poolBinder.Return<List<IController>, IController>(tmpList);
         }
         public async PromiseTask Enable()
         {
             if (!IsStarted || IsActive) return;
 
             IsActive = true;
-            // PLAN Aggregate exceptions 
-            int count = _childControllers.Count;
-            for (int i = 0; i < count; i++)
+
+            var tmpList = _poolBinder.AutoCreate<List<IController>>();
+            for (int i = 0; i < _childControllers.Count; i++)
             {
-                await _childControllers[i].Enable();
+                tmpList.Add(_childControllers[i]);
             }
+            foreach (var ctrl in tmpList)
+            {
+                await ctrl.Enable();
+            }
+            _poolBinder.Return<List<IController>, IController>(tmpList);
         }
         public void Update(int millisecond)
         {
-            for (int i = 0, length = _childUpdates.Count; i < length; i++)
+            var tmpList = _poolBinder.AutoCreate<List<IUpdatable>>();
+            for (int i = 0; i < _childUpdates.Count; i++)
             {
-                var update = _childUpdates[i];
-                if (update is IController controller &&
-                     controller.IsStarted && controller.IsActive)
+                if (_childUpdates[i] is IController controller &&
+                      controller.IsStarted && controller.IsActive)
                 {
-                    update.Update(millisecond);
+                    tmpList.Add(_childUpdates[i]);
                 }
             }
+            foreach (var ctrl in tmpList)
+            {
+                ctrl.Update(millisecond);
+            }
+            _poolBinder.Return<List<IUpdatable>, IUpdatable>(tmpList);
         }
         public void LateUpdate(int millisecond)
         {
-            for (int i = 0, length = _childLateUpdates.Count; i < length; i++)
+            var tmpList = _poolBinder.AutoCreate<List<ILateUpdate>>();
+            for (int i = 0; i < _childLateUpdates.Count; i++)
             {
-                var update = _childLateUpdates[i];
-
-                if (update is IController controller &&
-                   controller.IsStarted && controller.IsActive)
+                if (_childLateUpdates[i] is IController controller &&
+                      controller.IsStarted && controller.IsActive)
                 {
-                    update.LateUpdate(millisecond);
+                    tmpList.Add(_childLateUpdates[i]);
                 }
             }
+            foreach (var ctrl in tmpList)
+            {
+                ctrl.LateUpdate(millisecond);
+            }
+            _poolBinder.Return<List<ILateUpdate>, ILateUpdate>(tmpList);
         }
+
         public async PromiseTask Stop()
         {
             if (!IsStarted) return;
 
-            int count = _childControllers.Count;
-            for (int i = 0; i < count; i++)
+
+            var tmpList = _poolBinder.AutoCreate<List<IController>>();
+            for (int i = 0; i < _childControllers.Count; i++)
             {
-                await _childControllers[i].Stop();
+                tmpList.Add(_childControllers[i]);
             }
+            foreach (var ctrl in tmpList)
+            {
+                await ctrl.Stop();
+            }
+            _poolBinder.Return<List<IController>, IController>(tmpList);
+
             IsStarted = false;
         }
         public async PromiseTask Disable(bool closeImmediately)
         {
             if (!IsStarted || !IsActive) return;
 
-            int count = _childControllers.Count;
-            for (int i = 0; i < count; i++)
+            var tmpList = _poolBinder.AutoCreate<List<IController>>();
+            for (int i = 0; i < _childControllers.Count; i++)
             {
-                await _childControllers[i].Disable(closeImmediately);
+                tmpList.Add(_childControllers[i]);
             }
+            foreach (var ctrl in tmpList)
+            {
+                await ctrl.Disable(closeImmediately);
+            }
+            _poolBinder.Return<List<IController>, IController>(tmpList);
+
             IsActive = false;
         }
 
@@ -285,7 +321,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
             await base.OnPreloadAsync(cancellation);
         }
-        
+
         #endregion
 
         #region Inject Config
@@ -296,6 +332,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = true;
 
+            _context.InjectionBinder.Injector.Inject(this);
             foreach (var ctrl in _childControllers)
             {
                 _context.InjectionBinder.Injector.Inject(ctrl);

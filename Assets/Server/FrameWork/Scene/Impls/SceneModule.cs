@@ -61,9 +61,10 @@ namespace Cr7Sund.Server.Scene.Impl
             await UnloadNode(key);
         }
 
-        protected override INode CreateNode(IAssetKey key)
+        protected override async PromiseTask<INode> CreateNode(IAssetKey key)
         {
-            return SceneCreator.Create((SceneKey)key);
+            var resultNode = await SceneCreator.Create((SceneKey)key);
+            return resultNode as INode;
         }
 
         private async Task CancelOtherScenes(IAssetKey key)
