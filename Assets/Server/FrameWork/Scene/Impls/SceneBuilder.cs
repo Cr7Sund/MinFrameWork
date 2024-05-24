@@ -25,7 +25,6 @@ namespace Cr7Sund.Server.Scene.Impl
         public async PromiseTask BuildControllers()
         {
             _controllerModule = new ControllerModule();
-            await _controllerModule.AddController<InternalSceneController>();
             await AddControllers(_controllerModule);
         }
 
