@@ -6,7 +6,8 @@
         "Cr7Sund.FrameWork.Extension",
         "Cr7Sund.FarmeWork.Server",
         "Cr7Sund.FrameWork.Selector",
-        "UnityEngine.TestRunner"
+        "UnityEngine.TestRunner",
+        "Cr7Sund.NodeTree"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

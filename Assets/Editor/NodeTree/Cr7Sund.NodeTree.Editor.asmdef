@@ -2,13 +2,17 @@
     "name": "Cr7Sund.NodeTree.Editor",
     "rootNamespace": "Cr7Sund.NodeTree.Editor",
     "references": [
-        "GUID:a432eb0a70c5c4a37ab50d59671586f8",
-        "GUID:ca937d03ee5dd4d699091438dc0f3ae6",
         "GUID:30a9ffc669424caea2210a8500863ad7",
         "GUID:7e0d4cf51db150f438768a680ebea3c4",
-        "GUID:ef29ca56c67548b5b9b979f76e10f511"
+        "GUID:ef29ca56c67548b5b9b979f76e10f511",
+        "GUID:f5337683be0c9ed49824f4d1e7862f29",
+        "GUID:7a19ff388de17fe459f8d1303f265e19",
+        "GUID:fe13ff8c968d49d48ba40db5a43374e8",
+        "GUID:a2d238d269e810d4cbfd81d31a058a0f"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
