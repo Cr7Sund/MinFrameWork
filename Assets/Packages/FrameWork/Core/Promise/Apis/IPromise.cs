@@ -193,6 +193,5 @@ namespace Cr7Sund.Package.Api
         IPromise<PromisedT> Progress(Action<float> onProgress);
 
         PromiseTask<PromisedT> Join();
-        void TryReturn();
     }
 }

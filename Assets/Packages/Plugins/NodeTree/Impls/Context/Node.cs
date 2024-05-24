@@ -475,7 +475,7 @@ namespace Cr7Sund.NodeTree.Impl
             if (_removeStatus != null)
             {
                 _removeStatus.Resolve();
-                _removeStatus.TryReturn();
+                TryReturnPromise(_removeStatus);
                 _removeStatus = null;
             }
 
@@ -564,7 +564,6 @@ namespace Cr7Sund.NodeTree.Impl
             child.SetAdding();
             child.AddStatus = Promise.Create();
 
-
             if (!child.IsInjected)
             {
                 _context.AddContext(child.Context);
@@ -584,8 +583,11 @@ namespace Cr7Sund.NodeTree.Impl
                 {
                     // remove addStatus before unload all
                     if (child.AddStatus.CurState == PromiseState.Pending)
-                    { child.AddStatus.RejectWithoutDebug(ex); }
-                    child.AddStatus.TryReturn();
+                    {
+                        child.AddStatus.RejectWithoutDebug(ex);
+                    }
+
+                    TryReturnPromise(child.AddStatus);
                     child.AddStatus = null;
 
                     //UnloadChildAsync
@@ -603,7 +605,7 @@ namespace Cr7Sund.NodeTree.Impl
                 // remove addStatus before unload all
                 if (child.AddStatus.CurState == PromiseState.Pending)
                 { child.AddStatus.RejectWithoutDebug(ex); }
-                child.AddStatus.TryReturn();
+                TryReturnPromise(child.AddStatus);
                 child.AddStatus = null;
 
                 await RemoveChildAsyncInternal(child, false, false, true);
@@ -618,7 +620,7 @@ namespace Cr7Sund.NodeTree.Impl
                     child.AddStatus.Resolve();
                 }
 
-                child.AddStatus.TryReturn();
+                TryReturnPromise(child.AddStatus);
                 child.AddStatus = null;
             }
         }
@@ -697,7 +699,7 @@ namespace Cr7Sund.NodeTree.Impl
                     {
                         child.RemoveStatus.Resolve();
                     }
-                    child.RemoveStatus.TryReturn();
+                    TryReturnPromise(child.RemoveStatus);
                     child.RemoveStatus = null;
                 }
                 child.EndUnLoad(shouldUnload);
@@ -768,20 +770,26 @@ namespace Cr7Sund.NodeTree.Impl
 
         private UnsafeCancellationTokenSource GetNewCancellation()
         {
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-            var cancellationPool = poolBinder.GetOrCreate<UnsafeCancellationTokenSource>();
-            return cancellationPool.GetInstance();
+            // var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+            // var cancellationPool = poolBinder.GetOrCreate<UnsafeCancellationTokenSource>();
+            // return cancellationPool.GetInstance();
+            return UnsafeCancellationTokenSource.Create();
         }
 
         private void ReturnCancellation(UnsafeCancellationTokenSource cancellationToken)
         {
             if (cancellationToken != null)
             {
-                var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
-                var cancellationPool = poolBinder.GetOrCreate<UnsafeCancellationTokenSource>();
-                cancellationToken.Dispose();
-                cancellationPool.ReturnInstance(cancellationToken);
+                // var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+                // var cancellationPool = poolBinder.GetOrCreate<UnsafeCancellationTokenSource>();
+                // cancellationToken.Dispose();
+                // cancellationPool.ReturnInstance(cancellationToken);
+                if (!cancellationToken.IsCancelling)
+                {
+                    cancellationToken.TryReturn();
+                }
             }
+
         }
 
         #endregion
@@ -844,6 +852,11 @@ namespace Cr7Sund.NodeTree.Impl
             AssertUtil.Greater(ChildNodes.Count, 0);
 
             return ChildNodes[index];
+        }
+
+        private void TryReturnPromise(IPromise promise)
+        {
+            promise.TryReturn(false);
         }
     }
 }

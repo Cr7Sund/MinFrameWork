@@ -135,7 +135,6 @@ namespace Cr7Sund.Package.Impl
 
         public virtual void Dispose()
         {
-
             // can be called when invoke resolve handlers
             AssertUtil.IsNull(_resolveHandlers);
             AssertUtil.IsNull(_rejectHandlers);
@@ -143,14 +142,15 @@ namespace Cr7Sund.Package.Impl
             Name = string.Empty;
             CurState = PromiseState.Pending;
             Id = -1;
-            _core.Reset();
         }
 
-        public virtual void TryReturn()
+        public virtual void TryReturn(bool reportError = true)
         {
+            _core.Reset(reportError);
             Dispose();
             _taskPool.TryPush(this);
         }
+
         #endregion
 
         #region IPromise
@@ -612,7 +612,7 @@ namespace Cr7Sund.Package.Impl
         {
             _core.OnCompleted(continuation, token);
         }
-  
+
         public PromiseTask Join()
         {
             ValidateToken();
@@ -631,6 +631,7 @@ namespace Cr7Sund.Package.Impl
                     return PromiseTask.CompletedTask;
             }
         }
+
         private void ValidateToken()
         {
             AssertUtil.AreEqual(this._version, this._core.Version, PromiseExceptionType.CAN_VISIT_VALID_VERSION);

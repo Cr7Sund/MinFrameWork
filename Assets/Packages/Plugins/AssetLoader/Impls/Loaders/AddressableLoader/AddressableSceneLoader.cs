@@ -166,12 +166,19 @@ namespace Cr7Sund.AssetLoader.Impl
             {
                 return;
             }
-            
+
             AsyncChainOperations<SceneInstance> chainOperation = _assetKeyToHandles[assetKey];
 
             chainOperation.RegisterCancel(assetKey.Key, cancellation);
             chainOperation.RegisterUnload(_onUnloadedAction);
             _assetKeyToHandles.Remove(assetKey);
+            for (int i = _activeScenePromise.Count - 1; i >= 0; i--)
+            {
+                if (_activeScenePromise[i].Item1 == assetKey)
+                {
+                    _activeScenePromise.RemoveAt(i);
+                }
+            }
         }
     }
 }

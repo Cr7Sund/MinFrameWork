@@ -11,6 +11,7 @@ namespace Cr7Sund
         void Info<T0, T1>(string message, T0 propertyValue0, T1 propertyValue1);
         void Info<T0, T1, T2>(string message, T0 propertyValue0, T1 propertyValue1, T2 propertyValue2);
         void Warn(string message);
+        void Warn(Exception exception);
         void Warn<T0>(string message, T0 propertyValue0);
         void Warn<T0,T1>(string message, T0 propertyValue0, T1 propertyValue);
         void Error(string message);

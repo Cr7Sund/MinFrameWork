@@ -60,17 +60,20 @@ namespace Cr7Sund
         }
     }
 
-    public class UnsafeCancellationTokenSource : IDisposable
+    public class UnsafeCancellationTokenSource : IDisposable, IPoolNode<UnsafeCancellationTokenSource>
     {
+        private static ReusablePool<UnsafeCancellationTokenSource> _pool;
+
         private List<Action> _registrations;
         private short _version;
         private int _state;
+        private UnsafeCancellationTokenSource _nextNode;
         // NotCanceledState 0,
         // NotifyingState  1,
         // NotifyingCompleteState 2,
 
         internal bool IsCancellationRequested => _state > 0; // _state != State.NotCanceledState;
-
+        public bool IsCancelling => _state == 1;
         internal int Version => _version;
         public UnsafeCancellationToken Token
         {
@@ -78,6 +81,24 @@ namespace Cr7Sund
             {
                 return new UnsafeCancellationToken(this, _version);
             }
+        }
+        public ref UnsafeCancellationTokenSource NextNode => ref _nextNode;
+
+        public bool IsRecycled { get; set; }
+
+
+        private UnsafeCancellationTokenSource()
+        {
+
+        }
+
+        public static UnsafeCancellationTokenSource Create()
+        {
+            if (!_pool.TryPop(out var result))
+            {
+                result = new UnsafeCancellationTokenSource();
+            }
+            return result;
         }
 
         public void Cancel()
@@ -120,6 +141,12 @@ namespace Cr7Sund
 
             Token.Register(cancellation.Cancel);
             return cancellation;
+        }
+
+        public void TryReturn()
+        {
+            Dispose();
+            _pool.TryPush(this);
         }
 
         private void ExecuteCallbackHandlers()
