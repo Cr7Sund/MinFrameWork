@@ -1,3 +1,9 @@
 [submodule "Assets/Packages/Plugins/LogPipeline"]
 	path = Assets/Packages/Plugins/LogPipeline
 	url = https://github.com/Cr7Sund/LogPipeline.git
+[submodule "Assets/Editor/ThirdParty/NodeGraphProcessor"]
+	path = Assets/Editor/ThirdParty/NodeGraphProcessor
+	url = https://github.com/liuxinjia/NodeGraphProcessor.git
+[submodule "Assets/Editor/ThirdParty/NodeGraph"]
+	path = Assets/Editor/ThirdParty/NodeGraph
+	url = https://github.com/liuxinjia/NodeGraph.git

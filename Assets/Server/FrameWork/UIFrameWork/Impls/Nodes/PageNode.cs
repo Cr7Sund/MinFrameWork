@@ -10,6 +10,7 @@ namespace Cr7Sund.Server.UI.Impl
         [Inject] IPanelModule _panelModule;
         [Inject(ServerBindDefine.UITimer)] private IPromiseTimer _uiTimer;
 
+
         public PageNode(IAssetKey assetKey, IUIView uiView, IUIController uiController) : base(assetKey, uiView, uiController)
         {
 

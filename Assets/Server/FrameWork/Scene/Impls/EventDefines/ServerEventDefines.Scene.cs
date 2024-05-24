@@ -2,7 +2,7 @@
 
 namespace Cr7Sund.Server.Scene.Impl
 {
-    public class AddSceneBeginEvent : EventData
+    public abstract class BaseSceneEvent : EventData
     {
         public IAssetKey TargetScene { get; internal set; }
         public override void Clear()
@@ -11,30 +11,21 @@ namespace Cr7Sund.Server.Scene.Impl
         }
     }
 
-    public class AddSceneEndEvent : EventData
+    public class AddSceneBeginEvent : BaseSceneEvent
     {
-        public IAssetKey TargetScene { get; internal set; }
-        public override void Clear()
-        {
-            TargetScene = null;
-        }
-    }
-    public class RemoveSceneBeginEvent : EventData
-    {
-        public IAssetKey TargetScene { get; internal set; }
-        public override void Clear()
-        {
-            TargetScene = null;
-        }
+
     }
 
-    public class RemoveSceneEndEvent : EventData
+    public class AddSceneEndEvent : BaseSceneEvent
     {
-        public IAssetKey TargetScene { get; internal set; }
-        public override void Clear()
-        {
-            TargetScene = null;
-        }
+    }
+    public class RemoveSceneBeginEvent : BaseSceneEvent
+    {
+
+    }
+
+    public class RemoveSceneEndEvent : BaseSceneEvent
+    {
     }
 
     public class SwitchSceneEvent : EventData
