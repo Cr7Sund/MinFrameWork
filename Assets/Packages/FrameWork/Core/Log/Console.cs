@@ -81,7 +81,10 @@ namespace Cr7Sund
         {
             Logger.Warn(message);
         }
-
+        public static void Warn(Exception e)
+        {
+            Logger.Warn(e);
+        }
         public static void Warn<T0>(string message, T0 propertyValue0)
         {
             Logger.Warn(message, propertyValue0);

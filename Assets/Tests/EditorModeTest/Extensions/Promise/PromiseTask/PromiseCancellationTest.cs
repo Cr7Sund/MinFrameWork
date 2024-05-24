@@ -17,7 +17,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void CancelPromise()
         {
-            var cancellation = new UnsafeCancellationTokenSource();
+            var cancellation = UnsafeCancellationTokenSource.Create();
             var promise = new Promise();
             cancellation.Token.Register(promise.Cancel);
 
@@ -33,7 +33,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void ReCancel_Fail()
         {
-            var cancellation = new UnsafeCancellationTokenSource();
+            var cancellation = UnsafeCancellationTokenSource.Create();
             var promise = new Promise();
             cancellation.Token.Register(promise.Cancel);
             cancellation.Cancel();
@@ -47,7 +47,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void ReCancel_DisposeFirst()
         {
-            var cancellation = new UnsafeCancellationTokenSource();
+            var cancellation = UnsafeCancellationTokenSource.Create();
             var promise = new Promise();
             cancellation.Token.Register(promise.Cancel);
             cancellation.Cancel();
@@ -60,7 +60,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void ReuseCancellation()
         {
-            var cancellation = new UnsafeCancellationTokenSource();
+            var cancellation = UnsafeCancellationTokenSource.Create();
             var promise = new Promise();
             cancellation.Token.Register(promise.Cancel);
 
@@ -74,7 +74,7 @@ namespace Cr7Sund.PackageTest.PromiseTest
         [Test]
         public void JoinTaskCancellation()
         {
-            var cancellation = new UnsafeCancellationTokenSource();
+            var cancellation = UnsafeCancellationTokenSource.Create();
             var source = cancellation.Join();
             Task task1 = Task.Delay(2, source.Token);
 

@@ -45,12 +45,15 @@ namespace Cr7Sund.CompilerServices
                 throw new NotImplementedException();
             }
         }
-        
+
 
         [DebuggerHidden]
-        public void Reset()
+        public void Reset(bool reportError = true)
         {
-            ReportUnhandledError();
+            if (reportError)
+            {
+                ReportUnhandledError();
+            }
 
             unchecked
             {
@@ -71,7 +74,7 @@ namespace Cr7Sund.CompilerServices
                 {
                     if (error is Exception ex)
                     {
-                        Console.Error(ex);
+                        Console.Warn(ex);
                     }
                 }
                 catch

@@ -129,6 +129,7 @@ namespace Cr7Sund.Package.Impl
             Dispose();
             _taskPool.TryPush(this);
         }
+        
         #endregion
 
         #region IPromise Implementation

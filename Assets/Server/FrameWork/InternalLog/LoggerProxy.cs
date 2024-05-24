@@ -124,6 +124,10 @@ namespace Cr7Sund
         {
             Log(LogLevel.Warn, message);
         }
+        public void Warn(Exception exception)
+        {
+            Log(LogLevel.Warn, exception);
+        }
         public void Warn<T0>(string message, T0 propertyValue0)
         {
             Log(LogLevel.Warn, message, propertyValue0);
