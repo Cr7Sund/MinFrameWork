@@ -21,11 +21,14 @@ namespace Cr7Sund.Server.Scene.Impl
         {
             _context = CreateContext();
         }
-        public void BuildControllers()
+        
+        public async PromiseTask BuildControllers()
         {
             _controllerModule = new ControllerModule();
-            AddControllers(_controllerModule);
+            await _controllerModule.AddController<InternalSceneController>();
+            await AddControllers(_controllerModule);
         }
+
         public SceneNode GetProduct()
         {
             return _node;
@@ -35,7 +38,7 @@ namespace Cr7Sund.Server.Scene.Impl
         {
             return new SceneNode(sceneKey);
         }
-        protected abstract void AddControllers(IControllerModule controllerModule);
+        protected abstract PromiseTask AddControllers(IControllerModule controllerModule);
         protected abstract SceneContext CreateContext();
 
     }

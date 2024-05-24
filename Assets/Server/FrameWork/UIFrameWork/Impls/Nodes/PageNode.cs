@@ -19,7 +19,6 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override async PromiseTask OnUnloadAsync(UnsafeCancellationToken cancellation)
         {
-            await _panelModule.CloseAll();
             await base.OnUnloadAsync(cancellation);
         }
 

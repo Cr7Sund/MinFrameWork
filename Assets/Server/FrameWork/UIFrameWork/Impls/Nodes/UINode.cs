@@ -9,10 +9,10 @@ using Object = UnityEngine.Object;
 
 namespace Cr7Sund.Server.UI.Impl
 {
+    //node as Controller
     public abstract class UINode : UpdateNode, IUINode
     {
         [Inject(ServerBindDefine.UIPanelContainer)] private IUniqueInstanceContainer _uiContainer;
-        [Inject] private IPanelModule _panelModule;
         [Inject(ServerBindDefine.UILogger)] protected IInternalLog _log;
 
         public IUIView View { get; private set; }

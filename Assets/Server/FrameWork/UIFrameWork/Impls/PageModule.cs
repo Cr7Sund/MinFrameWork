@@ -142,11 +142,12 @@ namespace Cr7Sund.Server.UI.Impl
             _pageContainers.Clear();
         }
 
-        protected override INode CreateNode(IAssetKey key)
+        protected override async PromiseTask<INode> CreateNode(IAssetKey key)
         {
+            await PromiseTask.CompletedTask;
             var uINode = UICreator.CreatePageNode((UIKey)key);
             uINode.AssignContext(new PageContext());
-            return uINode;
+            return uINode as INode;
         }
 
         protected override void OnAdded(IAssetKey enterKey)

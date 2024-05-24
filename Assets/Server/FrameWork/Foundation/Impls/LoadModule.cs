@@ -241,7 +241,7 @@ namespace Cr7Sund.Server.Impl
             _fingerGesture.UnFreeze();
         }
 
-        protected abstract INode CreateNode(IAssetKey key);
+        protected abstract PromiseTask<INode> CreateNode(IAssetKey key);
 
         protected virtual void OnAdded(IAssetKey key)
         {
@@ -360,7 +360,7 @@ namespace Cr7Sund.Server.Impl
 
         private async PromiseTask PreloadNodeFromStart(IAssetKey key)
         {
-            var newNode = CreateNode(key);
+            var newNode = await CreateNode(key);
             _treeNodes.Add(key, newNode);
 
             await _parentNode.PreLoadChild(newNode);
@@ -388,7 +388,7 @@ namespace Cr7Sund.Server.Impl
         {
             AssertUtil.IsFalse(_treeNodes.ContainsKey(assetKey), FoundationExceptionType.duplicate_addNode);
 
-            var newNode = CreateNode(assetKey);
+            var newNode = await CreateNode(assetKey);
             _treeNodes.Add(assetKey, newNode);
             DispatchAddBegin(assetKey);
 

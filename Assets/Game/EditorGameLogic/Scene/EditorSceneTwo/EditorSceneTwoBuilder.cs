@@ -5,9 +5,9 @@ namespace Cr7Sund.Game.Scene
 {
     public class EditorSceneTwoBuilder : SceneBuilder
     {
-        protected override void AddControllers(IControllerModule controllerModule)
+        protected override async PromiseTask AddControllers(IControllerModule controllerModule)
         {
-            controllerModule.AddController<EditorSceneTwoController>();
+            await controllerModule.AddController<EditorSceneTwoController>();
         }
         protected override SceneContext CreateContext()
         {

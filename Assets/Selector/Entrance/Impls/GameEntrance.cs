@@ -39,6 +39,5 @@ namespace Cr7Sund.Selector.Impl
                 GameMgr.Instance.Start();
             }
         }
-
     }
 }

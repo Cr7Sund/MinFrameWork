@@ -5,7 +5,7 @@ namespace Cr7Sund.Server.Scene.Impl
 {
     public static class SceneCreator
     {
-        public static SceneNode Create(SceneKey key)
+        public static async PromiseTask<SceneNode> Create(SceneKey key)
         {
             SceneBuilder builder = key.Create();
 
@@ -14,7 +14,7 @@ namespace Cr7Sund.Server.Scene.Impl
                 throw new MyException($"SceneCreator::Create SceneBuilder is null, Key: {key}");
             }
 
-            SceneDirector.Construct(builder, key);
+            await SceneDirector.Construct(builder, key);
             return builder.GetProduct();
         }
     }

@@ -44,7 +44,7 @@ namespace Cr7Sund.Server.UI.Impl
 
             await SwitchNode(uiKey);
         }
-        
+
         public async PromiseTask CloseAll()
         {
             await UnloadAllNodes();
@@ -60,33 +60,34 @@ namespace Cr7Sund.Server.UI.Impl
         }
         protected override void DispatchAddBegin(IAssetKey targetUI)
         {
-            var e =  _eventBus.CreateEvent<AddUIBeginEvent>();
+            var e = _eventBus.CreateEvent<AddUIBeginEvent>();
             e.TargetUI = targetUI;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchAddEnd(IAssetKey targetUI)
         {
-            var e =  _eventBus.CreateEvent<AddUIEndEvent>();
+            var e = _eventBus.CreateEvent<AddUIEndEvent>();
             e.TargetUI = targetUI;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchRemoveBegin(IAssetKey targetUI)
         {
-            var e =  _eventBus.CreateEvent<AddUIBeginEvent>();
+            var e = _eventBus.CreateEvent<AddUIBeginEvent>();
             e.TargetUI = targetUI;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchRemoveEnd(IAssetKey targetUI)
         {
-            var e =  _eventBus.CreateEvent<AddUIEndEvent>();
+            var e = _eventBus.CreateEvent<AddUIEndEvent>();
             e.TargetUI = targetUI;
             _eventBus.Dispatch(e);
         }
-        protected override INode CreateNode(IAssetKey key)
+        protected override async PromiseTask<INode> CreateNode(IAssetKey key)
         {
+            await PromiseTask.CompletedTask;
             var uINode = UICreator.CreatePanelNode((UIKey)key);
             uINode.AssignContext(new PanelContext());
-            return uINode;
+            return uINode as INode;
         }
         #endregion
 
