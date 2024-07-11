@@ -34,5 +34,11 @@ namespace Cr7Sund.Package.EventBus.Impl
         {
             return _poolBinder.AutoCreate<TEvent>();
         }
+
+        public bool DispatchSignal<TEvent>() where TEvent : IEventData, new()
+        {
+            var @event = _poolBinder.AutoCreate<TEvent>();
+            return base.Raise(@event);
+        }
     }
 }

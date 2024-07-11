@@ -7,7 +7,7 @@ namespace Cr7Sund.Server.Impl
 {
     public class GameNode : ModuleNode, IGameNode
     {
-        private GameNode(IAssetKey assetKey) : base(assetKey)
+        protected GameNode(IAssetKey assetKey) : base(assetKey)
         {
 
         }

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4a346b629dda3945bfeff21926ae015, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  createUtilityNodeLabel: Create Utility
+  createNodeLabel: Create Node
+  searchWindowCommandHeader: Commands
+  searchWindowRootHeader: Create Nodes
+  graphDocumentIdentifier: a0414adb70e38d944a6aae0349026331
+  graphStylesheetVariablesIdentifier: 115571a842b38fd4dadd42f40c05370e
+  graphStylesheetIdentifier: aa6283743ea0a28499901ad9325353a7
+  lastOpenAssetPath: 
+  customStylesheet: {fileID: 0}
+  portTypePalette:
+    IntHex: '#289D74'
+    ShortHex: '#0DB31F'
+    LongHex: '#C771BB'
+    FloatHex: '#000000'
+    DoubleHex: '#00A4B3'
+    CharHex: '#DAB950'
+    StringHex: '#CC6927'
+    ColorHex: '#AD9280'
+    Vector2Hex: '#5E4738'
+    Vector3Hex: '#452C1B'
+    QuaternionHex: '#3B1903'
+    CollectionHex: '#D4D3D2'
+  handleBarsPartialIdentifier: 5e06b9b7f66cfc6409849fc4882a3ebf

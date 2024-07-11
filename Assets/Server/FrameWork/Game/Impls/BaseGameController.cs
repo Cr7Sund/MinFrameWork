@@ -78,9 +78,9 @@ namespace Cr7Sund.Server.Impl
             await _gameInstanceContainer.UnloadAll();
         }
 
-        protected abstract PromiseTask InitGameEnv();
-        protected abstract PromiseTask HandleHotfix();
-        protected abstract PromiseTask RunLoginScene();
+        protected virtual PromiseTask InitGameEnv(){return PromiseTask.CompletedTask;}
+        protected virtual PromiseTask HandleHotfix() { return PromiseTask.CompletedTask; }
+        protected virtual PromiseTask RunLoginScene() { return PromiseTask.CompletedTask; }
         protected virtual void OnUpdate(int millisecond) { }
         protected virtual void OnLateUpdate(int millisecond) { }
 

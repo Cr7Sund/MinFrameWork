@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:VisualElement name="nodeGraphRoot" style="height: auto; width: auto; flex-grow: 1; flex-direction: row; flex-wrap: wrap;">
+        <ui:VisualElement name="graphViewRoot" style="flex-direction: column; flex-wrap: nowrap; flex-grow: 1;" />
+        <ui:VisualElement name="inspectorRoot" style="flex-grow: 1; max-width: 200px; min-width: 200px;">
+            <ui:VisualElement name="inspectorHeader" />
+            <ui:TabView name="inspectorTabView" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

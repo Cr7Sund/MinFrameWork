@@ -2,21 +2,20 @@
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class GameBuilder
+
+    public abstract class GameBuilder 
     {
         protected GameNode _node { get; private set; }
         private GameContext _context;
         private ControllerModule _controllerModule;
 
 
-        public GameNode BuildNode()
+        public void BuildNode()
         {
             _node = CreateGameNode();
 
             _node.AssignContext(_context);
             _node.AssignControllerModule(_controllerModule);
-
-            return _node;
         }
 
         public void BuildContext()
