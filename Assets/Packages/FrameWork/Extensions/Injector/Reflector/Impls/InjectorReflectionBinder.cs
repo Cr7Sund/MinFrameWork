@@ -53,6 +53,7 @@ namespace Cr7Sund.Package.Impl
             var constructor = FindPreferredConstructor(type);
             if (constructor == null)
             {
+                return ;
                 throw new MyException("The reflector requires concrete classes.\nType " + type.Name + " has no constructor. Is it an interface?", ReflectionExceptionType.CANNOT_REFLECT_INTERFACE);
             }
 
