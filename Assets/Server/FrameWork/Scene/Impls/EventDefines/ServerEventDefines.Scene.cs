@@ -1,41 +1,38 @@
-﻿using Cr7Sund.Package.EventBus.Impl;
+﻿using Cr7Sund.Package.EventBus.Api;
 
 namespace Cr7Sund.Server.Scene.Impl
 {
-    public abstract class BaseSceneEvent : EventData
+    public struct AddSceneBeginEvent : IEventData
     {
-        public IAssetKey TargetScene { get; internal set; }
-        public override void Clear()
-        {
-            TargetScene = null;
-        }
+        public IAssetKey TargetScene;
+        public string guid;
     }
 
-    public class AddSceneBeginEvent : BaseSceneEvent
+    public struct AddSceneEndEvent : IEventData
     {
-
+        public IAssetKey TargetScene;
     }
 
-    public class AddSceneEndEvent : BaseSceneEvent
+    public struct AddSceneFailEvent : IEventData
     {
+        public IAssetKey TargetScene;
+        public string guid;
+        public bool IsUnload;
     }
-    public class RemoveSceneBeginEvent : BaseSceneEvent
+    public struct RemoveSceneBeginEvent : IEventData
     {
-
+        public IAssetKey TargetScene;
     }
 
-    public class RemoveSceneEndEvent : BaseSceneEvent
+    public struct RemoveSceneEndEvent : IEventData
     {
+        public bool IsUnload;
+        public IAssetKey TargetScene;
     }
 
-    public class SwitchSceneEvent : EventData
+    public struct SwitchSceneEvent : IEventData
     {
-        public IAssetKey LastScene { get; internal set; }
-        public IAssetKey CurScene { get; internal set; }
-        public override void Clear()
-        {
-            LastScene = null;
-            CurScene = null;
-        }
+        public IAssetKey LastScene;
+        public IAssetKey CurScene;
     }
 }

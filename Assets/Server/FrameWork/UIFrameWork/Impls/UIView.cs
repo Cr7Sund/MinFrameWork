@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.Server.Api;
-using System.Threading.Tasks;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -65,7 +64,6 @@ namespace Cr7Sund.Server.UI.Impl
         {
             AssertUtil.NotNull(parent, UIExceptionType.null_UI_parent);
             _parentTransform = GetParentTrans(parent);
-            _uiPanel.transform.SetParent(_parentTransform);
         }
 
         public void Enable(INode parent)

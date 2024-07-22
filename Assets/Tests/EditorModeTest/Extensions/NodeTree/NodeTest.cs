@@ -287,6 +287,21 @@ namespace Cr7Sund.PackageTest.NodeTree
         }
 
         [Test]
+        public async Task NodeTest_UnloadNode_Manually()
+        {
+            // Arrange
+            var child = new SampleNode();
+            var grandChild = new SampleNode();
+
+            // Act
+            await _node.AddChildAsync(child);
+            await child.AddChildAsync(grandChild);
+            await _node.UnloadChildAsync(child);
+
+            Assert.AreEqual(grandChild.LoadState, LoadState.Loaded);
+        }
+
+        [Test]
         public async Task NodeTest_EmptyCrossContext_ShouldThrowException()
         {
             MyException ex = null;

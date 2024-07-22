@@ -1,0 +1,12 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Editor/NodeGraph/Resources/USS/PinnedElement.uss?fileID=7433441132597879392&amp;guid=20d603bb19ea81f45b925ac726a9abee&amp;type=3#PinnedElement" />
+    <engine:VisualElement name="content" picking-mode="Ignore">
+        <engine:VisualElement name="header" picking-mode="Ignore">
+            <engine:VisualElement name="labelContainer" picking-mode="Ignore">
+                <engine:Label name="titleLabel" />
+            </engine:VisualElement>
+        </engine:VisualElement>
+        <engine:VisualElement name="contentContainer" picking-mode="Ignore">
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

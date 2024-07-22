@@ -1,0 +1,23 @@
+{
+    "name": "Cr7Sund.Editor.NodeGraph",
+    "rootNamespace": "Cr7Sund.Editor.NodeGraph",
+    "references": [
+        "GUID:fe13ff8c968d49d48ba40db5a43374e8",
+        "GUID:e8c3ed550924e1c47addffaa7117699b",
+        "GUID:70ada230189769b448c74f6f8a64d9e5",
+        "GUID:7e0d4cf51db150f438768a680ebea3c4",
+        "GUID:a2d238d269e810d4cbfd81d31a058a0f",
+        "GUID:30a9ffc669424caea2210a8500863ad7"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

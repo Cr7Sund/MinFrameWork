@@ -69,7 +69,8 @@ namespace Cr7Sund.NodeTree.Impl
         {
             get
             {
-                return ChildNodes.Count;
+                if (_childNodes == null) return 0;
+                else return _childNodes.Count;
             }
         }
         public INode this[int index] => GetChild(index);
@@ -456,8 +457,6 @@ namespace Cr7Sund.NodeTree.Impl
 
         public void Destroy(IContext parentContext)
         {
-            AssertUtil.IsTrue(_childNodes == null || _childNodes.Count <= 0);
-
             IsInit = false;
             _childNodes = null;
             _parent = null;
@@ -673,10 +672,12 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 if (shouldUnload)
                 {
-                    for (int i = child.ChildCount - 1; i >= 0; i--)
-                    {
-                        await child.UnloadChildAsync(child.GetChild(i));
-                    }
+                    // don't unload recursively
+                    // let the use handle the disconnection 
+                    // for (int i = child.ChildCount - 1; i >= 0; i--)
+                    // {
+                    //     await child.UnloadChildAsync(child.GetChild(i));
+                    // }
 
                     await child.Disable(closeImmediately);
                     await child.Stop();

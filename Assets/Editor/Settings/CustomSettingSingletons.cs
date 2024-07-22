@@ -11,11 +11,13 @@ namespace Cr7Sund.Editor
         // public T instance { get => CustomSettingSingletons<T>.Instance.; }
         protected virtual void NotifyValueChanged(SerializedPropertyChangeEvent evt)
         {
+            
         }
 
         public static void SaveModified<T>() where T : CustomSetting
         {
             CustomSettingSingletons<T>.SaveModified();
+            
         }
     }
 

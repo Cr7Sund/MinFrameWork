@@ -6,32 +6,33 @@ using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Impl;
 using System;
 using Object = UnityEngine.Object;
+using UnityEngine;
 
 namespace Cr7Sund.Server.UI.Impl
 {
     //node as Controller
     public abstract class UINode : UpdateNode, IUINode
     {
-        [Inject(ServerBindDefine.UIPanelContainer)] private IUniqueInstanceContainer _uiContainer;
+        private readonly string _panelID;
+        [Inject(ServerBindDefine.UIPanelContainer)] private IInstancesContainer _uiContainer;
+        [Inject(ServerBindDefine.UIPanelUniqueContainer)] private IUniqueInstanceContainer _uiUniqueContainer;
         [Inject(ServerBindDefine.UILogger)] protected IInternalLog _log;
 
         public IUIView View { get; private set; }
-        public string PageId { get; set; }
+        public string PanelID => _panelID;
         public bool IsTransitioning { get; private set; }
         public IUIController Controller { get; private set; }
 
-
         protected UINode(IAssetKey assetKey) : base(assetKey)
         {
-
+            _panelID = System.Guid.NewGuid().ToString();
         }
+
         public UINode(IAssetKey assetKey, IUIView uiView, IUIController uiController) : this(assetKey)
         {
             View = uiView;
             Controller = uiController;
-            PageId = System.Guid.NewGuid().ToString();
         }
-
 
         public PromiseTask BeforeExit(bool push, IUINode enterPage)
         {
@@ -97,7 +98,14 @@ namespace Cr7Sund.Server.UI.Impl
             var prepareTask = Controller.Prepare(cancellation, uiKey.Intent);
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                await _uiContainer.LoadAssetAsync<Object>(Key, cancellation);
+                if (uiKey.UniqueInstance)
+                {
+                    await _uiUniqueContainer.LoadAssetAsync<Object>(Key, cancellation);
+                }
+                else
+                {
+                    await _uiContainer.LoadAssetAsync<Object>(Key, cancellation);
+                }
             }
             await prepareTask;
         }
@@ -111,8 +119,16 @@ namespace Cr7Sund.Server.UI.Impl
 
             if (MacroDefine.IsMainThread && UnityEngine.Application.isPlaying)
             {
-                var instance = await _uiContainer.CreateInstanceAsync<Object>(Key, cancellation);
-                await View.OnLoad(instance as UnityEngine.GameObject);
+                GameObject instance = null;
+                if (uiKey.UniqueInstance)
+                {
+                    instance = await _uiUniqueContainer.CreateInstanceAsync<GameObject>(Key, cancellation);
+                }
+                else
+                {
+                    instance = await _uiContainer.InstantiateAsync<GameObject>(Key, PanelID, cancellation);
+                }
+                await View.OnLoad(instance);
                 await prepareTask;
             }
             else
@@ -124,7 +140,15 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override async PromiseTask OnUnloadAsync(UnsafeCancellationToken cancellation)
         {
-            await _uiContainer.Unload(Key);
+            var uiKey = Key as UIKey;
+            if (uiKey.UniqueInstance)
+            {
+                await _uiUniqueContainer.Unload(Key);
+            }
+            else
+            {
+                await _uiContainer.ReturnInstance(PanelID, Key);
+            }
             await base.OnUnloadAsync(cancellation);
         }
 

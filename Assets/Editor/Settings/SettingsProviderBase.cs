@@ -1,22 +1,25 @@
+using Cr7Sund.Editor.Drawer;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Cr7Sund.Editor {
+namespace Cr7Sund.Editor
+{
 
     /// <summary>
     /// Setting sproviders are neeeded to show up settings in the ProjectSettings window.
     /// This is an abstract base class to help with some of the heavy lifting to get this to work.
     /// </summary>
-    public abstract class SettingsProviderBase : SettingsProvider {
+    public abstract class SettingsProviderBase : SettingsProvider
+    {
 
         /// <summary>
         /// The serialized object to operate on.
         /// </summary>
         protected SerializedObject serializedObject;
 
-        public SettingsProviderBase(string path, SettingsScope scope = SettingsScope.User) : base(path, scope) {}
+        public SettingsProviderBase(string path, SettingsScope scope = SettingsScope.User) : base(path, scope) { }
 
         /// <summary>
         /// Get the instance to the specific object that should be managed
@@ -31,7 +34,8 @@ namespace Cr7Sund.Editor {
         /// Default is null which means that all properties will be drawn.
         /// </summary>
         /// <returns></returns>
-        protected virtual string GetRootPropertyPath() {
+        protected virtual string GetRootPropertyPath()
+        {
             return null;
         }
 
@@ -39,7 +43,8 @@ namespace Cr7Sund.Editor {
         /// Provide a callback that is fired when any property changed.
         /// </summary>
         /// <returns></returns>
-        protected virtual EventCallback<SerializedPropertyChangeEvent> GetValueChangedCallback() {
+        protected virtual EventCallback<SerializedPropertyChangeEvent> GetValueChangedCallback()
+        {
             return null;
         }
 
@@ -47,7 +52,8 @@ namespace Cr7Sund.Editor {
         /// Provide an additional UI creation action on a per row/propertyfield basis.
         /// </summary>
         /// <returns></returns>
-        protected virtual System.Action<SerializedProperty,VisualElement> GetCreateAdditionalUIAction() {
+        protected virtual System.Action<SerializedProperty, VisualElement> GetCreateAdditionalUIAction()
+        {
             return null;
         }
 
@@ -55,8 +61,10 @@ namespace Cr7Sund.Editor {
         /// Provide a specific header/label for the Settings.
         /// </summary>
         /// <returns></returns>
-        protected virtual string GetHeader() {
-            if (serializedObject != null) {
+        protected virtual string GetHeader()
+        {
+            if (serializedObject != null)
+            {
                 return serializedObject.targetObject.name;
             }
             return "";
@@ -67,7 +75,8 @@ namespace Cr7Sund.Editor {
         /// </summary>
         /// <param name="searchContext"></param>
         /// <param name="rootElement"></param>
-        public override void OnActivate(string searchContext, VisualElement rootElement) {
+        public override void OnActivate(string searchContext, VisualElement rootElement)
+        {
             serializedObject = new SerializedObject(GetInstance());
             VisualElement settingsRoot = new VisualElement();
 
@@ -83,6 +92,8 @@ namespace Cr7Sund.Editor {
             settingsRoot.Add(title);
 
             UIElementsHelper.CreateGenericUI(serializedObject, settingsRoot, GetValueChangedCallback(), GetCreateAdditionalUIAction(), GetRootPropertyPath());
+
+            var buttonDrawer = new ButtonsDrawer(serializedObject);
 
             rootElement.Add(settingsRoot);
             settingsRoot.Bind(serializedObject);

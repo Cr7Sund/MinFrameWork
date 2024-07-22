@@ -19,19 +19,25 @@ MonoBehaviour:
   graphDocumentIdentifier: a0414adb70e38d944a6aae0349026331
   graphStylesheetVariablesIdentifier: 115571a842b38fd4dadd42f40c05370e
   graphStylesheetIdentifier: aa6283743ea0a28499901ad9325353a7
-  lastOpenAssetPath: 
+  lastOpenAssetGuid: cebf7fb0fe7f0cb4b94962a64da13516
+  lastOpenType:
+    assemblyName: 
+    fullTypeName: 
   customStylesheet: {fileID: 0}
   portTypePalette:
-    IntHex: '#289D74'
-    ShortHex: '#0DB31F'
-    LongHex: '#C771BB'
-    FloatHex: '#000000'
-    DoubleHex: '#00A4B3'
-    CharHex: '#DAB950'
-    StringHex: '#CC6927'
-    ColorHex: '#AD9280'
-    Vector2Hex: '#5E4738'
-    Vector3Hex: '#452C1B'
-    QuaternionHex: '#3B1903'
+    IntHex: '#d9ed92'
+    ShortHex: '#b5e48c'
+    LongHex: '#99d98c'
+    FloatHex: '#76c893'
+    DoubleHex: '#52b69a'
+    CharHex: '#34a0a4'
+    StringHex: '#168aad'
+    ColorHex: '#1a759f'
+    Vector2Hex: '#1e6091'
+    Vector3Hex: '#184e77'
+    QuaternionHex: '#184e77'
     CollectionHex: '#D4D3D2'
+    DefaultHex: '#93DF29'
   handleBarsPartialIdentifier: 5e06b9b7f66cfc6409849fc4882a3ebf
+  pinnedElementIdentifier: d3f889c0a1158794083d393b941fcbfd
+  pinnedElementStyleIdentifier: 20d603bb19ea81f45b925ac726a9abee

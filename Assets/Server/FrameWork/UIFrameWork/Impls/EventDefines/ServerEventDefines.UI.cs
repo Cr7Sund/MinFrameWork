@@ -1,50 +1,43 @@
-﻿using Cr7Sund.Package.EventBus.Impl;
+﻿using Cr7Sund.Package.EventBus.Api;
 
 namespace Cr7Sund.Server
 {
-    public class AddUIBeginEvent : EventData
+    public struct AddUIBeginEvent : IEventData
     {
-        public IAssetKey TargetUI { get; internal set; }
-        public override void Clear()
-        {
-            TargetUI = null;
-        }
+        public IAssetKey TargetUI;
+        public IAssetKey ParentUI;
+        public string GUID;
     }
 
-    public class AddUIEndEvent : EventData
+    public struct AddUIEndEvent : IEventData
     {
-        public IAssetKey TargetUI { get; internal set; }
-        public override void Clear()
-        {
-            TargetUI = null;
-        }
-    }
-    public class RemoveUIBeginEvent : EventData
-    {
-        public IAssetKey TargetUI { get; internal set; }
-        public override void Clear()
-        {
-            TargetUI = null;
-        }
+        public IAssetKey TargetUI;
+        public IAssetKey ParentUI;
     }
 
-    public class RemoveUIEndEvent : EventData
+    public struct AddUIFailEvent : IEventData
     {
-        public IAssetKey TargetUI { get; internal set; }
-        public override void Clear()
-        {
-            TargetUI = null;
-        }
+        public IAssetKey TargetUI;
+        public IAssetKey ParentUI;
+        public string GUID;
+        public bool IsUnload;
     }
 
-    public class SwitchUIEvent : EventData
+    public struct RemoveUIBeginEvent : IEventData
     {
-        public IAssetKey LastUI { get; internal set; }
-        public IAssetKey CurUI { get; internal set; }
-        public override void Clear()
-        {
-            LastUI = null;
-            CurUI = null;
-        }
+        public IAssetKey TargetUI;
+    }
+
+    public struct RemoveUIEndEvent : IEventData
+    {
+        public IAssetKey ParentUI;
+        public IAssetKey TargetUI;
+        public bool IsUnload;
+    }
+
+    public struct SwitchUIEvent : IEventData
+    {
+        public IAssetKey LastUI;
+        public IAssetKey CurUI;
     }
 }

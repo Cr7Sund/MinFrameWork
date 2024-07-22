@@ -38,6 +38,7 @@ namespace Cr7Sund.Server.Impl
         /// don destroy on load
         /// </summary>
         public const string GameInstancePool = "GameInstancePool";
+        public const string UIPanelUniqueContainer = "UIPanelUniqueContainer";
         public const string UIPanelContainer = "UIPanelContainer";
 
         #endregion

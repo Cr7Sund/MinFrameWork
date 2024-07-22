@@ -6,7 +6,7 @@ namespace Cr7Sund.Patterns
     {
         private static T instance;
 
-        public bool IsInit {get;private set;}
+        public bool IsInit { get; private set; }
 
 
         static Singleton()
@@ -20,7 +20,7 @@ namespace Cr7Sund.Patterns
             IsInit = true;
         }
 
-        public  virtual void Dispose()
+        public virtual void Dispose()
         {
             IsInit = false;
             Singleton<T>.instance = default(T);

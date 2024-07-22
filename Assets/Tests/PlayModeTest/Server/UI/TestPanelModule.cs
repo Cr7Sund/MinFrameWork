@@ -92,7 +92,7 @@ namespace Cr7Sund.ServerTest.UI
             await _pageContainer.CloseAll();
             await _sceneModule.UnloadScene(SampleSceneKeys.SampleSceneKeyOne);
             await _gameLogic.DestroyAsync();
-            
+
             if (Application.isPlaying)
             {
                 GameObjectUtil.Destroy(_gameRoot.gameObject);
@@ -197,6 +197,14 @@ namespace Cr7Sund.ServerTest.UI
 
             Assert.AreEqual(0, _panelContainer.OperateNum);
             Assert.AreEqual(0, SampleThreeUIController.EnableCount);
+        }
+
+        [Test]
+        public async Task T()
+        {
+            await _panelContainer.OpenPanel(SampleUIKeys.SampleTwoUI);
+            await _panelContainer.OpenPanel(SampleUIKeys.SampleTwoUI);
+           
         }
     }
 }

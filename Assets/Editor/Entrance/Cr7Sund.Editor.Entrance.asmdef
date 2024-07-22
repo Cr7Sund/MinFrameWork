@@ -1,0 +1,19 @@
+{
+    "name": "Cr7Sund.Editor.Entrance",
+    "rootNamespace": "",
+    "references": [
+        "GUID:66333c5aff9cf9546b571d6783ccdfff",
+        "GUID:bb2f0e9fb469baa4eb5c3cf78e2c291e"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

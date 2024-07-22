@@ -10,27 +10,25 @@ namespace Cr7Sund.Server.Impl
     {
         [Inject] IAssetLoader _assetLoader;
 
-
         protected override IAssetLoader Loader => _assetLoader;
         public string SceneName { get; private set; }
-
 
         public void Init(string sceneName)
         {
             SceneName = sceneName;
         }
 
-        protected override void MoveInstanceToScene(GameObject instance)
-        {
-            var scene = SceneManager.GetSceneByName(SceneName);
-            AssertUtil.NotNull(scene, FoundationExceptionType.create_from_invalidScene);
-            SceneManager.MoveGameObjectToScene(instance, scene);
-        }
-
         public override void Dispose()
         {
             base.Dispose();
             SceneName = string.Empty;
+        }
+
+        protected override void OnCreate(GameObject instance)
+        {
+            var scene = SceneManager.GetSceneByName(SceneName);
+            AssertUtil.NotNull(scene, FoundationExceptionType.create_from_invalidScene);
+            SceneManager.MoveGameObjectToScene(instance, scene);
         }
     }
 }

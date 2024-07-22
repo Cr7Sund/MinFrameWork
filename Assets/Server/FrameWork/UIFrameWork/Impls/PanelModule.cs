@@ -50,38 +50,66 @@ namespace Cr7Sund.Server.UI.Impl
             await UnloadAllNodes();
         }
 
+        protected override string GetNodeGUID(IAssetKey assetKey)
+        {
+            if (_treeNodes.TryGetValue(assetKey, out var node) && node is UINode uINode)
+            {
+                return uINode.PanelID;
+            }
+            else
+            {
+                return base.GetNodeGUID(assetKey);
+            }
+        }
+
         #region Load
         protected override void DispatchSwitch(IAssetKey curUI, IAssetKey lastUI)
         {
-            var e = _eventBus.CreateEvent<SwitchUIEvent>();
+            var e = new SwitchUIEvent();
             e.LastUI = lastUI;
             e.CurUI = curUI;
             _eventBus.Dispatch(e);
         }
-        protected override void DispatchAddBegin(IAssetKey targetUI)
+        protected override void DispatchAddBegin(IAssetKey targetUI, string guid)
         {
-            var e = _eventBus.CreateEvent<AddUIBeginEvent>();
+            var e = new AddUIBeginEvent();
             e.TargetUI = targetUI;
+            e.ParentUI = _parentNode.Key;
+            e.GUID = guid;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchAddEnd(IAssetKey targetUI)
         {
-            var e = _eventBus.CreateEvent<AddUIEndEvent>();
+            var e = new AddUIEndEvent();
             e.TargetUI = targetUI;
+            _eventBus.Dispatch(e);
+        }
+        protected override void DispatchAddFail(IAssetKey targetUI, string guid, bool isUnload = true)
+        {
+            var e = new AddUIFailEvent();
+            e.TargetUI = targetUI;
+            e.ParentUI = _parentNode.Key;
+            e.IsUnload = isUnload;
+            e.GUID = guid;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchRemoveBegin(IAssetKey targetUI)
         {
-            var e = _eventBus.CreateEvent<AddUIBeginEvent>();
+            var e = new RemoveUIBeginEvent();
             e.TargetUI = targetUI;
             _eventBus.Dispatch(e);
         }
-        protected override void DispatchRemoveEnd(IAssetKey targetUI)
+        protected override void DispatchRemoveEnd(IAssetKey targetUI, bool isUnload)
         {
-            var e = _eventBus.CreateEvent<AddUIEndEvent>();
+            var e = new RemoveUIEndEvent();
             e.TargetUI = targetUI;
+            e.ParentUI = _parentNode.Key;
+            e.IsUnload = isUnload;
             _eventBus.Dispatch(e);
         }
+
+        #endregion
+
         protected override async PromiseTask<INode> CreateNode(IAssetKey key)
         {
             await PromiseTask.CompletedTask;
@@ -89,8 +117,5 @@ namespace Cr7Sund.Server.UI.Impl
             uINode.AssignContext(new PanelContext());
             return uINode as INode;
         }
-        #endregion
-
-
     }
 }

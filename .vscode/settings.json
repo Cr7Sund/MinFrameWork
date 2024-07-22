@@ -67,6 +67,7 @@
         "Monobehaviours",
         "NODESTATE",
         "NULLOIDNAME",
+        "Paramsserial",
         "pollings",
         "Poolable",
         "Postorder",

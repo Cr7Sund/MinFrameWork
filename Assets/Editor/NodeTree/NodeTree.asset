@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fef4cc96ed9ab645a3939bfd6411b28, type: 3}
+  m_Name: NodeTree
+  m_EditorClassIdentifier: 
+  graphModelBase:
+    rid: 1193447742173872188
+  references:
+    version: 2
+    RefIds:
+    - rid: 1193447742173872188
+      type: {class: GraphModel, ns: Cr7Sund.Editor.NodeGraph, asm: Cr7Sund.Editor.NodeGraph}
+      data:
+        nodes:
+        - nodeX: 0
+          nodeY: 40
+          nodeName: SampleOneScene
+          modelID: 3f94ccd1-e2bb-4760-ba24-d88750749cd8
+          serializeType:
+            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+            fullTypeName: Cr7Sund.NodeTree.Impl.Node
+          portInfos: []
+          portListInfo:
+            portInfos: []
+            portListName: 
+            portName: 
+            serializeType:
+              assemblyName: 
+              fullTypeName: 
+            direction: 0
+          nodeParameter:
+            ints: []
+            strings: []
+            bools: []
+            categories: []
+          isUtilityNode: 0
+        - nodeX: 180.5
+          nodeY: 35
+          nodeName: SampleOnePanel
+          modelID: aeb74047-9382-4aee-b79f-684a3edcbf05
+          serializeType:
+            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+            fullTypeName: Cr7Sund.NodeTree.Impl.Node
+          portInfos: []
+          portListInfo:
+            portInfos: []
+            portListName: 
+            portName: 
+            serializeType:
+              assemblyName: 
+              fullTypeName: 
+            direction: 0
+          nodeParameter:
+            ints: []
+            strings:
+            - Value: 
+              name: 
+              category: 
+            bools:
+            - Value: 1
+              name: 015d14df-debf-4b7f-8438-1faecb8133a1_enable
+              category: SampleOnePanel
+            categories:
+            - SampleOnePanel
+          isUtilityNode: 0
+        - nodeX: 469.5
+          nodeY: 30
+          nodeName: SampleTwoPanel
+          modelID: 9b9b82be-a108-490a-8abb-a8cb5986d84f
+          serializeType:
+            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+            fullTypeName: Cr7Sund.NodeTree.Impl.Node
+          portInfos: []
+          portListInfo:
+            portInfos: []
+            portListName: 
+            portName: 
+            serializeType:
+              assemblyName: 
+              fullTypeName: 
+            direction: 0
+          nodeParameter:
+            ints: []
+            strings:
+            - Value: 
+              name: 
+              category: 
+            bools:
+            - Value: 1
+              name: 59dbc900-91f0-4f1a-a51c-4284dfd8c7b6_enable
+              category: SampleTwoPanel
+            categories:
+            - SampleOnePanel
+            - SampleTwoPanel
+          isUtilityNode: 0
+        - nodeX: 0
+          nodeY: 0
+          nodeName: SampleTwoPanel
+          modelID: 5c67f5f4-7660-4960-ba60-531a36670209
+          serializeType:
+            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+            fullTypeName: Cr7Sund.NodeTree.Impl.Node
+          portInfos: []
+          portListInfo:
+            portInfos: []
+            portListName: 
+            portName: 
+            serializeType:
+              assemblyName: 
+              fullTypeName: 
+            direction: 0
+          nodeParameter:
+            ints: []
+            strings:
+            - Value: 
+              name: 
+              category: 
+            bools: []
+            categories:
+            - SampleOnePanel
+            - SampleTwoPanel
+          isUtilityNode: 0
+        utilityNodes: []
+        edges: []
+        inspectorInfo:
+          orientation: 0

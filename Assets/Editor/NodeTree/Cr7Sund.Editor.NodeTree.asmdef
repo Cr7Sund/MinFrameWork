@@ -1,0 +1,25 @@
+{
+    "name": "Cr7Sund.Editor.NodeTree",
+    "rootNamespace": "",
+    "references": [
+        "Cr7Sund.Editor.NodeGraph",
+        "Cr7Sund.FarmeWork.Server",
+        "Cr7Sund.FrameWork.Selector",
+        "GraphView",
+        "Cr7Sund.NodeTree",
+        "Cr7Sund.FrameWork.Extension",
+        "Cr7Sund.FrameWork.Core",
+        "Cr7Sund.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -12,7 +12,5 @@ namespace Cr7Sund.Package.EventBus.Api
     {
         bool DispatchImmediately<TEvent>(TEvent tEvent) where TEvent : IEventData, new();
         bool Dispatch<TEvent>(TEvent @event) where TEvent : IEventData, new();
-        bool DispatchSignal<TEvent>() where TEvent : IEventData, new();
-        TEvent CreateEvent<TEvent>() where TEvent : IEventData, new();
     }
 }

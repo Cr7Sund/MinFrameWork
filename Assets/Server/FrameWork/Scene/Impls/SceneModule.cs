@@ -129,33 +129,45 @@ namespace Cr7Sund.Server.Scene.Impl
         #region  Event
         protected override void DispatchSwitch(IAssetKey curScene, IAssetKey lastScene)
         {
-            var e = _eventBus.CreateEvent<SwitchSceneEvent>();
-            e.LastScene = lastScene;
-            e.CurScene = curScene;
+            var e = new SwitchSceneEvent
+            {
+                LastScene = lastScene,
+                CurScene = curScene
+            };
             _eventBus.Dispatch(e);
         }
-        protected override void DispatchAddBegin(IAssetKey targetScene)
+        protected override void DispatchAddBegin(IAssetKey targetScene, string guid)
         {
-            var e = _eventBus.CreateEvent<AddSceneBeginEvent>();
+            var e = new AddSceneBeginEvent();
             e.TargetScene = targetScene;
+            e.guid = guid;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchAddEnd(IAssetKey targetScene)
         {
-            var e = _eventBus.CreateEvent<AddSceneEndEvent>();
+            var e = new AddSceneEndEvent();
             e.TargetScene = targetScene;
+            _eventBus.Dispatch(e);
+        }
+        protected override void DispatchAddFail(IAssetKey targetScene, string guid, bool isUnload = true)
+        {
+            var e = new AddSceneFailEvent();
+            e.TargetScene = targetScene;
+            e.IsUnload = isUnload;
+            e.guid = guid;
             _eventBus.Dispatch(e);
         }
         protected override void DispatchRemoveBegin(IAssetKey targetScene)
         {
-            var e = _eventBus.CreateEvent<AddSceneBeginEvent>();
+            var e = new RemoveSceneBeginEvent();
             e.TargetScene = targetScene;
             _eventBus.Dispatch(e);
         }
-        protected override void DispatchRemoveEnd(IAssetKey targetScene)
+        protected override void DispatchRemoveEnd(IAssetKey targetScene, bool isUnload)
         {
-            var e = _eventBus.CreateEvent<AddSceneEndEvent>();
+            var e = new RemoveSceneEndEvent();
             e.TargetScene = targetScene;
+            e.IsUnload = isUnload;
             _eventBus.Dispatch(e);
         }
 

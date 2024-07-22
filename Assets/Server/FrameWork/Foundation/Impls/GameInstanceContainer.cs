@@ -11,7 +11,7 @@ namespace Cr7Sund.Server.Impl
         protected override IAssetLoader Loader => _assetLoader;
 
 
-        protected override void MoveInstanceToScene(GameObject instance)
+        protected override void OnCreate(GameObject instance)
         {
             GameObject.DontDestroyOnLoad(instance);
         }
