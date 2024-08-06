@@ -7,6 +7,7 @@ using Cr7Sund.Touch.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.Package.Api;
 using System.Text;
+using Cr7Sund.Server.UI.Impl;
 namespace Cr7Sund.Server.Impl
 {
     public abstract class LoadModule : ILoadModule
@@ -19,10 +20,10 @@ namespace Cr7Sund.Server.Impl
         [Inject]
         protected IPoolBinder _poolBinder;
         protected Dictionary<IAssetKey, INode> _treeNodes;
-        private int _startTransTime = -1;
+        private long _startTransTime = -1;
 
         protected abstract INode _parentNode { get; }
-        protected virtual int _loadTimeOutTime { get => 3000; }
+        protected virtual long _loadTimeOutTime { get => 3000; }
 
         internal LoadModule()
         {
@@ -218,7 +219,7 @@ namespace Cr7Sund.Server.Impl
             }
         }
 
-        public void TimeOut(int elapsedTime)
+        public void TimeOut(long elapsedTime)
         {
             if (!IsTransitioning())
             {
@@ -309,6 +310,10 @@ namespace Cr7Sund.Server.Impl
 
             return default;
         }
+        protected virtual string GetNodeGUID(IAssetKey assetKey)
+        {
+            return string.Empty;
+        }
 
         private async PromiseTask RemoveNodeFromNodeTree(IAssetKey removeKey, bool overwrite)
         {
@@ -331,7 +336,7 @@ namespace Cr7Sund.Server.Impl
 
             await OnRemoved(removeKey);
             UnFreeze();
-            DispatchRemoveEnd(removeKey);
+            DispatchRemoveEnd(removeKey, false);
         }
         private async PromiseTask UnloadNodeFromNodeTree(IAssetKey key, bool overwrite)
         {
@@ -353,7 +358,7 @@ namespace Cr7Sund.Server.Impl
             {
                 _treeNodes.Remove(unloadKey);
             }
-            DispatchRemoveEnd(unloadKey);
+            DispatchRemoveEnd(unloadKey, true);
 
             return unloadKey;
         }
@@ -390,13 +395,13 @@ namespace Cr7Sund.Server.Impl
 
             var newNode = await CreateNode(assetKey);
             _treeNodes.Add(assetKey, newNode);
-            DispatchAddBegin(assetKey);
+            DispatchAddBegin(assetKey, GetNodeGUID(assetKey));
 
             await AddChildNode(assetKey, false);
         }
         private async PromiseTask AddNodeFromLoaded(IAssetKey assetKey, bool overwrite)
         {
-            DispatchAddBegin(assetKey);
+            DispatchAddBegin(assetKey, GetNodeGUID(assetKey));
 
             await AddChildNode(assetKey, overwrite);
         }
@@ -428,14 +433,18 @@ namespace Cr7Sund.Server.Impl
         private void OnFailLoadedNode(IAssetKey assetKey)
         {
             UnFreeze();
-            DispatchAddEnd(assetKey);
             // in case of remove
             if (_treeNodes.TryGetValue(assetKey, out var node))
             {
                 if (node.LoadState == LoadState.Unloaded
                           || _treeNodes[assetKey].LoadState == LoadState.Fail)
                 {
+                    DispatchAddFail(assetKey,GetNodeGUID(assetKey), true);
                     _treeNodes.Remove(assetKey);
+                }
+                else
+                {
+                    DispatchAddFail(assetKey, GetNodeGUID(assetKey), false);
                 }
             }
         }
@@ -443,7 +452,7 @@ namespace Cr7Sund.Server.Impl
         private async PromiseTask AddNodeFromRemoving(IAssetKey assetKey)
         {
             _treeNodes[assetKey].CancelUnLoad();
-            DispatchAddBegin(assetKey);
+            DispatchAddBegin(assetKey, GetNodeGUID(assetKey));
             await AddChildNode(assetKey, false);
         }
 
@@ -464,16 +473,20 @@ namespace Cr7Sund.Server.Impl
         protected virtual void DispatchSwitch(IAssetKey curNode, IAssetKey lastNode)
         {
         }
-        protected virtual void DispatchAddBegin(IAssetKey targetNode)
+        protected virtual void DispatchAddBegin(IAssetKey targetNode, string guid)
         {
         }
         protected virtual void DispatchAddEnd(IAssetKey targetNode)
         {
         }
+
+        protected virtual void DispatchAddFail(IAssetKey targetNode, string guid, bool isUnload = true)
+        {
+        }
         protected virtual void DispatchRemoveBegin(IAssetKey targetNode)
         {
         }
-        protected virtual void DispatchRemoveEnd(IAssetKey targetNode)
+        protected virtual void DispatchRemoveEnd(IAssetKey targetNode, bool isUnload)
         {
         }
 

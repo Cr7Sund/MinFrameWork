@@ -2,8 +2,8 @@ namespace Cr7Sund.UGUI.Apis
 {
     public interface IUIAnimation
     {
-        int Duration { get; }
+        long Duration { get; }
 
-        void SetTime(int time);
+        void SetTime(long time);
     }
 }

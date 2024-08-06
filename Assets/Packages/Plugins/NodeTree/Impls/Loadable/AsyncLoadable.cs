@@ -54,7 +54,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
 
-        public virtual async PromiseTask UnloadAsync(UnsafeCancellationToken cancellation)
+        public async PromiseTask UnloadAsync(UnsafeCancellationToken cancellation)
         {
             if (LoadState == LoadState.Unloaded) return;
 

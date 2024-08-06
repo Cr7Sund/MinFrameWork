@@ -11,7 +11,7 @@ namespace Cr7Sund.Package.Impl
         /// <summary>
         ///     The frame the promise was started
         /// </summary>
-        public int frameStarted;
+        public long frameStarted;
 
         /// <summary>
         ///     The pending promise which is an interface for a promise that can be rejected or resolved.
@@ -33,7 +33,7 @@ namespace Cr7Sund.Package.Impl
         /// <summary>
         ///     The time the promise was started
         /// </summary>
-        public int timeStarted;
+        public long timeStarted;
 
         public IPromise innerTask;
 

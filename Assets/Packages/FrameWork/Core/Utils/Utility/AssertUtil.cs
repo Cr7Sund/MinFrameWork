@@ -182,6 +182,12 @@ namespace Cr7Sund.FrameWork.Util
             if (arg1 > arg2)
                 throw new MyException($"the value is {arg1} but expected lessOrEqual {arg2}");
         }
+
+        public static void LessOrEqual<TEnum>(int arg1, long arg2, TEnum errorCode) where TEnum : Enum
+        {
+            if (arg1 > arg2)
+                throw new MyException(errorCode);
+        }
         public static void LessOrEqual(uint arg1, uint arg2)
         {
             if (arg1 > arg2)
@@ -199,7 +205,11 @@ namespace Cr7Sund.FrameWork.Util
             if (arg1 > arg2)
                 throw new MyException(errorCode);
         }
-
+        public static void LessOrEqual(long arg1, long arg2)
+        {
+            if (arg1 > arg2)
+                throw new MyException($"the value is {arg1} but expected lessOrEqual {arg2}");
+        }
         public static void IsFalse(bool expected)
         {
             if (expected)

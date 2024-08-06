@@ -32,12 +32,13 @@ namespace Cr7Sund.Selector.Impl
 
             if (GameMgr.Instance.Status == Api.GameStatus.Started)
             {
-                await GameMgr.Instance.Restart();    
+                await GameMgr.Instance.Restart();
             }
             else
             {
                 GameMgr.Instance.Start();
             }
+            
         }
     }
 }

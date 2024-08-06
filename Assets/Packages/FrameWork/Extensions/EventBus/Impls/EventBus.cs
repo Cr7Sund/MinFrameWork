@@ -6,10 +6,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 {
     public class EventBus : GenericEventBus<IEventData>, IEventBus
     {
-        [Inject] private IPoolBinder _poolBinder;
-        protected override IPoolBinder poolBinder => _poolBinder;
-
-
         public bool Dispatch<TEvent>(TEvent @event) where TEvent : IEventData, new()
         {
             return base.Raise(@event);
@@ -28,11 +24,6 @@ namespace Cr7Sund.Package.EventBus.Impl
         public void RemoveObserver<TEvent>(Api.EventHandler<TEvent> handler) where TEvent : IEventData, new()
         {
             this.UnsubscribeFrom(handler);
-        }
-
-        public TEvent CreateEvent<TEvent>() where TEvent : IEventData, new()
-        {
-            return _poolBinder.AutoCreate<TEvent>();
         }
     }
 }

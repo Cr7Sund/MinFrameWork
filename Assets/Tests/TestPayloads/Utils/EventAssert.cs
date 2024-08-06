@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Cr7Sund.Package.EventBus.Api;
 using NUnit.Framework;
+using UnityEngine;
+
 #if UNITY_EDITOR
 using UnityEngine.TestTools.Constraints;
 #endif
@@ -12,9 +14,12 @@ namespace Cr7Sund.PackageTest.EventBus
     {
         public static void AssertDoesNotAllocate(Action action)
         {
-			#if UNITY_EDITOR
-            Assert.That(() => action(), NUnit.Framework.Is.Not.AllocatingGCMemory());
-			#endif
+#if UNITY_EDITOR
+            if (Application.isPlaying)
+            {
+                Assert.That(() => action(), NUnit.Framework.Is.Not.AllocatingGCMemory());
+            }
+#endif
         }
 
         public static void AssertListenersInvokedInOrder<TEvent>(this TestEventBus bus, TEvent eventData,

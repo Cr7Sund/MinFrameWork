@@ -10,6 +10,7 @@ namespace Cr7Sund.Game.UI
         public int EnableCount;
 
         [Inject] private IPageModule _pageContainer;
+        [Inject] private IPanelModule _panelModule;
 
 
         protected override async PromiseTask OnStart(UnsafeCancellationToken cancellation)
@@ -25,7 +26,7 @@ namespace Cr7Sund.Game.UI
 
             try
             {
-                // loaded
+                await _panelModule.OpenPanel(EditorUIKeys.SampleTwoUI);
                 await _pageContainer.PushPage(EditorUIKeys.SampleTwoUI, true);
             }
             catch (System.Exception ex)
@@ -33,6 +34,7 @@ namespace Cr7Sund.Game.UI
                 Debug.Info(ex);
             }
             await base.OnEnable();
+
             EnableCount++;
         }
 

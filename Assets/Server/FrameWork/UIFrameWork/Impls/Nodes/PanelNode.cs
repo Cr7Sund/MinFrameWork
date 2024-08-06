@@ -9,11 +9,11 @@ namespace Cr7Sund.Server.UI.Impl
         [Inject] IPanelModule _panelModule;
         [Inject(ServerBindDefine.UITimer)] private IPromiseTimer _uiTimer;
 
+
         public PanelNode(IAssetKey assetKey, IUIView uiView, IUIController uiController) : base(assetKey, uiView, uiController)
         {
 
         }
-
 
         public override PromiseTask OnStart(UnsafeCancellationToken cancellation)
         {

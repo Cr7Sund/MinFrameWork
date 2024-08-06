@@ -38,6 +38,6 @@ namespace Cr7Sund.Server.Scene.Apis
         /// <param name="key">The key of the scene to add and run.</param>
         PromiseTask AddScene(IAssetKey key);
 
-        void TimeOut(int milliseconds);
+        void TimeOut(long milliseconds);
     }
 }

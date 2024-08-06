@@ -62,6 +62,11 @@ namespace Cr7Sund
             Logger.Error(message, propertyValue0, propertyValue1, propertyValue2);
         }
 
+        public static void Error(Exception ex)
+        {
+            Logger.Error(ex);
+        }
+        
         public static void Error(Exception ex, string prefix)
         {
             Logger.Error(ex, prefix);
@@ -93,9 +98,6 @@ namespace Cr7Sund
         {
             Logger.Warn(message, propertyValue0, propertyValue1);
         }
-        public static void Error(Exception ex)
-        {
-            Logger.Error(ex);
-        }
+   
     }
 }

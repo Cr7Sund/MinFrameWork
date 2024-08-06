@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Cr7Sund.UGUI.Impls
 {
     [System.Serializable]
     public sealed class SimpleUITransitionAnimationObject : UITransitionAnimationObject
     {
-        [SerializeField] private int _delay;
-        [SerializeField] private int _duration = 300;
+        [SerializeField] private long _delay;
+        [SerializeField] private long _duration = 300;
         [SerializeField] private EaseType _easeType = EaseType.QuarticEaseOut;
         [SerializeField] private SheetAlignment _beforeAlignment = SheetAlignment.Center;
         [SerializeField] private Vector3 _beforeScale = Vector3.one;
@@ -19,9 +20,9 @@ namespace Cr7Sund.UGUI.Impls
         private Vector3 _beforePosition;
         private CanvasGroup _canvasGroup;
 
-        public override int Duration => _duration;
+        public override long Duration => _duration;
 
-        public static SimpleUITransitionAnimationObject CreateInstance(int? duration = null, EaseType? easeType = null,
+        public static SimpleUITransitionAnimationObject CreateInstance(long? duration = null, EaseType? easeType = null,
             SheetAlignment? beforeAlignment = null, Vector3? beforeScale = null, float? beforeAlpha = null,
             SheetAlignment? afterAlignment = null, Vector3? afterScale = null, float? afterAlpha = null)
         {
@@ -43,14 +44,14 @@ namespace Cr7Sund.UGUI.Impls
             _canvasGroup = canvasGroup;
         }
 
-        public override void SetTime(int time)
+        public override void SetTime(long time)
         {
             if (RectTransform == null)
             {
                 return;
             
             }
-            time = Mathf.Max(0, time - _delay);
+            time = Math.Max(0, time - _delay);
             float progress = _duration <= 0 ? 1.0f : Mathf.Clamp01(time / (float)_duration);
             progress = Easings.Interpolate(progress, _easeType);
             var position = Vector3.Lerp(_beforePosition, _afterPosition, progress);
@@ -61,7 +62,7 @@ namespace Cr7Sund.UGUI.Impls
             _canvasGroup.alpha = alpha;
         }
 
-        public void SetParams(int? duration = null, EaseType? easeType = null, SheetAlignment? beforeAlignment = null,
+        public void SetParams(long? duration = null, EaseType? easeType = null, SheetAlignment? beforeAlignment = null,
             Vector3? beforeScale = null, float? beforeAlpha = null, SheetAlignment? afterAlignment = null,
             Vector3? afterScale = null, float? afterAlpha = null)
         {

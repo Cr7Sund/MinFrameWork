@@ -15,10 +15,9 @@ namespace Cr7Sund.Server.Impl
         {
             builder.BuildContext();
             builder.BuildControllers();
+            builder.BuildNode();
 
-            var gameNode = builder.BuildNode();
-
-            return gameNode;
+            return builder.GetProduct() as GameNode;
         }
     }
 }

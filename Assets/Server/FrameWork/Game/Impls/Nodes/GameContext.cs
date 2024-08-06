@@ -38,7 +38,8 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Bind<IConfigContainer>().To<ConfigContainer>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IUITransitionAnimationContainer>().To<UITransitionAnimationContainer>().AsSingleton().AsCrossContext();
             InjectionBinder.Bind<IInstancesContainer>().To<GameInstanceContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.GameInstancePool);
-            InjectionBinder.Bind<IUniqueInstanceContainer>().To<UIPanelContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.UIPanelContainer);
+            InjectionBinder.Bind<IInstancesContainer>().To<UIPanelContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.UIPanelContainer);
+            InjectionBinder.Bind<IUniqueInstanceContainer>().To<UIPanelUniqueContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.UIPanelUniqueContainer);
             InjectionBinder.Bind<IAssetLoader>().To(assetLoader).AsCrossContext();
             InjectionBinder.Bind<ISceneLoader>().To(sceneLoader).AsCrossContext();
 
@@ -60,7 +61,8 @@ namespace Cr7Sund.Server.Impl
             InjectionBinder.Unbind<IConfigContainer>();
             InjectionBinder.Unbind<IUITransitionAnimationContainer>();
             InjectionBinder.Unbind<IInstancesContainer>(ServerBindDefine.GameInstancePool);
-            InjectionBinder.Unbind<IUniqueInstanceContainer>(ServerBindDefine.UIPanelContainer);
+            InjectionBinder.Unbind<IInstancesContainer>(ServerBindDefine.UIPanelContainer);
+            InjectionBinder.Unbind<IUniqueInstanceContainer>(ServerBindDefine.UIPanelUniqueContainer);
             InjectionBinder.Unbind<IAssetLoader>();
             InjectionBinder.Unbind<ISceneLoader>();
 

@@ -12,7 +12,20 @@ namespace Cr7Sund.Selector.Impl
 
         public GameStatus Status => _status;
 
+#if UNITY_EDITOR
+        public GameMgr()
+        {
+            UnityEditor.EditorApplication.playModeStateChanged += PlayModeChange;
+        }
 
+        private async void PlayModeChange(UnityEditor.PlayModeStateChange change)
+        {
+            if (change == UnityEditor.PlayModeStateChange.ExitingPlayMode)
+            {
+                await Close();
+            }
+        }
+#endif
         public void Start()
         {
             switch (_status)
@@ -111,10 +124,8 @@ namespace Cr7Sund.Selector.Impl
 
         private async PromiseTask DoClose()
         {
-            _status = GameStatus.Closing;
             await _launch.DestroyAsync();
             Dispose();
         }
-
     }
 }

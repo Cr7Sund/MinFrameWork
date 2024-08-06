@@ -10,7 +10,7 @@ namespace Cr7Sund.UGUI.Impls
     {
         public RectTransform RectTransform { get; private set; }
         public RectTransform PartnerRectTransform { get; private set; }
-        public abstract int Duration { get; }
+        public abstract long Duration { get; }
 
         void IUITransitionAnimationBehaviour.SetPartner(RectTransform partnerRectTransform)
         {
@@ -26,6 +26,6 @@ namespace Cr7Sund.UGUI.Impls
 
         public abstract void Setup();
 
-        public abstract void SetTime(int time);
+        public abstract void SetTime(long time);
     }
 }

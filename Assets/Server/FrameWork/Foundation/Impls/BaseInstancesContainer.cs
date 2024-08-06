@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Text.RegularExpressions;
 using Cr7Sund.Collection.Generic;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.Server.Api;
@@ -14,14 +14,12 @@ namespace Cr7Sund.Server.Impl
         private readonly Dictionary<string, GameObject> _instanceContainers = new();
         private readonly Dictionary<IAssetKey, UnsafeUnOrderList<GameObject>> _instantiatePromises = new();
 
-
-
         public GameObject Create(string name, params Type[] components)
         {
             if (!_instanceContainers.TryGetValue(name, out var instance))
             {
                 instance = new GameObject(name, components);
-                MoveInstanceToScene(instance);
+                OnCreate(instance);
                 _instanceContainers.Add(name, instance);
             }
 
@@ -33,7 +31,7 @@ namespace Cr7Sund.Server.Impl
             if (!_instanceContainers.TryGetValue(name, out var instance))
             {
                 instance = new GameObject(name, typeof(ComponentT));
-                MoveInstanceToScene(instance);
+                OnCreate(instance);
                 _instanceContainers.Add(name, instance);
             }
 
@@ -46,7 +44,8 @@ namespace Cr7Sund.Server.Impl
             {
                 foreach (var item in instances)
                 {
-                    if (item.name == name)
+                    var goName = GetGameObjectName(item);
+                    if (name == goName)
                     {
                         return item as T;
                     }
@@ -74,7 +73,8 @@ namespace Cr7Sund.Server.Impl
             {
                 foreach (var item in instances)
                 {
-                    if (item.name == name)
+                    var goName = GetGameObjectName(item);
+                    if (name == goName)
                     {
                         return item as T;
                     }
@@ -106,6 +106,7 @@ namespace Cr7Sund.Server.Impl
             if (_instanceContainers.TryGetValue(name, out var instance))
             {
                 GameObjectUtil.Destroy(instance);
+                _instanceContainers.Remove(name);
             }
             else
             {
@@ -121,6 +122,7 @@ namespace Cr7Sund.Server.Impl
             if (_instanceContainers.TryGetValue(name, out var instance))
             {
                 GameObjectUtil.Destroy(instance);
+                _instanceContainers.Remove(name);
             }
 
             if (_instantiatePromises.TryGetValue(assetKey, out var instances))
@@ -128,7 +130,8 @@ namespace Cr7Sund.Server.Impl
                 GameObject target = null;
                 foreach (var item in instances)
                 {
-                    if (item.name == name)
+                    var goName = GetGameObjectName(item);
+                    if (name == goName)
                     {
                         target = item;
                         break;
@@ -137,11 +140,17 @@ namespace Cr7Sund.Server.Impl
 
                 _instantiatePromises[assetKey].Remove(target);
             }
+
             if (_instantiatePromises[assetKey].Count == 0)
             {
                 await base.Unload(assetKey);
                 _instantiatePromises.Remove(assetKey);
             }
+        }
+
+        public override PromiseTask Unload(IAssetKey key)
+        {
+            throw new System.NotSupportedException("please use returnInstance");
         }
 
         public async override PromiseTask UnloadAll()
@@ -172,17 +181,42 @@ namespace Cr7Sund.Server.Impl
             AssertUtil.LessOrEqual(_instanceContainers.Count, 0);
         }
 
-        protected abstract void MoveInstanceToScene(GameObject instance);
+        /// <summary>
+        /// set parent or move into owner scene
+        /// </summary>
+        /// <param name="instance"></param>
+        protected abstract void OnCreate(GameObject instance);
 
         private T InstantiateAsset<T>(T asset, string name) where T : Object
         {
             var instance = GameObject.Instantiate(asset);
-            // OnInstantiate(instance);
-            instance.name = name;
-            MoveInstanceToScene(instance as GameObject);
+            if (MacroDefine.IsRelease)
+            {
+                instance.name = name;
+            }
+            else
+            {
+                instance.name = $"{name}({asset.name})";
+            }
+
+            OnCreate(instance as GameObject);
             _instanceContainers.Add(name, instance as GameObject);
             return instance;
         }
+
+        private static string GetGameObjectName(GameObject instance)
+        {
+            if (MacroDefine.IsRelease)
+            {
+                return instance.name;
+            }
+            else
+            {
+                var regex = new Regex(@"\((.*?)\)");
+                return regex.Match(instance.name).Value;
+            }
+        }
+
 
     }
 }

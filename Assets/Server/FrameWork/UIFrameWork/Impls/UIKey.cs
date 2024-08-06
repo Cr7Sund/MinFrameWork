@@ -12,17 +12,17 @@ namespace Cr7Sund.Server.UI.Impl
         public readonly bool Stack;
         public readonly bool LoadAsync;
         public readonly bool HideFirst;
+        public readonly bool UniqueInstance;
 
-        // --- internal content ---
         public string Key { get; }
-        // --- internal content ---
         internal IUINode exitPage { get; set; }
         internal bool IsPush { get; set; }
         internal bool PlayAnimation { get; set; }
 
 
         public UIKey(string key, Type ctrlType, Type viewType,
-             object intent = null, bool playAnimation = true, bool stack = true, bool loadAsync = true, bool hideFirst = false)
+             object intent = null, bool playAnimation = true, bool stack = true,
+             bool loadAsync = true, bool hideFirst = false, bool uniqueInstance = true)
         {
             Key = key;
             _ctrlType = ctrlType;
@@ -33,7 +33,7 @@ namespace Cr7Sund.Server.UI.Impl
             Stack = stack;
             LoadAsync = loadAsync;
             HideFirst = hideFirst;
-
+            UniqueInstance = uniqueInstance;
         }
 
         public IUIController CreateCtrl() => Activator.CreateInstance(_ctrlType) as IUIController;

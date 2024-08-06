@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fef4cc96ed9ab645a3939bfd6411b28, type: 3}
+  m_Name: NodeTree
+  m_EditorClassIdentifier: 
+  graphModelBase:
+    rid: 1193447742173872188
+  references:
+    version: 2
+    RefIds:
+    - rid: 1193447742173872188
+      type: {class: GraphModel, ns: Cr7Sund.Editor.NodeGraph, asm: Cr7Sund.Editor.NodeGraph}
+      data:
+        nodes:
+        - nodeX: 158.5
+          nodeY: 188.5
+          nodeName: TestNode1
+          modelID: 33b90876-cfcc-49c1-9bf9-b261b513a78a
+          serializeType:
+            assemblyName: Cr7Sund.Editor.NodeGraph, Version=0.0.0.0, Culture=neutral,
+              PublicKeyToken=null
+            fullTypeName: Cr7Sund.Editor.NodeGraph.TestNode1
+          portInfos:
+          - portName: a0
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            id: 0
+            direction: 0
+            capacity: 0
+          - portName: a1
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            id: 1
+            direction: 0
+            capacity: 0
+          - portName: b0
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            id: 0
+            direction: 1
+            capacity: 0
+          - portName: b1
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Double
+            id: 1
+            direction: 1
+            capacity: 0
+          - portName: bList
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: 'System.Collections.Generic.List`1[[System.Int32, mscorlib,
+                Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'
+            id: 2
+            direction: 1
+            capacity: 0
+          portListInfo:
+            portInfos: []
+            portListName: bList
+            portName: 
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            direction: 1
+          nodeParameter:
+            ints:
+            - Value: 24
+              name: nodeInfoInt
+              category: TestNode1
+              disPlayName: nodeInfoInt
+            strings:
+            - Value: hello
+              name: nodeInfoStr
+              category: TestNode1
+              disPlayName: nodeInfoStr
+            bools: []
+            categories:
+            - TestNode1
+          isUtilityNode: 0
+        utilityNodes: []
+        edges: []
+        inspectorInfo:
+          orientation: 0

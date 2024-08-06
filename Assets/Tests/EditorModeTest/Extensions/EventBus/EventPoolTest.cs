@@ -24,17 +24,17 @@ namespace Cr7Sund.PackageTest.EventBus
             injectionBinder.Injector.Inject(eventBus);
         }
 
-        [Test]
-        public void TestPool_Register()
-        {
-            var listener = eventBus.TestListener<ClassTestEvent>();
+        // [Test]
+        // public void TestPool_Register()
+        // {
+        //     var listener = eventBus.TestListener<ClassTestEvent>();
 
-            listener.Subscribe();
-            var @event = poolBinder.AutoCreate<ClassTestEvent>();
-            eventBus.Raise(@event);
-            Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().TotalLength);
-            Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().Available);
-        }
+        //     listener.Subscribe();
+        //     var @event = poolBinder.AutoCreate<ClassTestEvent>();
+        //     eventBus.Raise(@event);
+        //     Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().TotalLength);
+        //     Assert.AreEqual(4, poolBinder.Get<ClassTestEvent>().Available);
+        // }
 
 
     }

@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Cr7Sund
 {
-
     public class EditorApplicationProxy 
     {
         private List<IUpdatable> _updates = new();

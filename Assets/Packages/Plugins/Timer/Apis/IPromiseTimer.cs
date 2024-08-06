@@ -7,14 +7,14 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     Resolve the returned promise once the time has elapsed
         /// </summary>
-        IPromise WaitFor(int duration);
+        IPromise WaitFor(long duration);
         /// <summary>
         /// Resolve the returned promise once the time has elapsed
         /// </summary>
         /// <param name="duration"></param>
         /// <param name="onTimeAction">in time actin</param>
         /// <returns></returns>
-        IPromise WaitFor(int duration, Action onTimeAction);
+        IPromise WaitFor(long duration, Action onTimeAction);
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
@@ -31,12 +31,12 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     Resolve the returned promise once the predicate evaluates to true
         /// </summary>
-        IPromise Schedule(int duration, Action<TimeData> poll, UnsafeCancellationToken cancellation = default);
+        IPromise Schedule(long duration, Action<TimeData> poll, UnsafeCancellationToken cancellation = default);
         IPromise Schedule(Action<TimeData> poll, UnsafeCancellationToken cancellation = default);
         /// <summary>
         ///     Update all pending promises. Must be called for the promises to progress and resolve at all.
         /// </summary>
-        void Update(int deltaTime);
+        void Update(long deltaTime);
 
         /// <summary>
         ///     Cancel a waiting promise and reject it immediately.
@@ -57,17 +57,17 @@ namespace Cr7Sund.Package.Api
         /// <summary>
         ///     The amount of time that has elapsed since the pending promise started running
         /// </summary>
-        public int elapsedTime;
+        public long elapsedTime;
 
         /// <summary>
         ///     The amount of time since the last time the pending promise was updated.
         /// </summary>
-        public int deltaTime;
+        public long deltaTime;
 
         /// <summary>
         ///     The amount of times that update has been called since the pending promise started running
         /// </summary>
-        public int elapsedUpdates;
+        public long elapsedUpdates;
 
     }
 

@@ -15,7 +15,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 	/// <typeparam name="TBaseEvent"><para>The base type all events must inherit/implement.</para> If you don't want to restrict event types to a base type, use <see cref="object"/> as the base type.</typeparam>
 	public abstract class GenericEventBus<TBaseEvent> : IDisposable where TBaseEvent : IEventData
 	{
-
 		protected readonly Queue<QueuedEvent> QueuedEvents = new Queue<QueuedEvent>(32);
 
 		protected event Action<GenericEventBus<TBaseEvent>> DisposeEvent;
@@ -25,8 +24,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 		private uint _currentRaiseRecursionDepth;
 		private uint _depth;
 		private readonly List<uint> _raiseRecursionsConsumed = new List<uint>();
-		protected abstract IPoolBinder poolBinder{get;}
-
 
 		/// <summary>
 		/// Has the current raised event been consumed?
@@ -40,12 +37,12 @@ namespace Cr7Sund.Package.EventBus.Impl
 		public bool IsEventBeingRaised => _currentRaiseRecursionDepth > 0;
 
 
-
 		static GenericEventBus()
 		{
 			// Initialize some things to avoid allocation on first use.
 			var comparer = EqualityComparer<uint>.Default;
 		}
+
 
 		/// <summary>
 		/// <para>Raises the given event immediately, regardless if another event is currently still being raised.</para>
@@ -84,7 +81,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 			}
 
 			OnAfterRaiseEvent();
-			poolBinder?.Return(tEvent);
 
 			return wasConsumed;
 		}
@@ -104,7 +100,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 
 			var listeners = EventListeners<TEvent>.GetListeners(this);
 			listeners.EnqueueEvent(@event);
-
 			return false;
 		}
 
@@ -164,7 +159,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 		public virtual void Dispose()
 		{
 			DisposeEvent?.Invoke(this);
-
 			DisposeEvent = null;
 		}
 
@@ -203,7 +197,7 @@ namespace Cr7Sund.Package.EventBus.Impl
 			public abstract void Raise(GenericEventBus<TBaseEvent> eventBus);
 		}
 
-		private sealed class EventListeners<TEvent> : IEnumerable<Api.EventHandler<TEvent>> where TEvent : TBaseEvent, new()
+		private sealed class EventListeners<TEvent> : IEnumerable<Api.EventHandler<TEvent>>, IDisposable where TEvent : TBaseEvent, new()
 		{
 			private static readonly Dictionary<GenericEventBus<TBaseEvent>, EventListeners<TEvent>>
 				Listeners = new Dictionary<GenericEventBus<TBaseEvent>, EventListeners<TEvent>>();
@@ -230,7 +224,6 @@ namespace Cr7Sund.Package.EventBus.Impl
 			{
 				_eventBus = eventBus;
 			}
-
 
 
 			public static EventListeners<TEvent> GetListeners(GenericEventBus<TBaseEvent> eventBus)
@@ -282,6 +275,7 @@ namespace Cr7Sund.Package.EventBus.Impl
 							enumerator.Index--;
 						}
 					}
+					break;
 				}
 			}
 
@@ -384,6 +378,11 @@ namespace Cr7Sund.Package.EventBus.Impl
 			public void Clear()
 			{
 				_sortedListeners.Clear();
+			}
+
+			public void Dispose()
+			{
+				AssertUtil.AreEqual(0, _sortedListeners.Count);
 			}
 		}
 	}

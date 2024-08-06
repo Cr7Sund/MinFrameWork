@@ -10,7 +10,7 @@ namespace Cr7Sund.Server.UI.Api
         IUIView View { get; }
 
         //  get or set the page ID
-        string PageId { get; set; }
+        string PanelID { get; }
 
         //  check if the view is currently transitioning
         bool IsTransitioning { get; }

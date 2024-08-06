@@ -98,7 +98,7 @@ namespace Cr7Sund.Selector.Impl
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
             _gameLogic.Init();
-            
+
             _editorApplicationProxy = new EditorApplicationProxy();
             // _editorApplicationProxy.RegisterUpdateCallback(_gameLogic);
         }
@@ -118,8 +118,15 @@ namespace Cr7Sund.Selector.Impl
                 _dispose = true;
                 if (_gameLogic != null)
                 {
-                    await _configLoader.Unload(ConfigDefines.GameConfig);
-                    await _gameLogic.DestroyAsync();
+                    try
+                    {
+                        await _configLoader.Unload(ConfigDefines.GameConfig);
+                        await _gameLogic.DestroyAsync();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        EntranceConsole.Error(ex);
+                    }
                 }
             }
         }

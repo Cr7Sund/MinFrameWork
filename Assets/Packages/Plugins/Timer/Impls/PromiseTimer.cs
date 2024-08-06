@@ -16,11 +16,11 @@ namespace Cr7Sund.Package.Impl
         /// <summary>
         ///     The current running total for the amount of frames the PromiseTimer has run for
         /// </summary>
-        private int curFrame;
+        private long curFrame;
         /// <summary>
         ///     The current running total for time that this PromiseTimer has run for
         /// </summary>
-        private int curTime;
+        private long curTime;
 
         public bool Cancel(IPromise promise)
         {
@@ -39,7 +39,7 @@ namespace Cr7Sund.Package.Impl
             return true;
         }
 
-        public void Update(int deltaTime)
+        public void Update(long deltaTime)
         {
             curTime += deltaTime;
             curFrame += 1;
@@ -48,10 +48,10 @@ namespace Cr7Sund.Package.Impl
             while (node != null)
             {
                 var wait = node.Value;
-                int newElapsedTime = curTime - wait.timeStarted;
+                long newElapsedTime = curTime - wait.timeStarted;
                 wait.timeData.deltaTime = newElapsedTime - wait.timeData.elapsedTime;
                 wait.timeData.elapsedTime = newElapsedTime;
-                int newElapsedUpdates = curFrame - wait.frameStarted;
+                long newElapsedUpdates = curFrame - wait.frameStarted;
                 wait.timeData.elapsedUpdates = newElapsedUpdates;
 
                 bool result = false;
@@ -80,14 +80,14 @@ namespace Cr7Sund.Package.Impl
             }
         }
 
-        public IPromise WaitFor(int duration)
+        public IPromise WaitFor(long duration)
         {
             AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 
             return WaitUntil(t => t.elapsedTime > duration);
         }
 
-        public IPromise WaitFor(int duration, Action onTimeAction)
+        public IPromise WaitFor(long duration, Action onTimeAction)
         {
             AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 
@@ -160,7 +160,7 @@ namespace Cr7Sund.Package.Impl
             return promise;
         }
 
-        public IPromise Schedule(int duration, Action<TimeData> poll, UnsafeCancellationToken cancellation = default)
+        public IPromise Schedule(long duration, Action<TimeData> poll, UnsafeCancellationToken cancellation = default)
         {
             AssertUtil.LessOrEqual(0, duration, PromiseTimerExceptionType.INVALID_DURATION);
 

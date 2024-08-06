@@ -4,7 +4,6 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using System;
-using System.Threading;
 
 namespace Cr7Sund.NodeTree.Impl
 {
@@ -59,7 +58,7 @@ namespace Cr7Sund.NodeTree.Impl
             set;
         }
 
-        protected List<INode> ChildNodes
+        public List<INode> ChildNodes
         {
             get
             {
@@ -70,7 +69,8 @@ namespace Cr7Sund.NodeTree.Impl
         {
             get
             {
-                return ChildNodes.Count;
+                if (_childNodes == null) return 0;
+                else return _childNodes.Count;
             }
         }
         public INode this[int index] => GetChild(index);
@@ -672,6 +672,13 @@ namespace Cr7Sund.NodeTree.Impl
             {
                 if (shouldUnload)
                 {
+                    // don't unload recursively
+                    // let the use handle the disconnection 
+                    // for (int i = child.ChildCount - 1; i >= 0; i--)
+                    // {
+                    //     await child.UnloadChildAsync(child.GetChild(i));
+                    // }
+
                     await child.Disable(closeImmediately);
                     await child.Stop();
                     await child.UnloadAsync(child.RemoveCancellation.Token);
