@@ -8,7 +8,8 @@
                         "*.csproj"
                     ],
                     "exclude": [
-                        "Assets/Plugins/**"
+                        "Assets/Plugins/**",
+                        "Assets/Packages/Plugins/LogPipeline"
                     ]
                 }
             ],

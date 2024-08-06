@@ -11,3 +11,9 @@ apiRules:
 - exclude:
     uidRegex: ^Cr7Sund.Editor
     type: Namespace
+- exclude:
+    uidRegex: ^Cr7Sund.PackageTest
+    type: NamespaceF
+- exclude:
+    uidRegex: ^Cr7Sund.ServerTest
+    type: NamespaceFF
