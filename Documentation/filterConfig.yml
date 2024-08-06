@@ -1,0 +1,13 @@
+apiRules:
+- include:
+    uidRegex: ^Cr7Sund
+    type: Namespace
+- exclude:
+    uidRegex: ^Global
+    type: Namespace
+- exclude:
+    uidRegex: .*
+    type: Namespace
+- exclude:
+    uidRegex: ^Cr7Sund.Editor
+    type: Namespace
