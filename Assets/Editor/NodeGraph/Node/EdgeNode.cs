@@ -3,20 +3,15 @@ using UnityEditor.GraphView;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
-    public class EdgeController : EditorNode
+    public class EdgeNode : EditorNode
     {
         public readonly EdgeView edgeView;
         public EdgeModel edgeModel => modelData as EdgeModel;
 
 
-        public EdgeController(IModel model, Edge baseEdge) : base(model)
+        public EdgeNode(IModel model, Edge baseEdge) : base(model)
         {
             edgeView = new EdgeView(baseEdge, model as EdgeModel);
-        }
-
-        protected override EditorNode CreateChildNode(IModel model)
-        {
-            throw new NotImplementedException();
         }
 
         protected override IView CreateView()

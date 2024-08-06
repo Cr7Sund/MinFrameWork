@@ -18,7 +18,7 @@ namespace Cr7Sund.Editor.NodeGraph
         public void StartView(IView parentView)
         {
             var nodeView = parentView as NodeView;
-            var nodeParameters = _model as NodeParameters;
+            var nodeParameters = _model as NodeParamsInfo;
             _container = DrawInspector(_model, nodeView.ExtensionContainer);
         }
 
@@ -28,6 +28,8 @@ namespace Cr7Sund.Editor.NodeGraph
             rootElement.styleSheets.Add(NodeGraphSetting.PinnedElementStyle);
 
             var main = NodeGraphSetting.PinnedElement.CloneTree();
+            rootElement.Add(main);
+
             main.AddToClassList("mainContainer");
             var root = main.Q("content");
             var header = main.Q("header");
@@ -37,7 +39,7 @@ namespace Cr7Sund.Editor.NodeGraph
             root.ClearClassList();
             root.AddToClassList("pinnedElement");
 
-            var nodeParameters = model as NodeParameters;
+            var nodeParameters = model as NodeParamsInfo;
 
             foreach (var category in nodeParameters.categories)
             {
@@ -49,7 +51,6 @@ namespace Cr7Sund.Editor.NodeGraph
                 }
             }
 
-            rootElement.Add(main);
 
             content.visible = true;
             return content;
@@ -99,6 +100,7 @@ namespace Cr7Sund.Editor.NodeGraph
                 _container.visible = false;
             }
             // var nodeView = parentView as NodeView;
+            // _container.RemoveFromHierarchy();
             // nodeView.ExtensionContainer.Remove(_container);
         }
     }

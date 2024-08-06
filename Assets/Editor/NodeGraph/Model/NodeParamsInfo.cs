@@ -85,8 +85,9 @@ namespace Cr7Sund.Editor.NodeGraph
             this.disPlayName = disPlayName;
         }
     }
+  
     [Serializable]
-    public class NodeParameters : BaseModel
+    public class NodeParamsInfo : BaseModel
     {
         // [SerializeReference]
         public List<IntParams> ints = new();
@@ -97,7 +98,7 @@ namespace Cr7Sund.Editor.NodeGraph
         private Dictionary<Type, object> paramsDict = new();
 
 
-        public NodeParameters(BaseModel parentModel) : base(parentModel)
+        public NodeParamsInfo(BaseModel parentModel) : base(parentModel)
         {
             paramsDict.Add(typeof(int), ints);
             paramsDict.Add(typeof(string), strings);
@@ -106,7 +107,7 @@ namespace Cr7Sund.Editor.NodeGraph
 
         public override SerializedProperty OnBindSerializedProperty(IModel model, SerializedProperty parentSerializedProperty, int index)
         {
-            SerializedProperty paramsProp = parentSerializedProperty.FindPropertyRelative("nodeParameter");
+            SerializedProperty paramsProp = parentSerializedProperty.FindPropertyRelative("nodeParamsInfo");
             BindSerializeProps(this, paramsProp);
             return paramsProp;
         }
@@ -320,14 +321,14 @@ namespace Cr7Sund.Editor.NodeGraph
             return elementProp;
         }
 
-        private static void BindSerializeProps(NodeParameters nodeParameters, SerializedProperty nodeParamSerialProp)
+        private static void BindSerializeProps(NodeParamsInfo nodeParamsInfo, SerializedProperty nodeParamSerialProp)
         {
             // reflection instead
-            MapSerializeParams(nodeParameters.ints.Cast<ValueParams>().ToList(),
+            MapSerializeParams(nodeParamsInfo.ints.Cast<ValueParams>().ToList(),
                     nodeParamSerialProp.FindPropertyRelative(nameof(ints)));
-            MapSerializeParams(nodeParameters.strings.Cast<ValueParams>().ToList(),
+            MapSerializeParams(nodeParamsInfo.strings.Cast<ValueParams>().ToList(),
                 nodeParamSerialProp.FindPropertyRelative(nameof(strings)));
-            MapSerializeParams(nodeParameters.bools.Cast<ValueParams>().ToList(),
+            MapSerializeParams(nodeParamsInfo.bools.Cast<ValueParams>().ToList(),
                 nodeParamSerialProp.FindPropertyRelative(nameof(bools)));
         }
 

@@ -42,18 +42,29 @@ namespace Cr7Sund.Editor
         [FormerlySerializedAs("lastOpenAssetPath")]
         [SerializeField]
         private string lastOpenAssetGuid = "cebf7fb0fe7f0cb4b94962a64da13516";
-        public SerializeType LastOpenType
+        public SerializeType LastOpenGraphAssetType
         {
-            get => lastOpenType;
+            get => lastOpenGraphAssetType;
             set
             {
-                Instance.lastOpenType = value;
+                Instance.lastOpenGraphAssetType = value;
+                SaveModified<NodeGraphSetting>();
+            }
+        }
+        public SerializeType LastGraphManifestType
+        {
+            get => lastGraphManifestType;
+            set
+            {
+                Instance.lastGraphManifestType = value;
                 SaveModified<NodeGraphSetting>();
             }
         }
 
         [SerializeField]
-        private SerializeType lastOpenType;
+        private SerializeType lastOpenGraphAssetType;
+        [SerializeField]
+        private SerializeType lastGraphManifestType;
         public StyleSheet customStylesheet;
         public PortTypePalette portTypePalette;
 

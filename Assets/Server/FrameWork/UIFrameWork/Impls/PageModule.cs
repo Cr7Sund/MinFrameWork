@@ -29,7 +29,7 @@ namespace Cr7Sund.Server.UI.Impl
             }
         }
 
-        protected override int _loadTimeOutTime
+        protected override long _loadTimeOutTime
         {
             get
             {

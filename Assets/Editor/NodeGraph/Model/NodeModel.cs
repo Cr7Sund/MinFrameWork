@@ -6,6 +6,7 @@ using Cr7Sund.FrameWork.Util;
 using UnityEditor;
 using UnityEditor.GraphView;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
@@ -25,7 +26,8 @@ namespace Cr7Sund.Editor.NodeGraph
         public List<PortInfo> portInfos = new();
         [HideInInspector]
         public PortListInfo portListInfo;
-        public NodeParameters nodeParameter;
+        [FormerlySerializedAs("nodeParameter")]
+        public NodeParamsInfo nodeParamsInfo;
 
         [HideInInspector]
         public bool isUtilityNode;
@@ -50,7 +52,7 @@ namespace Cr7Sund.Editor.NodeGraph
             {
                 action?.Invoke(portListInfo, 0);
             }
-            action?.Invoke(nodeParameter, 0);
+            action?.Invoke(nodeParamsInfo, 0);
         }
 
         public static NodeAttribute GetNodeAttribute(Type type)
@@ -105,9 +107,9 @@ namespace Cr7Sund.Editor.NodeGraph
                 nodeName = name,
                 isUtilityNode = isUtilityNode
             };
-            if (nodeModel.nodeParameter == null)
+            if (nodeModel.nodeParamsInfo == null)
             {
-                nodeModel.nodeParameter = new NodeParameters(parentModel);
+                nodeModel.nodeParamsInfo = new NodeParamsInfo(parentModel);
             }
 
             object instance = null;
@@ -166,7 +168,7 @@ namespace Cr7Sund.Editor.NodeGraph
                 if (nodeInfoAttribute != null)
                 {
                     var value = fieldInfo.GetValue(instance);
-                    nodeModel.nodeParameter.TryAddValue(value, fieldInfo.FieldType, fieldInfo.Name, nodeType.Name, fieldInfo.Name, out var resultParams);
+                    nodeModel.nodeParamsInfo.TryAddValue(value, fieldInfo.FieldType, fieldInfo.Name, nodeType.Name, fieldInfo.Name, out var resultParams);
                 }
             }
 
@@ -227,10 +229,10 @@ namespace Cr7Sund.Editor.NodeGraph
         public bool TryAddParams(object value, Type fieldType, string name, string disPlayName, out SerializedProperty serializedProperty)
         {
             serializedProperty = null;
-            bool containsValue = nodeParameter.TryAddValue(value, fieldType, name, nodeName, disPlayName, out var valueParams);
+            bool containsValue = nodeParamsInfo.TryAddValue(value, fieldType, name, nodeName, disPlayName, out var valueParams);
             if (!containsValue)
             {
-                serializedProperty = nodeParameter.AddSerialization(value, valueParams);
+                serializedProperty = nodeParamsInfo.AddSerialization(value, valueParams);
             }
 
 

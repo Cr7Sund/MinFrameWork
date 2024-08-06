@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine.Serialization;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
@@ -11,7 +12,8 @@ namespace Cr7Sund.Editor.NodeGraph
         public List<NodeModel> utilityNodes = new List<NodeModel>();
         public List<EdgeModel> edges = new List<EdgeModel>();
         public ContextInfo contextInfo;
-        public InspectorInfo inspectorInfo;
+        [FormerlySerializedAs("inspectorInfo")]
+        public BlackboardInfo blackboardInfo;
 
         public SerializedObject serializedObject { get; private set; }
 
@@ -19,7 +21,7 @@ namespace Cr7Sund.Editor.NodeGraph
         public GraphModel() : base(null)
         {
             contextInfo = new ContextInfo(this);
-            inspectorInfo = new InspectorInfo(this);
+            blackboardInfo = new BlackboardInfo(this);
         }
 
         public void AssignSerializeObject(SerializedObject serializedObject)
@@ -46,6 +48,18 @@ namespace Cr7Sund.Editor.NodeGraph
             this.AddChildModel(nodeModel, propListName);
 
             return nodeModel;
+        }
+
+        public void RemoveNode(NodeModel nodeModel)
+        {
+            if (!nodeModel.isUtilityNode)
+            {
+                nodes.Remove(nodeModel);
+            }
+            else
+            {
+                utilityNodes.Remove(nodeModel);
+            }
         }
 
         public void AddEdge(EdgeModel edgeModel)
@@ -85,20 +99,7 @@ namespace Cr7Sund.Editor.NodeGraph
             }
 
             action?.Invoke(contextInfo, 0);
-            action?.Invoke(inspectorInfo, 0);
-        }
-
-        public void RemoveNode(NodeModel node)
-        {
-            if (!node.isUtilityNode)
-            {
-                nodes.Remove(node);
-
-            }
-            else
-            {
-                utilityNodes.Remove(node);
-            }
+            action?.Invoke(blackboardInfo, 0);
         }
 
         public void ClearAll()

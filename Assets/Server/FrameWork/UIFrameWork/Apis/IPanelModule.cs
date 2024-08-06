@@ -4,7 +4,7 @@ namespace Cr7Sund.Server.UI.Api
     {
         public PromiseTask OpenPanel(IAssetKey uiKey);
         public PromiseTask OpenPanelAndCloseOthers(IAssetKey uiKey);
-        public void TimeOut(int milliseconds);
+        public void TimeOut(long milliseconds);
     }
 
 }

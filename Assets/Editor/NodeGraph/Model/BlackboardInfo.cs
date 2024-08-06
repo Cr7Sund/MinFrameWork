@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Cr7Sund.Editor.NodeGraph
 {
     [System.Serializable]
-    public class InspectorInfo : BaseModel
+    public class BlackboardInfo : BaseModel
     {
         [SerializeField] private Orientation orientation = Orientation.Horizontal;
 
@@ -18,14 +18,14 @@ namespace Cr7Sund.Editor.NodeGraph
             }
         }
 
-        public InspectorInfo(BaseModel parentModel) : base(parentModel)
+        public BlackboardInfo(BaseModel parentModel) : base(parentModel)
         {
 
         }
 
         public override SerializedProperty OnBindSerializedProperty(IModel model, SerializedProperty parentSerializedProperty, int index)
         {
-            return parentSerializedProperty.FindPropertyRelative("inspectorInfo");
+            return parentSerializedProperty.FindPropertyRelative("blackboardInfo");
         }
     }
 }

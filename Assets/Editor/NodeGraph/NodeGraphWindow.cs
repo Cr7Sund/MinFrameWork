@@ -1,13 +1,6 @@
 using UnityEditor;
-using Cr7Sund.NodeTree.Impl;
-using INode = Cr7Sund.NodeTree.Api.INode;
-using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
-using Cr7Sund.Package.EventBus.Api;
-using Cr7Sund.Package.EventBus.Impl;
 using UnityEditor.UIElements;
 using System;
-using NUnit.Framework.Internal;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
@@ -16,15 +9,18 @@ namespace Cr7Sund.Editor.NodeGraph
     public class NodeGraphWindow : EditorWindow
     {
         private IEditorGraphLogic _gameLogic;
-        
-        public static NodeGraphWindow OpenGraph<TGameLogic>(IAssetKey assetKey) where TGameLogic : IEditorGraphLogic
+
+        public static NodeGraphWindow OpenGraph<TGameLogic, TManifest>(IAssetKey assetKey)
+            where TManifest : Manifest
+            where TGameLogic : IEditorGraphLogic
         {
             var graphWindow = GetWindow<NodeGraphWindow>();
-
             var gameLogic = Activator.CreateInstance<TGameLogic>();
             gameLogic.GraphKey = assetKey;
+
+            NodeGraphSetting.Instance.LastGraphManifestType = new SerializeType(typeof(TManifest));
             NodeGraphSetting.Instance.LastOpenAssetGUID = AssetDatabase.AssetPathToGUID(assetKey.Key);
-            NodeGraphSetting.Instance.LastOpenType = new SerializeType(typeof(TGameLogic));
+            NodeGraphSetting.Instance.LastOpenGraphAssetType = new SerializeType(typeof(TGameLogic));
             graphWindow.Show();
             graphWindow.RunLogic(gameLogic);
 
@@ -45,16 +41,16 @@ namespace Cr7Sund.Editor.NodeGraph
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
         }
-        
+
         void OnDisable()
         {
             AssemblyReloadEvents.beforeAssemblyReload -= OnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
         }
-        
+
         private void OnAfterAssemblyReload()
         {
-            if (NodeGraphSetting.Instance.LastOpenType.IsEmpty())
+            if (NodeGraphSetting.Instance.LastOpenGraphAssetType.IsEmpty())
             {
                 return;
             }
@@ -64,12 +60,12 @@ namespace Cr7Sund.Editor.NodeGraph
             SerializedObject serializedObject = new SerializedObject(asset);
             asset.Init(serializedObject);
 
-            var gameLogic = Activator.CreateInstance(NodeGraphSetting.Instance.LastOpenType.GetSerialType()) as IEditorGraphLogic;
+            var gameLogic = Activator.CreateInstance(NodeGraphSetting.Instance.LastOpenGraphAssetType.GetSerialType()) as IEditorGraphLogic;
             gameLogic.GraphKey = new EditorKeys(asset.graphModelBase);
 
             RunLogic(gameLogic);
         }
-        
+
         private void OnBeforeAssemblyReload()
         {
             _gameLogic?.Stop();
@@ -97,32 +93,6 @@ namespace Cr7Sund.Editor.NodeGraph
         {
             _gameLogic?.Stop();
             _gameLogic = null;
-        }
-    }
-
-    public class NodeGraphContext : CrossContext
-    {
-        private string Channel => "NodeGraph";
-
-        public NodeGraphContext() : base()
-        {
-            _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
-        }
-
-        public override void AddComponents(INode self)
-        {
-            var logger = InternalLoggerFactory.Create(Channel);
-
-            InjectionBinder.Bind<IInternalLog>().To(logger).AsCrossContext();
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsCrossContext().AsSingleton();
-            InjectionBinder.Bind<IEventBus>().To<EventBus>().AsCrossContext().AsSingleton(); // same level
-        }
-
-        public override void RemoveComponents()
-        {
-            InjectionBinder.Unbind<IInternalLog>();
-            InjectionBinder.Unbind<IPoolBinder>();
-            InjectionBinder.Unbind<IEventBus>();
         }
     }
 }

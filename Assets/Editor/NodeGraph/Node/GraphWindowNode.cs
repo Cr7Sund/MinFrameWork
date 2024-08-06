@@ -1,7 +1,8 @@
 using System;
+using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Package.Api;
-using Cr7Sund.Package.EventBus.Api;
 using Cr7Sund.Package.Impl;
+using NUnit.Framework;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -9,70 +10,93 @@ namespace Cr7Sund.Editor.NodeGraph
 {
     using GraphSettings = CustomSettingSingletons<NodeGraphSetting>;
 
-    public class GraphWindowController : EditorNode
+    public class GraphWindowNode : EditorNode
     {
         private GraphModel graphModel;
-        public GraphController GraphNode;
+        private GraphNode _graphNode;
         private VisualElement _rootVisualElement;
-        [Inject] private IEventBus eventBus;
-        [Inject] private IPoolBinder poolBinder;
+        private IVisualElementScheduledItem _updateTask;
+        [Inject] private IPromiseTimer _promiseTimer;
 
-        public GraphWindowController(VisualElement rootVisualElement, IAssetKey assetKey = default) : base(null)
+        public GraphNode GraphNode
+        {
+            get
+            {
+                Assert.IsTrue(_isStart);
+                return _graphNode;
+            }
+        }
+
+        public GraphWindowNode(VisualElement rootVisualElement, IAssetKey assetKey = default) : base(null)
         {
             var editorKey = assetKey as EditorKeys;
-            graphModel = editorKey.graphModel;
+            graphModel = editorKey.GraphModel;
             this._rootVisualElement = rootVisualElement;
+
             LoadStyle(_rootVisualElement);
         }
 
         public override void Start()
         {
-            if (isStart)
+            if (_isStart)
             {
                 return;
             }
-            isStart = true;
+            _isStart = true;
 
+            _context = CreateContext();
+            Inject();
             StartGraph();
             StartView();
 
-            eventBus.AddObserver<RebindUISignal>(OnRebindUI);
+            _eventBus.AddObserver<RebindUISignal>(OnRebindUI);
+            _updateTask = _rootVisualElement.schedule.Execute(OnEditorUpdate).Every(10);
+        }
+
+        private void OnEditorUpdate(TimerState state)
+        {
+            _promiseTimer.Update(state.deltaTime);
+        }
+
+        protected override ICrossContext CreateContext()
+        {
+            return new NodeGraphContext();
         }
 
         public override void Stop()
         {
-            if (!isStart)
+            if (!_isStart)
             {
                 return;
             }
-            isStart = false;
+            _isStart = false;
+
+            _updateTask.Pause();
 
             var graphRoot = _rootVisualElement.Q<VisualElement>("graphViewRoot");
-
             graphRoot.UnregisterCallback<MouseDownEvent>(OnMouseDown);
             _rootVisualElement.Unbind();
 
-            UnloadChildAsync(GraphNode);
-            GraphNode = null;
+            UnloadChildAsync(_graphNode);
+            _graphNode = null;
             GC.Collect();
-        }
-
-        public void AssignContext(NodeGraphContext nodeGraphContext)
-        {
-            _context = nodeGraphContext;
         }
 
         private void StartGraph()
         {
-            GraphNode = new GraphController(graphModel, _rootVisualElement);
-            AddChildAsync(GraphNode);
+            // _graphNode = new GraphController(graphModel, _rootVisualElement);
+            if (_manifest.TryGetValue(nameof(NodeGraph.GraphNode), out var output))
+            {
+                _graphNode = Activator.CreateInstance(output.NodeType, graphModel, _rootVisualElement) as GraphNode;
+            }
+            AddChildAsync(_graphNode);
         }
 
         private void StartView()
         {
             var graphRoot = _rootVisualElement.Q<VisualElement>("graphViewRoot");
 
-            if (GraphNode.view is VisualElement graphView)
+            if (_graphNode.View is VisualElement graphView)
             {
                 graphView.StretchToParentSize();
                 graphRoot.Add(graphView);
@@ -97,10 +121,10 @@ namespace Cr7Sund.Editor.NodeGraph
         {
             if (evt.button == 1)
             {
-                OpenMenuEvent eventData = poolBinder.AutoCreate<OpenMenuEvent>();
+                OpenMenuEvent eventData = _poolBinder.AutoCreate<OpenMenuEvent>();
                 eventData.evt = evt;
-                eventData.commands = GraphNode.CreateCommands();
-                eventBus.Dispatch(eventData);
+                eventData.commands = _graphNode.CreateCommands();
+                _eventBus.Dispatch(eventData);
             }
         }
 
@@ -121,9 +145,5 @@ namespace Cr7Sund.Editor.NodeGraph
             }
         }
 
-        protected override IView CreateView()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -14,28 +14,22 @@ namespace Cr7Sund.Editor.NodeGraph
 
     public class BaseGraphLogic : IEditorGraphLogic
     {
-        protected GraphWindowController _graphWindowNode;
-        IVisualElementScheduledItem _updateTask;
+        protected GraphWindowNode _graphWindowNode;
 
         public IAssetKey GraphKey { get; set; }
 
-        public void Init(VisualElement rootVisualElement)
+
+        public void Init(VisualElement rootVisualElement )
         {
             Console.Init(InternalLoggerFactory.Create());
-            _graphWindowNode = new GraphWindowController(rootVisualElement, GraphKey);
-            _graphWindowNode.AssignContext(new NodeGraphContext());
-
-            _updateTask = rootVisualElement.schedule.Execute(OnEditorUpdate).Every(10);
+            _graphWindowNode = new GraphWindowNode(rootVisualElement, GraphKey);
         }
 
-        public void Run()
+        public virtual void Run()
         {
             try
             {
-                _graphWindowNode.Inject();
                 _graphWindowNode.Start();
-
-                OnRun();
             }
             catch (Exception ex)
             {
@@ -43,14 +37,10 @@ namespace Cr7Sund.Editor.NodeGraph
             }
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             try
             {
-                GraphModel graphModel = _graphWindowNode.GraphNode.graphModel;
-                OnStop();
-                _updateTask.Pause();
-                _updateTask = null;
                 _graphWindowNode.Stop();
                 _graphWindowNode = null;
             }
@@ -59,17 +49,6 @@ namespace Cr7Sund.Editor.NodeGraph
                 UnityEngine.Debug.LogError(ex);
             }
         }
-
-        protected virtual void OnRun()
-        {
-        }
-
-        protected virtual void OnStop()
-        {
-        }
-
-        protected virtual void OnEditorUpdate()
-        {
-        }
+        
     }
 }

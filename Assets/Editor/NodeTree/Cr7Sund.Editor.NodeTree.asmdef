@@ -9,7 +9,8 @@
         "Cr7Sund.NodeTree",
         "Cr7Sund.FrameWork.Extension",
         "Cr7Sund.FrameWork.Core",
-        "Cr7Sund.Editor"
+        "Cr7Sund.Editor",
+        "Cr7Sund.Timer"
     ],
     "includePlatforms": [
         "Editor"

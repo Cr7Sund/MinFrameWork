@@ -22,7 +22,7 @@ namespace Cr7Sund.Server.Scene.Impl
                 return _gameNode;
             }
         }
-        protected override int _loadTimeOutTime
+        protected override long _loadTimeOutTime
         {
             get
             {

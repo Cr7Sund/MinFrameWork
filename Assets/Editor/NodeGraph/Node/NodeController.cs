@@ -9,27 +9,38 @@ namespace Cr7Sund.Editor.NodeGraph
 
     public class NodeController : EditorNode
     {
-        public NodeView nodeView => view as NodeView;
+        public NodeView nodeView => View as NodeView;
         public NodeModel nodeModel => modelData as NodeModel;
 
         public NodeController(NodeModel nodeModel) : base(nodeModel)
         {
         }
 
-
         protected override EditorNode CreateChildNode(IModel model)
         {
             if (model is PortInfo)
             {
-                return new PortController(model);
+                if (_manifest.TryGetValue(nameof(PortNode), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, model) as EditorNode;
+                }
+                // return new PortController(model);
             }
             else if (model is PortListInfo portListInfo)
             {
-                return new PortListController(model);
+                if (_manifest.TryGetValue(nameof(PortListNode), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, model) as EditorNode;
+                }
+                // return new PortListController(model);
             }
-            else if (model is NodeParameters nodeInfo)
+            else if (model is NodeParamsInfo nodeInfo)
             {
-                return new NodeParamsController(model);
+                if (_manifest.TryGetValue(nameof(NodeParamsController), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, model) as EditorNode;
+                }
+                // return new NodeParamsController(model);
             }
 
 
@@ -38,13 +49,16 @@ namespace Cr7Sund.Editor.NodeGraph
 
         protected override IView CreateView()
         {
-            NodeView nodeView = new NodeView(this);
-            return nodeView;
+            if (_manifest.TryGetValue(nameof(NodeController), out var outPut))
+            {
+                return Activator.CreateInstance(outPut.ViewType, this) as IView;
+            }
+            return base.CreateView();
         }
 
         protected override void OnBindUI()
         {
-            var nodeView = view as NodeView;
+            var nodeView = View as NodeView;
 
             var nodeModel = modelData as NodeModel;
             nodeView.SetPosition(nodeModel.GetPosition());
@@ -57,14 +71,14 @@ namespace Cr7Sund.Editor.NodeGraph
             nodeView.SetPosition(newPosition);
         }
 
-        public PortController GetPortByView(BasePort targetPort)
+        public PortNode GetPortByView(BasePort targetPort)
         {
             return ChildNodes
                 .SelectMany(childNode => GetPortControllers(childNode))
-                .FirstOrDefault(portController => portController.view == targetPort);
+                .FirstOrDefault(portController => portController.View == targetPort);
         }
 
-        public PortController GetPortByIndex(Direction direction, int id)
+        public PortNode GetPortByIndex(Direction direction, int id)
         {
             return ChildNodes
                  .SelectMany(GetPortControllers)
@@ -74,9 +88,9 @@ namespace Cr7Sund.Editor.NodeGraph
                      portInfo.id == id);
         }
 
-        public PortController AddPort(PortInfo portInfo)
+        public PortNode AddPort(PortInfo portInfo)
         {
-            var newPort = new PortController(portInfo);
+            var newPort = new PortNode(portInfo);
             nodeModel.AddPort(portInfo);
             AddChildAsync(newPort);
             return newPort;
@@ -98,16 +112,16 @@ namespace Cr7Sund.Editor.NodeGraph
             return "NodeController";
         }
 
-        private IEnumerable<PortController> GetPortControllers(EditorNode childNode)
+        private IEnumerable<PortNode> GetPortControllers(EditorNode childNode)
         {
-            if (childNode is PortController portController)
+            if (childNode is PortNode portController)
             {
                 yield return portController;
             }
 
-            if (childNode is PortListController portListController)
+            if (childNode is PortListNode portListController)
             {
-                IEnumerable<PortController> childPorts = portListController.ChildNodes.OfType<PortController>();
+                IEnumerable<PortNode> childPorts = portListController.ChildNodes.OfType<PortNode>();
                 foreach (var childPort in childPorts)
                 {
                     yield return childPort;

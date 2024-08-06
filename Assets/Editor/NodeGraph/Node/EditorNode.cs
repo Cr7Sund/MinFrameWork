@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.NodeTree.Api;
@@ -10,17 +11,17 @@ namespace Cr7Sund.Editor.NodeGraph
 {
     public class EditorKeys : AssetKey
     {
-        public GraphModel graphModel;
+        public readonly GraphModel GraphModel;
 
         public EditorKeys(GraphModel graphModel, string path = null) : base(path)
         {
-            this.graphModel = graphModel;
+            this.GraphModel = graphModel;
         }
     }
 
     public class EditorContext : CrossContext
     {
-        protected EditorNode _editorNode;
+        protected readonly EditorNode _editorNode;
 
         public EditorContext(EditorNode editorNode)
         {
@@ -37,29 +38,31 @@ namespace Cr7Sund.Editor.NodeGraph
 
     public abstract class EditorNode
     {
-        public IModel modelData;
-        public IView view;
+        public readonly IModel modelData;
+        public IView View;
         [Inject] protected IEventBus _eventBus;
         [Inject] protected IPoolBinder _poolBinder;
+        [Inject] protected Manifest _manifest;
+
         private List<EditorNode> _childNodes = new();
         protected EditorNode _parent;
         protected IContext _context;
-        protected bool isStart;
+        protected bool _isStart;
 
         public List<EditorNode> ChildNodes => _childNodes;
 
         public EditorNode(IModel model)
         {
             this.modelData = model;
-            _context = CreateContext();
         }
-
 
         protected void AddChildAsync(EditorNode child)
         {
+            child._context = child.CreateContext();
             _context.AddContext(child._context);
-            child._parent = this;
             child.Inject();
+
+            child._parent = this;
             child.Start();
             _childNodes.Add(child);
         }
@@ -80,38 +83,47 @@ namespace Cr7Sund.Editor.NodeGraph
 
         public virtual void Start()
         {
-            if (isStart)
+            if (_isStart)
             {
                 return;
             }
-            isStart = true;
+            _isStart = true;
 
-            view = CreateView();
-            if (view != null)
+            try
+            {
+                View = CreateView();
+            }
+            catch (System.Exception ex)
+            {
+                Console.Error(ex, this.GetType().ToString());
+                throw ex;
+            }
+            if (View != null)
             {
                 if (_parent is EditorNode parentNode)
                 {
-                    view.StartView(parentNode.view);
+                    View.StartView(parentNode.View);
                 }
                 else
                 {
-                    view.StartView(null);
+                    View.StartView(null);
                 }
             }
 
+            OnStart();
             OnBindUI();
-
             IterateChildData();
             OnListen();
         }
 
+
         public virtual void Stop()
         {
-            if (!isStart)
+            if (!_isStart)
             {
                 return;
             }
-            isStart = false;
+            _isStart = false;
 
             for (int i = 0; i < ChildNodes.Count; i++)
             {
@@ -120,12 +132,14 @@ namespace Cr7Sund.Editor.NodeGraph
 
             if (_parent is EditorNode parentNode)
             {
-                view.StopView(parentNode.view);
+                View.StopView(parentNode.View);
             }
             else
             {
-                view.StopView(null);
+                View.StopView(null);
             }
+
+            OnStop();
 
             //PLAN : remove from injector;
             // IEventBus eventBus;
@@ -138,7 +152,15 @@ namespace Cr7Sund.Editor.NodeGraph
                 .FirstOrDefault(nodeController => nodeController.modelData.Name == targetNodeName);
         }
 
-        protected virtual EditorContext CreateContext()
+        protected virtual void OnStart()
+        {
+        }
+
+        protected virtual void OnStop()
+        {
+        }
+
+        protected virtual ICrossContext CreateContext()
         {
             return new EditorContext(this);
         }
@@ -170,13 +192,19 @@ namespace Cr7Sund.Editor.NodeGraph
             return null;
         }
 
-        protected abstract IView CreateView();
+        protected virtual IView CreateView()
+        {
+            if (_manifest.TryGetValue(this.GetType().Name, out var outPut))
+            {
+                return Activator.CreateInstance(outPut.ViewType) as IView;
+            }
+            return null;
+        }
 
         protected virtual void OnListen()
         {
 
         }
-
 
     }
 }

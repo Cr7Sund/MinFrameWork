@@ -20,10 +20,10 @@ namespace Cr7Sund.Server.Impl
         [Inject]
         protected IPoolBinder _poolBinder;
         protected Dictionary<IAssetKey, INode> _treeNodes;
-        private int _startTransTime = -1;
+        private long _startTransTime = -1;
 
         protected abstract INode _parentNode { get; }
-        protected virtual int _loadTimeOutTime { get => 3000; }
+        protected virtual long _loadTimeOutTime { get => 3000; }
 
         internal LoadModule()
         {
@@ -219,7 +219,7 @@ namespace Cr7Sund.Server.Impl
             }
         }
 
-        public void TimeOut(int elapsedTime)
+        public void TimeOut(long elapsedTime)
         {
             if (!IsTransitioning())
             {

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.GraphView;
-using UnityEditor;
 using UnityEngine.UIElements;
 using Cr7Sund.NodeTree.Api;
 using UnityEditor.UIElements;
@@ -17,22 +16,21 @@ namespace Cr7Sund.Editor.NodeGraph
 
         public override void AddComponents(INode self)
         {
-            var graphNode = _editorNode as GraphController;
+            var graphNode = _editorNode as GraphNode;
             var graphModel = graphNode.graphModel;
 
-            InjectionBinder.Bind<InspectorInfo>().To(graphModel.inspectorInfo).AsCrossContext();
+            InjectionBinder.Bind<BlackboardInfo>().To(graphModel.blackboardInfo).AsCrossContext();
         }
     }
 
-    public class GraphController : EditorNode
+    public class GraphNode : EditorNode
     {
-        public GraphView graphView => view as GraphView;
+        public GraphView graphView => View as GraphView;
         public GraphModel graphModel => modelData as GraphModel;
-        public VisualElement _rootVisualElement;
-        private List<EdgeModel> appendingEdges = new();
-        [Inject] public InspectorInfo inspectorInfo;
+        private VisualElement _rootVisualElement;
+        private List<EdgeModel> _appendingEdges = new();
 
-        public GraphController(IModel model, VisualElement rootVisualElement) : base(model)
+        public GraphNode(IModel model, VisualElement rootVisualElement) : base(model)
         {
             this._rootVisualElement = rootVisualElement;
         }
@@ -61,7 +59,10 @@ namespace Cr7Sund.Editor.NodeGraph
         {
             if (model is NodeModel nodeModel)
             {
-                return new NodeController(nodeModel);
+                if (_manifest.TryGetValue(nameof(NodeController), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, model) as EditorNode;
+                }
             }
             else if (model is EdgeModel edgeModel)
             {
@@ -70,21 +71,33 @@ namespace Cr7Sund.Editor.NodeGraph
 
                 if (outputEdge == null)
                 {
-                    appendingEdges.Add(edgeModel);
+                    _appendingEdges.Add(edgeModel);
                     return null;
                 }
                 else
                 {
-                    return new EdgeController(edgeModel, EdgeView.CreateEdge(inputEdge, outputEdge));
+                    if (_manifest.TryGetValue(nameof(EdgeNode), out var outputInfo))
+                    {
+                        return Activator.CreateInstance(outputInfo.NodeType, edgeModel, EdgeView.CreateEdge(inputEdge, outputEdge)) as EditorNode;
+                    }
+                    // return new EdgeController(edgeModel, EdgeView.CreateEdge(inputEdge, outputEdge));
                 }
             }
             else if (model is ContextInfo contextInfo)
             {
-                return new ContextMenuController(contextInfo);
+                if (_manifest.TryGetValue(nameof(ContextMenuNode), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, contextInfo) as EditorNode;
+                }
+                // return new ContextMenuController(contextInfo);
             }
-            else if (model is InspectorInfo inspectorInfo)
+            else if (model is BlackboardInfo inspectorInfo)
             {
-                return new BlackboardNode(inspectorInfo, _rootVisualElement);
+                if (_manifest.TryGetValue(nameof(BlackboardNode), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, inspectorInfo, _rootVisualElement) as EditorNode;
+                }
+                // return new BlackboardNode(inspectorInfo, _rootVisualElement);
             }
 
             throw new NotImplementedException();
@@ -92,10 +105,16 @@ namespace Cr7Sund.Editor.NodeGraph
 
         protected override IView CreateView()
         {
-            return new GraphView(OnGraphViewActionExecuted);
+            if (_manifest.TryGetValue(nameof(GraphNode), out var outPut))
+            {
+                Action<Actions, object> ts = OnGraphViewActionExecuted;
+                return Activator.CreateInstance(outPut.ViewType, ts) as GraphView;
+            }
+
+            return base.CreateView();
         }
 
-        protected override EditorContext CreateContext()
+        protected override ICrossContext CreateContext()
         {
             return new GraphContext(this);
         }
@@ -109,9 +128,9 @@ namespace Cr7Sund.Editor.NodeGraph
         private void OnAddPortList(AddPortListEvent eventData)
         {
             EdgeModel edgeModel = null;
-            for (int i = appendingEdges.Count - 1; i >= 0; i--)
+            for (int i = _appendingEdges.Count - 1; i >= 0; i--)
             {
-                EdgeModel appendEdge = appendingEdges[i];
+                EdgeModel appendEdge = _appendingEdges[i];
                 if (appendEdge.outputId == eventData.portInfo.id &&
                     appendEdge.outputNode.Equals(eventData.containerNode))
                 {
@@ -126,7 +145,13 @@ namespace Cr7Sund.Editor.NodeGraph
 
             var outputEdge = eventData.edgeView;
             var inputEdge = GetPortByEdge(edgeModel.inputNode, edgeModel.inputId, Direction.Input).portView;
-            var nodeCtrl = new EdgeController(edgeModel, EdgeView.CreateEdge(inputEdge, outputEdge));
+            EdgeNode nodeCtrl = null;
+            // = new EdgeController(edgeModel, EdgeView.CreateEdge(inputEdge, outputEdge));
+
+            if (_manifest.TryGetValue(nameof(EdgeNode), out var outputInfo))
+            {
+                nodeCtrl = Activator.CreateInstance(outputInfo.NodeType, edgeModel, EdgeView.CreateEdge(inputEdge, outputEdge)) as EdgeNode;
+            }
 
             // nodeCtrl.modelData.serializedProperty = nodeCtrl.modelData.OnBindSerializedProperty(modelData.serializedProperty, index);
             AddChildAsync(nodeCtrl);
@@ -211,7 +236,7 @@ namespace Cr7Sund.Editor.NodeGraph
             var outputPort = outputNode.GetPortByView(edge.Output);
 
             var targetEdge = ChildNodes
-                .OfType<EdgeController>()
+                .OfType<EdgeNode>()
                 .FirstOrDefault(edgeController => edgeController.edgeModel.inputNode.Equals(inputNode.modelData) &&
                                                   edgeController.edgeModel.outputNode.Equals(outputNode.modelData) &&
                                                   edgeController.edgeModel.inputId == inputPort.portInfo.id &&
@@ -231,22 +256,28 @@ namespace Cr7Sund.Editor.NodeGraph
             return nodeCtrl;
         }
 
-        public EdgeController AddEdge(Edge edge, EdgeModel edgeModel)
+        public EdgeNode AddEdge(Edge edge, EdgeModel edgeModel)
         {
-            var edgeNode = new EdgeController(edgeModel, edge);
+            var edgeNode = new EdgeNode(edgeModel, edge);
             graphModel.AddEdge(edgeModel);
 
             AddChildAsync(edgeNode);
             return edgeNode;
         }
 
-        private void RemoveEdge(EdgeController edgeController)
+        public void RemoveEdge(EdgeNode edgeNode)
         {
-            graphModel.RemoveEdge(edgeController.edgeModel);
-            UnloadChildAsync(edgeController);
+            graphModel.RemoveEdge(edgeNode.edgeModel);
+            UnloadChildAsync(edgeNode);
         }
 
-        private PortController GetPortByEdge(NodeModel targetNode, int id, Direction direction)
+        public void RemoveNode(NodeController node)
+        {
+            graphModel.RemoveNode(node.nodeModel);
+            UnloadChildAsync(node);
+        }
+
+        private PortNode GetPortByEdge(NodeModel targetNode, int id, Direction direction)
         {
             return ChildNodes.OfType<NodeController>()
                     .Where(nodeController => nodeController.modelData.Equals(targetNode))
@@ -261,9 +292,9 @@ namespace Cr7Sund.Editor.NodeGraph
                             .FirstOrDefault();
         }
 
-        public EdgeController GetEdgeByModel(string outputNode, string inputNode)
+        public EdgeNode GetEdgeByModel(string outputNode, string inputNode)
         {
-            return (from edgeController in ChildNodes.OfType<EdgeController>()
+            return (from edgeController in ChildNodes.OfType<EdgeNode>()
                     let edgeModel = edgeController.edgeModel
                     where edgeModel.inputNode.Name == inputNode && edgeModel.outputNode.Name == outputNode
                     select edgeController).FirstOrDefault();
@@ -271,7 +302,7 @@ namespace Cr7Sund.Editor.NodeGraph
 
         public IEnumerable<NodeController> GetConnectNodes(NodeModel connectNode)
         {
-            var connectNodes = (from edgeController in ChildNodes.OfType<EdgeController>()
+            var connectNodes = (from edgeController in ChildNodes.OfType<EdgeNode>()
                                 let edgeModel = edgeController.edgeModel
                                 where edgeModel.outputNode.Equals(connectNode)
                                 select edgeController.edgeModel.inputNode);
@@ -320,7 +351,7 @@ namespace Cr7Sund.Editor.NodeGraph
                         EdgeModel edge = graphModel.edges[i];
                         if (nodesToRemove.Contains(edge.inputNode) || nodesToRemove.Contains(edge.outputNode))
                         {
-                            var targetEdge = ChildNodes.OfType<EdgeController>()
+                            var targetEdge = ChildNodes.OfType<EdgeNode>()
                                                      .FirstOrDefault(edgeController => edgeController.edgeModel == edge).edgeView.edge;
 
                             if (!edgesToRemove.Contains(targetEdge))

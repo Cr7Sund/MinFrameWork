@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Cr7Sund.Package.Impl;
 using UnityEditor;
 using UnityEditor.GraphView;
@@ -10,12 +9,12 @@ namespace Cr7Sund.Editor.NodeGraph
 {
     using Settings = CustomSettingSingletons<NodeGraphSetting>;
 
-    public class ContextMenuController : EditorNode
+    public class ContextMenuNode : EditorNode
     {
         private ContextInfo contextInfo => modelData as ContextInfo;
-        private ContextMenu contextMenu => view as ContextMenu;
+        private ContextMenu contextMenu => View as ContextMenu;
 
-        public ContextMenuController(IModel model) : base(model)
+        public ContextMenuNode(IModel model) : base(model)
         {
         }
 
@@ -23,7 +22,7 @@ namespace Cr7Sund.Editor.NodeGraph
         {
             return ScriptableObject.CreateInstance<ContextMenu>();
         }
-
+        
         protected override void OnListen()
         {
             _eventBus.AddObserver<OpenMenuEvent>(OnOpenMenu);

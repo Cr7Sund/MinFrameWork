@@ -7,13 +7,13 @@ namespace Cr7Sund.Server.Impl
         #endregion
 
         #region 
-        public const int SceneTimeOutTime = 2000;
+        public const long SceneTimeOutTime = 2000;
         #endregion
 
         #region  UI
         public static IAssetKey UIRootAssetKey = new AssetKey("UIRoot");
         public const string UI_ROOT_NAME = "UIROOT";
-        public const int UITimeOutTime = 2000;
+        public const long UITimeOutTime = 2000;
 
         #endregion
 

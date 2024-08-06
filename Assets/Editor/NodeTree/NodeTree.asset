@@ -21,113 +21,73 @@ MonoBehaviour:
       type: {class: GraphModel, ns: Cr7Sund.Editor.NodeGraph, asm: Cr7Sund.Editor.NodeGraph}
       data:
         nodes:
-        - nodeX: 0
-          nodeY: 40
-          nodeName: SampleOneScene
-          modelID: 3f94ccd1-e2bb-4760-ba24-d88750749cd8
+        - nodeX: 158.5
+          nodeY: 188.5
+          nodeName: TestNode1
+          modelID: 33b90876-cfcc-49c1-9bf9-b261b513a78a
           serializeType:
-            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-            fullTypeName: Cr7Sund.NodeTree.Impl.Node
-          portInfos: []
+            assemblyName: Cr7Sund.Editor.NodeGraph, Version=0.0.0.0, Culture=neutral,
+              PublicKeyToken=null
+            fullTypeName: Cr7Sund.Editor.NodeGraph.TestNode1
+          portInfos:
+          - portName: a0
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            id: 0
+            direction: 0
+            capacity: 0
+          - portName: a1
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            id: 1
+            direction: 0
+            capacity: 0
+          - portName: b0
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            id: 0
+            direction: 1
+            capacity: 0
+          - portName: b1
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Double
+            id: 1
+            direction: 1
+            capacity: 0
+          - portName: bList
+            serializeType:
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: 'System.Collections.Generic.List`1[[System.Int32, mscorlib,
+                Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]'
+            id: 2
+            direction: 1
+            capacity: 0
           portListInfo:
             portInfos: []
-            portListName: 
+            portListName: bList
             portName: 
             serializeType:
-              assemblyName: 
-              fullTypeName: 
-            direction: 0
+              assemblyName: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+              fullTypeName: System.Int32
+            direction: 1
           nodeParameter:
-            ints: []
-            strings: []
-            bools: []
-            categories: []
-          isUtilityNode: 0
-        - nodeX: 180.5
-          nodeY: 35
-          nodeName: SampleOnePanel
-          modelID: aeb74047-9382-4aee-b79f-684a3edcbf05
-          serializeType:
-            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-            fullTypeName: Cr7Sund.NodeTree.Impl.Node
-          portInfos: []
-          portListInfo:
-            portInfos: []
-            portListName: 
-            portName: 
-            serializeType:
-              assemblyName: 
-              fullTypeName: 
-            direction: 0
-          nodeParameter:
-            ints: []
+            ints:
+            - Value: 24
+              name: nodeInfoInt
+              category: TestNode1
+              disPlayName: nodeInfoInt
             strings:
-            - Value: 
-              name: 
-              category: 
-            bools:
-            - Value: 1
-              name: 015d14df-debf-4b7f-8438-1faecb8133a1_enable
-              category: SampleOnePanel
-            categories:
-            - SampleOnePanel
-          isUtilityNode: 0
-        - nodeX: 469.5
-          nodeY: 30
-          nodeName: SampleTwoPanel
-          modelID: 9b9b82be-a108-490a-8abb-a8cb5986d84f
-          serializeType:
-            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-            fullTypeName: Cr7Sund.NodeTree.Impl.Node
-          portInfos: []
-          portListInfo:
-            portInfos: []
-            portListName: 
-            portName: 
-            serializeType:
-              assemblyName: 
-              fullTypeName: 
-            direction: 0
-          nodeParameter:
-            ints: []
-            strings:
-            - Value: 
-              name: 
-              category: 
-            bools:
-            - Value: 1
-              name: 59dbc900-91f0-4f1a-a51c-4284dfd8c7b6_enable
-              category: SampleTwoPanel
-            categories:
-            - SampleOnePanel
-            - SampleTwoPanel
-          isUtilityNode: 0
-        - nodeX: 0
-          nodeY: 0
-          nodeName: SampleTwoPanel
-          modelID: 5c67f5f4-7660-4960-ba60-531a36670209
-          serializeType:
-            assemblyName: Cr7Sund.NodeTree, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-            fullTypeName: Cr7Sund.NodeTree.Impl.Node
-          portInfos: []
-          portListInfo:
-            portInfos: []
-            portListName: 
-            portName: 
-            serializeType:
-              assemblyName: 
-              fullTypeName: 
-            direction: 0
-          nodeParameter:
-            ints: []
-            strings:
-            - Value: 
-              name: 
-              category: 
+            - Value: hello
+              name: nodeInfoStr
+              category: TestNode1
+              disPlayName: nodeInfoStr
             bools: []
             categories:
-            - SampleOnePanel
-            - SampleTwoPanel
+            - TestNode1
           isUtilityNode: 0
         utilityNodes: []
         edges: []

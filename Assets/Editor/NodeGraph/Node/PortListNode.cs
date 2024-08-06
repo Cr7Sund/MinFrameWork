@@ -1,32 +1,30 @@
+using System;
 using NUnit.Framework;
-using UnityEditor.GraphView;
 using UnityEngine.UIElements;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
-    public class PortListController : EditorNode
+    public class PortListNode : EditorNode
     {
-        public PortListView portListView => view as PortListView;
+        public PortListView portListView => View as PortListView;
         public PortListInfo portListInfo => modelData as PortListInfo;
 
-        [Inject] private InspectorInfo _inspectorInfo;
+        [Inject] private BlackboardInfo _blackboardInfo;
 
 
-        public PortListController(IModel model) : base(model)
+        public PortListNode(IModel model) : base(model)
         {
-        }
-
-
-        protected override IView CreateView()
-        {
-            return new PortListView();
         }
 
         protected override EditorNode CreateChildNode(IModel model)
         {
             if (model is PortInfo portInfo)
             {
-                return new PortController(model);
+                // return new PortController(model);
+                if (_manifest.TryGetValue(nameof(PortNode), out var outputInfo))
+                {
+                    return Activator.CreateInstance(outputInfo.NodeType, model) as EditorNode;
+                }
             }
 
             throw new System.NotImplementedException();
@@ -52,21 +50,21 @@ namespace Cr7Sund.Editor.NodeGraph
             int id = 1000 + index;
             var parentNodeModel = _parent.modelData as NodeModel;
             var portInfo = portListInfo.TryAddPort(parentNodeModel, id);
-            portView.UpdatePort(portInfo, _inspectorInfo.Orientation);
+            portView.UpdatePort(portInfo, _blackboardInfo.Orientation);
 
             // late view binding
             if (ChildNodes.Count <= index)
             {
-                PortController childNode = new PortController(portListInfo.portInfos[index])
+                PortNode childNode = new PortNode(portListInfo.portInfos[index])
                 {
-                    view = portListView.portViews[index]
+                    View = portListView.portViews[index]
                 };
                 AddChildAsync(childNode);
             }
             else
             {
-                var childNode = ChildNodes[index] as PortController;
-                childNode.view = portListView.portViews[index];
+                var childNode = ChildNodes[index] as PortNode;
+                childNode.View = portListView.portViews[index];
 
                 var parentNode = _parent as NodeController;
                 var eventData = new AddPortListEvent();

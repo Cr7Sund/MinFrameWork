@@ -18,6 +18,8 @@ namespace Cr7Sund.Editor.NodeGraph
         public int nodeInfoInt = 24;
         [NodeParams]
         public string nodeInfoStr = "hello";
+        [OutPort]
+        public List<int> bList;
     }
 
     [Node]

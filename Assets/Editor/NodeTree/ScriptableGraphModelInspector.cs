@@ -1,8 +1,9 @@
+using Cr7Sund.Editor.NodeGraph;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-namespace Cr7Sund.Editor.NodeGraph
+namespace Cr7Sund.Editor.NodeTree
 {
     [CustomEditor(typeof(ScriptableGraphModel))]
     public class ScriptableGraphModelInspector : UnityEditor.Editor
@@ -19,7 +20,7 @@ namespace Cr7Sund.Editor.NodeGraph
             {
                 text = "Open"
             };
-            openBtn.RegisterCallback<ClickEvent>(_ => NodeGraphWindow.OpenGraph<BaseGraphLogic>(graphKey));
+            openBtn.RegisterCallback<ClickEvent>(_ => NodeGraphWindow.OpenGraph<BaseGraphLogic,Manifest>(graphKey));
 
             SerializedProperty property = serializedObject.FindProperty(nameof(graphModel.graphModelBase));
             var objectField = new PropertyField(property);

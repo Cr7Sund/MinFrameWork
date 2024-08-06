@@ -22,7 +22,7 @@ namespace Cr7Sund.Server.UI.Impl
                 return _parentNode.ChildCount;
             }
         }
-        protected override int _loadTimeOutTime
+        protected override long _loadTimeOutTime
         {
             get
             {
