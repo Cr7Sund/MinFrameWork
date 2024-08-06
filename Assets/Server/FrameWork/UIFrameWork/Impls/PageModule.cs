@@ -147,7 +147,7 @@ namespace Cr7Sund.Server.UI.Impl
             await PromiseTask.CompletedTask;
             var uINode = UICreator.CreatePageNode((UIKey)key);
             uINode.AssignContext(new PageContext());
-            return uINode as INode;
+            return uINode ;
         }
 
         protected override void OnAdded(IAssetKey enterKey)

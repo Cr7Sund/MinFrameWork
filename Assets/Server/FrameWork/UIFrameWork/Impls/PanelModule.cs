@@ -112,6 +112,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         protected override async PromiseTask<INode> CreateNode(IAssetKey key)
         {
+            await PromiseTask.CompletedTask;
             var uINode = UICreator.CreatePanelNode((UIKey)key);
             uINode.AssignContext(new PanelContext());
             return uINode;
