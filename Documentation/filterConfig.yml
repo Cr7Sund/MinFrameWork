@@ -1,13 +1,13 @@
 apiRules:
 - include:
-    uidRegex: ^DocFxForUnity
+    uidRegex: ^Cr7Sund
     type: Namespace
-# - include:
-#     uidRegex: ^Global
-#     type: Namespace
-- include:
-    uidRegex: Cr7Sund.Server.Api
+- exclude:
+    uidRegex: ^Global
     type: Namespace
 - exclude:
     uidRegex: .*
+    type: Namespace
+- exclude:
+    uidRegex: ^Cr7Sund.Editor
     type: Namespace
