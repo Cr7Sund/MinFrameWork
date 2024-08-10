@@ -4,3 +4,6 @@
 [submodule "Assets/Packages/Plugins/IocContainer_Unity"]
 	path = Assets/Packages/Plugins/IocContainer_Unity
 	url = https://github.com/Cr7Sund/IocContainer_Unity.git
+[submodule "Assets/Packages/Core/Utility"]
+	path = Assets/Packages/Core/Utility
+	url = https://github.com/Cr7Sund/Utility.git
