@@ -7,3 +7,6 @@
 [submodule "Assets/Packages/Core/Utility"]
 	path = Assets/Packages/Core/Utility
 	url = https://github.com/Cr7Sund/Utility.git
+[submodule "Assets/Packages/Plugins/PromiseTask_Source"]
+	path = Assets/Packages/Plugins/PromiseTask_Source
+	url = https://github.com/Cr7Sund/PromiseTask_Source.git
