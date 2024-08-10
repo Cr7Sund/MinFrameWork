@@ -2,21 +2,19 @@
     "name": "Cr7Sund.FarmeWork.Server",
     "rootNamespace": "",
     "references": [
-        "GUID:fe13ff8c968d49d48ba40db5a43374e8",
         "GUID:cea320192bde1a94bb216893ff5c2c12",
-        "GUID:7e0d4cf51db150f438768a680ebea3c4",
         "GUID:95794d81a09f4002b22911a94bc7eda4",
         "GUID:8f8128e37f742684682e189610715549",
         "GUID:d451dfbe42f0515448e01d94fcb4d358",
         "GUID:b1dfc434f003953419c9949af3d822de",
         "GUID:2f3cd57b9d3373042810c8b6efd6fc4d",
         "GUID:a2d238d269e810d4cbfd81d31a058a0f",
-        "GUID:1b97c127447054546ab4529bc5444ba9",
         "GUID:591ce0789910fae4c98efe7915552f8e",
         "GUID:f274f1c86be697844bb0a212f667e834",
         "GUID:af0b4b098996f6a45a15ee88064c6c5a",
         "GUID:49c23d01c6326c14890b16a09a448b81",
-        "GUID:f890c01dea3058c4d9ea186851e37025"
+        "GUID:f890c01dea3058c4d9ea186851e37025",
+        "GUID:25dc4ad84df46ce47b240fed0062b7d0"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
