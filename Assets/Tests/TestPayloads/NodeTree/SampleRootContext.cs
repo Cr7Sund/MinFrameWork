@@ -1,23 +1,20 @@
-using System;
-
-using Cr7Sund.Package.Impl;
-using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Package.Api;
 using Cr7Sund.NodeTree.Api;
+using Cr7Sund.IocContainer;
+using Cr7Sund.FrameWork.Util;
 namespace Cr7Sund.PackageTest.IOC
 {
-    public class SampleRootContext : CrossContext
+    public class SampleRootContext : CrossContext,INodeContext
     {
         public SampleRootContext() : base()
         {
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
         }
-        public override void AddComponents(INode self)
+        public  void AddComponents(INode self)
         {
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton().AsCrossContext();
+            BindAsCrossAndSingleton<IPoolBinder,PoolBinder>();
         }
 
-        public override void RemoveComponents()
+        public  void RemoveComponents()
         {
         }
     }

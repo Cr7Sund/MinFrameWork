@@ -156,15 +156,15 @@ namespace Cr7Sund.Server.UI.Impl
         protected override void OnInject()
         {
             base.OnInject();
-            _context.InjectionBinder.Injector.Inject(Controller);
-            _context.InjectionBinder.Injector.Inject(View);
+            _context.Inject(Controller);
+            _context.Inject(View);
         }
 
         protected override void OnDeject()
         {
             base.OnDeject();
-            _context.InjectionBinder.Injector.Deject(View);
-            _context.InjectionBinder.Injector.Deject(Controller);
+            _context.Deject(View);
+            _context.Deject(Controller);
         }
 
         protected override void OnInit()

@@ -349,7 +349,7 @@ namespace Cr7Sund.PackageTest.IOC
         }
     }
 
-    internal class PooledInstance : IPoolable
+    public class PooledInstance : IPoolable
     {
         public int someValue;
 
@@ -372,7 +372,7 @@ namespace Cr7Sund.PackageTest.IOC
         }
     }
 
-    internal class TestInstanceProvider : IInstanceProvider
+    public class TestInstanceProvider : IInstanceProvider
     {
         public T GetInstance<T>()
         {

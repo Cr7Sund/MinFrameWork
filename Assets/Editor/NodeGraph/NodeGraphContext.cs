@@ -5,39 +5,41 @@ using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using Cr7Sund.Package.EventBus.Api;
 using Cr7Sund.Package.EventBus.Impl;
+using Cr7Sund.NodeTree.Api;
+using Cr7Sund.IocContainer;
+using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
-    public class NodeGraphContext : CrossContext
+    public class NodeGraphContext : CrossContext, INodeContext
     {
         private string Channel => "NodeGraph";
-
-
 
         public NodeGraphContext() : base()
         {
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
         }
 
-        public override void AddComponents(INode self)
+
+        public void AddComponents(INode self)
         {
             var logger = InternalLoggerFactory.Create(Channel);
             var manifest = Activator.CreateInstance(NodeGraphSetting.Instance.LastGraphManifestType.GetSerialType());
-            
-            InjectionBinder.Bind<IInternalLog>().To(logger).AsCrossContext();
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsCrossContext().AsSingleton();
-            InjectionBinder.Bind<IEventBus>().To<EventBus>().AsCrossContext().AsSingleton(); // same level
-            InjectionBinder.Bind<Manifest>().To(manifest).AsCrossContext();
-            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsCrossContext().AsSingleton();
+
+            BindInstanceAsCrossContext<IInternalLog>(logger);
+            BindAsCrossAndSingleton<IPoolBinder, PoolBinder>();
+            BindAsCrossAndSingleton<IEventBus, EventBus>();
+            BindInstanceAsCrossContext<Manifest>(manifest);
+            BindAsCrossAndSingleton<IPromiseTimer, PromiseTimer>();
         }
 
-        public override void RemoveComponents()
+        public void RemoveComponents()
         {
-            InjectionBinder.Unbind<IInternalLog>();
-            InjectionBinder.Unbind<IPoolBinder>();
-            InjectionBinder.Unbind<IEventBus>();
-            InjectionBinder.Unbind<Manifest>();
-            InjectionBinder.Unbind<IPromiseTimer>();
+            Unbind<IInternalLog>();
+            Unbind<IPoolBinder>();
+            Unbind<IEventBus>();
+            Unbind<Manifest>();
+            Unbind<IPromiseTimer>();
         }
     }
 }

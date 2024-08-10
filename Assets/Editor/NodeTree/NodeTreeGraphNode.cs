@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Cr7Sund.Editor.NodeGraph;
+using Cr7Sund.IocContainer;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
@@ -79,7 +80,7 @@ namespace Cr7Sund.Editor.NodeTree
         private void AddListeners()
         {
             IContext context = _gameNode.Context;
-            IEventBus eventBus = context.InjectionBinder.GetInstance<IEventBus>();
+            IEventBus eventBus = context.GetInstance<IEventBus>();
             eventBus.AddObserver<SwitchSceneEvent>(OnSwitchScene);
             eventBus.AddObserver<RemoveSceneEndEvent>(OnRemoveScene);
             eventBus.AddObserver<AddSceneBeginEvent>(OnAddScene);
@@ -100,7 +101,7 @@ namespace Cr7Sund.Editor.NodeTree
                 return;
             }
 
-            IEventBus eventBus = context.InjectionBinder.GetInstance<IEventBus>();
+            IEventBus eventBus = context.GetInstance<IEventBus>();
             eventBus.RemoveObserver<SwitchSceneEvent>(OnSwitchScene);
             eventBus.RemoveObserver<RemoveSceneEndEvent>(OnRemoveScene);
             eventBus.RemoveObserver<AddSceneBeginEvent>(OnAddScene);

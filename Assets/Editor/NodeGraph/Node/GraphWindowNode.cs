@@ -1,10 +1,10 @@
 using System;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Package.Api;
-using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
+using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
@@ -58,7 +58,7 @@ namespace Cr7Sund.Editor.NodeGraph
             _promiseTimer.Update(state.deltaTime);
         }
 
-        protected override ICrossContext CreateContext()
+        protected override INodeContext CreateContext()
         {
             return new NodeGraphContext();
         }

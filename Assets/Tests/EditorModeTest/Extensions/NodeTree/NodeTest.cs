@@ -8,6 +8,7 @@ using NUnit.Framework;
 using System.Threading.Tasks;
 using System.Threading;
 using Cr7Sund.Package.Impl;
+using Cr7Sund.IocContainer;
 
 namespace Cr7Sund.PackageTest.NodeTree
 {
@@ -320,7 +321,7 @@ namespace Cr7Sund.PackageTest.NodeTree
             }
 
             // Assert
-            Assert.AreEqual(ex.Type, NodeTreeExceptionType.EMPTY_CROSS_CONTEXT);
+            Assert.AreEqual(ex.Type, ContextExceptionType.EmptyCrossContext);
         }
 
         [Test]

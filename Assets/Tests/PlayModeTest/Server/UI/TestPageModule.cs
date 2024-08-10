@@ -43,10 +43,9 @@ namespace Cr7Sund.ServerTest.UI
             var metGetNode = typeof(LoadModule).GetMethod("GetViewByKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var genMetGetNode = metGetNode.MakeGenericMethod(typeof(SceneNode));
             var sceneNode = (SceneNode)genMetGetNode.Invoke(_sceneModule, new[] { SampleSceneKeys.SampleSceneKeyTwo });
-            var sceneInjectBinder = sceneNode.Context.InjectionBinder;
 
             _pageContainer = new PageModule();
-            sceneInjectBinder.Injector.Inject(_pageContainer);
+            sceneNode.Context.Inject(_pageContainer);
 
             SampleOneUIController.Init();
             SampleTwoUIController.Init();

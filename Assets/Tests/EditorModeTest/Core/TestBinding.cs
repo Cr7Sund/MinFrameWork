@@ -1,10 +1,11 @@
+using Cr7Sund.IocContainer;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 using System;
 namespace Cr7Sund.PackageTest.IOC
 {
-    internal class TestBinding
+    public class TestBinding
     {
         private IBinding binding;
 
@@ -18,13 +19,13 @@ namespace Cr7Sund.PackageTest.IOC
         public void TestKeyAsType()
         {
             binding.Bind<MarkerClass>();
-            Assert.That(binding.Key.SingleValue as Type == typeof(MarkerClass));
+            Assert.That(binding.Key as Type == typeof(MarkerClass));
         }
         [Test]
         public void TestKeyToAsTypes()
         {
             binding.Bind<InjectableSuperClass>().To<InjectableDerivedClass>();
-            Assert.That(binding.Key.SingleValue as Type == typeof(InjectableSuperClass));
+            Assert.That(binding.Key as Type == typeof(InjectableSuperClass));
             Assert.That((Type)binding.Value.SingleValue == typeof(InjectableDerivedClass));
         }
 
@@ -49,7 +50,7 @@ namespace Cr7Sund.PackageTest.IOC
                 .To(test1).ToName("abc")
                 .To(test2).ToName("def")
                 .To(test3).ToName("ghi");
-            Assert.That(binding.Key.SingleValue as Type == typeof(ISimpleInterface));
+            Assert.That(binding.Key as Type == typeof(ISimpleInterface));
 
             ISemiBinding values = ((Binding)binding).Value ;
             Assert.IsNotNull(values);

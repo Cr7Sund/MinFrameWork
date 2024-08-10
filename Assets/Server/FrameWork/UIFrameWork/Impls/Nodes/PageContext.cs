@@ -4,35 +4,47 @@ using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Impl;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.UI.Api;
+using Cr7Sund.IocContainer;
+using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund.Server.UI.Impl
 {
-    public class PageContext : CrossContext
+    public class PageContext : CrossContext, INodeContext
     {
         protected virtual string Channel { get => "Page"; }
 
-
-        public sealed override void AddComponents(INode node)
+        public void AddComponents(INode node)
         {
-            // Local In GameNode or GameController
-            // --- --- 
             var logger = InternalLoggerFactory.Create(Channel);
 
-            InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.UILogger);
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.UITimer);
-            InjectionBinder.Bind<IUINode>().To(node);
-            InjectionBinder.Bind<IPanelModule>().To<PanelModule>().AsSingleton();
+            // Local In GameNode or GameController
+            // --- ---
+            BindAsSingleton<IPoolBinder, PoolBinder>();
+            BindAsSingleton<IPromiseTimer, PromiseTimer>(ServerBindDefine.UITimer);
+            BindAsSingleton<IPanelModule, PanelModule>();
+            BindInstance<IUINode>(node);
+            BindInstance<IInternalLog>(logger, ServerBindDefine.UILogger);
+
+            OnMappedBindings();
         }
 
-        public sealed override void RemoveComponents()
+        public void RemoveComponents()
         {
-            InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.UILogger);
-            InjectionBinder.Unbind<IPoolBinder>();
-            InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.UITimer);
-            InjectionBinder.Unbind<IUINode>();
-            InjectionBinder.Unbind<IPanelModule>();
+            Unbind<IInternalLog>(ServerBindDefine.UILogger);
+            Unbind<IPoolBinder>();
+            Unbind<IPromiseTimer>(ServerBindDefine.UITimer);
+            Unbind<IUINode>();
+            Unbind<IPanelModule>();
+
+            OnUnMappedBindings();
         }
 
+        protected virtual void OnMappedBindings()
+        {
+        }
+
+        protected virtual void OnUnMappedBindings()
+        {
+        }
     }
 }

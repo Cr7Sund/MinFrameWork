@@ -6,6 +6,7 @@ using Cr7Sund.NodeTree.Api;
 using System.Threading;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
+using Cr7Sund.IocContainer;
 
 namespace Cr7Sund.NodeTree.Impl
 {
@@ -62,7 +63,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             if (IsStarted)
             {
-                _context.InjectionBinder.Injector.Inject(controller);
+                _context.Inject(controller);
 
                 if (controller is AsyncLoadable load)
                 {
@@ -135,7 +136,7 @@ namespace Cr7Sund.NodeTree.Impl
                 await load.UnloadAsync(cancellation);
             }
 
-            _context.InjectionBinder.Injector.Deject(controller);
+            _context.Deject(controller);
             RemoveChild(controller);
             _childControllers.Remove(controller);
         }
@@ -332,10 +333,10 @@ namespace Cr7Sund.NodeTree.Impl
 
             IsInjected = true;
 
-            _context.InjectionBinder.Injector.Inject(this);
+            _context.Inject(this);
             foreach (var ctrl in _childControllers)
             {
-                _context.InjectionBinder.Injector.Inject(ctrl);
+                _context.Inject(ctrl);
             }
         }
 
@@ -348,7 +349,7 @@ namespace Cr7Sund.NodeTree.Impl
 
             foreach (var ctrl in _childControllers)
             {
-                _context.InjectionBinder.Injector.Deject(ctrl);
+                _context.Deject(ctrl);
             }
         }
 

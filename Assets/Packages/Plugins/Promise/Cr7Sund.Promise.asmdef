@@ -1,0 +1,17 @@
+{
+    "name": "Cr7Sund.Promise",
+    "rootNamespace": "",
+    "references": [
+        "GUID:49c23d01c6326c14890b16a09a448b81",
+        "GUID:f890c01dea3058c4d9ea186851e37025"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

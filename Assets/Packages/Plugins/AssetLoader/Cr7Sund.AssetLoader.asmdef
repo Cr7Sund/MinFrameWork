@@ -4,7 +4,9 @@
     "references": [
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "Cr7Sund.FrameWork.Core"
+        "Cr7Sund.PromiseTask",
+        "Cr7Sund.Runtime.Utility",
+        "Cr7Sund.Annotation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

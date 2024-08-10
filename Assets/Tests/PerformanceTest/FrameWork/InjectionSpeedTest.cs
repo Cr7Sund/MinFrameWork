@@ -1,9 +1,17 @@
+using Cr7Sund.IocContainer;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 namespace Cr7Sund.PackageTest.IOC
 {
+    public class PromiseSpeedTest
+    {
+        public const int warmupCount = 5;
+        public const int iterationCount = 10;
+        public const int executeCount = 25;
+    }
+
     public class InjectionSpeedTest
     {
         private const int Count = 100;

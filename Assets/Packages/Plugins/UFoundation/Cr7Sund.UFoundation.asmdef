@@ -2,7 +2,9 @@
     "name": "Cr7Sund.UFoundation",
     "rootNamespace": "",
     "references": [
-        "GUID:fe13ff8c968d49d48ba40db5a43374e8"
+        "GUID:fe13ff8c968d49d48ba40db5a43374e8",
+        "GUID:591ce0789910fae4c98efe7915552f8e",
+        "GUID:f890c01dea3058c4d9ea186851e37025"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cr7Sund.FrameWork.Util;
+using Cr7Sund.IocContainer;
 using Cr7Sund.NodeTree.Api;
-using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Package.Api;
 using Cr7Sund.Package.EventBus.Api;
 using INode = Cr7Sund.NodeTree.Api.INode;
 
@@ -19,7 +19,7 @@ namespace Cr7Sund.Editor.NodeGraph
         }
     }
 
-    public class EditorContext : CrossContext
+    public class EditorContext : CrossContext, INodeContext
     {
         protected readonly EditorNode _editorNode;
 
@@ -28,10 +28,11 @@ namespace Cr7Sund.Editor.NodeGraph
             _editorNode = editorNode;
         }
 
-        public override void AddComponents(INode self)
+        public virtual void AddComponents(INode node)
         {
         }
-        public override void RemoveComponents()
+
+        public virtual void RemoveComponents()
         {
         }
     }
@@ -46,7 +47,7 @@ namespace Cr7Sund.Editor.NodeGraph
 
         private List<EditorNode> _childNodes = new();
         protected EditorNode _parent;
-        protected IContext _context;
+        protected INodeContext _context;
         protected bool _isStart;
 
         public List<EditorNode> ChildNodes => _childNodes;
@@ -70,7 +71,7 @@ namespace Cr7Sund.Editor.NodeGraph
         public void UnloadChildAsync(EditorNode child)
         {
             _context.RemoveContext(child._context);
-            _context.InjectionBinder.Injector.Deject(child);
+            _context.Deject(child);
             child.Stop();
             _childNodes.Remove(child);
         }
@@ -78,7 +79,7 @@ namespace Cr7Sund.Editor.NodeGraph
         public void Inject()
         {
             _context.AddComponents(null);
-            _context.InjectionBinder.Injector.Inject(this);
+            _context.Inject(this);
         }
 
         public virtual void Start()
@@ -160,7 +161,7 @@ namespace Cr7Sund.Editor.NodeGraph
         {
         }
 
-        protected virtual ICrossContext CreateContext()
+        protected virtual INodeContext CreateContext()
         {
             return new EditorContext(this);
         }

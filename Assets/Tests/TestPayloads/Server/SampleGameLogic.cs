@@ -1,3 +1,5 @@
+using Cr7Sund.IocContainer;
+using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Impl;
 
 namespace Cr7Sund.Server.Test
@@ -9,9 +11,10 @@ namespace Cr7Sund.Server.Test
             return new SampleGameBuilder();
         }
 
-        public Package.Api.IInjector GetContextInjector()
+        public IInjector GetContextInjector()
         {
-            return _gameNode.Context.InjectionBinder.Injector;
+            var context = _gameNode.Context as Context;
+            return context.InjectionBinder.Injector;
         }
     }
 }

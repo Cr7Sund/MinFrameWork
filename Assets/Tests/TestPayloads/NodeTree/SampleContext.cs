@@ -1,15 +1,16 @@
 using System;
+using Cr7Sund.IocContainer;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
 namespace Cr7Sund.PackageTest.IOC
 {
-    public class SampleContext : CrossContext
+    public class SampleContext : CrossContext, INodeContext
     {
-        public override void AddComponents(INode self)
+        public void AddComponents(INode self)
         {
         }
 
-        public override void RemoveComponents()
+        public void RemoveComponents()
         {
         }
     }

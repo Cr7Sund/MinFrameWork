@@ -25,7 +25,7 @@ namespace Cr7Sund.Server.Impl
         protected abstract INode _parentNode { get; }
         protected virtual long _loadTimeOutTime { get => 3000; }
 
-        internal LoadModule()
+        public LoadModule()
         {
             _treeNodes = new Dictionary<IAssetKey, INode>();
         }
@@ -168,7 +168,7 @@ namespace Cr7Sund.Server.Impl
             await UnloadNodeInternal(key, true, overwrite);
         }
 
-        internal async PromiseTask UnloadNodeInternal(IAssetKey assetKey, bool unload, bool overwrite)
+        public async PromiseTask UnloadNodeInternal(IAssetKey assetKey, bool unload, bool overwrite)
         {
             if (assetKey == null)
             {

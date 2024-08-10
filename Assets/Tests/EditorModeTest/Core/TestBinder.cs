@@ -3,9 +3,10 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
+using Cr7Sund.IocContainer;
 namespace Cr7Sund.PackageTest.IOC
 {
-    internal class TestBinder
+    public class TestBinder
     {
         private IBinder binder;
 
@@ -22,8 +23,8 @@ namespace Cr7Sund.PackageTest.IOC
             var binding = binder.GetBinding<InjectableSuperClass>();
 
             Assert.IsNotNull(binding);
-            Assert.AreEqual(typeof(InjectableSuperClass), binding.Key.SingleValue);
-            Assert.AreNotEqual(typeof(InjectableDerivedClass), binding.Key.SingleValue);
+            Assert.AreEqual(typeof(InjectableSuperClass), binding.Key);
+            Assert.AreNotEqual(typeof(InjectableDerivedClass), binding.Key);
             Assert.AreEqual(typeof(InjectableDerivedClass), binding.Value.SingleValue);
         }
 
@@ -36,7 +37,7 @@ namespace Cr7Sund.PackageTest.IOC
 
             var binding = binder.GetBinding<InjectableSuperClass>();
             Assert.IsNotNull(binding);
-            Assert.AreEqual(binding.Key.SingleValue, typeof(InjectableSuperClass));
+            Assert.AreEqual(binding.Key, typeof(InjectableSuperClass));
 
             var unNameValue = binding.Value.SingleValue as Type;
             Assert.AreEqual(typeof(InjectableDerivedClassOne), unNameValue);

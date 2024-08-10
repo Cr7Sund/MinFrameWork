@@ -19,7 +19,7 @@ namespace Cr7Sund.Editor.NodeGraph
             var graphNode = _editorNode as GraphNode;
             var graphModel = graphNode.graphModel;
 
-            InjectionBinder.Bind<BlackboardInfo>().To(graphModel.blackboardInfo).AsCrossContext();
+            BindInstanceAsCrossContext<BlackboardInfo>(graphModel.blackboardInfo);
         }
     }
 
@@ -114,7 +114,7 @@ namespace Cr7Sund.Editor.NodeGraph
             return base.CreateView();
         }
 
-        protected override ICrossContext CreateContext()
+        protected override INodeContext CreateContext()
         {
             return new GraphContext(this);
         }

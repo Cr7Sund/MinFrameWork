@@ -6,11 +6,14 @@
         "Cr7Sund.FarmeWork.Server",
         "Cr7Sund.Tests.Payloads",
         "Cr7Sund.FrameWork.Selector",
-        "Cr7Sund.FrameWork.Core",
-        "Cr7Sund.FrameWork.Extension",
         "Cr7Sund.Timer",
         "Cr7Sund.UFoundation",
-        "Cr7Sund.NodeTree"
+        "Cr7Sund.NodeTree",
+        "Cr7Sund.IocContainer",
+        "Cr7Sund.Runtime.Utility",
+        "Cr7Sund.PromiseTask",
+        "Cr7Sund.Promise",
+        "Cr7Sund.Annotation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

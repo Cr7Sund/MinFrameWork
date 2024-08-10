@@ -13,75 +13,76 @@ using Cr7Sund.Server.UI.Api;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.AssetLoader.Impl;
 using Cr7Sund.NodeTree.Api;
+using Cr7Sund.IocContainer;
+using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund.Server.Impl
 {
-    public abstract class GameContext : CrossContext
+    public abstract class GameContext : CrossContext, INodeContext
     {
         protected abstract string Channel { get; }
+
         public GameContext() : base()
         {
             _crossContextInjectionBinder.CrossContextBinder = new CrossContextInjectionBinder();
         }
 
-        public sealed override void AddComponents(INode self)
+        public void AddComponents(INode self)
         {
             var assetLoader = AssetLoaderFactory.CreateLoader();
             var logger = InternalLoggerFactory.Create(Channel);
             var sceneLoader = AssetLoaderFactory.CreateSceneLoader();
 
             // Cross Context
-            // --- --- 
-            InjectionBinder.Bind<IFingerGesture>().To<FingerGesture>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IEventBus>().To<EventBus>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<ISceneModule>().To<SceneModule>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IConfigContainer>().To<ConfigContainer>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IUITransitionAnimationContainer>().To<UITransitionAnimationContainer>().AsSingleton().AsCrossContext();
-            InjectionBinder.Bind<IInstancesContainer>().To<GameInstanceContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.GameInstancePool);
-            InjectionBinder.Bind<IInstancesContainer>().To<UIPanelContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.UIPanelContainer);
-            InjectionBinder.Bind<IUniqueInstanceContainer>().To<UIPanelUniqueContainer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.UIPanelUniqueContainer);
-            InjectionBinder.Bind<IAssetLoader>().To(assetLoader).AsCrossContext();
-            InjectionBinder.Bind<ISceneLoader>().To(sceneLoader).AsCrossContext();
+            // --- ---
+            BindAsCrossAndSingleton<IFingerGesture, FingerGesture>();
+            BindAsCrossAndSingleton<IEventBus, EventBus>();
+            BindAsCrossAndSingleton<ISceneModule, SceneModule>();
+            BindAsCrossAndSingleton<IConfigContainer, ConfigContainer>();
+            BindAsCrossAndSingleton<IUITransitionAnimationContainer, UITransitionAnimationContainer>();
+            BindAsCrossAndSingleton<IInstancesContainer, GameInstanceContainer>(ServerBindDefine.GameInstancePool);
+            BindAsCrossAndSingleton<IInstancesContainer, UIPanelContainer>(ServerBindDefine.UIPanelContainer);
+            BindAsCrossAndSingleton<IUniqueInstanceContainer, UIPanelUniqueContainer>(ServerBindDefine.UIPanelUniqueContainer);
+            BindInstanceAsCrossContext<IAssetLoader>(assetLoader);
+            BindInstanceAsCrossContext<ISceneLoader>(sceneLoader);
+            BindInstanceAsCrossContext<IInternalLog>(logger, ServerBindDefine.GameLogger);
 
             // Local In GameNode or GameController
-            // --- --- 
-            InjectionBinder.Bind<IGameNode>().To(self);
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().ToName(ServerBindDefine.GameTimer);
-            InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.GameLogger);
+            // --- ---
+            BindInstance<IGameNode>(self);
+            BindAsSingleton<IPoolBinder, PoolBinder>();
+            BindAsSingleton<IPromiseTimer, PromiseTimer>(ServerBindDefine.GameTimer);
 
             OnMappedBindings();
         }
 
-        public sealed override void RemoveComponents()
+        public void RemoveComponents()
         {
-            InjectionBinder.Unbind<IFingerGesture>();
-            InjectionBinder.Unbind<IEventBus>();
-            InjectionBinder.Unbind<ISceneModule>();
-            InjectionBinder.Unbind<IConfigContainer>();
-            InjectionBinder.Unbind<IUITransitionAnimationContainer>();
-            InjectionBinder.Unbind<IInstancesContainer>(ServerBindDefine.GameInstancePool);
-            InjectionBinder.Unbind<IInstancesContainer>(ServerBindDefine.UIPanelContainer);
-            InjectionBinder.Unbind<IUniqueInstanceContainer>(ServerBindDefine.UIPanelUniqueContainer);
-            InjectionBinder.Unbind<IAssetLoader>();
-            InjectionBinder.Unbind<ISceneLoader>();
+            Unbind<IFingerGesture>();
+            Unbind<IEventBus>();
+            Unbind<ISceneModule>();
+            Unbind<IConfigContainer>();
+            Unbind<IUITransitionAnimationContainer>();
+            Unbind<IInstancesContainer>(ServerBindDefine.GameInstancePool);
+            Unbind<IInstancesContainer>(ServerBindDefine.UIPanelContainer);
+            Unbind<IUniqueInstanceContainer>(ServerBindDefine.UIPanelUniqueContainer);
+            Unbind<IAssetLoader>();
+            Unbind<ISceneLoader>();
+            Unbind<IInternalLog>(ServerBindDefine.GameLogger);
 
-            InjectionBinder.Unbind<IGameNode>();
-            InjectionBinder.Unbind<IPoolBinder>();
-            InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.GameTimer);
-            InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.GameLogger);
+            Unbind<IGameNode>();
+            Unbind<IPoolBinder>();
+            Unbind<IPromiseTimer>(ServerBindDefine.GameTimer);
 
             OnUnMappedBindings();
         }
 
-
         protected virtual void OnMappedBindings()
         {
         }
+
         protected virtual void OnUnMappedBindings()
         {
         }
-
-
     }
 }

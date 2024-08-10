@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 namespace Cr7Sund.AssetLoader.Impl
 {
 
-    internal class AddressableSceneLoader : ISceneLoader
+    public class AddressableSceneLoader : ISceneLoader
     {
 
         private Dictionary<IAssetKey, AsyncChainOperations<SceneInstance>> _assetKeyToHandles

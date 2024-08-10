@@ -7,42 +7,45 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.Server.UI.Impl;
 using Cr7Sund.Server.Api;
+using Cr7Sund.IocContainer;
+using Cr7Sund.FrameWork.Util;
 
 namespace Cr7Sund.Server.Scene.Impl
 {
-    public abstract class SceneContext : CrossContext
+    public abstract class SceneContext : CrossContext, INodeContext
     {
         protected abstract string Channel { get; }
-        public sealed override void AddComponents(INode self)
+
+        public void AddComponents(INode self)
         {
             var logger = InternalLoggerFactory.Create(Channel);
             var sceneContainer = new SceneInstanceContainer();
             sceneContainer.Init(self.Key.Key);
 
             // Cross Context
-            // --- --- 
-            InjectionBinder.Bind<ISceneInstanceContainer>().To(sceneContainer).AsCrossContext();
-            InjectionBinder.Bind<IPromiseTimer>().To<PromiseTimer>().AsSingleton().AsCrossContext().ToName(ServerBindDefine.SceneTimer);
+            // --- ---
+            BindInstanceAsCrossContext<ISceneInstanceContainer>(sceneContainer);
+            BindAsCrossAndSingleton<IPromiseTimer, PromiseTimer>(ServerBindDefine.SceneTimer);
+            BindAsCrossAndSingleton<IPageModule, PageModule>();
 
             // Local In GameNode or GameController
-            // --- --- 
-            InjectionBinder.Bind<ISceneNode>().To(self);
-            InjectionBinder.Bind<IPoolBinder>().To<PoolBinder>().AsSingleton();
-            InjectionBinder.Bind<IInternalLog>().To(logger).ToName(ServerBindDefine.SceneLogger);
-            InjectionBinder.Bind<IPageModule>().To<PageModule>().AsSingleton().AsCrossContext();
+            // --- ---
+            BindInstance<ISceneNode>(self);
+            BindAsSingleton<IPoolBinder, PoolBinder>();
+            BindInstance<IInternalLog>(logger, ServerBindDefine.SceneLogger);
 
             OnMappedBindings();
         }
 
-        public sealed override void RemoveComponents()
+        public void RemoveComponents()
         {
-            InjectionBinder.Unbind<ISceneInstanceContainer>();
+            Unbind<ISceneInstanceContainer>();
 
-            InjectionBinder.Unbind<ISceneNode>();
-            InjectionBinder.Unbind<IPoolBinder>();
-            InjectionBinder.Unbind<IPromiseTimer>(ServerBindDefine.SceneTimer);
-            InjectionBinder.Unbind<IInternalLog>(ServerBindDefine.SceneLogger);
-            InjectionBinder.Unbind<IPageModule>();
+            Unbind<ISceneNode>();
+            Unbind<IPoolBinder>();
+            Unbind<IPromiseTimer>(ServerBindDefine.SceneTimer);
+            Unbind<IInternalLog>(ServerBindDefine.SceneLogger);
+            Unbind<IPageModule>();
 
             OnUnMappedBindings();
         }
@@ -50,9 +53,9 @@ namespace Cr7Sund.Server.Scene.Impl
         protected virtual void OnMappedBindings()
         {
         }
+
         protected virtual void OnUnMappedBindings()
         {
         }
-
     }
 }

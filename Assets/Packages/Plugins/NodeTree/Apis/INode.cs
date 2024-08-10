@@ -1,10 +1,11 @@
 ﻿using System.Threading;
+using Cr7Sund.IocContainer;
 using Cr7Sund.Package.Api;
 namespace Cr7Sund.NodeTree.Api
 {
     public interface INode : ILifeTime, ILoadAsync, IInjectable, IRunnable, IInitialize
     {
-        IContext Context { get; }
+        INodeContext Context { get; }
         INode Parent { get; set; }
         IPromise AddStatus { get; set; }
         IPromise RemoveStatus { get; set; }
@@ -19,7 +20,7 @@ namespace Cr7Sund.NodeTree.Api
         PromiseTask UnloadChildAsync(INode child, bool overwrite = false);
         PromiseTask RemoveChildAsync(INode child, bool overwrite = false);
         void CancelCurTask();
-        void Destroy(IContext parentContext);
+        void Destroy(INodeContext parentContext);
         INode GetChild(int index);
 
         #region Load

@@ -4,6 +4,7 @@ using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Cr7Sund.IocContainer;
 
 namespace Cr7Sund.PackageTest.IOC
 {
@@ -277,38 +278,6 @@ namespace Cr7Sund.PackageTest.IOC
             Assert.AreEqual(1, ConstructorInjectsClassToBeInjected.Value);
         }
 
-        [Test]
-        public void TestPolymorphicBinding()
-        {
-            binder.Bind<ISimpleInterface>().Bind<IAnotherSimpleInterface>().To<PolymorphicClass>();
-
-            var callOnce = binder.GetInstance<ISimpleInterface>();
-            Assert.NotNull(callOnce);
-            Assert.IsInstanceOf<PolymorphicClass>(callOnce);
-
-            var callAgain = binder.GetInstance<IAnotherSimpleInterface>();
-            Assert.NotNull(callAgain);
-            Assert.IsInstanceOf<PolymorphicClass>(callAgain);
-        }
-
-        [Test]
-        public void TestPolymorphicSingleton()
-        {
-            binder.Bind<ISimpleInterface>().Bind<IAnotherSimpleInterface>().To<PolymorphicClass>().AsSingleton();
-
-            var callOnce = binder.GetInstance<ISimpleInterface>();
-            Assert.NotNull(callOnce);
-            Assert.IsInstanceOf<PolymorphicClass>(callOnce);
-
-            var callAgain = binder.GetInstance<IAnotherSimpleInterface>();
-            Assert.NotNull(callAgain);
-            Assert.IsInstanceOf<PolymorphicClass>(callAgain);
-
-            callOnce.intValue = 42;
-
-            Assert.AreSame(callOnce, callAgain);
-            Assert.AreEqual(42, (callAgain as ISimpleInterface).intValue);
-        }
 
         [Test]
         public void TestNamedInstanceBeforeUnnamedInstance()

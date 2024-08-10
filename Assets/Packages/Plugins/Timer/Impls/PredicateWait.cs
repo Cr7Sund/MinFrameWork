@@ -5,7 +5,7 @@ namespace Cr7Sund.Package.Impl
     /// <summary>
     ///     A class that wraps a pending promise with it's predicate and time data
     /// </summary>
-    internal class PredicateWait
+    public class PredicateWait
     {
 
         /// <summary>

@@ -7,3 +7,9 @@
 [submodule "Assets/Editor/ThirdParty/NodeGraph"]
 	path = Assets/Editor/ThirdParty/NodeGraph
 	url = https://github.com/liuxinjia/NodeGraph.git
+[submodule "Assets/Packages/Plugins/IocContainer"]
+	path = Assets/Packages/Plugins/IocContainer
+	url = https://github.com/Cr7Sund/IocContainer.git
+[submodule "Assets/Packages/FrameWork/Utility"]
+	path = Assets/Packages/FrameWork/Utility
+	url = https://github.com/Cr7Sund/Utility.git

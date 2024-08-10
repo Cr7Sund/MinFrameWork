@@ -3,8 +3,9 @@
     "rootNamespace": "",
     "references": [
         "UnityEngine.UI",
-        "Cr7Sund.FrameWork.Core",
-        "Cr7Sund.Attributes"
+        "Cr7Sund.Attributes",
+        "Cr7Sund.Runtime.Utility",
+        "Cr7Sund.Annotation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -4,6 +4,7 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using System;
+using Cr7Sund.IocContainer;
 
 namespace Cr7Sund.NodeTree.Impl
 {
@@ -12,7 +13,7 @@ namespace Cr7Sund.NodeTree.Impl
         private readonly IAssetKey _key;
         private List<INode> _childNodes;
         private INode _parent;
-        protected IContext _context;
+        protected INodeContext _context;
         private Promise _addStatus;
         private Promise _removeStatus;
         private UnsafeCancellationTokenSource _addCancellation;
@@ -74,7 +75,7 @@ namespace Cr7Sund.NodeTree.Impl
             }
         }
         public INode this[int index] => GetChild(index);
-        public IContext Context => _context;
+        public INodeContext Context => _context;
 
         public UnsafeCancellationTokenSource AddCancellation
         {
@@ -455,7 +456,7 @@ namespace Cr7Sund.NodeTree.Impl
             RemoveCancellation.Cancel();
         }
 
-        public void Destroy(IContext parentContext)
+        public void Destroy(INodeContext parentContext)
         {
             IsInit = false;
             _childNodes = null;
@@ -513,8 +514,7 @@ namespace Cr7Sund.NodeTree.Impl
         {
             if (!IsInjected) return;
 
-            var contextInjectionBinder = _context.InjectionBinder;
-            var poolBinder = contextInjectionBinder.GetInstance<IPoolBinder>();
+            var poolBinder = _context.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<INode>>();
             var queuePool = poolBinder.GetOrCreate<Stack<INode>>();
 
@@ -527,7 +527,7 @@ namespace Cr7Sund.NodeTree.Impl
 
         private void GetCollection(out Stack<INode> stack, out Stack<INode> resultQueue)
         {
-            var poolBinder = _context.InjectionBinder.GetInstance<IPoolBinder>();
+            var poolBinder = _context.GetInstance<IPoolBinder>();
             var stackPool = poolBinder.GetOrCreate<Stack<INode>>();
             var queuePool = poolBinder.GetOrCreate<Stack<INode>>();
 
@@ -802,7 +802,7 @@ namespace Cr7Sund.NodeTree.Impl
         #endregion
 
         #region Inject Config
-        public void AssignContext(IContext context)
+        public void AssignContext(INodeContext context)
         {
             _context = context;
         }
@@ -814,7 +814,7 @@ namespace Cr7Sund.NodeTree.Impl
             IsInjected = true;
 
             _context.AddComponents(this);
-            _context.InjectionBinder.Injector.Inject(this);
+            _context.Inject(this);
 
             OnInject();
         }
@@ -826,7 +826,7 @@ namespace Cr7Sund.NodeTree.Impl
             IsInjected = false;
 
             OnDeject();
-            _context.InjectionBinder.Injector.Deject(this);
+            _context.Deject(this);
             _context.RemoveComponents();
         }
         /// <summary>

@@ -7,7 +7,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Cr7Sund.AssetLoader.Impl
 {
-    internal class AsyncChainOperations<T> : IPoolNode<AsyncChainOperations<T>>, IDisposable
+    public class AsyncChainOperations<T> : IPoolNode<AsyncChainOperations<T>>, IDisposable
     {
         private enum State
         {

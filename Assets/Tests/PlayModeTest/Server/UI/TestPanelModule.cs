@@ -42,10 +42,9 @@ namespace Cr7Sund.ServerTest.UI
             var metGetNode = typeof(LoadModule).GetMethod("GetViewByKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var genMetGetNode = metGetNode.MakeGenericMethod(typeof(SceneNode));
             var sceneNode = (SceneNode)genMetGetNode.Invoke(_sceneModule, new[] { SampleSceneKeys.SampleSceneKeyOne });
-            var sceneInjectBinder = sceneNode.Context.InjectionBinder;
 
             _pageContainer = new PageModule();
-            sceneInjectBinder.Injector.Inject(_pageContainer);
+            sceneNode.Context.Inject(_pageContainer);
 
 
             SampleOneUIController.Init();
@@ -71,10 +70,9 @@ namespace Cr7Sund.ServerTest.UI
 
             genMetGetNode = metGetNode.MakeGenericMethod(typeof(UINode));
             var uiNode = (UINode)genMetGetNode.Invoke(_pageContainer, new[] { SampleUIKeys.SampleOneUI });
-            var uiInjectBinder = uiNode.Context.InjectionBinder;
 
             _panelContainer = new PanelModule();
-            uiInjectBinder.Injector.Inject(_panelContainer);
+            uiNode.Context.Inject(_panelContainer);
 
             if (Application.isPlaying)
             {

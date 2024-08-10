@@ -7,10 +7,13 @@
         "Cr7Sund.FrameWork.Selector",
         "GraphView",
         "Cr7Sund.NodeTree",
-        "Cr7Sund.FrameWork.Extension",
-        "Cr7Sund.FrameWork.Core",
         "Cr7Sund.Editor",
-        "Cr7Sund.Timer"
+        "Cr7Sund.Timer",
+        "Cr7Sund.EventBus",
+        "Cr7Sund.IocContainer",
+        "Cr7Sund.Promise",
+        "Cr7Sund.Runtime.Utility",
+        "Cr7Sund.Annotation"
     ],
     "includePlatforms": [
         "Editor"

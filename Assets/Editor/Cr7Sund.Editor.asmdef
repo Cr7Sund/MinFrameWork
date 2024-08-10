@@ -8,7 +8,7 @@
         "Cr7Sund.Attributes",
         "Cr7Sund.UGUI",
         "Unity.Addressables.Editor",
-        "Cr7Sund.FrameWork.Core"
+        "Cr7Sund.Annotation"
     ],
     "includePlatforms": [
         "Editor"

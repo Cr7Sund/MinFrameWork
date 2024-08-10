@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Cr7Sund.Server.Utils
 {
-    internal static class RectTransformExtensions
+    public static class RectTransformExtensions
     {
         public static void FillParent(this RectTransform self, RectTransform parent)
         {

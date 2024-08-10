@@ -4,6 +4,7 @@ using Cr7Sund.PackageTest.IOC;
 using Cr7Sund.FrameWork.Util;
 using NUnit.Framework;
 using System;
+using Cr7Sund.IocContainer;
 namespace Cr7Sund.PackageTest.IOC
 {
     public class TestInjectionBinding

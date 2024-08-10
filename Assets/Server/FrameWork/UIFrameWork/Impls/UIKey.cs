@@ -15,9 +15,9 @@ namespace Cr7Sund.Server.UI.Impl
         public readonly bool UniqueInstance;
 
         public string Key { get; }
-        internal IUINode exitPage { get; set; }
-        internal bool IsPush { get; set; }
-        internal bool PlayAnimation { get; set; }
+        public IUINode exitPage { get; set; }
+        public bool IsPush { get; set; }
+        public bool PlayAnimation { get; set; }
 
 
         public UIKey(string key, Type ctrlType, Type viewType,

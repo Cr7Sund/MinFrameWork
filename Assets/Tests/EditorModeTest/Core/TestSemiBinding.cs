@@ -1,9 +1,11 @@
+using Cr7Sund.FrameWork.Util;
+using Cr7Sund.IocContainer;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
 using NUnit.Framework;
 namespace Cr7Sund.PackageTest.IOC
 {
-    internal class TestSemiBinding
+    public class TestSemiBinding
     {
 
         private ISemiBinding semibinding;
