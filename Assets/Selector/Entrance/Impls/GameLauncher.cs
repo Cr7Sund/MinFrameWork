@@ -14,7 +14,7 @@ namespace Cr7Sund.Selector.Impl
         private IAssetLoader _configLoader;
         private TimeCorrector _updateCorrector;
         private TimeCorrector _lateUpdateCorrector;
-        private EditorApplicationProxy _editorApplicationProxy;
+        // private EditorApplicationProxy _editorApplicationProxy;
         private bool _dispose;
 
 
@@ -81,8 +81,6 @@ namespace Cr7Sund.Selector.Impl
                 EntranceConsole.Error(ex);
             }
 
-            // _editorApplicationProxy.UnRegisterUpdateCallback(_gameLogic);
-            _editorApplicationProxy.Dispose();
             EntranceConsole.Info("GameLauncher: Exit Game!!!");
             Console.Dispose();
             EntranceConsole.Dispose();
@@ -98,9 +96,6 @@ namespace Cr7Sund.Selector.Impl
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
             _gameLogic.Init();
-
-            _editorApplicationProxy = new EditorApplicationProxy();
-            // _editorApplicationProxy.RegisterUpdateCallback(_gameLogic);
         }
 
         private async PromiseTask<GameLogic.GameLogic> CreateGameLogic()

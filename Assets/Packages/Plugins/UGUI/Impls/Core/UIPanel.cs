@@ -19,7 +19,7 @@ namespace Cr7Sund.UGUI.Impls
         public StringBehaviourDictionary ComponentContainers { get => _componentContainers; }
 
 
-        public T GetUIComponent<T>(string key) where T : Behaviour
+        public T GetUIComponent<T>(string key) where T : Component
         {
             if (!_componentContainers.ContainsKey(key))
             {
@@ -29,7 +29,7 @@ namespace Cr7Sund.UGUI.Impls
             return _componentContainers[key] as T;
         }
 
-        public UITransitionAnimation GetAnimation(bool push, bool enter, IAssetKey partnerTransitionUI)
+        public UITransitionAnimation GetAnimation(bool push, bool enter, string partnerTransitionUI)
         {
             UITransitionAnimation animation = null;
             if (push)

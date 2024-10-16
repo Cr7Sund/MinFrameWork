@@ -10,17 +10,15 @@ namespace Cr7Sund.Editor.NodeGraph
     {
         private IEditorGraphLogic _gameLogic;
 
-        public static NodeGraphWindow OpenGraph<TGameLogic, TManifest>(IAssetKey assetKey)
+        public static NodeGraphWindow OpenGraph< TManifest>(IAssetKey assetKey)
             where TManifest : Manifest
-            where TGameLogic : IEditorGraphLogic
         {
             var graphWindow = GetWindow<NodeGraphWindow>();
-            var gameLogic = Activator.CreateInstance<TGameLogic>();
+            var gameLogic = Activator.CreateInstance<NodeTreeGraphLogic>();
             gameLogic.GraphKey = assetKey;
 
             NodeGraphSetting.Instance.LastGraphManifestType = new SerializeType(typeof(TManifest));
             NodeGraphSetting.Instance.LastOpenAssetGUID = AssetDatabase.AssetPathToGUID(assetKey.Key);
-            NodeGraphSetting.Instance.LastOpenGraphAssetType = new SerializeType(typeof(TGameLogic));
             graphWindow.Show();
             graphWindow.RunLogic(gameLogic);
 
@@ -50,17 +48,13 @@ namespace Cr7Sund.Editor.NodeGraph
 
         private void OnAfterAssemblyReload()
         {
-            if (NodeGraphSetting.Instance.LastOpenGraphAssetType.IsEmpty())
-            {
-                return;
-            }
             string assetPath = AssetDatabase.GUIDToAssetPath(NodeGraphSetting.Instance.LastOpenAssetGUID);
             var asset = AssetDatabase.LoadAssetAtPath<ScriptableGraphModel>(assetPath);
             if (asset == null) return;
             SerializedObject serializedObject = new SerializedObject(asset);
             asset.Init(serializedObject);
 
-            var gameLogic = Activator.CreateInstance(NodeGraphSetting.Instance.LastOpenGraphAssetType.GetSerialType()) as IEditorGraphLogic;
+            var gameLogic = Activator.CreateInstance<NodeTreeGraphLogic>() as IEditorGraphLogic;
             gameLogic.GraphKey = new EditorKeys(asset.graphModelBase);
 
             RunLogic(gameLogic);

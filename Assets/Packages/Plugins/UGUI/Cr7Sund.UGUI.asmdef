@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "UnityEngine.UI",
-        "Cr7Sund.Attributes",
+        "Cr7Sund.Serialize",
         "Cr7Sund.Runtime.Utility",
         "Cr7Sund.Annotation"
     ],

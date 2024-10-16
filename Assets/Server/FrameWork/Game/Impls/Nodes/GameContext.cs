@@ -1,14 +1,13 @@
 using Cr7Sund.Package.EventBus.Api;
 using Cr7Sund.Package.Api;
 using Cr7Sund.Package.Impl;
-using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Server.Scene.Apis;
 using Cr7Sund.Server.Scene.Impl;
 using Cr7Sund.Server.UI.Impl;
 using Cr7Sund.Touch.Api;
 using Cr7Sund.Touch.Impl;
 using Cr7Sund.Package.EventBus.Impl;
-using Cr7Sund.Server.Api;
+using Cr7Sund.AssetContainers;
 using Cr7Sund.Server.UI.Api;
 using Cr7Sund.AssetLoader.Api;
 using Cr7Sund.AssetLoader.Impl;
@@ -16,7 +15,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.IocContainer;
 using Cr7Sund.FrameWork.Util;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetContainers
 {
     public abstract class GameContext : CrossContext, INodeContext
     {

@@ -5,10 +5,11 @@
         "Cr7Sund.FrameWork.Selector",
         "UnityEditor.UI",
         "Cr7Sund.FarmeWork.Server",
-        "Cr7Sund.Attributes",
+        "Cr7Sund.Serialize",
         "Cr7Sund.UGUI",
         "Unity.Addressables.Editor",
-        "Cr7Sund.Annotation"
+        "Cr7Sund.Annotation",
+        "Cr7Sund.AssetContainers"
     ],
     "includePlatforms": [
         "Editor"

@@ -4,7 +4,6 @@ using Cr7Sund.Package.Impl;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using System;
-using Cr7Sund.IocContainer;
 
 namespace Cr7Sund.NodeTree.Impl
 {

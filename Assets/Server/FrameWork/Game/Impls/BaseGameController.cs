@@ -4,18 +4,19 @@ using Cr7Sund.Config;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Impl;
 using Cr7Sund.Package.Api;
-using Cr7Sund.Server.Api;
+using Cr7Sund.AssetContainers;
 using Cr7Sund.Server.Scene.Apis;
+using Cr7Sund.Server.UI.Api;
 using UnityEngine;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetContainers
 {
     public abstract class BaseGameController : BaseController, IUpdatable, ILateUpdate
     {
         [Inject(ServerBindDefine.GameTimer)] private IPromiseTimer _gameTimer;
         [Inject(ServerBindDefine.GameInstancePool)] IInstancesContainer _gameInstanceContainer;
         [Inject] private IConfigContainer _configModule;
-        [Inject] private UI.Api.IUITransitionAnimationContainer _uiTransModule;
+        [Inject] private IUITransitionAnimationContainer _uiTransModule;
         [Inject] private IAssetLoader _assetLoader;
         [Inject] private ISceneLoader _sceneLoader;
         [Inject] private IPoolBinder _poolBinder;

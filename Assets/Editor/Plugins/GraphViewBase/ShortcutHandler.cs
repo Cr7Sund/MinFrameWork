@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace UnityEditor.GraphView
 {
     public class ShortcutHandler
     {
-
         public static readonly Dictionary<SpecialKey, string> specialKeyDisplayNameLookup = new Dictionary<SpecialKey, string>() {
             { SpecialKey.CommandExclusive, "⌘" },
             { SpecialKey.Command, "⌘" },

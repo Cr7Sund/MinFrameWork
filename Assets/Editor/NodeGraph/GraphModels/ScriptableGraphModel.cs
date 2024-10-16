@@ -1,12 +1,14 @@
 using System;
+using Cr7Sund.Editor.MenuItems;
 using UnityEditor;
 using UnityEngine;
 
 namespace Cr7Sund.Editor.NodeGraph
 {
-    [CreateAssetMenu(menuName = "GraphModel")]
+    [CreateAssetMenu(menuName = "Cgraph")]
     public class ScriptableGraphModel : ScriptableObject
     {
+        public const string str = "";
         [SerializeReference]
         public GraphModel graphModelBase = new();
 

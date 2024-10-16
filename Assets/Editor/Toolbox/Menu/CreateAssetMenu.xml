@@ -1,0 +1,29 @@
+﻿<MenuBar>
+    <Menu title="RunTime" icon="file_icon">
+        <MenuItem menuName="GameConfig" shortcut="" actionTarget="Cr7Sund.Config.GameConfig"
+            actionMethod="CreateAssetMenu"
+            params="Assets/Preresources/Config/UI/newGameConfig.asset" />
+        <SubMenu  title="UI" icon="recent_icon">
+            <MenuItem menuName="UIScreenNavigatorSettings" shortcut=""
+                actionTarget="Cr7Sund.AssetContainers.UIScreenNavigatorSettings"
+                actionMethod="CreateAssetMenu"
+                params="Assets/Preresources/Config/UI/NewUITransitionConfig.asset" />
+            <MenuItem menuName="UIConfig" shortcut=""
+                actionTarget="Cr7Sund.Config.UIConfig"
+                actionMethod="CreateAssetMenu"
+                params="Assets/Preresources/Config/UI/NewUIConfig.asset" />
+        </SubMenu >
+    </Menu>
+    <Menu title="Editor" icon="edit_icon">
+        <MenuItem menuName="ScriptableGraphModel" shortcut=""
+            actionTarget="Cr7Sund.Editor.NodeGraph.ScriptableGraphModel"
+            actionMethod="OpenUrl" params="Assets/Editor/NodeTree/NewNodeTree.asset" />
+    </Menu>
+    <Menu title="Help" icon="help_icon">
+        <MenuItem menuName="Documentation" shortcut="F1" actionTarget="Cr7Sund.Editor.MenuItems"
+            actionMethod="OpenURL"
+            params="https://docs.unity3d.com/ScriptReference/Application.OpenURL.html" />
+        <MenuItem menuName="About" shortcut="Ctrl+Shift+A"
+            actionTarget="MyNamespace.MyEditorActions" actionMethod="ShowAboutDialog" params="" />
+    </Menu>
+</MenuBar>

@@ -31,7 +31,7 @@ namespace Cr7Sund.UGUI.Impls
         public AssetKey AnimationAsset { get => _animationAsset;  }
 
 
-        public bool IsValid(IAssetKey partnerUI)
+        public bool IsValid(string partnerUIKey)
         {
             if (!HasConfig())
             {
@@ -44,7 +44,7 @@ namespace Cr7Sund.UGUI.Impls
                 return false;
             }
 
-            if (string.IsNullOrEmpty(partnerUI.Key))
+            if (string.IsNullOrEmpty(partnerUIKey))
             {
                 return false;
             }
@@ -54,7 +54,7 @@ namespace Cr7Sund.UGUI.Impls
                 _partnerSheetIdentifierRegexCache = new Regex(_partnerPageIdentifierRegex);
             }
 
-            return _partnerSheetIdentifierRegexCache.IsMatch(partnerUI.Key);
+            return _partnerSheetIdentifierRegexCache.IsMatch(partnerUIKey);
         }
 
         private bool HasConfig()

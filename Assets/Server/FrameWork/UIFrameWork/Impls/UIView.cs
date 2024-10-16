@@ -9,8 +9,7 @@ using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Server.Scene.Impl;
 using System.Collections.Generic;
 using Cr7Sund.FrameWork.Util;
-using Cr7Sund.Server.Impl;
-using Cr7Sund.Server.Api;
+using Cr7Sund.AssetContainers;
 
 namespace Cr7Sund.Server.UI.Impl
 {
@@ -237,7 +236,7 @@ namespace Cr7Sund.Server.UI.Impl
 
         private async PromiseTask TransitionRoutine(bool push, bool enter, IUINode partnerPage, UnsafeCancellationToken cancellation)
         {
-            UITransitionAnimation animation = _uiPanel.GetAnimation(push, enter, partnerPage?.Key);
+            UITransitionAnimation animation = _uiPanel.GetAnimation(push, enter, partnerPage?.Key.ToString());
             if (animation == null)
             {
                 var transitionBehaviour = await _animationContainer.GetDefaultPageTransition(push, enter, cancellation);

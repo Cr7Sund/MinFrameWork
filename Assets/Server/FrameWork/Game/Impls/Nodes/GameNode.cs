@@ -1,9 +1,9 @@
 ﻿using Cr7Sund.FrameWork.Util;
 using Cr7Sund.NodeTree.Api;
 using Cr7Sund.NodeTree.Impl;
-using Cr7Sund.Server.Api;
+using Cr7Sund.AssetContainers;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetContainers
 {
     public class GameNode : ModuleNode, IGameNode
     {

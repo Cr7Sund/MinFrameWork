@@ -1,6 +1,6 @@
 ﻿using Cr7Sund.NodeTree.Impl;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetContainers
 {
 
     public abstract class GameBuilder 

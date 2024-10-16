@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Cr7Sund.Server.Impl
+namespace Cr7Sund.AssetContainers
 {
     public static class GameDirector
     {

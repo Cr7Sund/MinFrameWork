@@ -13,7 +13,9 @@
         "Cr7Sund.Runtime.Utility",
         "Cr7Sund.PromiseTask",
         "Cr7Sund.Promise",
-        "Cr7Sund.Annotation"
+        "Cr7Sund.Annotation",
+        "Cr7Sund.UILifetime",
+        "Cr7Sund.Lifecycle"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
