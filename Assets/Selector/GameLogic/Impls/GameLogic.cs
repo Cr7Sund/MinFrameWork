@@ -1,49 +1,40 @@
 using Cr7Sund.Selector.Apis;
-using Cr7Sund.AssetContainers;
+using Cr7Sund.LifeTime;
 
 namespace Cr7Sund.GameLogic
 {
     public abstract class GameLogic : IGameLogic
     {
-        protected GameNode _gameNode;
-
-
-        public void Init()
-        {
-            GameBuilder builder = CreateBuilder();
-            _gameNode = GameDirector.Construct(builder);
-
-            OnInit();
-        }
-
+        private GameBuilder _gameBuilder;
+        protected abstract IRouteKey routeKey { get; }
+        
         public async PromiseTask Run()
         {
-            await _gameNode.Run();
+            _gameBuilder = new GameBuilder(routeKey);
+            await _gameBuilder.LaunchActivity();
+            await OnCreate();
         }
 
         public void Update(int millisecond)
         {
-            _gameNode?.Update(millisecond);
+            _gameBuilder.Update(millisecond);
         }
 
         public void LateUpdate(int millisecond)
         {
-            _gameNode?.LateUpdate(millisecond);
+            _gameBuilder.LateUpdate(millisecond);
         }
 
-        public async PromiseTask DestroyAsync()
+        public PromiseTask DestroyAsync()
         {
-            if (_gameNode != null)
-            {
-                await _gameNode.DestroyAsync();
-            }
+            _gameBuilder.CloseActivity();
+            return PromiseTask.CompletedTask;
         }
 
-        protected virtual void OnInit()
+        protected  virtual PromiseTask OnCreate()
         {
+            return PromiseTask.CompletedTask;
         }
-
-        protected abstract GameBuilder CreateBuilder();
 
     }
 }

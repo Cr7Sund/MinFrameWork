@@ -1,8 +1,7 @@
 namespace Cr7Sund.Selector.Apis
 {
-    public interface IGameLogic : IDestroyAsync, IUpdatable, ILateUpdate
+    public interface IGameLogic : IDestroyAsync, IUpdatable, ILateUpdatable
     {
-        void Init();
         PromiseTask Run();
     }
 }

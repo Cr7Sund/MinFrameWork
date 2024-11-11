@@ -95,7 +95,6 @@ namespace Cr7Sund.Selector.Impl
             _gameLogic = await CreateGameLogic();
             _updateCorrector = new TimeCorrector();
             _lateUpdateCorrector = new TimeCorrector();
-            _gameLogic.Init();
         }
 
         private async PromiseTask<GameLogic.GameLogic> CreateGameLogic()

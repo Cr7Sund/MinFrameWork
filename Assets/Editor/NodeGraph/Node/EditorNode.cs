@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cr7Sund.FrameWork.Util;
 using Cr7Sund.IocContainer;
-using Cr7Sund.NodeTree.Api;
 using Cr7Sund.Package.EventBus.Api;
-using INode = Cr7Sund.NodeTree.Api.INode;
 
 namespace Cr7Sund.Editor.NodeGraph
 {

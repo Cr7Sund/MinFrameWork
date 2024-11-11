@@ -1,9 +1,8 @@
-using System.Threading;
-using Cr7Sund.Server.UI.Impl;
+using Cr7Sund.LifeTime;
 
 namespace Cr7Sund.Game.UI
 {
-    public class SampleTwoUIController : BaseUIController
+    public class SampleTwoUIController : Fragment
     {
         public static int StartValue;
         public static int EnableCount;
@@ -24,24 +23,24 @@ namespace Cr7Sund.Game.UI
 
         }
 
-        protected override async PromiseTask OnEnable()
+        protected override async PromiseTask OnEnable(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Enable ui two");
-            await base.OnEnable();
+            await base.OnEnable(cancellation);
             EnableCount++;
         }
 
-        protected override async PromiseTask OnDisable(bool closeImmediately)
+        protected override async PromiseTask OnDisable(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Disable ui two");
-            await base.OnDisable(closeImmediately);
+            await base.OnDisable(cancellation);
             EnableCount--;
         }
 
-        protected override async PromiseTask OnStop()
+        protected override async PromiseTask OnStop(UnsafeCancellationToken cancellation)
         {
             Debug.Debug("Stop ui two");
-            await base.OnStop();
+            await base.OnStop(cancellation);
             StartValue--;
         }
     }

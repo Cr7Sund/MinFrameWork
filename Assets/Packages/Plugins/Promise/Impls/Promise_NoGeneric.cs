@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Cr7Sund.Package.Api;
 using Cr7Sund.FrameWork.Util;
@@ -636,7 +637,7 @@ namespace Cr7Sund.Package.Impl
         {
             AssertUtil.AreEqual(this._version, this._core.Version, PromiseExceptionType.CAN_VISIT_VALID_VERSION);
         }
-        #endregion
+#endregion
 
         #region private methods
         // Helper Function to invoke or register resolve/reject handlers

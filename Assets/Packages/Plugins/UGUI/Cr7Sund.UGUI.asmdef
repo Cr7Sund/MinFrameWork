@@ -5,7 +5,10 @@
         "UnityEngine.UI",
         "Cr7Sund.Serialize",
         "Cr7Sund.Runtime.Utility",
-        "Cr7Sund.Annotation"
+        "Cr7Sund.Annotation",
+        "PrimeTween.Runtime",
+        "Cr7Sund.TweenTimeLine",
+        "Cr7Sund.PromiseTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

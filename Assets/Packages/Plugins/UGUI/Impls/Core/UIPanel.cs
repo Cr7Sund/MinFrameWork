@@ -1,23 +1,23 @@
+﻿using System;
 using Cr7Sund.UGUI.Apis;
+using Cr7Sund.UGUI.Impls.Cr7Sund.UGUI.Impls;
 using UnityEngine;
-using UnityEngine.EventSystems;
-
 namespace Cr7Sund.UGUI.Impls
 {
-    [RequireComponent(typeof(Canvas))]
-    [RequireComponent(typeof(CanvasGroup))]
-    public partial class UIPanel : UIBehaviour, IUIPanel
+    namespace Cr7Sund.UGUI.Impls
     {
-        [SerializeField] private UITransitionAnimation _pushEnterAnimations;
-        [SerializeField] private UITransitionAnimation _pushExitAnimations;
-        [SerializeField] private UITransitionAnimation _popEnterAnimations;
-        [SerializeField] private UITransitionAnimation _popExitAnimations;
-        [SerializeField] private StringBehaviourDictionary _componentContainers;
+        [Serializable]
+        public class BindBehaviourDict : SerializableDictionary<string, Behaviour>
+        {
 
+        }
+    }
+    
+    public class UIPanel : MonoBehaviour, IUIComponentGetter
+    {
+        [SerializeField] private  BindBehaviourDict _componentContainers;
 
-        public bool IsInit { get; }
-        public StringBehaviourDictionary ComponentContainers { get => _componentContainers; }
-
+        public BindBehaviourDict ComponentContainers { get => _componentContainers; }
 
         public T GetUIComponent<T>(string key) where T : Component
         {
@@ -28,33 +28,5 @@ namespace Cr7Sund.UGUI.Impls
             }
             return _componentContainers[key] as T;
         }
-
-        public UITransitionAnimation GetAnimation(bool push, bool enter, string partnerTransitionUI)
-        {
-            UITransitionAnimation animation = null;
-            if (push)
-            {
-                animation = enter ? _pushEnterAnimations : _pushExitAnimations;
-            }
-
-            animation = enter ? _popEnterAnimations : _popExitAnimations;
-
-            if (!animation.IsValid(partnerTransitionUI))
-            {
-                return null;
-            }
-
-            return animation;
-        }
-
-        public void Init()
-        {
-
-        }
-
-        public void Dispose()
-        {
-        }
-
     }
 }

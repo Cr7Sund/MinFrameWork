@@ -7,6 +7,6 @@ namespace Cr7Sund
         bool IsStarted { get; set; }
 
         PromiseTask Start(UnsafeCancellationToken cancellation);
-        PromiseTask Stop();
+        PromiseTask Stop(UnsafeCancellationToken cancellation);
     }
 }

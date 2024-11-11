@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 namespace Cr7Sund.AssetLoader.Api
 {
-    public interface ISceneLoader : IInitialize, IDisposable, ILateUpdate
+    public interface ISceneLoader : IInitialize, IDisposable, ILateUpdatable
     {
         PromiseTask LoadSceneAsync(IAssetKey key,
             LoadSceneMode loadMode, bool activateOnLoad, UnsafeCancellationToken cancellation);

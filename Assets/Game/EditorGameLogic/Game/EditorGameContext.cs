@@ -1,9 +1,8 @@
-using Cr7Sund.AssetContainers;
+using Cr7Sund.LifeTime;
 
 namespace Cr7Sund.Game.GameLogic
 {
-    public class EditorGameContext : GameContext
+    public class EditorGameContext : RootActivityContext
     {
-        protected override string Channel => "EditorGame";
     }
 }

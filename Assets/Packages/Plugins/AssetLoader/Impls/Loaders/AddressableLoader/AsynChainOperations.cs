@@ -26,7 +26,7 @@ namespace Cr7Sund.AssetLoader.Impl
         private UnsafeCancellationToken _cancellation;
         private string _cancelMsg;
         private State _state;
-        
+
         public ref AsyncChainOperations<T> NextNode => ref _nextNode;
         public bool IsRecycled { get; set; }
         public AsyncOperationHandle Handler => _handler;
@@ -139,7 +139,7 @@ namespace Cr7Sund.AssetLoader.Impl
 
             // delay destroy after all actions be done
             // and handler is done
-            if (_state == State.NotifyingCompleteState)              // wait until async operation callback 
+            if (_state == State.NotifyingCompleteState) // wait until async operation callback 
             {
                 deleteAction?.Invoke(this);
             }
@@ -185,7 +185,8 @@ namespace Cr7Sund.AssetLoader.Impl
             }
             _promiseTaskSources.Clear();
             _state = State.NotifyingCompleteState;
-            _deleteAction?.Invoke(this);
+            if (_cancellation.IsCancellationRequested)
+                _deleteAction?.Invoke(this);
         }
 
         private bool Validate()

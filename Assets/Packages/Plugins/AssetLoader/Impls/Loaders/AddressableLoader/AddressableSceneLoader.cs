@@ -43,7 +43,11 @@ namespace Cr7Sund.AssetLoader.Impl
             var sceneKey = assetKey.Key;
 
             var handler = Addressables.LoadSceneAsync(sceneKey, loadMode, activateOnLoad);
-
+            // var handler = SceneManager.LoadSceneAsync(sceneKey, loadMode);
+            // handler.allowSceneActivation = activateOnLoad;
+            
+            //PLAN : Compare with Cancel Load and cancel instantite
+            
             chainOperation = AsyncChainOperations<SceneInstance>.Start(ref handler, assetKey.Key, cancellation);
             _assetKeyToHandles.Add(assetKey, chainOperation);
             RegisterCancel(assetKey, cancellation);
@@ -169,6 +173,7 @@ namespace Cr7Sund.AssetLoader.Impl
 
             AsyncChainOperations<SceneInstance> chainOperation = _assetKeyToHandles[assetKey];
 
+            //AsyncInstantiateOperation.Cancel
             chainOperation.RegisterCancel(assetKey.Key, cancellation);
             chainOperation.RegisterUnload(_onUnloadedAction);
             _assetKeyToHandles.Remove(assetKey);

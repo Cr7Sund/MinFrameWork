@@ -9,7 +9,9 @@
         "Cr7Sund.UGUI",
         "Unity.Addressables.Editor",
         "Cr7Sund.Annotation",
-        "Cr7Sund.AssetContainers"
+        "Cr7Sund.AssetContainers",
+        "Cr7Sund.EventBus",
+        "Cr7Sund.PromiseTask"
     ],
     "includePlatforms": [
         "Editor"

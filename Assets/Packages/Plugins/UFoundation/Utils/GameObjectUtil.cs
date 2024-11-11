@@ -4,16 +4,17 @@ namespace Cr7Sund
 {
     public static class GameObjectUtil
     {
-        public static void Destroy(GameObject gameObject)
+        public static void Destroy(UnityEngine.Object gameObject)
         {
             if (!Application.isPlaying)
             {
-                GameObject.DestroyImmediate(gameObject);
+                Object.DestroyImmediate(gameObject);
             }
             else
             {
-                GameObject.Destroy(gameObject);
+                Object.Destroy(gameObject);
             }
         }
+
     }
 }

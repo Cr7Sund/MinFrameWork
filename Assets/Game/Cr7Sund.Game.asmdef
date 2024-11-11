@@ -10,7 +10,11 @@
         "Cr7Sund.IocContainer",
         "Cr7Sund.Runtime.Utility",
         "Cr7Sund.EventBus",
-        "Cr7Sund.Annotation"
+        "Cr7Sund.Annotation",
+        "Cr7Sund.Serialize",
+        "Cr7Sund.UGUI",
+        "Cr7Sund.UILifetime",
+        "Cr7Sund.Navigation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,0 +1,21 @@
+{
+    "name": "Cr7Sund.Navigation",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5d6f6ec903534696b5c9c0ea95c04c84",
+        "GUID:49c23d01c6326c14890b16a09a448b81",
+        "GUID:25dc4ad84df46ce47b240fed0062b7d0",
+        "GUID:f890c01dea3058c4d9ea186851e37025",
+        "GUID:14d03b2789074ec69c4e54328a797392",
+        "GUID:591ce0789910fae4c98efe7915552f8e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -8,6 +8,10 @@ namespace Cr7Sund
         public string FullName;
 
         public string Key { get => FullName; }
+        public int Priority
+        {
+            get;
+        }
 
 
         public AssetKey(string key)

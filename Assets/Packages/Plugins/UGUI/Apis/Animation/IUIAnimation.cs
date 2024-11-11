@@ -4,6 +4,6 @@ namespace Cr7Sund.UGUI.Apis
     {
         long Duration { get; }
 
-        void SetTime(long time);
+        void Play();
     }
 }
